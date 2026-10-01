@@ -65,13 +65,13 @@ Aktuálne dáta mincí (vrátane Market Capu a vzťahu k ATH):
 {market_context}
 
 Priprav profesionálnu 6-hodinovú krypto analýzu pre môj Telegramový kanál. 
-Zohľadni fundamenty a valuaciju pre každú mincu (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO).
+Zohľadni fundamenty a valuáciu pre každú mincu (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO).
 Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať** (napr. „Predať 15% pozície“, „Dokúpiť 10%“, „Držať 100%“).
 Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
 """
 
-# 5. Volanie Gemini AI so stabilnými záložnými modelmi bez chýb v názvoch
-models_to_try = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-3.8-flash"]
+# 5. Volanie Gemini AI so stabilnými modelmi gemini-1.5-flash a gemini-1.5-pro
+models_to_try = ["gemini-1.5-flash", "gemini-1.5-pro"]
 payload_gemini = {"contents": [{"parts": [{"text": prompt}]}]}
 
 ai_analysis = ""
@@ -103,8 +103,7 @@ for model in models_to_try:
 if not success:
     ai_analysis = "⚠️ Všetky Gemini modely sú momentálne preťažené. Skript to o chvíľu skúsi znova."
 
-# 6. Odoslanie do Telegramu
-telegram_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage" # Opravené na TELEGRAM_TOKEN
+# 6. Odoslanie do Telegramu (používa správnu premennú TELEGRAM_TOKEN)
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 payload_telegram = urllib.parse.urlencode({
     "chat_id": TELEGRAM_CHAT_ID,
@@ -112,5 +111,9 @@ payload_telegram = urllib.parse.urlencode({
     "parse_mode": "Markdown"
 }).encode("utf-8")
 
-urllib.request.urlopen(telegram_url, data=payload_telegram)
-print("Hotovo, správa odoslaná do Telegramu!")
+try:
+    urllib.request.urlopen(telegram_url, data=payload_telegram)
+    print("Hotovo, správa úspešne odoslaná do Telegramu!")
+except urllib.error.HTTPError as e:
+    print(f"Telegram HTTP Error: {e.code} - {e.read().decode()}")
+    raise e
