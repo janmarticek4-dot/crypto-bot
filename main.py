@@ -80,7 +80,7 @@ success = False
 for model in models_to_try:
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
     try:
-        print( skúšam model: {model} )
+        print(f"Skúšam model: {model}")
         req = urllib.request.Request(
             gemini_url,
             data=json.dumps(payload_gemini).encode("utf-8"),
@@ -101,7 +101,7 @@ for model in models_to_try:
         time.sleep(2)
 
 if not success:
-        ai_analysis = "⚠️ Všetky Gemini modely sú momentálne preťažené (503). Skript to o chvíľu skúsi znova."
+    ai_analysis = "⚠️ Všetky Gemini modely sú momentálne preťažené (503). Skript to o chvíľu skúsi znova."
 
 # 6. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
