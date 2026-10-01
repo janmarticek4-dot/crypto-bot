@@ -104,9 +104,9 @@ if sudden_drops:
         except Exception as e:
             print(f"Alert error: {e}")
 
-# 6. STRUČNÁ A KOMPAKTNÁ HLAVNÁ ANALÝZA PRE VŠETKY MINCE
+# 6. STRUČNÁ A KOMPAKTNÁ HLAVNÁ ANALÝZA (OPRAVENÁ NA 4H A LOGICKÚ NÄVAZNOSŤ CENOVÝCH HLADÍN)
 prompt = f"""
-Si špičkový krypto portfólio manažér. Priprav STRUČNÚ a prehľadnú 6-hodinovú analýzu pre Telegram. Žiadne dlhé texty, píš vecne v bodoch.
+Si špičkový krypto portfólio manažér. Priprav STRUČNÚ a prehľadnú **4-hodinovú analýzu** pre Telegram. Žiadne dlhé texty, píš vecne v bodoch.
 Cieľ: Maximalizovať zisky v bull markete, realizovať zisky na vrchoch a dokupovať LEN NA SKUTOČNÝCH DNÁCH.
 
 Sentiment: {fng_value}/100 ({fng_class}) | Správy: {news_context}
@@ -114,12 +114,12 @@ Dáta trhu:
 {market_context}
 
 Požiadavky na štruktúru:
-1. **Makro & Rotácia:** 2 vety o fáze trhu a kam smeruje kapitál.
-2. **Pre KAŽDÚ z 8 mincí (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO)** použi tento ultrakrátky formát:
+1. **Makro & Rotácia:** 2 vety o fáze trhu a kam smeruje kapitál. (V nadpise správy použi explicitne 4H analýza).
+2. **Pre KAŽDÚ z 8 mincí (BTC, ETH, SOL, TAO, FET, AAVE,RENDER, ONDO)** dodrž tento presný a konzistentný formát:
    - **[SYMBOL]** | Prognóza: [rast +X% / pokles -X% / range X%]
      - **Fundament/Tech:** [1 stručná veta]
-     - **Exekúcia:** [Buď čisté **DRŽAŤ 100% pozície** do ceny \(X (ak sa práve neoplatí nič iné robiť), ALEBO ak je reálna príležitosť, uveď konkrétne **DOKÚPIŤ [X]% za Market / Limitku na\)X** resp. **PREDAŤ [X]% na Take-Profit $X** s uvedením následnej limitky na odkúpenie]. 
-     *DÔLEŽITÉ:* Nenucuj nákupy ani predaje nasilu tam, kde to nedáva zmysel – vtedy napíš iba DRŽAŤ s cieľom!
+     - **Exekúcia:** [Buď čisté **DRŽAŤ 100% pozície do cieľovej ceny \(X**, ALEBO ak je vhodná príležitosť na predaj, uveď **PREDAŤ [X]% na Take-Profit\)X** (ktorá je zároveň cieľovou hodnotou rastu) s uvedením následnej limitky na odkúpenie na \(Y. Ak je vhodný nákup na dne, uveď **DOKÚPIŤ [X]% na Limitku\)Y**].
+     *DÔLEŽITÉ:* Ceny musia byť logicky previazané a nesmú si protirečiť. Nenucuj nákupy ani predaje tam, kde sa má iba držať.
 
 Začni priamo správou, dodrž stručnosť a pokry všetkých 8 mincí!
 """
@@ -137,4 +137,4 @@ if len(ai_analysis) > 4000:
     ai_analysis = ai_analysis[:3950] + "\n\n... (skrátené)"
 
 send_telegram(ai_analysis)
-print("Hotovo, analýza úspešne odoslaná!")
+print("Hotovo, 4h analýza úspešne odoslaná!")
