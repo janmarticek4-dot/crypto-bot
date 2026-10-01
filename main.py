@@ -99,12 +99,12 @@ if sudden_drops:
         """
         try:
             genai.configure(api_key=GEMINI_API_KEY)
-            alert_res = genai.GenerativeModel('gemini-1.5-flash').generate_content(alert_prompt)
+            alert_res = genai.GenerativeModel('gemini-2.5-flash').generate_content(alert_prompt)
             send_telegram(f"🚨 **ALERT: {symbol}** 🚨\n\n{alert_res.text}")
         except Exception as e:
             print(f"Alert error: {e}")
 
-# 6. STRUČNÁ A KOMPAKTNÁ HLAVNá ANALÝZA PRE VŠETKY MINCE
+# 6. STRUČNÁ A KOMPAKTNÁ HLAVNÁ ANALÝZA PRE VŠETKY MINCE
 prompt = f"""
 Si špičkový krypto portfólio manažér. Priprav STRUČNÚ a prehľadnú 6-hodinovú analýzu pre Telegram. Žiadne dlhé texty, píš vecne v bodoch.
 Cieľ: Maximalizovať zisky v bull markete, realizovať zisky na vrchoch a dokupovať LEN NA SKUTOČNÝCH DNÁCH.
@@ -127,7 +127,7 @@ Začni priamo správou, dodrž stručnosť a pokry všetkých 8 mincí!
 ai_analysis = ""
 try:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content(prompt)
     ai_analysis = response.text
 except Exception as e:
