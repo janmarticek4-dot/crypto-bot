@@ -104,22 +104,24 @@ if sudden_drops:
         except Exception as e:
             print(f"Alert error: {e}")
 
-# 6. STRUČNÁ A KOMPAKTNÁ HLAVNÁ ANALÝZA (OPRAVENÁ NA 4H A LOGICKÚ NÄVAZNOSŤ CENOVÝCH HLADÍN)
+# 6. 4H ANALÝZA S ČASOVÝMI HORIZONTMI A PRESNÝMI CIEĽMI PRE DRŽANIE
 prompt = f"""
-Si špičkový krypto portfólio manažér. Priprav STRUČNÚ a prehľadnú **4-hodinovú analýzu** pre Telegram. Žiadne dlhé texty, píš vecne v bodoch.
-Cieľ: Maximalizovať zisky v bull markete, realizovať zisky na vrchoch a dokupovať LEN NA SKUTOČNÝCH DNÁCH.
+Si špičkový krypto portfólio manažér. Priprav STRUČNÚ a prehľadnú **4-hodinovú analýzu** pre Telegram. Píš vecne v bodoch.
+Cieľ: Maximalizovať zisky v bull markete, realizovať zisky na vrchoch a dokupovať na dnách.
 
 Sentiment: {fng_value}/100 ({fng_class}) | Správy: {news_context}
 Dáta trhu:
 {market_context}
 
 Požiadavky na štruktúru:
-1. **Makro & Rotácia:** 2 vety o fáze trhu a kam smeruje kapitál. (V nadpise správy použi explicitne 4H analýza).
-2. **Pre KAŽDÚ z 8 mincí (BTC, ETH, SOL, TAO, FET, AAVE,RENDER, ONDO)** dodrž tento presný a konzistentný formát:
-   - **[SYMBOL]** | Prognóza: [rast +X% / pokles -X% / range X%]
+1. **Makro & Rotácia:** 2 vety o fáze trhu a kam smeruje kapitál (v nadpise použi explicitne 4H analýza).
+2. **Pre KAŽDÚ z 8 mincí (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO)** dodrž tento presný formát:
+   - **[SYMBOL]** | Prognóza: [rast +X% / pokles -X% / range X%] (Časový horizont: napr. *najbližších 24-48 hodín* / *do 24 hodín*)
      - **Fundament/Tech:** [1 stručná veta]
-     - **Exekúcia:** [Buď čisté **DRŽAŤ 100% pozície do cieľovej ceny \(X**, ALEBO ak je vhodná príležitosť na predaj, uveď **PREDAŤ [X]% na Take-Profit\)X** (ktorá je zároveň cieľovou hodnotou rastu) s uvedením následnej limitky na odkúpenie na \(Y. Ak je vhodný nákup na dne, uveď **DOKÚPIŤ [X]% na Limitku\)Y**].
-     *DÔLEŽITÉ:* Ceny musia byť logicky previazané a nesmú si protirečiť. Nenucuj nákupy ani predaje tam, kde sa má iba držať.
+     - **Exekúcia:** 
+       - Ak je pokyn **DRŽAŤ**: Uveď **DRŽAŤ 100% pozície do cieľovej ceny $X** (pri ktorej sa má pozícia prehodnotiť/predať).
+       - Ak je pokyn na predaj: Uveď **PREDAŤ [X]% na Take-Profit \(X** + následná limitka na odkúpenie na\)Y.
+       - Ak je pokyn na nákup: Uveď **DOKÚPIŤ [X]% na Limitku $Y**.
 
 Začni priamo správou, dodrž stručnosť a pokry všetkých 8 mincí!
 """
