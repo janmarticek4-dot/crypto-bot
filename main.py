@@ -70,12 +70,11 @@ Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej poz�
 Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
 """
 
-# 5. Volanie Gemini cez oficiálnu knižnicu (automaticky si poradi s modelom)
+# 5. Volanie Gemini cez oficiálnu knižnicu (model gemini-2.0-flash)
 ai_analysis = ""
 try:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Použijeme stabilný model gemini-1.5-flash cez oficiálne SDK
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.0-flash')
     response = model.generate_content(prompt)
     ai_analysis = response.text
 except Exception as e:
