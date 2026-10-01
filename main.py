@@ -3,12 +3,13 @@ import json
 import urllib.request
 import urllib.parse
 
-# Načítanie tokenov
-TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
-CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+# Načítanie všetkých kľúčov
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
-if not TOKEN or not CHAT_ID:
-    print("CHYBA: Token alebo Chat ID chýbajú!")
+if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
+    print("CHYBA: Niektorý z kľúčov chýba v GitHub Secrets!")
     exit(1)
 
 # 1. Stiahnutie Crypto Fear & Greed Indexu
@@ -22,73 +23,94 @@ except Exception as e:
     fng_value = "N/D"
     fng_class = "N/D"
 
-# 2. Stiahnutie dát z CoinGecko pre naše mince
-coins = [
-    ("bitcoin", "BTC"),
-    ("ethereum", "ETH"),
-    ("solana", "SOL"),
-    ("bittensor", "TAO"),
-    ("fetch-ai", "FET"),
-    ("aave", "AAVE"),
-    ("render-token", "RENDER"),
-    ("ondo-finance", "ONDO")
-]
+# 2. Stiahnutie pokročilých dát z CoinGecko (trhová kapitalizácia, valuácia, ATH)
+coins_map = {
+    "bitcoin": "BTC",
+    "ethereum": "ETH",
+    "solana": "SOL",
+    "bittensor": "TAO",
+    "fetch-ai": "FET",
+    "aave": "AAVE",
+    "render-token": "RENDER",
+    "ondo-finance": "ONDO"
+}
 
-coin_ids = ",".join([c[0] for c in coins])
-cg_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_ids}&vs_currencies=usd&include_24hr_change=true"
+coin_ids = ",".join(coins_map.keys())
+cg_url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={coin_ids}&order=market_cap_desc"
 
 try:
     req = urllib.request.Request(cg_url, headers={'User-Agent': 'Mozilla/5.0'})
     response = urllib.request.urlopen(req)
-    cg_data = json.loads(response.read().decode())
+    market_data = json.loads(response.read().decode())
 except Exception as e:
     print(f"Chyba pri sťahovaní z CoinGecko: {e}")
-    cg_data = {}
+    market_data = []
 
-# 3. Vybudovanie komplexnej správy a analýzy
-message_lines = [
-    "📊 **KOMPLEXNÁ KRYPTO ANALÝZA**",
-    f"🧠 **Trhový Sentiment (F&G):** {fng_value} / 100 ({fng_class})",
-    "-----------------------------------"
-]
+crypto_summary_lines = []
+for coin in market_data:
+    symbol = coins_map.get(coin['id'], coin['symbol'].upper())
+    price = coin.get('current_price', 0)
+    change_24h = coin.get('price_change_percentage_24h', 0)
+    market_cap = coin.get('market_cap', 0)
+    ath = coin.get('ath', 0)
+    
+    crypto_summary_lines.append(
+        f"- {symbol}: Cena: \({price:,.2f}, 24h zmena: {change_24h:+.2f}%, Market Cap:\){market_cap:,.0f}, ATH: ${ath:,.2f}"
+    )
 
-for coin_id, symbol in coins:
-    if coin_id in cg_data:
-        price = cg_data[coin_id].get('usd', 0)
-        change_24h = cg_data[coin_id].get('usd_24h_change', 0)
-        
-        # Jednoduchá analytická logika pre odporúčanie
-        if change_24h > 5.0:
-            action = "🟢 SILNÝ RAST (Zvážiť čiastočný výber ziskov / Držať)"
-        elif change_24h > 0:
-            action = "🔵 RAST / STABILNÉ (Držať)"
-        elif change_24h > -5.0:
-            action = "🟡 MIERNY POKLES (Sledovať / Možný nákup v zľave)"
-        else:
-            action = "🔴 VÝRAZNÝ POKLES (Príležitosť na DCA nákup / Držať)"
-            
-        emoji_change = "📈" if change_24h >= 0 else "📉"
-        line = f"*{symbol}*: ${price:,.2f} | {emoji_change} {change_24h:+.2f}%\n   💡 *Signál:* {action}"
-        message_lines.append(line)
-    else:
-        message_lines.append(f"*{symbol}*: Dáta nedostupné")
+market_context = "\n".join(crypto_summary_lines)
 
-message_lines.append("-----------------------------------")
-message_lines.append("🤖 *AI Agent:* Pravidelná 6-hodinová analýza trhu.")
+# 3. Pokročilý Prompt pre Gemini AI s požiadavkou na Twitter/X sentiment a vyhlásenia vplyvných osôb
+prompt = f"""
+Si špičkový kvantitatívny krypto analytik, portfólio manažér a expert na on-chain, fundamentálnu analýzu a sociálny sentiment (Twitter/X).
+Tu sú aktuálne dáta z trhu:
+- Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
+- Aktuálne dáta sledovaných mincí:
+{market_context}
 
-full_message = "\n".join(message_lines)
+Tvojou úlohou je vykonať hĺbkový prieskum a pripraviť profesionálnu 6-hodinovú krypto analýzu pre môj Telegramový kanál.
+Pri analýze bezpodmienečne zohľadni:
+1. **Sociálny sentiment a Twitter (X) / správy**: Vyhľadaj si najnovšie vyhlásenia, tweety a statusy od vplyvných osôb (ako sú Elon Musk, Donald Trump, zakladatelia a kľúčoví vývojári spojení s týmito mincami: BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO) za posledné hodiny/dni a zohľadni ich vplyv na cenu.
+2. **Fundamentálnu situáciu a valuáciu** (trhovú kapitalizáciu, pomer voči ATH).
+3. **Konkrétne obchodné odporúčanie** pre každú mincu vrátane exaktného percenta aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať (napr. „Predať 15% pozície“, „Dokúpiť 10%“, „Držať 100%“).
 
-# 4. Odoslanie správy do Telegramu
-telegram_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-payload = urllib.parse.urlencode({
-    "chat_id": CHAT_ID,
-    "text": full_message,
+Odpoveď naformátuj priamo pre Telegram (používaj emoji, tučné písmo cez markdown). Ak za posledné hodiny prebehol nejaký dôležitý tweet alebo vyhlásenie ovplyvňujúce tieto mince, výslovne ho v analýze spomeň. Začni priamo správou, žiadne úvody okolo toho.
+"""
+
+# Volanie Gemini API s povoleným nástrojom Google Search Grounding (na vyhľadávanie tweetov a aktuálnych správ)
+gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+payload_gemini = {
+    "contents": [{
+        "parts": [{"text": prompt}]
+    }],
+    "tools": [{"google_search": {}}]  # Toto umožní Gemini prehľadávať web a sociálne siete v reálnom čase
+}
+
+try:
+    req = urllib.request.Request(
+        gemini_url,
+        data=json.dumps(payload_gemini).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+    response = urllib.request.urlopen(req)
+    gemini_response = json.loads(response.read().decode())
+    ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
+except Exception as e:
+    print(f"Chyba pri volaní Gemini API: {e}")
+    ai_analysis = "⚠️ Chyba pri generovaní AI analýzy trhu."
+
+# 4. Odoslanie výslednej analýzy do Telegramu
+telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+payload_telegram = urllib.parse.urlencode({
+    "chat_id": TELEGRAM_CHAT_ID,
+    "text": ai_analysis,
     "parse_mode": "Markdown"
 }).encode("utf-8")
 
 try:
-    urllib.request.urlopen(telegram_url, data=payload)
-    print("Komplexná analýza úspešne odoslaná do Telegramu!")
+    urllib.request.urlopen(telegram_url, data=payload_telegram)
+    print("Pokročilá AI analýza so sentimentom z Twitteru úspešne odoslaná do Telegramu!")
 except urllib.error.HTTPError as e:
     print(f"HTTP Chyba od Telegramu: {e.code} - {e.reason}")
     print(e.read().decode())
