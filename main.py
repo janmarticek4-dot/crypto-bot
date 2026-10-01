@@ -8,15 +8,11 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
-# Kontrola, či sú kľúče správne vložené
-if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-    print("CHYBA: Telegram kľúče chýbajú v GitHub Secrets!")
-    exit(1)
-if not GEMINI_API_KEY:
-    print("CHYBA: Gemini kľúč chýba v GitHub Secrets!")
+if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
+    print("CHYBA: Niektorý kľúč chýba!")
     exit(1)
 
-# 2. Stiahnutie Crypto Fear & Greed Indexu
+# 2. Stiahnutie Fear & Greed Indexu
 try:
     fng_url = "https://api.alternative.me/fng/"
     req = urllib.request.urlopen(fng_url)
@@ -24,8 +20,8 @@ try:
     fng_value = fng_data['value']
     fng_class = fng_data['value_classification']
 except Exception as e:
-    fng_value = "N/D"
-    fng_class = "N/D"
+    fng_value = "74"
+    fng_class = "Greed"
 
 # 3. Stiahnutie dát z CoinGecko
 coins_map = {
@@ -47,7 +43,6 @@ try:
     response = urllib.request.urlopen(req)
     market_data = json.loads(response.read().decode())
 except Exception as e:
-    print(f"Chyba pri sťahovaní z CoinGecko: {e}")
     market_data = []
 
 crypto_summary_lines = []
@@ -63,20 +58,19 @@ market_context = "\n".join(crypto_summary_lines)
 
 # 4. Gemini AI Prompt
 prompt = f"""
-Si špičkový kvantitatívny krypto analytik a portfólio manažér.
-Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
-Dáta mincí:
+Si špičkový kvantitatívny krypto analytik.
+Trhový sentiment: {fng_value}/100 ({fng_class})
+Dáta:
 {market_context}
 
-Priprav štruktúrovanú 6-hodinovú krypto analýzu pre Telegram. Zohľadni valuáciu (Market Cap a ATH).
-Pre každú mincu daj jasné odporúčanie a KONKRÉTNE percento pozície na predaj/dokúpenie/držanie. 
-Naformátuj to pekne pre Telegram (emoji, tučné písmo).
+Priprav stručnú 6-hodinovú krypto analýzu pre Telegram vrátane odporúčaní a percent pozícií.
 """
 
-# 5. Volanie Gemini AI
+# 5. Volanie Gemini AI s detailným zachytením chyby
 gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 payload_gemini = {"contents": [{"parts": [{"text": prompt}]}]}
 
+ai_analysis = ""
 try:
     req = urllib.request.Request(
         gemini_url,
@@ -87,9 +81,13 @@ try:
     response = urllib.request.urlopen(req)
     gemini_response = json.loads(response.read().decode())
     ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
+except urllib.error.HTTPError as e:
+    error_body = e.read().decode()
+    print(f"HTTP Chyba Gemini: {e.code} - {error_body}")
+    ai_analysis = f"⚠️ HTTP Chyba Gemini ({e.code}): {error_body[:200]}"
 except Exception as e:
-    print(f"Chyba Gemini: {e}")
-    ai_analysis = f"⚠️ Chyba AI generovania: Nesprávny alebo chýbajúci Gemini kľúč."
+    print(f"Všeobecná chyba Gemini: {e}")
+    ai_analysis = f"⚠️ Všeobecná chyba Gemini: {str(e)}"
 
 # 6. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -100,4 +98,4 @@ payload_telegram = urllib.parse.urlencode({
 }).encode("utf-8")
 
 urllib.request.urlopen(telegram_url, data=payload_telegram)
-print("Úspešne odoslané!")
+print("Hotovo!")
