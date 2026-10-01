@@ -2,6 +2,7 @@ import os
 import json
 import urllib.request
 import urllib.parse
+import time
 
 # 1. NAČÍTANIE KĽÚČOV
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
@@ -69,28 +70,38 @@ Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej poz�
 Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
 """
 
-# 5. Volanie Gemini AI s novým modelom gemini-3.8-flash
-gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
+# 5. Volanie Gemini AI s mechanizmom záložných modelov (fallback)
+models_to_try = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-pro"]
 payload_gemini = {"contents": [{"parts": [{"text": prompt}]}]}
 
 ai_analysis = ""
-try:
-    req = urllib.request.Request(
-        gemini_url,
-        data=json.dumps(payload_gemini).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST"
-    )
-    response = urllib.request.urlopen(req)
-    gemini_response = json.loads(response.read().decode())
-    ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
-except urllib.error.HTTPError as e:
-    error_body = e.read().decode()
-    print(f"HTTP Chyba Gemini: {e.code} - {error_body}")
-    ai_analysis = f"⚠️ HTTP Chyba Gemini ({e.code}): {error_body[:200]}"
-except Exception as e:
-    print(f"Všeobecná chyba Gemini: {e}")
-    ai_analysis = f"⚠️ Všeobecná chyba Gemini: {str(e)}"
+success = False
+
+for model in models_to_try:
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+    try:
+        print( skúšam model: {model} )
+        req = urllib.request.Request(
+            gemini_url,
+            data=json.dumps(payload_gemini).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        response = urllib.request.urlopen(req)
+        gemini_response = json.loads(response.read().decode())
+        ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
+        success = True
+        break
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode()
+        print(f"Model {model} zlyhal (HTTP {e.code}): {error_body[:100]}")
+        time.sleep(2)
+    except Exception as e:
+        print(f"Chyba s modelom {model}: {e}")
+        time.sleep(2)
+
+if not success:
+        ai_analysis = "⚠️ Všetky Gemini modely sú momentálne preťažené (503). Skript to o chvíľu skúsi znova."
 
 # 6. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -101,4 +112,4 @@ payload_telegram = urllib.parse.urlencode({
 }).encode("utf-8")
 
 urllib.request.urlopen(telegram_url, data=payload_telegram)
-print("Hotovo, analýza odoslaná!")
+print("Hotovo!")
