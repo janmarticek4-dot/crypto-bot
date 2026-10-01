@@ -26,7 +26,7 @@ except Exception as e:
     fng_value = "74"
     fng_class = "Greed"
 
-# 3. Sťahovanie aktuálnych správy a oznámení z trhu (RSS)
+# 3. Sťahovanie aktuálnych správ z trhu (RSS)
 news_context = "Žiadne aktuálne správy k dispozícii."
 try:
     rss_url = "https://cointelegraph.com/rss"
@@ -36,7 +36,7 @@ try:
     
     root = ET.fromstring(xml_data)
     news_items = []
-    for item in root.findall('./channel/item')[:8]: # Top 8 najnovších správ
+    for item in root.findall('./channel/item')[:5]: # Top 5 správ kvôli dĺžke
         title = item.find('title').text if item.find('title') is not None else ""
         if title:
             news_items.append(f"- {title}")
@@ -75,27 +75,27 @@ for coin in market_data:
     change_24h = coin.get('price_change_percentage_24h', 0)
     market_cap = coin.get('market_cap', 0)
     ath = coin.get('ath', 0)
-    crypto_summary_lines.append(f"- {symbol}: Cena: \({price:,.2f}, 24h zmena: {change_24h:+.2f}%, Market Cap:\){market_cap:,.0f}, ATH: ${ath:,.2f}")
+    crypto_summary_lines.append(f"- {symbol}: Cena: \({price:,.2f} | 24h: {change_24h:+.2f}% | MC:\){market_cap:,.0f} | ATH: ${ath:,.2f}")
 
 market_context = "\n".join(crypto_summary_lines)
 
-# 5. Pokročilý prompt zahŕňajúci fundamenty a živé správy
+# 5. Optimalizovaný prompt s dôrazom na fundamenty, správy a stručnosť pre Telegram
 prompt = f"""
-Si špičkový kvantitatívny krypto analytik, portfólio manažér a makroekonóm.
-Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
+Si špičkový kvantitatívny krypto analytik a portfólio manažér.
+Trhový sentiment: {fng_value}/100 ({fng_class})
 
-Najnovšie správy, udalosti a vyhlásenia z krypto trhu:
+Najnovšie správy z trhu:
 {news_context}
 
-Aktuálne kvantitatívne dáta sledovaných mincí (vrátane Market Capu a vzťahu k ATH):
+Kvantitatívne dáta mincí:
 {market_context}
 
-Priprav profesionálnu a hĺbkovú krypto analýzu pre môj Telegramový kanál. 
-Požiadavky na analýzu:
-1. Zohľadni nielen aktuálne cenové pohyby a sentiment, ale predovšetkým **silné fundamenty každého projektu** (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO) – ich technologický pokrok, ekosystém, reálne využitie, tokenomiku a vplyv najnovších správ z trhu.
-2. Pre každú mincu vecne prepoj fundamentálnu hodnotu s aktuálnou trhovou situáciou.
-3. Uveď jasné investičné odporúčanie a **konkrétne odporúčané percento aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať** (napr. „Predať 15% pozície“, „Dokúpiť 10%“, „Držať 100%“).
-4. Naformátuj to prehľadne pre Telegram (použi emoji a štruktúrovaný text). Začni priamo správou.
+Priprav profesionálnu krypto analýzu pre Telegram. 
+Požiadavky:
+1. Zohľadni silné fundamenty projektov a najnovšie správy z trhu spolu s dátami.
+2. Buď vecný, presný a vyjadruj sa kompaktne, aby text nebol zbytočne dlhý.
+3. Pre každú mincu uveď jasný exekučný pokyn a **konkrétne odporúčané percento pozície na predaj, dokúpenie alebo držanie** (napr. „Dokúpiť 10%“).
+4. Naformátuj to pre Telegram a začni priamo správou.
 """
 
 # 6. Volanie Gemini cez oficiálne SDK
@@ -108,7 +108,11 @@ try:
 except Exception as e:
     error_str = str(e)
     print(f"Chyba Gemini: {error_str}")
-    ai_analysis = f"⚠️️ Chyba Gemini: {error_str[:150]}"
+    ai_analysis = f"⚠️ Chyba Gemini: {error_str[:150]}"
+
+# POISTKA: Ak je text dlhší ako limit Telegramu (4096 znakov), bezpečne ho ošetri
+if len(ai_analysis) > 4000:
+    ai_analysis = ai_analysis[:3950] + "\n\n... (analýza bola skrátená pre limit správy)"
 
 # 7. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
