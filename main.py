@@ -3,16 +3,20 @@ import json
 import urllib.request
 import urllib.parse
 
-# Načítanie všetkých kľúčov
+# 1. NAČÍTANIE KĽÚČOV
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
-if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
-    print("CHYBA: Niektorý z kľúčov chýba v GitHub Secrets!")
+# Kontrola, či sú kľúče správne vložené
+if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+    print("CHYBA: Telegram kľúče chýbajú v GitHub Secrets!")
+    exit(1)
+if not GEMINI_API_KEY:
+    print("CHYBA: Gemini kľúč chýba v GitHub Secrets!")
     exit(1)
 
-# 1. Stiahnutie Crypto Fear & Greed Indexu
+# 2. Stiahnutie Crypto Fear & Greed Indexu
 try:
     fng_url = "https://api.alternative.me/fng/"
     req = urllib.request.urlopen(fng_url)
@@ -23,7 +27,7 @@ except Exception as e:
     fng_value = "N/D"
     fng_class = "N/D"
 
-# 2. Stiahnutie pokročilých dát z CoinGecko (trhová kapitalizácia, valuácia, ATH)
+# 3. Stiahnutie dát z CoinGecko
 coins_map = {
     "bitcoin": "BTC",
     "ethereum": "ETH",
@@ -53,36 +57,25 @@ for coin in market_data:
     change_24h = coin.get('price_change_percentage_24h', 0)
     market_cap = coin.get('market_cap', 0)
     ath = coin.get('ath', 0)
-    
-    crypto_summary_lines.append(
-        f"- {symbol}: Cena: \({price:,.2f}, 24h zmena: {change_24h:+.2f}%, Market Cap:\){market_cap:,.0f}, ATH: ${ath:,.2f}"
-    )
+    crypto_summary_lines.append(f"- {symbol}: Cena: \({price:,.2f}, 24h zmena: {change_24h:+.2f}%, Market Cap:\){market_cap:,.0f}, ATH: ${ath:,.2f}")
 
 market_context = "\n".join(crypto_summary_lines)
 
-# 3. Prompt pre Gemini AI zameraný na fundamenty, valuáciu a presné percentá pozícií
+# 4. Gemini AI Prompt
 prompt = f"""
-Si špičkový kvantitatívny krypto analytik, portfólio manažér a expert na fundamentálnu analýzu a valuáciu.
-Tu sú aktuálne reálne dáta z trhu:
-- Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
-- Aktuálne dáta sledovaných mincí (vrátane Market Capu a vzťahu k ATH):
+Si špičkový kvantitatívny krypto analytik a portfólio manažér.
+Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
+Dáta mincí:
 {market_context}
 
-Tvojou úlohou je pripraviť profesionálnu, štruktúrovanú a údernú 6-hodinovú krypto analýzu pre môj Telegramový kanál.
-Pri každej minci bezpodmienečne zohľadni:
-1. Fundamentálnu situáciu a aktuálnu valuáciu (trhovú kapitalizáciu a odstup od historického maxima - ATH).
-2. Jasné obchodné odporúčanie a **konkrétne odporúčané percento aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať** (napr. „Predať 15 % pozície“, „Dokúpiť 10 %“, „Držať 100 %“).
-
-Odpoveď naformátuj priamo pre Telegram (používaj emoji, tučné písmo cez markdown) tak, aby bola prehľadná a pripravená na okamžité čítanie. Buď vecný, presný a profesionálny. Nepisuj žiadne zbytočné úvody okolo, začni priamo správou.
+Priprav štruktúrovanú 6-hodinovú krypto analýzu pre Telegram. Zohľadni valuáciu (Market Cap a ATH).
+Pre každú mincu daj jasné odporúčanie a KONKRÉTNE percento pozície na predaj/dokúpenie/držanie. 
+Naformátuj to pekne pre Telegram (emoji, tučné písmo).
 """
 
-# Volanie Gemini API (stabilná verzia bez externých toolov)
+# 5. Volanie Gemini AI
 gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-payload_gemini = {
-    "contents": [{
-        "parts": [{"text": prompt}]
-    }]
-}
+payload_gemini = {"contents": [{"parts": [{"text": prompt}]}]}
 
 try:
     req = urllib.request.Request(
@@ -95,21 +88,16 @@ try:
     gemini_response = json.loads(response.read().decode())
     ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
 except Exception as e:
-    print(f"Chyba pri volaní Gemini API: {e}")
-    ai_analysis = f"⚠️ Chyba pri generovaní AI analýzy trhu: {str(e)}"
+    print(f"Chyba Gemini: {e}")
+    ai_analysis = f"⚠️ Chyba AI generovania: Nesprávny alebo chýbajúci Gemini kľúč."
 
-# 4. Odoslanie výslednej analýzy do Telegramu
-telegram_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+# 6. Odoslanie do Telegramu
+telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 payload_telegram = urllib.parse.urlencode({
-    "chat_id": CHAT_ID,
+    "chat_id": TELEGRAM_CHAT_ID,
     "text": ai_analysis,
     "parse_mode": "Markdown"
 }).encode("utf-8")
 
-try:
-    urllib.request.urlopen(telegram_url, data=payload_telegram)
-    print("AI analýza s fundamentmi a percentami úspešne odoslaná do Telegramu!")
-except urllib.error.HTTPError as e:
-    print(f"HTTP Chyba od Telegramu: {e.code} - {e.reason}")
-    print(e.read().decode())
-    raise e
+urllib.request.urlopen(telegram_url, data=payload_telegram)
+print("Úspešne odoslané!")
