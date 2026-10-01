@@ -104,7 +104,7 @@ if sudden_drops:
         except Exception as e:
             print(f"Alert error: {e}")
 
-# 6. 4H ANALÝZA S AKTUÁLNYMI CENAMI, ČASOVÝMI HORIZONTMI A PRESNÝMI CIEĽMI
+# 6. 4H ANALÝZA S AKTUÁLNYMI CENAMI A ROZŠÍRENÝMI POKYNMI PRE DRŽANIE
 prompt = f"""
 Si špičkový krypto portfólio manažér. Priprav STRUČNÚ a prehľadnú **4-hodinovú analýzu** pre Telegram. Píš vecne v bodoch.
 Cieľ: Maximalizovať zisky v bull markete, realizovať zisky na vrchoch a dokupovať na dnách.
@@ -119,7 +119,7 @@ Požiadavky na štruktúru:
    - **[SYMBOL] (Aktuálna cena: $X)** | Prognóza: [rast +X% / pokles -X% / range X%] (Časový horizont: napr. *najbližších 24-48 hodín*)
      - **Fundament/Tech:** [1 stručná veta]
      - **Exekúcia:** 
-       - Ak je pokyn **DRŽAŤ**: Uveď **DRŽAŤ 100% pozície do cieľovej ceny $X**.
+       - Ak je pokyn **DRŽAŤ**: Uveď **DRŽAŤ 100% pozície do cieľovej ceny $X** a presne definuj, čo spraviť po jej dosiahnutí (či predať časť pozície, napr. *PREDAŤ [Y]%*, alebo držať ďalej do ešte vyššej ceny).
        - Ak je pokyn na predaj: Uveď **PREDAŤ [X]% na Take-Profit \(X** + následná limitka na odkúpenie na\)Y.
        - Ak je pokyn na nákup: Uveď **DOKÚPIŤ [X]% na Limitku $Y**.
 
@@ -139,4 +139,4 @@ if len(ai_analysis) > 4000:
     ai_analysis = ai_analysis[:3950] + "\n\n... (skrátené)"
 
 send_telegram(ai_analysis)
-print("Hotovo, 4h analýza s aktuálnymi cenami úspešne odoslaná!")
+print("Hotovo, 4h analýza s rozšírenými pokynmi úspešne odoslaná!")
