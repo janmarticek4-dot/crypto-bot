@@ -2,6 +2,7 @@ import os
 import json
 import urllib.request
 import urllib.parse
+import time
 import google.generativeai as genai
 
 # 1. NAČÍTANIE KĽÚČOV
@@ -70,16 +71,35 @@ Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej poz�
 Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
 """
 
-# 5. Volanie Gemini cez oficiálnu knižnicu (používame odporúčaný model gemini-3.8-flash)
+# 5. Volanie Gemini cez SDK s automatickým čakaním pri preťažení / limite (429)
+genai.configure(api_key=GEMINI_API_KEY)
+models_to_try = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-3.8-flash']
+
 ai_analysis = ""
-try:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-3.8-flash')
-    response = model.generate_content(prompt)
-    ai_analysis = response.text
-except Exception as e:
-    print(f"Chyba pri generovaní cez Gemini SDK: {e}")
-    ai_analysis = f"⚠️ Chyba Gemini SDK: {str(e)}"
+success = False
+
+for model_name in models_to_try:
+    for attempt in range(2): # 2 pokusy na jeden model
+        try:
+            print(f"Skúšam model {model_name}...")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            ai_analysis = response.text
+            success = True
+            break
+        except Exception as e:
+            error_str = str(e)
+            print(f"Chyba s modelom {model_name}: {error_str}")
+            if "429" in error_str:
+                print("Dosiahnutý limit požiadaviek (429). Čakám 20 sekúnd pred opakovaním...")
+                time.sleep(20)
+            else:
+                time.sleep(3)
+    if success:
+        break
+
+if not success:
+    ai_analysis = "⚠️ Gemini API dočasne vyčerpalo bezplatný limit (429). Skript to o chvíľu skúsi automaticky znova."
 
 # 6. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
