@@ -22,11 +22,10 @@ try:
     fng_value = fng_data['value']
     fng_class = fng_data['value_classification']
 except Exception as e:
-    print(f"Varovanie FNG: {e}")
     fng_value = "74"
     fng_class = "Greed"
 
-# 3. Sťahovanie aktuálnych správ z trhu (RSS)
+# 3. Sťahovanie aktuálnych správ a vyhlásení z trhu (RSS)
 news_context = "Žiadne aktuálne správy k dispozícii."
 try:
     rss_url = "https://cointelegraph.com/rss"
@@ -36,7 +35,7 @@ try:
     
     root = ET.fromstring(xml_data)
     news_items = []
-    for item in root.findall('./channel/item')[:5]: # Top 5 správ kvôli dĺžke
+    for item in root.findall('./channel/item')[:5]:
         title = item.find('title').text if item.find('title') is not None else ""
         if title:
             news_items.append(f"- {title}")
@@ -65,7 +64,6 @@ try:
     response = urllib.request.urlopen(req, timeout=10)
     market_data = json.loads(response.read().decode())
 except Exception as e:
-    print(f"Varovanie CoinGecko: {e}")
     market_data = []
 
 crypto_summary_lines = []
@@ -75,27 +73,34 @@ for coin in market_data:
     change_24h = coin.get('price_change_percentage_24h', 0)
     market_cap = coin.get('market_cap', 0)
     ath = coin.get('ath', 0)
-    crypto_summary_lines.append(f"- {symbol}: Cena: \({price:,.2f} | 24h: {change_24h:+.2f}% | MC:\){market_cap:,.0f} | ATH: ${ath:,.2f}")
+    crypto_summary_lines.append(f"- {symbol}: Aktuálna cena: \({price:,.2f} | 24h zmena: {change_24h:+.2f}% | Market Cap:\){market_cap:,.0f} | ATH: ${ath:,.2f}")
 
 market_context = "\n".join(crypto_summary_lines)
 
-# 5. Optimalizovaný prompt s dôrazom na fundamenty, správy a stručnosť pre Telegram
+# 5. Pokročilý makroekonomický a exekučný prompt podľa zvolenej stratégie
 prompt = f"""
-Si špičkový kvantitatívny krypto analytik a portfólio manažér.
-Trhový sentiment: {fng_value}/100 ({fng_class})
+Si špičkový kvantitatívny krypto analytik, portfólio manažér a makroekonóm.
+Investičná stratégia: Maximalizovať rast v bull markete, realizovať zisky na vrchoch pred blížiacimi sa korekciami, lacno dokupovať na lokálnych dnách, prípadne ukončiť obchody pri prechode do bear marketu. Sleduje sa rotácia kapitálu (altcoiny <-> BTC <-> externé aktíva).
 
-Najnovšie správy z trhu:
+Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
+
+Kľúčové správy a vyhlásenia z trhu:
 {news_context}
 
-Kvantitatívne dáta mincí:
+Aktuálne trhové dáta mincí:
 {market_context}
 
-Priprav profesionálnu krypto analýzu pre Telegram. 
-Požiadavky:
-1. Zohľadni silné fundamenty projektov a najnovšie správy z trhu spolu s dátami.
-2. Buď vecný, presný a vyjadruj sa kompaktne, aby text nebol zbytočne dlhý.
-3. Pre každú mincu uveď jasný exekučný pokyn a **konkrétne odporúčané percento pozície na predaj, dokúpenie alebo držanie** (napr. „Dokúpiť 10%“).
-4. Naformátuj to pre Telegram a začni priamo správou.
+Priprav profesionálnu 6-hodinovú krypto analýzu pre Telegram s touto štruktúrou:
+1. **Makro výhľad & Rotácia kapitálu:** Zhodnotenie trhovej fázy (bull market vs. riziko korekcie/bear marketu). Sleduj prelievanie kapitálu (altcoiny vs BTC) a ak hrozí odliv inam, uveď presne, kam a do ktorých kryptomien presunúť kapitál.
+2. **Exekučné pokyny pre každú mincu (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO):**
+   - **Analýza & Fundament:** Vplyv správ a stavu trhu.
+   - **Exekúcia:** 
+     - Ak realizujeme zisk na vrchole pred korekciou: **PREDAŤ [X]% z pozície** (uveď či Market, alebo Take-Profit na cene $X).
+     - Ak využívame lokálne dno/dip na nákup: **DOKÚPIŤ [X]% z investície** (uveď či Market, alebo Limitná objednávka na hladine $X).
+     - Ak držíme v bull markete: **DRŽAŤ 100% pozície**.
+     - Ak sa končí cyklus / bear market: **Ukončiť obchod / Predať 100%**.
+
+Píš vecne, úderne, s emoji a začni priamo správou.
 """
 
 # 6. Volanie Gemini cez oficiálne SDK
@@ -107,12 +112,11 @@ try:
     ai_analysis = response.text
 except Exception as e:
     error_str = str(e)
-    print(f"Chyba Gemini: {error_str}")
     ai_analysis = f"⚠️ Chyba Gemini: {error_str[:150]}"
 
-# POISTKA: Ak je text dlhší ako limit Telegramu (4096 znakov), bezpečne ho ošetri
+# Poistka proti prekročeniu dĺžky správy pre Telegram
 if len(ai_analysis) > 4000:
-    ai_analysis = ai_analysis[:3950] + "\n\n... (analýza bola skrátená pre limit správy)"
+    ai_analysis = ai_analysis[:3950] + "\n\n... (analýza bola skrátená)"
 
 # 7. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -123,7 +127,7 @@ payload_telegram = urllib.parse.urlencode({
 
 try:
     urllib.request.urlopen(telegram_url, data=payload_telegram, timeout=10)
-    print("Hotovo, správa s fundamentmi a správami úspešne odoslaná do Telegramu!")
+    print("Hotovo, správa úspešne odoslaná do Telegramu!")
 except urllib.error.HTTPError as e:
     error_body = e.read().decode()
     print(f"Telegram HTTP Error: {e.code} - {error_body}")
