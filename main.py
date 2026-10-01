@@ -58,7 +58,7 @@ market_context = "\n".join(crypto_summary_lines)
 
 # 4. Gemini AI Prompt
 prompt = f"""
-Si špičkový kvantitívny krypto analytik a portfólio manažér.
+Si špičkový kvantitatívny krypto analytik a portfólio manažér.
 Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
 Aktuálne dáta mincí (vrátane Market Capu a vzťahu k ATH):
 {market_context}
@@ -69,8 +69,8 @@ Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej poz�
 Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
 """
 
-# 5. Volanie Gemini AI s aktuálnym modelom gemini-2.5-flash
-gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+# 5. Volanie Gemini AI s novým modelom gemini-3.8-flash
+gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
 payload_gemini = {"contents": [{"parts": [{"text": prompt}]}]}
 
 ai_analysis = ""
