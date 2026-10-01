@@ -16,11 +16,12 @@ if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
 # 2. Stiahnutie Fear & Greed Indexu
 try:
     fng_url = "https://api.alternative.me/fng/"
-    req = urllib.request.urlopen(fng_url)
+    req = urllib.request.urlopen(fng_url, timeout=10)
     fng_data = json.loads(req.read().decode())['data'][0]
     fng_value = fng_data['value']
     fng_class = fng_data['value_classification']
 except Exception as e:
+    print(f"Varovanie FNG: {e}")
     fng_value = "74"
     fng_class = "Greed"
 
@@ -41,9 +42,10 @@ cg_url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={c
 
 try:
     req = urllib.request.Request(cg_url, headers={'User-Agent': 'Mozilla/5.0'})
-    response = urllib.request.urlopen(req)
+    response = urllib.request.urlopen(req, timeout=10)
     market_data = json.loads(response.read().decode())
 except Exception as e:
+    print(f"Varovanie CoinGecko: {e}")
     market_data = []
 
 crypto_summary_lines = []
@@ -67,10 +69,10 @@ Aktuálne dáta mincí (vrátane Market Capu a vzťahu k ATH):
 Priprav profesionálnu 6-hodinovú krypto analýzu pre môj Telegramový kanál. 
 Zohľadni fundamenty a valuáciu pre každú mincu (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO).
 Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať** (napr. „Predať 15% pozície“, „Dokúpiť 10%“, „Držať 100%“).
-Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
+Použi prehľadné formátovanie a emoji. Začni priamo správou.
 """
 
-# 5. Volanie Gemini cez oficiálne SDK (stabilne na 1 požiadavku)
+# 5. Volanie Gemini cez oficiálne SDK
 ai_analysis = ""
 try:
     genai.configure(api_key=GEMINI_API_KEY)
@@ -79,19 +81,23 @@ try:
     ai_analysis = response.text
 except Exception as e:
     error_str = str(e)
-    print(f"Chyba: {error_str}")
+    print(f"Chyba Gemini: {error_str}")
     if "429" in error_str:
         ai_analysis = "⚠️ Prekročený bezplatný limit API (429 - Quota exceeded). Skript bol spustený príliš často, počkajte minútu."
     else:
         ai_analysis = f"⚠️ Chyba Gemini: {error_str[:150]}"
 
-# 6. Odoslanie do Telegramu
+# 6. Odoslanie do Telegramu (bez parse_mode, aby nedošlo k chybe 400 Bad Request)
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 payload_telegram = urllib.parse.urlencode({
     "chat_id": TELEGRAM_CHAT_ID,
-    "text": ai_analysis,
-    "parse_mode": "Markdown"
+    "text": ai_analysis
 }).encode("utf-8")
 
-urllib.request.urlopen(telegram_url, data=payload_telegram)
-print("Hotovo, správa odoslaná do Telegramu!")
+try:
+    urllib.request.urlopen(telegram_url, data=payload_telegram, timeout=10)
+    print("Hotovo, správa úspešne odoslaná do Telegramu!")
+except urllib.error.HTTPError as e:
+    error_body = e.read().decode()
+    print(f"Telegram HTTP Error: {e.code} - {error_body}")
+    raise e
