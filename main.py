@@ -2,7 +2,7 @@ import os
 import json
 import urllib.request
 import urllib.parse
-import time
+import google.generativeai as genai
 
 # 1. NAČÍTANIE KĽÚČOV
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
@@ -10,7 +10,7 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
 if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
-    print("CHYBA: Niektorý kľúč chýba!")
+    print("CHYBA: Niektorý kľúč chýba v GitHub Secrets!")
     exit(1)
 
 # 2. Stiahnutie Fear & Greed Indexu
@@ -57,7 +57,7 @@ for coin in market_data:
 
 market_context = "\n".join(crypto_summary_lines)
 
-# 4. Gemini AI Prompt
+# 4. Prompt pre Gemini
 prompt = f"""
 Si špičkový kvantitatívny krypto analytik a portfólio manažér.
 Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
@@ -70,40 +70,19 @@ Uveď jasné odporúčanie a **konkrétne odporúčané percento aktuálnej poz�
 Naformátuj to pre Telegram (emoji, tučné písmo). Začni priamo správou.
 """
 
-# 5. Volanie Gemini AI so stabilnými modelmi gemini-1.5-flash a gemini-1.5-pro
-models_to_try = ["gemini-1.5-flash", "gemini-1.5-pro"]
-payload_gemini = {"contents": [{"parts": [{"text": prompt}]}]}
-
+# 5. Volanie Gemini cez oficiálnu knižnicu (automaticky si poradi s modelom)
 ai_analysis = ""
-success = False
+try:
+    genai.configure(api_key=GEMINI_API_KEY)
+    # Použijeme stabilný model gemini-1.5-flash cez oficiálne SDK
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(prompt)
+    ai_analysis = response.text
+except Exception as e:
+    print(f"Chyba pri generovaní cez Gemini SDK: {e}")
+    ai_analysis = f"⚠️ Chyba Gemini SDK: {str(e)}"
 
-for model in models_to_try:
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
-    try:
-        print(f"Skúšam model: {model}")
-        req = urllib.request.Request(
-            gemini_url,
-            data=json.dumps(payload_gemini).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        response = urllib.request.urlopen(req)
-        gemini_response = json.loads(response.read().decode())
-        ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
-        success = True
-        break
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode()
-        print(f"Model {model} zlyhal (HTTP {e.code}): {error_body[:100]}")
-        time.sleep(2)
-    except Exception as e:
-        print(f"Chyba s modelom {model}: {e}")
-        time.sleep(2)
-
-if not success:
-    ai_analysis = "⚠️ Všetky Gemini modely sú momentálne preťažené. Skript to o chvíľu skúsi znova."
-
-# 6. Odoslanie do Telegramu (používa správnu premennú TELEGRAM_TOKEN)
+# 6. Odoslanie do Telegramu
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 payload_telegram = urllib.parse.urlencode({
     "chat_id": TELEGRAM_CHAT_ID,
@@ -111,9 +90,5 @@ payload_telegram = urllib.parse.urlencode({
     "parse_mode": "Markdown"
 }).encode("utf-8")
 
-try:
-    urllib.request.urlopen(telegram_url, data=payload_telegram)
-    print("Hotovo, správa úspešne odoslaná do Telegramu!")
-except urllib.error.HTTPError as e:
-    print(f"Telegram HTTP Error: {e.code} - {e.read().decode()}")
-    raise e
+urllib.request.urlopen(telegram_url, data=payload_telegram)
+print("Hotovo, správa odoslaná do Telegramu!")
