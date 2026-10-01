@@ -60,30 +60,28 @@ for coin in market_data:
 
 market_context = "\n".join(crypto_summary_lines)
 
-# 3. Pokročilý Prompt pre Gemini AI s požiadavkou na Twitter/X sentiment a vyhlásenia vplyvných osôb
+# 3. Prompt pre Gemini AI zameraný na fundamenty, valuáciu a presné percentá pozícií
 prompt = f"""
-Si špičkový kvantitatívny krypto analytik, portfólio manažér a expert na on-chain, fundamentálnu analýzu a sociálny sentiment (Twitter/X).
-Tu sú aktuálne dáta z trhu:
+Si špičkový kvantitatívny krypto analytik, portfólio manažér a expert na fundamentálnu analýzu a valuáciu.
+Tu sú aktuálne reálne dáta z trhu:
 - Trhový sentiment (Fear & Greed Index): {fng_value}/100 ({fng_class})
-- Aktuálne dáta sledovaných mincí:
+- Aktuálne dáta sledovaných mincí (vrátane Market Capu a vzťahu k ATH):
 {market_context}
 
-Tvojou úlohou je vykonať hĺbkový prieskum a pripraviť profesionálnu 6-hodinovú krypto analýzu pre môj Telegramový kanál.
-Pri analýze bezpodmienečne zohľadni:
-1. **Sociálny sentiment a Twitter (X) / správy**: Vyhľadaj si najnovšie vyhlásenia, tweety a statusy od vplyvných osôb (ako sú Elon Musk, Donald Trump, zakladatelia a kľúčoví vývojári spojení s týmito mincami: BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO) za posledné hodiny/dni a zohľadni ich vplyv na cenu.
-2. **Fundamentálnu situáciu a valuáciu** (trhovú kapitalizáciu, pomer voči ATH).
-3. **Konkrétne obchodné odporúčanie** pre každú mincu vrátane exaktného percenta aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať (napr. „Predať 15% pozície“, „Dokúpiť 10%“, „Držať 100%“).
+Tvojou úlohou je pripraviť profesionálnu, štruktúrovanú a údernú 6-hodinovú krypto analýzu pre môj Telegramový kanál.
+Pri každej minci bezpodmienečne zohľadni:
+1. Fundamentálnu situáciu a aktuálnu valuáciu (trhovú kapitalizáciu a odstup od historického maxima - ATH).
+2. Jasné obchodné odporúčanie a **konkrétne odporúčané percento aktuálnej pozície, ktoré sa má predať, dokúpiť alebo držať** (napr. „Predať 15 % pozície“, „Dokúpiť 10 %“, „Držať 100 %“).
 
-Odpoveď naformátuj priamo pre Telegram (používaj emoji, tučné písmo cez markdown). Ak za posledné hodiny prebehol nejaký dôležitý tweet alebo vyhlásenie ovplyvňujúce tieto mince, výslovne ho v analýze spomeň. Začni priamo správou, žiadne úvody okolo toho.
+Odpoveď naformátuj priamo pre Telegram (používaj emoji, tučné písmo cez markdown) tak, aby bola prehľadná a pripravená na okamžité čítanie. Buď vecný, presný a profesionálny. Nepisuj žiadne zbytočné úvody okolo, začni priamo správou.
 """
 
-# Volanie Gemini API s povoleným nástrojom Google Search Grounding (na vyhľadávanie tweetov a aktuálnych správ)
+# Volanie Gemini API (stabilná verzia bez externých toolov)
 gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 payload_gemini = {
     "contents": [{
         "parts": [{"text": prompt}]
-    }],
-    "tools": [{"google_search": {}}]  # Toto umožní Gemini prehľadávať web a sociálne siete v reálnom čase
+    }]
 }
 
 try:
@@ -98,19 +96,19 @@ try:
     ai_analysis = gemini_response['candidates'][0]['content']['parts'][0]['text']
 except Exception as e:
     print(f"Chyba pri volaní Gemini API: {e}")
-    ai_analysis = "⚠️ Chyba pri generovaní AI analýzy trhu."
+    ai_analysis = f"⚠️ Chyba pri generovaní AI analýzy trhu: {str(e)}"
 
 # 4. Odoslanie výslednej analýzy do Telegramu
-telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+telegram_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 payload_telegram = urllib.parse.urlencode({
-    "chat_id": TELEGRAM_CHAT_ID,
+    "chat_id": CHAT_ID,
     "text": ai_analysis,
     "parse_mode": "Markdown"
 }).encode("utf-8")
 
 try:
     urllib.request.urlopen(telegram_url, data=payload_telegram)
-    print("Pokročilá AI analýza so sentimentom z Twitteru úspešne odoslaná do Telegramu!")
+    print("AI analýza s fundamentmi a percentami úspešne odoslaná do Telegramu!")
 except urllib.error.HTTPError as e:
     print(f"HTTP Chyba od Telegramu: {e.code} - {e.reason}")
     print(e.read().decode())
