@@ -83,8 +83,14 @@ market_context = "\n".join(crypto_summary_lines)
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "Markdown"}).encode("utf-8")
-    try: urllib.request.urlopen(url, data=payload, timeout=10)
-    except Exception as e: print(f"TG Error: {e}")
+    try:
+        req = urllib.request.Request(url, data=payload)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            print(f"Telegram úspešne odoslaný, HTTP status: {response.status}")
+    except urllib.error.HTTPError as e:
+        print(f"CHYBA Telegram HTTP Error: {e.code} - {e.read().decode()}")
+    except Exception as e:
+        print(f"CHYBA Telegram General Error: {e}")
 
 # 5. MASTER PROMPT S GOOGLE SEARCH, PAMÄŤOU A PORTFÓLIOM
 prompt = f"""
