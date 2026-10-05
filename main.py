@@ -4,7 +4,6 @@ import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime
-import google.generativeai as genai
 
 # 1. NAČÍTANIE KĽÚČOV
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
@@ -144,21 +143,31 @@ VÝSTUP DO TELEGRAMU (Zachovaj presne tento markdown formát, buď stručný a d
 - Zmena oproti minulej analýze: [1 veta]
 """
 
+# 7. VOLANIE GEMINI API CEZ PRIAMY HTTP REQUEST (BEZ KNIŽNICE)
+ai_analysis = ""
 try:
-    genai.configure(api_key=GEMINI_API_KEY)
-    # Vynútenie správneho aliasu najnovšieho flash modelu pre starú knižnicu
-    model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
-    response = model.generate_content(prompt)
-    ai_analysis = response.text
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    headers = {'Content-Type': 'application/json'}
+    data = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+    req_payload = json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(gemini_url, data=req_payload, headers=headers, method="POST")
+    
+    with urllib.request.urlopen(req, timeout=30) as response:
+        result = json.loads(response.read().decode())
+        ai_analysis = result['candidates'][0]['content']['parts'][0]['text']
 except Exception as e:
-    ai_analysis = f"⚠️ Chyba AI pri generovaní: {str(e)[:150]}"
+    ai_analysis = f"⚠️ Chyba AI pri generovaní (HTTP): {str(e)[:150]}"
 
 if len(ai_analysis) > 4000:
     ai_analysis = ai_analysis[:3950] + "\n\n... (skrátené)"
 
 send_telegram(ai_analysis)
 
-# 7. ULOŽENIE AKTUÁLNEJ ANALÝZY DO PAMÄTE PRE ĎALŠÍ BEH
+# 8. ULOŽENIE AKTUÁLNEJ ANALÝZY DO PAMÄTE PRE ĎALŠÍ BEH
 try:
     with open(memory_file, "w", encoding="utf-8") as f:
         f.write(ai_analysis)
