@@ -3,6 +3,7 @@ import json
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
+from datetime import datetime
 import google.generativeai as genai
 
 # 1. NAČÍTANIE KĽÚČOV
@@ -14,7 +15,10 @@ if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
     print("CHYBA: Kľúč chýba v GitHub Secrets!")
     exit(1)
 
-# 2. Stiahnutie Fear & Greed Indexu
+# 2. Aktuálny čas
+current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+# 3. Stiahnutie Fear & Greed Indexu
 try:
     fng_url = "https://api.alternative.me/fng/"
     req = urllib.request.urlopen(fng_url, timeout=10)
@@ -22,31 +26,27 @@ try:
     fng_value = fng_data['value']
     fng_class = fng_data['value_classification']
 except Exception as e:
-    fng_value = "74"
-    fng_class = "Greed"
+    fng_value = "UNKNOWN"
+    fng_class = "UNKNOWN"
 
-# 3. Sťahovanie správ z viacerých svetových zdrojov (vrátane politiky a Trumpových vyhlásení)
-news_items = []
-rss_urls = [
-    "https://cointelegraph.com/rss",
-    "https://www.coindesk.com/arc/outboundfeeds/rss/"
-]
+# 4. Sťahovanie aktuálnych správ z trhu (RSS)
+news_context = "Žiadne overené správy."
+try:
+    rss_url = "https://cointelegraph.com/rss"
+    req = urllib.request.Request(rss_url, headers={'User-Agent': 'Mozilla/5.0'})
+    response = urllib.request.urlopen(req, timeout=10)
+    root = ET.fromstring(response.read())
+    news_items = []
+    for item in root.findall('./channel/item')[:5]:
+        title = item.find('title').text if item.find('title') is not None else ""
+        if title:
+            news_items.append(title)
+    if news_items:
+        news_context = " | ".join(news_items)
+except Exception as e:
+    print(f"Varovanie RSS: {e}")
 
-for rss_url in rss_urls:
-    try:
-        req = urllib.request.Request(rss_url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=8)
-        root = ET.fromstring(response.read())
-        for item in root.findall('./channel/item')[:3]:
-            title = item.find('title').text if item.find('title') is not None else ""
-            if title:
-                news_items.append(title)
-    except Exception as e:
-        print(f"Varovanie RSS ({rss_url}): {e}")
-
-news_context = " | ".join(news_items) if news_items else "Žiadne čerstvé správy."
-
-# 4. Stiahnutie reálnych dát z CoinGecko
+# 5. Stiahnutie reálnych dát z CoinGecko
 coins_map = {
     "bitcoin": "BTC",
     "ethereum": "ETH",
@@ -78,7 +78,7 @@ for coin in market_data:
     market_cap = coin.get('market_cap', 0)
     ath = coin.get('ath', 0)
     
-    crypto_summary_lines.append(f"- {symbol} (Aktuálna cena: \({price:,.2f}): 24h zmena: {change_24h:+.2f}%, MC:\){market_cap:,.0f}, ATH: ${ath:,.2f}")
+    crypto_summary_lines.append(f"- {symbol}: \({price:,.2f} (24h: {change_24h:+.2f}%, MC:\){market_cap:,.0f}, ATH: ${ath:,.2f})")
     
     if change_24h < -6.0:
         sudden_drops.append((symbol, change_24h, price))
@@ -93,13 +93,16 @@ def send_telegram(text):
     except Exception as e:
         print(f"Chyba Telegram: {e}")
 
-# 5. OKAMŽITÝ ALERT PRI POKLESE > 6%
+# 6. OKAMŽITÝ ALERT PRI POKLESE > 6%
 if sudden_drops:
     for symbol, change, price in sudden_drops:
         alert_prompt = f"""
+        Si prísny kvantitatívny AI analytik.
         🚨 KRITICKÝ POKLES: {symbol} padol o {change:.2f}% (${price:,.2f}).
-        Sentiment: {fng_value}/100. Aktuálne správy a vyhlásenia z trhu/politiky: {news_context}
-        Napíš stručný výstražný alert pre Telegram: 1. Fundamentálny/politický dôvod poklesu. 2. Pokyn (držat/predat celok alebo časť). 3. Predikcia dna a návratu rastu.
+        Napíš stručný výstražný alert pre Telegram podľa pravidiel dátovej prísnosti. 
+        1. Fundamentálny dôvod poklesu (ak nemáš dáta, uveď UNKNOWN, nehalucinuj veľryby ani inštitúcie).
+        2. Pokyn (držat/predat). Ak je R:R < 2:1 alebo chýbajú dáta, daj pokyn NO TRADE / HOLD.
+        3. Support a predikcia zotavenia.
         """
         try:
             genai.configure(api_key=GEMINI_API_KEY)
@@ -108,28 +111,48 @@ if sudden_drops:
         except Exception as e:
             print(f"Alert error: {e}")
 
-# 6. 4H ANALÝZA ZAHŔŇAJÚCA POLITICKÉ VPLYVY (TRUMP/MAKRO), AKTUÁLNE CENY A POKYNY
+# 7. HLAVNÝ KVANTITATÍVNY 4H PROMPT
 prompt = f"""
-Si špičkový krypto portfólio manažér a makroekonóm. Priprav STRUČNÚ a prehľadnú **4-hodinovú analýzu** pre Telegram. Píš vecne v bodoch.
-Cieľ: Maximalizovať zisky v bull markete, realizovať zisky na vrchoch a dokupovať na dnách. Sleduj politické vplyvy, vyhlásenia (napr. Donald Trump) a makro správy.
+ROLE: Si pokročilý AI analytik kryptomenového trhu. Tvojou úlohou nie je vytvárať optimistické predikcie, ale objektívne vyhodnocovať pravdepodobnosť rastu alebo poklesu a vytvárať obchodné rozhodnutia založené na dátach.
+Používateľ preferuje agresívnejší rastový štýl, ale nechce realizovať zbytočné straty. Horizont je krátkodobý/strednodobý trading a držanie kvalitných altcoinov v bull markete.
 
-Sentiment: {fng_value}/100 ({fng_class}) | Čerstvé správy, vyhlásenia a makro/politické pozadia:
-{news_context}
+HLAVNÉ PRAVIDLO: NIKDY nevymýšľaj dáta. Ak nemáš údaj, označ ho UNKNOWN. Nikdy nepoužívaj "inštitúcie nakupujú" alebo "whales akumulujú" bez tvrdých dát. 
 
-Dáta trhu (vrátane reálnych cien):
+DATA AS OF: {current_time}
+SENTIMENT (F&G): {fng_value}/100 ({fng_class})
+NEWS CONTEXT: {news_context}
+MARKET DATA: 
 {market_context}
 
-Požiadavky na štruktúru:
-1. **Makro & Rotácia:** 2 vety o fáze trhu, vplyve aktuálnych politických/makro vyhlásení (napr. Trump/regulácie) a kam smeruje kapitál (v nadpise použi explicitne 4H analýza).
-2. **Pre KAŽDÚ z 8 mincí (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO)** dodrž tento presný formát:
-   - **[SYMBOL] (Aktuálna cena: $X)** | Prognóza: [rast +X% / pokles -X% / range X%] (Časový horizont: napr. *najbližších 24-48 hodín*)
-     - **Fundament/Tech:** [1 stručná veta s prihliadnutím na aktuálne správy/politiku]
-     - **Exekúcia:** 
-       - Ak je pokyn **DRŽAŤ**: Uveď **DRŽAŤ 100% pozície do cieľovej ceny $X** a definuj, čo spraviť po jej dosiahnutí (napr. *PREDAŤ [Y]%* alebo držať ďalej).
-       - Ak je pokyn na predaj: Uveď **PREDAŤ [X]% na Take-Profit \(X** + následná limitka na odkúpenie na\)Y.
-       - Ak je pokyn na nákup: Uveď **DOKÚPIŤ [X]% na Limitku $Y**.
+APLIKUJ TIETO LOGICKÉ KROKY:
+1. Vyhodnoť MACRO SCORE (0-100) a BTC MARKET REGIME.
+2. ALTCOIN ROTATION: Zhodnoť kam reálne tečie kapitál z 8 sledovaných mincí (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO).
+3. SCORING MODEL (Macro 20%, BTC Regime 15%, Tech 25%, Fundament 20%, Onchain 10%, Tokenomics 5%, Sentiment 5%) pre každú mincu.
+4. CONFIDENCE SCORE (0-100%). Zníž ju, ak si indikátory odporujú alebo chýbajú dáta.
+5. SCENÁRE (Bull/Base/Bear % pravdepodobnosť).
+6. RISK/REWARD: Entry, Stop, TP1, TP2, TP3. Ak R:R < 2:1, použi príkaz NO TRADE.
+7. ANTI-HALLUCINATION CHECK: Zosúlaď matematiku. Predikcia sa musí logicky rovnať cieľovej cene. NIKDY nenavrhuj dokúpiť 20% bez dôvodu, zohľadni voľný kapitál používateľa.
 
-Začni priamo správou, dodrž stručnosť a pokry všetkých 8 mincí!
+VÝSTUP DO TELEGRAMU MUSÍ BYŤ STRUČNÝ, DÁTOVÝ A PRESNE V TOMTO FORMÁTE:
+
+📊 CRYPTO MARKET UPDATE (4H)
+🕐 Data: {current_time}
+
+🌍 MACRO Score: [XX]/100 | Bias: [BULLISH/NEUTRAL/BEARISH] | Hotovosť: [Šetriť / Nasadiť]
+₿ BTC Price: [Aktuálna cena] | Regime: [Režim] | Score: [XX]/100
+Bull: [X-X] | Base: [X-X] | Bear: [X-X]
+⚡ ROTÁCIA: [Leading sectors] | [Weak sectors]
+
+🔥 PORTFÓLIO: 8 SLEDOVANÝCH MINCÍ
+(Pre každú z mincí BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO v tomto formáte)
+
+- **[SYMBOL]** ([Cena]) — [XX]/100 | Bias: [BUY / HOLD / REDUCE / NO TRADE] | Conf: [XX]%
+  - Scenár: Bull [X%] Base [X%] Bear [X%]
+  - Exekúcia: [Presný pokyn na držanie/nákup/predaj so 100% zosúladenými cenovými hladinami s tvojou predikciou. Ak nákup, uveď ENTRY X, STOP X, TP1 X. Ak sa to neoplatí, napíš NO TRADE a len držať do X].
+  - R:R: [X:X] | Dôvod: [1 stručná dátová veta]
+
+🧠 FINAL VERDICT
+Market bias: [..] | Best opportunity: [..] | Biggest risk: [..]
 """
 
 ai_analysis = ""
@@ -145,4 +168,4 @@ if len(ai_analysis) > 4000:
     ai_analysis = ai_analysis[:3950] + "\n\n... (skrátené)"
 
 send_telegram(ai_analysis)
-print("Hotovo, 4h analýza s makro/politickým kontextom úspešne odoslaná!")
+print("Hotovo, kvantitatívna 4h analýza úspešne odoslaná!")
