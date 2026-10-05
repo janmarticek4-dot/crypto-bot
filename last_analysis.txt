@@ -1,0 +1,1 @@
+⚠️ Chyba AI pri generovaní: Unknown field for FunctionDeclaration: google_search
