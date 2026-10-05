@@ -15,157 +15,144 @@ if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
     print("CHYBA: Kľúč chýba v GitHub Secrets!")
     exit(1)
 
-# 2. Aktuálny čas
 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
 
-# 3. Stiahnutie Fear & Greed Indexu
+# 2. NAČÍTANIE PREDCHÁDZAJÚCEJ ANALÝZY (PAMÄŤ BOTA)
+memory_file = "last_analysis.txt"
+try:
+    with open(memory_file, "r", encoding="utf-8") as f:
+        previous_analysis = f.read()
+except FileNotFoundError:
+    previous_analysis = "Žiadna predchádzajúca analýza. Toto je prvý beh."
+
+# 3. GLOBÁLNE MAKRO DÁTA A FEAR & GREED
+try:
+    global_url = "https://api.coingecko.com/api/v3/global"
+    req = urllib.request.Request(global_url, headers={'User-Agent': 'Mozilla/5.0'})
+    global_data = json.loads(urllib.request.urlopen(req, timeout=10).read().decode())['data']
+    total_mcap = global_data['total_market_cap'].get('usd', 0)
+    btc_dom = global_data['market_cap_percentage'].get('btc', 0)
+    macro_context = f"Total Market Cap: ${total_mcap:,.0f} | BTC Dominance: {btc_dom:.2f}%"
+except:
+    macro_context = "Makro dáta nedostupné."
+
 try:
     fng_url = "https://api.alternative.me/fng/"
-    req = urllib.request.urlopen(fng_url, timeout=10)
-    fng_data = json.loads(req.read().decode())['data'][0]
-    fng_value = fng_data['value']
-    fng_class = fng_data['value_classification']
-except Exception as e:
-    fng_value = "UNKNOWN"
-    fng_class = "UNKNOWN"
+    fng_data = json.loads(urllib.request.urlopen(fng_url, timeout=10).read().decode())['data'][0]
+    fng_context = f"{fng_data['value']}/100 ({fng_data['value_classification']})"
+except:
+    fng_context = "UNKNOWN"
 
-# 4. Sťahovanie aktuálnych správ z trhu (RSS)
-news_context = "Žiadne overené správy."
-try:
-    rss_url = "https://cointelegraph.com/rss"
-    req = urllib.request.Request(rss_url, headers={'User-Agent': 'Mozilla/5.0'})
-    response = urllib.request.urlopen(req, timeout=10)
-    root = ET.fromstring(response.read())
-    news_items = []
-    for item in root.findall('./channel/item')[:5]:
-        title = item.find('title').text if item.find('title') is not None else ""
-        if title:
-            news_items.append(title)
-    if news_items:
-        news_context = " | ".join(news_items)
-except Exception as e:
-    print(f"Varovanie RSS: {e}")
-
-# 5. Stiahnutie reálnych dát z CoinGecko
-coins_map = {
-    "bitcoin": "BTC",
-    "ethereum": "ETH",
-    "solana": "SOL",
-    "bittensor": "TAO",
-    "fetch-ai": "FET",
-    "aave": "AAVE",
-    "render-token": "RENDER",
-    "ondo-finance": "ONDO"
-}
-
+# 4. DETAILNÉ DÁTA O MINCIACH + SPARKLINE (OHLC PROXY)
+coins_map = {"bitcoin": "BTC", "ethereum": "ETH", "solana": "SOL", "bittensor": "TAO", "fetch-ai": "FET", "aave": "AAVE", "render-token": "RENDER", "ondo-finance": "ONDO"}
 coin_ids = ",".join(coins_map.keys())
-cg_url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={coin_ids}&order=market_cap_desc"
+# Zapnutý sparkline pre históriu cien (7 dní)
+cg_url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={coin_ids}&order=market_cap_desc&price_change_percentage=24h,7d,30d&sparkline=true"
 
+crypto_summary_lines = []
 try:
     req = urllib.request.Request(cg_url, headers={'User-Agent': 'Mozilla/5.0'})
-    response = urllib.request.urlopen(req, timeout=10)
-    market_data = json.loads(response.read().decode())
+    market_data = json.loads(urllib.request.urlopen(req, timeout=15).read().decode())
+    for coin in market_data:
+        sym = coins_map.get(coin['id'], coin['symbol'].upper())
+        p = coin.get('current_price', 0)
+        c24 = coin.get('price_change_percentage_24h_in_currency', 0) or coin.get('price_change_percentage_24h', 0)
+        c7d = coin.get('price_change_percentage_7d_in_currency', 0)
+        c30d = coin.get('price_change_percentage_30d_in_currency', 0)
+        vol = coin.get('total_volume', 0)
+        ath_dist = coin.get('ath_change_percentage', 0)
+        
+        # Získanie 7-dňovej krivky (168 hodín) a jej redukcia na 4-hodinové sviečky
+        sparkline = coin.get('sparkline_in_7d', {}).get('price', [])
+        if sparkline:
+            # Vezmeme každú 4. hodnotu pre prehľadnosť
+            downsampled = sparkline[::4]
+            prices_str = ", ".join(f"{pr:.2f}" for pr in downsampled)
+            trend_data = f"Vývoj ceny (4H interval, posledných 7 dní): [{prices_str}]"
+        else:
+            trend_data = "Historické ceny nedostupné."
+            
+        crypto_summary_lines.append(
+            f"[{sym}] Cena: \({p} | 24h: {c24:+.2f}% | 7d: {c7d:+.2f}% | 30d: {c30d:+.2f}% | Vol:\){vol:,.0f} | Od ATH: {ath_dist:.1f}%\n   {trend_data}"
+        )
 except Exception as e:
-    market_data = []
-
-sudden_drops = []
-crypto_summary_lines = []
-
-for coin in market_data:
-    symbol = coins_map.get(coin['id'], coin['symbol'].upper())
-    price = coin.get('current_price', 0)
-    change_24h = coin.get('price_change_percentage_24h', 0)
-    market_cap = coin.get('market_cap', 0)
-    ath = coin.get('ath', 0)
-    
-    crypto_summary_lines.append(f"- {symbol}: \({price:,.2f} (24h: {change_24h:+.2f}%, MC:\){market_cap:,.0f}, ATH: ${ath:,.2f})")
-    
-    if change_24h < -6.0:
-        sudden_drops.append((symbol, change_24h, price))
+    print(f"CoinGecko error: {e}")
 
 market_context = "\n".join(crypto_summary_lines)
 
 def send_telegram(text):
-    telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text}).encode("utf-8")
-    try:
-        urllib.request.urlopen(telegram_url, data=payload, timeout=10)
-    except Exception as e:
-        print(f"Chyba Telegram: {e}")
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "Markdown"}).encode("utf-8")
+    try: urllib.request.urlopen(url, data=payload, timeout=10)
+    except Exception as e: print(f"TG Error: {e}")
 
-# 6. OKAMŽITÝ ALERT PRI POKLESE > 6%
-if sudden_drops:
-    for symbol, change, price in sudden_drops:
-        alert_prompt = f"""
-        Si prísny kvantitatívny AI analytik.
-        🚨 KRITICKÝ POKLES: {symbol} padol o {change:.2f}% (${price:,.2f}).
-        Napíš stručný výstražný alert pre Telegram podľa pravidiel dátovej prísnosti. 
-        1. Fundamentálny dôvod poklesu (ak nemáš dáta, uveď UNKNOWN, nehalucinuj veľryby ani inštitúcie).
-        2. Pokyn (držat/predat). Ak je R:R < 2:1 alebo chýbajú dáta, daj pokyn NO TRADE / HOLD.
-        3. Support a predikcia zotavenia.
-        """
-        try:
-            genai.configure(api_key=GEMINI_API_KEY)
-            alert_res = genai.GenerativeModel('gemini-3.8-flash').generate_content(alert_prompt)
-            send_telegram(f"🚨 **ALERT: {symbol}** 🚨\n\n{alert_res.text}")
-        except Exception as e:
-            print(f"Alert error: {e}")
-
-# 7. HLAVNÝ KVANTITATÍVNY 4H PROMPT
+# 5. MASTER PROMPT S GOOGLE SEARCH, PAMÄŤOU A PORTFÓLIOM
 prompt = f"""
-ROLE: Si pokročilý AI analytik kryptomenového trhu. Tvojou úlohou nie je vytvárať optimistické predikcie, ale objektívne vyhodnocovať pravdepodobnosť rastu alebo poklesu a vytvárať obchodné rozhodnutia založené na dátach.
-Používateľ preferuje agresívnejší rastový štýl, ale nechce realizovať zbytočné straty. Horizont je krátkodobý/strednodobý trading a držanie kvalitných altcoinov v bull markete.
+ROLE: Si špičkový AI kvantitatívny analytik. GitHub funguje len ako zberač surových dát.
+Máš explicitné povolenie použiť svoj zabudovaný Google Search na overenie dnešných správ, regulácií, on-chain udalostí (TVL, fees) a fundamentov. Nikdy si dáta nevymýšľaj. Ak nie sú, uveď DATA NOT AVAILABLE.
 
-HLAVNÉ PRAVIDLO: NIKDY nevymýšľaj dáta. Ak nemáš údaj, označ ho UNKNOWN. Nikdy nepoužívaj "inštitúcie nakupujú" alebo "whales akumulujú" bez tvrdých dát. 
+DÁTOVÝ BALÍČEK OD GITHUB (AS OF {current_time}):
+GLOBÁLNE MAKRO: {macro_context}
+FEAR & GREED: {fng_context}
 
-DATA AS OF: {current_time}
-SENTIMENT (F&G): {fng_value}/100 ({fng_class})
-NEWS CONTEXT: {news_context}
-MARKET DATA: 
+TRHOVÉ DÁTA A HISTÓRIA (Cenové pole zohľadni ako proxy pre EMA/RSI a hľadanie supportov/rezistencií):
 {market_context}
 
-APLIKUJ TIETO LOGICKÉ KROKY:
-1. Vyhodnoť MACRO SCORE (0-100) a BTC MARKET REGIME.
-2. ALTCOIN ROTATION: Zhodnoť kam reálne tečie kapitál z 8 sledovaných mincí (BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO).
-3. SCORING MODEL (Macro 20%, BTC Regime 15%, Tech 25%, Fundament 20%, Onchain 10%, Tokenomics 5%, Sentiment 5%) pre každú mincu.
-4. CONFIDENCE SCORE (0-100%). Zníž ju, ak si indikátory odporujú alebo chýbajú dáta.
-5. SCENÁRE (Bull/Base/Bear % pravdepodobnosť).
-6. RISK/REWARD: Entry, Stop, TP1, TP2, TP3. Ak R:R < 2:1, použi príkaz NO TRADE.
-7. ANTI-HALLUCINATION CHECK: Zosúlaď matematiku. Predikcia sa musí logicky rovnať cieľovej cene. NIKDY nenavrhuj dokúpiť 20% bez dôvodu, zohľadni voľný kapitál používateľa.
+PAMÄŤ BOTA (TVOJA POSLEDNÁ ANALÝZA SPRED 4 HODÍN):
+{previous_analysis}
 
-VÝSTUP DO TELEGRAMU MUSÍ BYŤ STRUČNÝ, DÁTOVÝ A PRESNE V TOMTO FORMÁTE:
+PORTFÓLIO KLIENTA:
+Klient aktuálne aktívne drží na burzách eToro a Bybit: BTC, SOL, AAVE, FET, TAO.
+Zvyšné mince (ETH, RENDER, ONDO) zatiaľ len sleduje. Zohľadni túto sektorovú koncentráciu a nepodporuj agresívne zväčšovanie pozícií bez extrémne jasného R:R.
 
-📊 CRYPTO MARKET UPDATE (4H)
-🕐 Data: {current_time}
+INŠTRUKCIE PRE EXEKÚCIU A VÝSTUP:
+1. Skontroluj svoju predošlú analýzu. Status meň, Iba ak sa štruktúra trhu alebo fundament za 4 hodiny zmenil.
+2. Statusy: NEW BUY, HOLD, WAIT, REDUCE, TAKE PROFIT, EXIT, NO TRADE.
+3. Výstup musí striktne oddeľovať Technické a Fundamentálne skóre.
 
-🌍 MACRO Score: [XX]/100 | Bias: [BULLISH/NEUTRAL/BEARISH] | Hotovosť: [Šetriť / Nasadiť]
-₿ BTC Price: [Aktuálna cena] | Regime: [Režim] | Score: [XX]/100
-Bull: [X-X] | Base: [X-X] | Bear: [X-X]
-⚡ ROTÁCIA: [Leading sectors] | [Weak sectors]
+VÝSTUP DO TELEGRAMU (Zachovaj presne tento markdown formát, buď stručný a dátový):
 
-🔥 PORTFÓLIO: 8 SLEDOVANÝCH MINCÍ
-(Pre každú z mincí BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO v tomto formáte)
+📊 **CRYPTO MARKET UPDATE (4H)**
+🕐 {current_time}
 
-- **[SYMBOL]** ([Cena]) — [XX]/100 | Bias: [BUY / HOLD / REDUCE / NO TRADE] | Conf: [XX]%
-  - Scenár: Bull [X%] Base [X%] Bear [X%]
-  - Exekúcia: [Presný pokyn na držanie/nákup/predaj so 100% zosúladenými cenovými hladinami s tvojou predikciou. Ak nákup, uveď ENTRY X, STOP X, TP1 X. Ak sa to neoplatí, napíš NO TRADE a len držať do X].
-  - R:R: [X:X] | Dôvod: [1 stručná dátová veta]
+🌍 **MAKRO & SENTIMENT**
+- Trh: [Analýza trendu podľa BTC dom. a Total Cap]
+- Fundament (Search): [Najdôležitejšie reálne správy/makro z dneška]
 
-🧠 FINAL VERDICT
-Market bias: [..] | Best opportunity: [..] | Biggest risk: [..]
+🔥 **PORTFÓLIO & WATCHLIST**
+(Rozober všetkých 8 mincí: BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO)
+
+- **[SYMBOL]** (${{Cena}}) | Bias: **[STATUS]** | Conf: [XX]%
+  - Tech Skóre: [XX/100] | Fundament Skóre: [XX/100]
+  - Analýza: [1 stručná veta kombinujúca cenovú štruktúru zo 7d poľa a fundament zo Searchu]
+  - Exekúcia: [Napr. HOLD. Ak NEW BUY, definuj Entry X, TP X, Stop X. Ak WAIT, tak dokedy/na akú cenu].
+
+🧠 **FINAL VERDICT**
+- Najlepší Risk/Reward: [Symbol]
+- Zmena oproti minulej analýze: [1 veta]
 """
 
-ai_analysis = ""
 try:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-3.8-flash')
+    # Použitie modelu PRO pre hlbšiu analytiku a zapnutie Google Search Toolu
+    model = genai.GenerativeModel(
+        model_name='gemini-1.5-pro',
+        tools=[{"google_search": {}}]
+    )
     response = model.generate_content(prompt)
     ai_analysis = response.text
 except Exception as e:
-    ai_analysis = f"⚠️ Chyba AI: {str(e)[:150]}"
+    ai_analysis = f"⚠️ Chyba AI pri generovaní: {str(e)[:150]}"
 
 if len(ai_analysis) > 4000:
     ai_analysis = ai_analysis[:3950] + "\n\n... (skrátené)"
 
 send_telegram(ai_analysis)
-print("Hotovo, kvantitatívna 4h analýza úspešne odoslaná!")
+
+# 6. ULOŽENIE AKTUÁLNEJ ANALÝZY DO PAMÄTE PRE ĎALŠÍ BEH
+try:
+    with open(memory_file, "w", encoding="utf-8") as f:
+        f.write(ai_analysis)
+    print("Analýza úspešne odoslaná a uložená do pamäte!")
+except Exception as e:
+    print(f"Chyba pri ukladaní pamäte: {e}")
