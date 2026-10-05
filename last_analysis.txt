@@ -1,1 +1,1 @@
-⚠️ Chyba AI pri generovaní: 404 models/gemini-1.5-flash-002 is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the 
+⚠️ Chyba AI pri generovaní: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see t
