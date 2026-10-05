@@ -43,10 +43,20 @@ try:
 except:
     fng_context = "UNKNOWN"
 
-# 4. DETAILNÉ DÁTA O MINCIACH + SPARKLINE (OHLC PROXY)
+# 4. RSS SPRÁVY
+news_items = []
+try:
+    rss_url = "https://cointelegraph.com/rss"
+    root = ET.fromstring(urllib.request.urlopen(urllib.request.Request(rss_url, headers={'User-Agent': 'Mozilla/5.0'}), timeout=10).read())
+    for item in root.findall('./channel/item')[:4]:
+        title = item.find('title').text
+        if title: news_items.append(title)
+except: pass
+news_context = " | ".join(news_items) if news_items else "DATA NOT AVAILABLE"
+
+# 5. DETAILNÉ DÁTA O MINCIACH + SPARKLINE
 coins_map = {"bitcoin": "BTC", "ethereum": "ETH", "solana": "SOL", "bittensor": "TAO", "fetch-ai": "FET", "aave": "AAVE", "render-token": "RENDER", "ondo-finance": "ONDO"}
 coin_ids = ",".join(coins_map.keys())
-# Zapnutý sparkline pre históriu cien (7 dní)
 cg_url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={coin_ids}&order=market_cap_desc&price_change_percentage=24h,7d,30d&sparkline=true"
 
 crypto_summary_lines = []
@@ -62,10 +72,8 @@ try:
         vol = coin.get('total_volume', 0)
         ath_dist = coin.get('ath_change_percentage', 0)
         
-        # Získanie 7-dňovej krivky (168 hodín) a jej redukcia na 4-hodinové sviečky
         sparkline = coin.get('sparkline_in_7d', {}).get('price', [])
         if sparkline:
-            # Vezmeme každú 4. hodnotu pre prehľadnosť
             downsampled = sparkline[::4]
             prices_str = ", ".join(f"{pr:.2f}" for pr in downsampled)
             trend_data = f"Vývoj ceny (4H interval, posledných 7 dní): [{prices_str}]"
@@ -82,26 +90,22 @@ market_context = "\n".join(crypto_summary_lines)
 
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    # Odstránili sme parse_mode, posielame čistý text, aby to nezlyhalo na znakoch
-    payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text}).encode("utf-8")
+    payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "Markdown"}).encode("utf-8")
     try:
         req = urllib.request.Request(url, data=payload)
         with urllib.request.urlopen(req, timeout=10) as response:
-            res_body = response.read().decode()
-            print(f"Telegram odpoveď: {res_body}")
-    except urllib.error.HTTPError as e:
-        print(f"CHYBA Telegram HTTP Error: {e.code} - {e.read().decode()}")
+            print(f"Telegram úspešne odoslaný, status: {response.status}")
     except Exception as e:
-        print(f"CHYBA Telegram General Error: {e}")
+        print(f"CHYBA Telegram: {e}")
 
-# 5. MASTER PROMPT S GOOGLE SEARCH, PAMÄŤOU A PORTFÓLIOM
+# 6. MASTER PROMPT S PAMÄŤOU A PORTFÓLIOM (BEZ GOOGLE SEARCH TOOLS)
 prompt = f"""
-ROLE: Si špičkový AI kvantitatívny analytik. GitHub funguje len ako zberač surových dát.
-Máš explicitné povolenie použiť svoj zabudovaný Google Search na overenie dnešných správ, regulácií, on-chain udalostí (TVL, fees) a fundamentov. Nikdy si dáta nevymýšľaj. Ak nie sú, uveď DATA NOT AVAILABLE.
+ROLE: Si špičkový AI kvantitatívny analytik. GitHub funguje len ako zberač surových dát. Analyzuj dáta objektívne, bez halucinácií.
 
 DÁTOVÝ BALÍČEK OD GITHUB (AS OF {current_time}):
 GLOBÁLNE MAKRO: {macro_context}
 FEAR & GREED: {fng_context}
+RSS SPRÁVY: {news_context}
 
 TRHOVÉ DÁTA A HISTÓRIA (Cenové pole zohľadni ako proxy pre EMA/RSI a hľadanie supportov/rezistencií):
 {market_context}
@@ -114,7 +118,7 @@ Klient aktuálne aktívne drží na burzách eToro a Bybit: BTC, SOL, AAVE, FET,
 Zvyšné mince (ETH, RENDER, ONDO) zatiaľ len sleduje. Zohľadni túto sektorovú koncentráciu a nepodporuj agresívne zväčšovanie pozícií bez extrémne jasného R:R.
 
 INŠTRUKCIE PRE EXEKÚCIU A VÝSTUP:
-1. Skontroluj svoju predošlú analýzu. Status meň, Iba ak sa štruktúra trhu alebo fundament za 4 hodiny zmenil.
+1. Skontroluj svoju predošlú analýzu. Status meň, Iba ak sa štruktúra trhu alebo dáta za 4 hodiny zmenili.
 2. Statusy: NEW BUY, HOLD, WAIT, REDUCE, TAKE PROFIT, EXIT, NO TRADE.
 3. Výstup musí striktne oddeľovať Technické a Fundamentálne skóre.
 
@@ -125,14 +129,14 @@ VÝSTUP DO TELEGRAMU (Zachovaj presne tento markdown formát, buď stručný a d
 
 🌍 **MAKRO & SENTIMENT**
 - Trh: [Analýza trendu podľa BTC dom. a Total Cap]
-- Fundament (Search): [Najdôležitejšie reálne správy/makro z dneška]
+- Správy: [Zhodnotenie RSS správ]
 
 🔥 **PORTFÓLIO & WATCHLIST**
 (Rozober všetkých 8 mincí: BTC, ETH, SOL, TAO, FET, AAVE, RENDER, ONDO)
 
 - **[SYMBOL]** (${{Cena}}) | Bias: **[STATUS]** | Conf: [XX]%
   - Tech Skóre: [XX/100] | Fundament Skóre: [XX/100]
-  - Analýza: [1 stručná veta kombinujúca cenovú štruktúru zo 7d poľa a fundament zo Searchu]
+  - Analýza: [1 stručná veta kombinujúca cenovú štruktúru zo 7d poľa]
   - Exekúcia: [Napr. HOLD. Ak NEW BUY, definuj Entry X, TP X, Stop X. Ak WAIT, tak dokedy/na akú cenu].
 
 🧠 **FINAL VERDICT**
@@ -142,11 +146,8 @@ VÝSTUP DO TELEGRAMU (Zachovaj presne tento markdown formát, buď stručný a d
 
 try:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Použitie modelu PRO pre hlbšiu analytiku a zapnutie Google Search Toolu
-    model = genai.GenerativeModel(
-        model_name='gemini-1.5-pro',
-        tools=[{"google_search": {}}]
-    )
+    # Čisté volanie modelu bez chybného nástroja search
+    model = genai.GenerativeModel('gemini-1.5-pro')
     response = model.generate_content(prompt)
     ai_analysis = response.text
 except Exception as e:
@@ -157,7 +158,7 @@ if len(ai_analysis) > 4000:
 
 send_telegram(ai_analysis)
 
-# 6. ULOŽENIE AKTUÁLNEJ ANALÝZY DO PAMÄTE PRE ĎALŠÍ BEH
+# 7. ULOŽENIE AKTUÁLNEJ ANALÝZY DO PAMÄTE PRE ĎALŠÍ BEH
 try:
     with open(memory_file, "w", encoding="utf-8") as f:
         f.write(ai_analysis)
