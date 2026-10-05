@@ -146,8 +146,8 @@ VÝSTUP DO TELEGRAMU (Zachovaj presne tento markdown formát, buď stručný a d
 
 try:
     genai.configure(api_key=GEMINI_API_KEY)
-    # S aktualizovanou knižnicou bude gemini-1.5-flash fungovať dokonale
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Použitie predvoleného modelu bez explicitného názvu verzie
+    model = genai.GenerativeModel()
     response = model.generate_content(prompt)
     ai_analysis = response.text
 except Exception as e:
