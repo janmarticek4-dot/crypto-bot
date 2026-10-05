@@ -82,11 +82,13 @@ market_context = "\n".join(crypto_summary_lines)
 
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "Markdown"}).encode("utf-8")
+    # Odstránili sme parse_mode, posielame čistý text, aby to nezlyhalo na znakoch
+    payload = urllib.parse.urlencode({"chat_id": TELEGRAM_CHAT_ID, "text": text}).encode("utf-8")
     try:
         req = urllib.request.Request(url, data=payload)
         with urllib.request.urlopen(req, timeout=10) as response:
-            print(f"Telegram úspešne odoslaný, HTTP status: {response.status}")
+            res_body = response.read().decode()
+            print(f"Telegram odpoveď: {res_body}")
     except urllib.error.HTTPError as e:
         print(f"CHYBA Telegram HTTP Error: {e.code} - {e.read().decode()}")
     except Exception as e:
