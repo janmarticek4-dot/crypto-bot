@@ -98,7 +98,7 @@ def send_telegram(text):
     except Exception as e:
         print(f"CHYBA Telegram: {e}")
 
-# 6. MASTER PROMPT S PAMÄŤOU A PORTFÓLIOM (BEZ GOOGLE SEARCH TOOLS)
+# 6. MASTER PROMPT S PAMÄŤOU A PORTFÓLIOM
 prompt = f"""
 ROLE: Si špičkový AI kvantitatívny analytik. GitHub funguje len ako zberač surových dát. Analyzuj dáta objektívne, bez halucinácií.
 
@@ -146,8 +146,8 @@ VÝSTUP DO TELEGRAMU (Zachovaj presne tento markdown formát, buď stručný a d
 
 try:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Čisté volanie modelu bez chybného nástroja search
-    model = genai.GenerativeModel('gemini-1.5-pro')
+    # Použitie overeného a stabilného modelu flash
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
     ai_analysis = response.text
 except Exception as e:
