@@ -1,53 +1,53 @@
 📊 **CRYPTO MARKET UPDATE (4H)**
-🕐 2026-10-06 08:08:25 UTC
+🕐 2026-10-06 12:08:37 UTC
 
 🌍 **MAKRO & SENTIMENT**
 - BTC Regime: **BULLISH**
-- Trh: Celkový trh zotrváva v bočnej konsolidácii pod lokálnymi maximami, pričom BTC dominancia mierne stúpla na 59,15 %.
-- Fear & Greed: 73/100 (Greed) – trvalý optimizmus a stabilný trhový sentiment bez náznakov extrémnej eufórie.
-- Správy: FinCEN stiahol sporné pravidlo pre krypto mixéry a inštitúcie naďalej podávajú žiadosti o bankové trust licencie v USA, čo podporuje dlhodobú regulatórnu integráciu.
+- Trh: Celkový trh konsoliduje pod lokálnymi maximami pri vysokej BTC dominancii (59,27 %) a stabilnom akumulačnom správaní inštitúcií.
+- Fear & Greed: 73/100 (Greed) – trvalý optimizmus trhu bez známok extrémnej prehriatosti.
+- Správy: Rekordné odlevy BTC z Binance v kombinácii s prílevom stablecoinov naznačujú akumuláciu veľkými hráčmi, zatiaľ čo Ondo rozširuje RWA ponuku o tokenizovanú pre-IPO AI expozíciu.
 
 🔥 **PORTFÓLIO & WATCHLIST**
 
-- **BTC** ($85,673.00) | Bias: **HOLD** | Conf: 85%
-  - Tech Skóre: 80/100 | Fundament Skóre: 88/100
-  - Analýza: Stabilná konsolidácia v rozmedzí $85,000–$86,500 udržiava býčiu štruktúru bez distribučných signálov.
-  - Exekúcia: HOLD – držať pozíciu, pre ADD vyčkať na otestovanie supportu $83,500–$84,000 alebo potvrdený prieraz nad $86,800.
+- **BTC** ($86,260.00) | Bias: **HOLD** | Conf: 85%
+  - Tech Skóre: 81/100 | Fundament Skóre: 88/100
+  - Analýza: Konsolidácia v hornej časti pásma $85,000–$86,500 potvrdzuje udržanie býčej štruktúry.
+  - Exekúcia: HOLD – držať pozíciu, pre ADD vyčkať na potvrdený prieraz nad $86,800 alebo pullback do pásma $83,500–$84,000.
 
-- **ETH** ($2,710.65) | Bias: **WAIT** | Conf: 70%
-  - Tech Skóre: 63/100 | Fundament Skóre: 78/100
-  - Analýza: Cena osciluje okolo $2,710 s nízkou relatívnou silou a bez dostatočného objemu na prelomenie odporu.
-  - Exekúcia: Wait for: potvrdený prieraz nad $2,750 s objemom alebo pullback k supportu $2,650.
+- **ETH** ($2,713.34) | Bias: **WAIT** | Conf: 69%
+  - Tech Skóre: 62/100 | Fundament Skóre: 78/100
+  - Analýza: Pretrvávajúci bočný pohyb okolo $2,710 bez relatívnej sily a objemu na prieraz rezistencie.
+  - Exekúcia: Wait for: potvrdený prieraz nad $2,750 s objemom alebo retest supportu na $2,650.
 
 - **SOL** ($120.32) | Bias: **HOLD** | Conf: 78%
-  - Tech Skóre: 74/100 | Fundament Skóre: 82/100
-  - Analýza: Udržanie psychologickej podpory $120 potvrdzuje zdravú konsolidáciu v rámci strednodobého rastu.
-  - Exekúcia: HOLD – zachovať existujúcu pozíciu, nedokupovať pred čistým prekonaním rezistencie $123.00.
+  - Tech Skóre: 74/100 | Fundament Skóre: 83/100
+  - Analýza: Stabilné udržiavanie úrovne $120 spolu s technologickým pokrokom v rýchlosti vysporiadania podporujú zdravú štruktúru.
+  - Exekúcia: HOLD – zachovať existujúcu pozíciu, nevstupovať do nových nákupov pred prekonaním $123.00.
 
-- **TAO** ($304.07) | Bias: **HOLD** | Conf: 75%
-  - Tech Skóre: 72/100 | Fundament Skóre: 79/100
-  - Analýza: Odraz a udržanie nad kľúčovou hladinou $300 potvrdzujú stabilitu lokálneho supportu.
-  - Exekúcia: HOLD – držať pozíciu nad úrovňou $300, pre prípadný ADD vyčkať na prerazenie a uzatvorenie nad $315.00.
+- **TAO** ($303.45) | Bias: **HOLD** | Conf: 75%
+  - Tech Skóre: 71/100 | Fundament Skóre: 79/100
+  - Analýza: Hladina $300 naďalej slúži ako pevný lokálny support napriek krátkodobému poklesu hybnosti.
+  - Exekúcia: HOLD – držať pozíciu nad $300, pre prípadný ADD vyčkať na uzatvorenie nad $315.00.
 
-- **FET** ($0.2521) | Bias: **HOLD** | Conf: 73%
-  - Tech Skóre: 75/100 | Fundament Skóre: 72/100
-  - Analýza: Krátkodobý pullback po masívnom mesačnom raste (+52 %) nachádza podporu v okolí $0.250.
-  - Exekúcia: HOLD – držať existujúcu pozíciu so stop-lossom ukotveným pod úrovňou $0.228 na ochranu ziskov.
+- **FET** ($0.2491) | Bias: **HOLD** | Conf: 72%
+  - Tech Skóre: 73/100 | Fundament Skóre: 72/100
+  - Analýza: Prebieha zdravý pullback po mesačnom zisku (+45 %), pričom supportná zóna $0.245–$0.250 zatiaľ drží.
+  - Exekúcia: HOLD – držať existujúcu pozíciu s ochranným stop-lossom pod $0.228.
 
-- **AAVE** ($180.64) | Bias: **HOLD** | Conf: 83%
-  - Tech Skóre: 85/100 | Fundament Skóre: 84/100
-  - Analýza: Pretrvávajúca vysoká relatívna sila voči sektoru DeFi udržiava cenu blízko lokálneho vrcholu.
-  - Exekúcia: HOLD – nevstupovať na lokálnych maximách, pri priblížení k pásmu $195–$200 realizovať čiastočný Take Profit.
+- **AAVE** ($182.60) | Bias: **HOLD** | Conf: 83%
+  - Tech Skóre: 84/100 | Fundament Skóre: 84/100
+  - Analýza: Silné relatívne momentum voči trhu drží cenu stabilne nad $180 bez distribučného tlaku.
+  - Exekúcia: HOLD – nedokupovať na lokálnych maximách, pri priblížení k pásmu $195–$200 realizovať čiastočný Take Profit.
 
-- **RENDER** ($2.10) | Bias: **WAIT** | Conf: 69%
-  - Tech Skóre: 75/100 | Fundament Skóre: 74/100
-  - Analýza: Testovanie rezistencie $2.10 prináša pozitívne momentum, avšak vstup priamo do rezistencie neponúka asymetrický R:R.
-  - Exekúcia: Wait for: potvrdené prerazenie a retest nad $2.15 alebo pullback do nákupnej zóny $1.95–$1.98.
+- **RENDER** ($2.15) | Bias: **WAIT** | Conf: 71%
+  - Tech Skóre: 78/100 | Fundament Skóre: 74/100
+  - Analýza: Silný 24h rast (+7,8 %) posunul cenu priamo na úroveň kľúčovej rezistencie $2.15, kde chýba výhodný R:R pre okamžitý vstup.
+  - Exekúcia: Wait for: potvrdené prerazenie a úspešný retest hladiny $2.15 ako nového supportu alebo pullback k $1.98.
 
-- **ONDO** ($0.4927) | Bias: **WAIT** | Conf: 65%
-  - Tech Skóre: 60/100 | Fundament Skóre: 76/100
-  - Analýza: Slabé nákupné momentum pod hladinou $0.50 naďalej vytvára riziko ďalšieho otestovania nižších supportov.
-  - Exekúcia: Wait for: návrat a udržanie nad hladinou $0.515 alebo stabilizáciu na supporte $0.465.
+- **ONDO** ($0.4995) | Bias: **WAIT** | Conf: 67%
+  - Tech Skóre: 61/100 | Fundament Skóre: 78/100
+  - Analýza: Pozitívny fundament ohľadom pre-IPO AI expozície zatiaľ nevyvolal technické prelomenie bariéry $0.505.
+  - Exekúcia: Wait for: prerazenie a udržanie nad $0.515 alebo odraz z hlbšieho supportu na $0.465.
 
 🧠 **FINAL VERDICT**
 
