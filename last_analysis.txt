@@ -1,57 +1,57 @@
 📊 **CRYPTO MARKET UPDATE (4H)**
-🕐 2026-10-05 22:07:11 UTC
+🕐 2026-10-06 00:08:51 UTC
 
 🌍 **MAKRO & SENTIMENT**
 - BTC Regime: **BULLISH**
-- Trh: Trh konsoliduje na lokálnych maximách pri vysokej dominancii BTC (58,69 %), pričom tlak 5 % výnosov na US štátnych dlhopisoch spomaľuje okamžitý prieraz nahor.
-- Fear & Greed: 70/100 (Greed) – trh odráža zdravý optimizmus bez známok prehriatia či extrémnej eufórie.
-- Správy: FinCEN stiahol reštriktívne pravidlá zamerané na krypto mixéry a unhosted peňaženky, čo podporuje odvetvie; rastúce výnosy dlhopisov (5 %+) však naďalej zvyšujú náklady na držanie rizikových aktív.
+- Trh: Trh naďalej konsoliduje blízko lokálnych maxím s pevnou dominanciou BTC (58,68 %) a miernym vyberaním ziskov pri stabilnom objeme.
+- Fear & Greed: 73/100 (Greed) – pretrvávajúci zvýšený optimizmus bez extrémnej eufórie.
+- Správy: FinCEN stiahol sporné reštrikcie na krypto mixéry a inštitúcie expandujú do Digital Asset custody, no tlak výnosov US dlhopisov (5 %) limituje bezprostredný breakout.
 
 🔥 **PORTFÓLIO & WATCHLIST**
 
-- **BTC** ($85,952.00) | Bias: **HOLD** | Conf: 85%
-  - Tech Skóre: 82/100 | Fundament Skóre: 88/100
-  - Analýza: Konsolidácia v hornej časti týždenného pásma tesne pod rezistenciou $86,500 s pevným supportom na $84,500.
-  - Exekúcia: HOLD – držať pozíciu, pre nový vstup/ADD čakať na otestovanie supportu $83,500–$84,000.
+- **BTC** ($85,766.00) | Bias: **HOLD** | Conf: 85%
+  - Tech Skóre: 81/100 | Fundament Skóre: 88/100
+  - Analýza: Pokračujúca zdravá konsolidácia v rozpätí $85,000–$86,500 po silnom týždňovom raste.
+  - Exekúcia: HOLD – držať pozíciu, pre ADD vyčkať na retest supportu $83,500–$84,000 alebo potvrdený prieraz nad $86,800.
 
-- **ETH** ($2,719.47) | Bias: **WAIT** | Conf: 70%
-  - Tech Skóre: 64/100 | Fundament Skóre: 78/100
-  - Analýza: Pomalý pohyb v úzkom pásme bez výrazného nákupného objemu a pokračujúca relatívna slabosť voči BTC.
-  - Exekúcia: Wait for: $2,750 (potvrdený breakout s objemom) alebo návrat k supportu na $2,650.
+- **ETH** ($2,711.51) | Bias: **WAIT** | Conf: 70%
+  - Tech Skóre: 63/100 | Fundament Skóre: 78/100
+  - Analýza: Pomalý bočný pohyb bez expanzie objemu a pretrvávajúca slabosť v krížovom kurze voči BTC.
+  - Exekúcia: Wait for: potvrdený breakout nad $2,750 s objemom alebo zľavu na supporte $2,650.
 
-- **SOL** ($121.35) | Bias: **HOLD** | Conf: 80%
-  - Tech Skóre: 76/100 | Fundament Skóre: 82/100
-  - Analýza: Stabilné udržanie úrovne nad $120 po 17 % mesačnom raste, s rezistenciou okolo $123.
-  - Exekúcia: HOLD – pozícia je stabilná, nedokupovať pred čistým prierazom rezistencie $123.00.
+- **SOL** ($120.79) | Bias: **HOLD** | Conf: 79%
+  - Tech Skóre: 75/100 | Fundament Skóre: 82/100
+  - Analýza: Držanie kľúčovej psychologickej úrovne $120 v rámci strednodobej rastovej štruktúry (+16,8 % za 30 dní).
+  - Exekúcia: HOLD – držať stabilnú pozíciu, nevstupovať do nového dokupu pred prerazením pásma $123.00.
 
-- **TAO** ($307.92) | Bias: **HOLD** | Conf: 75%
-  - Tech Skóre: 74/100 | Fundament Skóre: 79/100
-  - Analýza: Úspešná obrana lokálneho supportu $290–$295 potvrdzuje pokračovanie strednodobého rastového trendu.
-  - Exekúcia: HOLD – držať otvorenú pozíciu, na prípadný ADD vyčkať na prekonanie hladiny $315.00.
+- **TAO** ($305.93) | Bias: **HOLD** | Conf: 75%
+  - Tech Skóre: 73/100 | Fundament Skóre: 79/100
+  - Analýza: Konsolidácia nad supportom $300 potvrdzuje odraz z lokálneho dna a udržiava býčiu štruktúru.
+  - Exekúcia: HOLD – ponechať existujúcu pozíciu, pre ADD čakať na čisté prekonanie rezistencie $315.00.
 
-- **FET** ($0.2543) | Bias: **HOLD** | Conf: 75%
-  - Tech Skóre: 78/100 | Fundament Skóre: 72/100
-  - Analýza: Silný 30-dňový nárast (+54 %) sa dočasne zastavil pri rezistencii $0.265, kde prebieha vyberanie ziskov.
-  - Exekúcia: HOLD – držať existujúcu pozíciu so ziskovým stop-lossom posunutým pod $0.228.
+- **FET** ($0.2545) | Bias: **HOLD** | Conf: 74%
+  - Tech Skóre: 77/100 | Fundament Skóre: 72/100
+  - Analýza: Vyberanie ziskov po silnom mesačnom vzostupe (+53,6 %) našlo stabilitu na lokálnom supporte $0.250.
+  - Exekúcia: HOLD – držať pozíciu so ziskovým stop-lossom ukotveným pod hladinou $0.228.
 
-- **AAVE** ($184.18) | Bias: **HOLD** | Conf: 83%
-  - Tech Skóre: 86/100 | Fundament Skóre: 84/100
-  - Analýza: Najvyššia relatívna sila v portfóliu podporená sektorovým fundamentom v krypto lendingu, cena atakuje lokálne maximá.
-  - Exekúcia: HOLD – držať pozíciu bez unáhlených dokupov na vrchole, čiastočný Take Profit zvážiť v pásme $195–$200.
+- **AAVE** ($184.94) | Bias: **HOLD** | Conf: 83%
+  - Tech Skóre: 87/100 | Fundament Skóre: 84/100
+  - Analýza: Pokračujúca sektorová dominancia v DeFi lendingu a stabilný rast (+25 % za 7 dní) na lokálnych maximách.
+  - Exekúcia: HOLD – nedokupovať na lokálnom vrchole, pri dosiahnutí zóny $195–$200 realizovať čiastočný Take Profit.
 
-- **RENDER** ($2.10) | Bias: **WAIT** | Conf: 68%
-  - Tech Skóre: 75/100 | Fundament Skóre: 74/100
-  - Analýza: Prudký 24h rast o +6 % narazil priamo do rezistenčného pásma $2.10–$2.15, kde je aktuálny R:R nepriaznivý.
-  - Exekúcia: Wait for: pullback a potvrdenie supportu na úrovni $1.95–$1.98.
+- **RENDER** ($2.06) | Bias: **WAIT** | Conf: 68%
+  - Tech Skóre: 74/100 | Fundament Skóre: 74/100
+  - Analýza: Mierny pullback z rezistencie $2.10, kde trh zatiaľ neponúka asymetrický vstupný pomer.
+  - Exekúcia: Wait for: otestovanie a potvrdenie podpory v zóne $1.95–$1.98.
 
-- **ONDO** ($0.4998) | Bias: **WAIT** | Conf: 65%
-  - Tech Skóre: 62/100 | Fundament Skóre: 76/100
-  - Analýza: Krátkodobá slabosť a strata dynamiky okolo psychologickej hranice $0.50 (-3,5 % za 7 dní).
-  - Exekúcia: Wait for: potvrdené znovuzískanie úrovne $0.515 alebo otestovanie silnejšieho supportu na $0.465.
+- **ONDO** ($0.4985) | Bias: **WAIT** | Conf: 65%
+  - Tech Skóre: 61/100 | Fundament Skóre: 76/100
+  - Analýza: Pokles pod hladinu $0.50 poukazuje na krátkodobú absenciu nákupného momenta v RWA segmente.
+  - Exekúcia: Wait for: opätovné získanie a udržanie úrovne $0.515 alebo pullback k supportu na $0.465.
 
 🧠 **FINAL VERDICT**
 
 - Najlepší Risk/Reward: **AAVE**
 - Najslabší setup: **ONDO**
 - BTC režim: **BULLISH**
-- Zmena oproti minulej analýze: Minulá analýza nebola dostupná z dôvodu výpadku dát; trh sa nachádza v silnej konsolidácii tesne pod rezistenciami.
+- Zmena oproti minulej analýze: Bez významnej zmeny – trhová štruktúra zostáva rovnaká.
