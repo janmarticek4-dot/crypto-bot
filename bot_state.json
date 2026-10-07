@@ -3,5 +3,133 @@
   "safety_updated_utc": "2026-10-07T12:14:27.806941+00:00",
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
-  "main_analysis_slot": "MANUAL"
+  "main_analysis_slot": "MANUAL",
+  "last_run": "2026-10-07T22:25:52.040169+02:00",
+  "market_safety": {
+    "state": "WARNING",
+    "score": 3,
+    "reasons": [
+      "celková kapitalizácia prudko klesá",
+      "BTC klesá"
+    ]
+  },
+  "fear_greed": {
+    "value": 71,
+    "classification": "Greed",
+    "timestamp": "1791331200"
+  },
+  "last_analysis": {
+    "market_regime": "corrective",
+    "market_summary": "The broader crypto market is undergoing a sharp short-term correction (-5.23% in 24h) triggered by macro tensions and a Bitcoin pullback toward $82.7K. Despite greed sentiment (71), short-term market safety is on WARNING. The medium-term cycle toward April 2027 remains intact as key assets hold above 4H EMA200 baselines, favoring patient accumulation on deep pullbacks rather than aggressive immediate buying.",
+    "action": "DEFENSIVE ACCUMULATION",
+    "new_coin": "NO TRADE",
+    "new_coin_action": "NO TRADE",
+    "new_coin_reason": "Market safety is on WARNING with BTC declining and global capitalization falling sharply. NEAR is overextended after a +135% 30-day run, UNISWAP has broken below its 4H EMA200, and HYPERLIQUID is still searching for support. In line with the mandate that a missed trade is better than a bad trade, no new positions are justified.",
+    "coins": [
+      {
+        "symbol": "AAVE",
+        "action": "BUY PULLBACK",
+        "current_price": 173.64,
+        "buy_zone_1": "164.00 - 168.00",
+        "buy_zone_2": "150.00 - 155.00",
+        "invalidation": "142.00",
+        "tp1": "205.00",
+        "tp2": "240.00",
+        "risk_reward": "3.2:1",
+        "bull_probability": 65.0,
+        "bear_probability": 35.0,
+        "technical_score": 6.8,
+        "fundamental_score": 8.5,
+        "reason": "Maintaining resilience above the 4H EMA50 ($173.43) and well above EMA200 ($150.32). DeFi liquidity fundamentals remain top-tier, making pullbacks near the 4H EMA100 solid risk-reward entries."
+      },
+      {
+        "symbol": "TAO",
+        "action": "HOLD",
+        "current_price": 289.44,
+        "buy_zone_1": "275.00 - 280.00",
+        "buy_zone_2": "250.00 - 260.00",
+        "invalidation": "238.00",
+        "tp1": "340.00",
+        "tp2": "420.00",
+        "risk_reward": "2.8:1",
+        "bull_probability": 60.0,
+        "bear_probability": 40.0,
+        "technical_score": 5.2,
+        "fundamental_score": 8.0,
+        "reason": "Price has dipped below 4H EMA20 and EMA50, losing short-term momentum (RSI 40.7). Crucial support sits at the 4H EMA200 ($277.78). Hold existing exposure and wait for stabilization before adding."
+      },
+      {
+        "symbol": "FET",
+        "action": "HOLD",
+        "current_price": 0.2293,
+        "buy_zone_1": "0.218 - 0.224",
+        "buy_zone_2": "0.202 - 0.208",
+        "invalidation": "0.190",
+        "tp1": "0.285",
+        "tp2": "0.350",
+        "risk_reward": "2.9:1",
+        "bull_probability": 58.0,
+        "bear_probability": 42.0,
+        "technical_score": 5.4,
+        "fundamental_score": 7.2,
+        "reason": "Short-term momentum is negative with MACD histogram expanding lower, though price still sits safely above the 4H EMA100 ($0.224) and EMA200 ($0.206). Hold existing allocation and avoid chasing."
+      },
+      {
+        "symbol": "SOL",
+        "action": "BUY PULLBACK",
+        "current_price": 116.26,
+        "buy_zone_1": "111.50 - 113.50",
+        "buy_zone_2": "102.00 - 106.00",
+        "invalidation": "98.00",
+        "tp1": "138.00",
+        "tp2": "165.00",
+        "risk_reward": "3.5:1",
+        "bull_probability": 68.0,
+        "bear_probability": 32.0,
+        "technical_score": 6.0,
+        "fundamental_score": 8.8,
+        "reason": "4H RSI is approaching oversold territory at 35.8. SOL is testing support above its 4H EMA200 ($111.80), offering a high-probability asymmetric long setup targeting continuation toward mid-2027."
+      },
+      {
+        "symbol": "ONDO",
+        "action": "HOLD",
+        "current_price": 0.4728,
+        "buy_zone_1": "0.445 - 0.455",
+        "buy_zone_2": "0.410 - 0.425",
+        "invalidation": "0.390",
+        "tp1": "0.580",
+        "tp2": "0.720",
+        "risk_reward": "2.7:1",
+        "bull_probability": 62.0,
+        "bear_probability": 38.0,
+        "technical_score": 5.5,
+        "fundamental_score": 8.3,
+        "reason": "Consolidating near 4H EMA100 ($0.479) after rejection at EMA50. Strong institutional narrative around tokenized RWAs supports hold status, but new capital should wait for a test of the 4H EMA200 ($0.448)."
+      },
+      {
+        "symbol": "RENDER",
+        "action": "HOLD",
+        "current_price": 2.03,
+        "buy_zone_1": "1.88 - 1.94",
+        "buy_zone_2": "1.74 - 1.80",
+        "invalidation": "1.65",
+        "tp1": "2.45",
+        "tp2": "3.10",
+        "risk_reward": "3.1:1",
+        "bull_probability": 64.0,
+        "bear_probability": 36.0,
+        "technical_score": 6.5,
+        "fundamental_score": 7.8,
+        "reason": "Showing relative strength during market decline by sustaining price above the 4H EMA50 ($1.99) and 4H EMA100 ($1.91). RSI is neutral at 49.6. Hold current allocation."
+      }
+    ],
+    "best_opportunity": "SOL limit accumulation near $111.80 - $113.50 (confluence of 4H EMA200 support and oversold RSI conditions).",
+    "avoid": "Chasing overextended assets (NEAR) or catching falling knives breaking long-term EMAs (UNISWAP). Additional APT exposure is completely excluded.",
+    "conditions_to_watch": [
+      "Bitcoin stabilization and reclaim of $84,500 following geopolitical volatility",
+      "Market safety indicator shifting from WARNING back to NEUTRAL/SAFE",
+      "BTC dominance behavior to assess whether altcoin liquidity bleed is abating",
+      "Reaction of core assets (SOL, TAO) at their respective 4H EMA200 structural supports"
+    ]
+  }
 }
