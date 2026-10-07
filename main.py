@@ -1,578 +1,1226 @@
 import os
 import json
+import math
 import time
 import urllib.request
 import urllib.parse
-import urllib.error
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-
-
-# ============================================================
-# CRYPTO AI BOT V2
-# GitHub = zber dát
-# Gemini = analytický mozog
-# Telegram = výstup
-# ============================================================
-
+from zoneinfo import ZoneInfo
 
 # ============================================================
-# 1. KONFIGURÁCIA
+# CRYPTO AI BOT V4
+# Gemini 3.8 Flash + Google Search + Structured JSON
+#
+# RUN_MODE:
+#   analysis = 3x daily main analysis
+#   safety   = safety monitor / emergency alert
 # ============================================================
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "")
 
-# Aktuálny model podľa Gemini API dokumentácie
 GEMINI_MODEL = "gemini-3.8-flash"
 
-MEMORY_FILE = "last_analysis.txt"
+RUN_MODE = os.getenv("RUN_MODE", "analysis").lower()
 
-# CoinGecko mince
-COINS = {
+STATE_FILE = "bot_state.json"
+
+LOCAL_TZ = ZoneInfo("Europe/Bratislava")
+
+# ------------------------------------------------------------
+# PORTFOLIO
+# ------------------------------------------------------------
+
+HELD_COINS = {
+    "aave": {
+        "symbol": "AAVE",
+        "name": "Aave",
+    },
+    "bittensor": {
+        "symbol": "TAO",
+        "name": "Bittensor",
+    },
+    "fetch-ai": {
+        "symbol": "FET",
+        "name": "Artificial Superintelligence Alliance",
+    },
+    "solana": {
+        "symbol": "SOL",
+        "name": "Solana",
+    },
+    "ondo-finance": {
+        "symbol": "ONDO",
+        "name": "Ondo",
+    },
+    "render-token": {
+        "symbol": "RENDER",
+        "name": "Render",
+    },
+}
+
+# BTC + ETH are market-regime references.
+MARKET_CONTEXT = {
     "bitcoin": "BTC",
     "ethereum": "ETH",
-    "solana": "SOL",
-    "bittensor": "TAO",
-    "fetch-ai": "FET",
-    "aave": "AAVE",
-    "render-token": "RENDER",
-    "ondo-finance": "ONDO"
 }
 
-# Reálne držané pozície
-HELD_COINS = {
-    "BTC",
-    "SOL",
-    "AAVE",
-    "FET",
-    "TAO"
-}
+ALL_TRACKED_IDS = list(HELD_COINS.keys()) + list(MARKET_CONTEXT.keys())
 
-# Watchlist
-WATCHLIST_COINS = {
-    "ETH",
-    "RENDER",
-    "ONDO"
-}
+# ------------------------------------------------------------
+# HTTP
+# ------------------------------------------------------------
 
+def http_get(url, headers=None, timeout=30):
+    headers = headers or {}
 
-# ============================================================
-# 2. ZÁKLADNÉ KONTROLY
-# ============================================================
-
-if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or not GEMINI_API_KEY:
-    print("CHYBA: Chýba TELEGRAM_TOKEN, TELEGRAM_CHAT_ID alebo GEMINI_API_KEY v GitHub Secrets.")
-    exit(1)
-
-
-# Explicitný UTC čas
-current_time = datetime.now(timezone.utc)
-current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S UTC")
-
-
-# ============================================================
-# 3. HTTP HELPER
-# ============================================================
-
-def http_get(url, timeout=15, retries=3):
-    """
-    GET request s retry logikou.
-    """
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "CryptoAI-Bot/4.0",
+            **headers,
+        },
+    )
 
     last_error = None
 
-    for attempt in range(retries):
+    for attempt in range(4):
         try:
-            req = urllib.request.Request(
-                url,
-                headers={
-                    "User-Agent": "Crypto-AI-Bot-V2/1.0",
-                    "Accept": "application/json, application/xml, text/xml, */*"
-                }
-            )
-
             with urllib.request.urlopen(req, timeout=timeout) as response:
-                return response.read()
-
-        except urllib.error.HTTPError as e:
-            last_error = e
-
-            # Rate limit / server errors
-            if e.code in [429, 500, 502, 503, 504]:
-                wait_time = 2 ** attempt
-                print(f"HTTP {e.code}. Retry za {wait_time}s...")
-                time.sleep(wait_time)
-                continue
-
-            raise
+                return json.loads(response.read().decode("utf-8"))
 
         except Exception as e:
             last_error = e
 
-            if attempt < retries - 1:
-                wait_time = 2 ** attempt
-                print(f"HTTP chyba: {e}. Retry za {wait_time}s...")
-                time.sleep(wait_time)
+            if attempt < 3:
+                time.sleep(2 ** attempt)
 
     raise last_error
 
 
-# ============================================================
-# 4. NAČÍTANIE PREDCHÁDZAJÚCEJ ANALÝZY
-# ============================================================
+def http_post_json(url, payload, headers=None, timeout=90):
+    headers = headers or {}
 
-try:
-    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-        previous_analysis = f.read().strip()
+    body = json.dumps(payload).encode("utf-8")
 
-    if not previous_analysis:
-        previous_analysis = "Žiadna použiteľná predchádzajúca analýza."
-
-except FileNotFoundError:
-    previous_analysis = "Žiadna predchádzajúca analýza. Toto je prvý beh."
-
-except Exception as e:
-    previous_analysis = f"Pamäť nedostupná: {e}"
-
-
-# Ochrana proti nekonečne veľkej pamäti
-MAX_MEMORY_CHARS = 12000
-
-if len(previous_analysis) > MAX_MEMORY_CHARS:
-    previous_analysis = previous_analysis[-MAX_MEMORY_CHARS:]
-
-
-# ============================================================
-# 5. COINGECKO – GLOBAL MARKET
-# ============================================================
-
-macro_context = "Makro dáta nedostupné."
-
-try:
-
-    global_url = "https://api.coingecko.com/api/v3/global"
-
-    global_raw = http_get(global_url, timeout=15)
-    global_data = json.loads(global_raw.decode("utf-8"))["data"]
-
-    total_mcap = global_data.get("total_market_cap", {}).get("usd", 0)
-    btc_dom = global_data.get("market_cap_percentage", {}).get("btc", 0)
-
-    mcap_change_24h = global_data.get(
-        "market_cap_change_percentage_24h_usd",
-        0
+    req = urllib.request.Request(
+        url,
+        data=body,
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "CryptoAI-Bot/4.0",
+            **headers,
+        },
     )
 
-    active_cryptos = global_data.get("active_cryptocurrencies", 0)
+    last_error = None
 
-    macro_context = (
-        f"Total Market Cap: ${total_mcap:,.0f} | "
-        f"BTC Dominance: {btc_dom:.2f}% | "
-        f"Market Cap 24H: {mcap_change_24h:+.2f}% | "
-        f"Active Cryptos: {active_cryptos:,}"
-    )
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                return json.loads(response.read().decode("utf-8"))
 
-except Exception as e:
-    print(f"CoinGecko Global error: {e}")
+        except Exception as e:
+            last_error = e
 
+            if attempt < 2:
+                time.sleep(3 * (attempt + 1))
 
-# ============================================================
-# 6. FEAR & GREED
-# ============================================================
-
-fng_context = "UNKNOWN"
-
-try:
-
-    fng_url = "https://api.alternative.me/fng/"
-
-    fng_raw = http_get(fng_url, timeout=15)
-    fng_data = json.loads(fng_raw.decode("utf-8"))["data"][0]
-
-    fng_value = fng_data.get("value", "UNKNOWN")
-    fng_classification = fng_data.get(
-        "value_classification",
-        "UNKNOWN"
-    )
-
-    fng_context = (
-        f"{fng_value}/100 ({fng_classification})"
-    )
-
-except Exception as e:
-    print(f"Fear & Greed error: {e}")
+    raise last_error
 
 
-# ============================================================
-# 7. RSS SPRÁVY
-# ============================================================
+# ------------------------------------------------------------
+# COINGECKO
+# ------------------------------------------------------------
 
-news_items = []
+def cg_headers():
+    if COINGECKO_API_KEY:
+        return {
+            "x-cg-demo-api-key": COINGECKO_API_KEY
+        }
 
-try:
+    return {}
 
-    rss_url = "https://cointelegraph.com/rss"
 
-    rss_raw = http_get(rss_url, timeout=15)
+def cg_get(path, params=None):
+    base = "https://api.coingecko.com/api/v3"
 
-    root = ET.fromstring(rss_raw)
+    params = params or {}
 
-    items = root.findall("./channel/item")
+    url = base + path
 
-    for item in items[:12]:
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
 
-        title_element = item.find("title")
-        date_element = item.find("pubDate")
-        link_element = item.find("link")
+    return http_get(url, headers=cg_headers())
 
-        title = (
-            title_element.text.strip()
-            if title_element is not None and title_element.text
-            else ""
+
+# ------------------------------------------------------------
+# TECHNICAL INDICATORS
+# ------------------------------------------------------------
+
+def ema(values, period):
+    if len(values) < period:
+        return None
+
+    multiplier = 2 / (period + 1)
+
+    result = sum(values[:period]) / period
+
+    for price in values[period:]:
+        result = (price - result) * multiplier + result
+
+    return result
+
+
+def rsi(values, period=14):
+    if len(values) < period + 1:
+        return None
+
+    gains = []
+    losses = []
+
+    for i in range(1, len(values)):
+        change = values[i] - values[i - 1]
+
+        gains.append(max(change, 0))
+        losses.append(max(-change, 0))
+
+    avg_gain = sum(gains[:period]) / period
+    avg_loss = sum(losses[:period]) / period
+
+    for i in range(period, len(gains)):
+        avg_gain = ((avg_gain * (period - 1)) + gains[i]) / period
+        avg_loss = ((avg_loss * (period - 1)) + losses[i]) / period
+
+    if avg_loss == 0:
+        return 100
+
+    rs = avg_gain / avg_loss
+
+    return 100 - (100 / (1 + rs))
+
+
+def macd(values):
+    if len(values) < 35:
+        return None, None, None
+
+    ema12_values = []
+
+    multiplier12 = 2 / 13
+    current12 = sum(values[:12]) / 12
+
+    for price in values[12:]:
+        current12 = (price - current12) * multiplier12 + current12
+        ema12_values.append(current12)
+
+    ema26_values = []
+
+    multiplier26 = 2 / 27
+    current26 = sum(values[:26]) / 26
+
+    for price in values[26:]:
+        current26 = (price - current26) * multiplier26 + current26
+        ema26_values.append(current26)
+
+    # Align approximately by using the later series.
+    min_len = min(len(ema12_values), len(ema26_values))
+
+    macd_values = []
+
+    for i in range(min_len):
+        macd_values.append(
+            ema12_values[-min_len + i] -
+            ema26_values[-min_len + i]
         )
 
-        pub_date = (
-            date_element.text.strip()
-            if date_element is not None and date_element.text
-            else "unknown time"
+    if len(macd_values) < 9:
+        return None, None, None
+
+    signal = ema(macd_values, 9)
+
+    if signal is None:
+        return None, None, None
+
+    current_macd = macd_values[-1]
+
+    return current_macd, signal, current_macd - signal
+
+
+def atr(highs, lows, closes, period=14):
+    if len(closes) < period + 1:
+        return None
+
+    true_ranges = []
+
+    for i in range(1, len(closes)):
+        tr = max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i - 1]),
+            abs(lows[i] - closes[i - 1]),
         )
 
-        link = (
-            link_element.text.strip()
-            if link_element is not None and link_element.text
-            else ""
-        )
+        true_ranges.append(tr)
 
-        if title:
-            news_items.append(
-                f"- {title} | {pub_date} | {link}"
+    return sum(true_ranges[-period:]) / period
+
+
+def safe_round(value, decimals=4):
+    if value is None:
+        return None
+
+    return round(value, decimals)
+
+
+# ------------------------------------------------------------
+# MARKET CHART / VOLUME
+# ------------------------------------------------------------
+
+def get_market_chart(coin_id, days=30):
+    return cg_get(
+        f"/coins/{coin_id}/market_chart",
+        {
+            "vs_currency": "usd",
+            "days": days,
+        },
+    )
+
+
+def extract_series(chart):
+    prices = [
+        float(x[1])
+        for x in chart.get("prices", [])
+    ]
+
+    volumes = [
+        float(x[1])
+        for x in chart.get("total_volumes", [])
+    ]
+
+    return prices, volumes
+
+
+def calculate_volume_pressure(prices, volumes):
+    """
+    This is NOT true buy/sell volume.
+    It is a sell-pressure proxy based on:
+      price direction
+      volume expansion
+      recent volume vs baseline
+    """
+
+    if len(prices) < 8 or len(volumes) < 8:
+        return {
+            "label": "UNKNOWN",
+            "score": 0,
+            "volume_change_pct": None,
+            "price_change_pct": None,
+        }
+
+    current_price = prices[-1]
+    previous_price = prices[-2]
+
+    price_change = (
+        (current_price / previous_price) - 1
+    ) * 100
+
+    recent_volumes = volumes[-6:-1]
+
+    if not recent_volumes:
+        return {
+            "label": "UNKNOWN",
+            "score": 0,
+            "volume_change_pct": None,
+            "price_change_pct": price_change,
+        }
+
+    baseline_volume = sum(recent_volumes) / len(recent_volumes)
+
+    current_volume = volumes[-1]
+
+    if baseline_volume <= 0:
+        volume_change = 0
+    else:
+        volume_change = (
+            (current_volume / baseline_volume) - 1
+        ) * 100
+
+    score = 0
+    label = "NEUTRAL"
+
+    # Strong price decline + volume expansion
+    if price_change <= -3 and volume_change >= 50:
+        score = 90
+        label = "VERY_HIGH_SELL_PRESSURE"
+
+    elif price_change <= -2 and volume_change >= 30:
+        score = 75
+        label = "HIGH_SELL_PRESSURE"
+
+    elif price_change <= -1 and volume_change >= 20:
+        score = 60
+        label = "ELEVATED_SELL_PRESSURE"
+
+    elif price_change >= 2 and volume_change >= 50:
+        score = -75
+        label = "STRONG_BUYING_PRESSURE_PROXY"
+
+    elif price_change >= 1 and volume_change >= 30:
+        score = -50
+        label = "BUYING_PRESSURE_PROXY"
+
+    return {
+        "label": label,
+        "score": score,
+        "volume_change_pct": safe_round(volume_change, 1),
+        "price_change_pct": safe_round(price_change, 2),
+    }
+
+
+# ------------------------------------------------------------
+# SUPPORT / RESISTANCE
+# ------------------------------------------------------------
+
+def support_resistance(closes):
+    if len(closes) < 20:
+        return None, None
+
+    recent = closes[-30:]
+
+    support = min(recent)
+    resistance = max(recent)
+
+    current = closes[-1]
+
+    # More useful local levels:
+    local_lows = []
+    local_highs = []
+
+    for i in range(2, len(recent) - 2):
+        if (
+            recent[i] <= recent[i - 1]
+            and recent[i] <= recent[i + 1]
+        ):
+            local_lows.append(recent[i])
+
+        if (
+            recent[i] >= recent[i - 1]
+            and recent[i] >= recent[i + 1]
+        ):
+            local_highs.append(recent[i])
+
+    lower_supports = [
+        x for x in local_lows
+        if x < current
+    ]
+
+    higher_resistances = [
+        x for x in local_highs
+        if x > current
+    ]
+
+    if lower_supports:
+        support = max(lower_supports)
+
+    if higher_resistances:
+        resistance = min(higher_resistances)
+
+    return support, resistance
+
+
+# ------------------------------------------------------------
+# COIN ANALYSIS DATA
+# ------------------------------------------------------------
+
+def build_coin_data(coin_id, market_row):
+    chart = get_market_chart(coin_id, days=30)
+
+    prices, volumes = extract_series(chart)
+
+    if len(prices) < 50:
+        raise ValueError(f"Not enough chart data for {coin_id}")
+
+    current = prices[-1]
+
+    ema20 = ema(prices, 20)
+    ema50 = ema(prices, 50)
+    ema200 = ema(prices, 200)
+
+    rsi14 = rsi(prices, 14)
+
+    macd_value, macd_signal, macd_hist = macd(prices)
+
+    # Since 30 days may not always provide 200 points,
+    # EMA200 is optional.
+    atr14 = None
+
+    if len(prices) >= 15:
+        # Market chart is not OHLC, so approximate ATR from
+        # price movements. This is deliberately labelled proxy.
+        ranges = []
+
+        for i in range(1, len(prices)):
+            ranges.append(
+                abs(prices[i] - prices[i - 1])
             )
 
-except Exception as e:
-    print(f"RSS error: {e}")
+        if len(ranges) >= 14:
+            atr14 = sum(ranges[-14:]) / 14
 
+    support, resistance = support_resistance(prices)
 
-if news_items:
-    news_context = "\n".join(news_items)
-else:
-    news_context = "RSS DATA NOT AVAILABLE."
-
-
-# ============================================================
-# 8. COINGECKO – MARKET DATA
-# ============================================================
-
-coin_ids = ",".join(COINS.keys())
-
-cg_url = (
-    "https://api.coingecko.com/api/v3/coins/markets"
-    "?vs_currency=usd"
-    f"&ids={coin_ids}"
-    "&order=market_cap_desc"
-    "&price_change_percentage=24h,7d,30d"
-    "&sparkline=true"
-)
-
-crypto_summary_lines = []
-
-try:
-
-    market_raw = http_get(cg_url, timeout=20)
-
-    market_data = json.loads(
-        market_raw.decode("utf-8")
+    volume_pressure = calculate_volume_pressure(
+        prices,
+        volumes
     )
 
-    for coin in market_data:
+    price_24h = market_row.get("price_change_percentage_24h")
+    price_7d = market_row.get("price_change_percentage_7d_in_currency", {}).get("usd")
+    price_30d = market_row.get("price_change_percentage_30d_in_currency", {}).get("usd")
 
-        coin_id = coin.get("id", "")
-        sym = COINS.get(
-            coin_id,
-            coin.get("symbol", "").upper()
-        )
+    trend = "NEUTRAL"
 
-        price = coin.get("current_price", 0) or 0
+    if ema20 and ema50:
+        if current > ema20 > ema50:
+            trend = "BULLISH"
 
-        change_24h = (
-            coin.get("price_change_percentage_24h_in_currency")
-            or coin.get("price_change_percentage_24h")
-            or 0
-        )
-
-        change_7d = (
-            coin.get("price_change_percentage_7d_in_currency")
-            or 0
-        )
-
-        change_30d = (
-            coin.get("price_change_percentage_30d_in_currency")
-            or 0
-        )
-
-        volume = coin.get("total_volume", 0) or 0
-
-        market_cap = coin.get("market_cap", 0) or 0
-
-        ath = coin.get("ath", 0) or 0
-
-        ath_change = (
-            coin.get("ath_change_percentage", 0)
-            or 0
-        )
-
-        market_cap_rank = (
-            coin.get("market_cap_rank", "N/A")
-        )
-
-        # ----------------------------------------------------
-        # 7D SPARKLINE
-        # CoinGecko 7d sparkline = približne hodinové dáta.
-        # [::4] => približne 4H interval.
-        # ----------------------------------------------------
-
-        sparkline = (
-            coin.get("sparkline_in_7d", {})
-            .get("price", [])
-        )
-
-        if sparkline:
-
-            downsampled = sparkline[::4]
-
-            prices_str = ", ".join(
-                f"{p:.6g}"
-                for p in downsampled
-            )
-
-            trend_data = (
-                "4H proxy z 7D hodinovej histórie: "
-                f"[{prices_str}]"
-            )
+        elif current < ema20 < ema50:
+            trend = "BEARISH"
 
         else:
+            trend = "MIXED"
 
-            trend_data = (
-                "7D historická cenová séria nedostupná."
+    macd_state = "UNKNOWN"
+
+    if macd_value is not None and macd_signal is not None:
+        if macd_value > macd_signal:
+            macd_state = "BULLISH"
+
+        else:
+            macd_state = "BEARISH"
+
+    rsi_state = "UNKNOWN"
+
+    if rsi14 is not None:
+        if rsi14 >= 70:
+            rsi_state = "OVERBOUGHT"
+
+        elif rsi14 <= 30:
+            rsi_state = "OVERSOLD"
+
+        elif rsi14 >= 55:
+            rsi_state = "BULLISH"
+
+        elif rsi14 <= 45:
+            rsi_state = "BEARISH"
+
+        else:
+            rsi_state = "NEUTRAL"
+
+    return {
+        "id": coin_id,
+        "symbol": market_row.get("symbol", "").upper(),
+        "name": market_row.get("name"),
+
+        "price": current,
+
+        "market_cap": market_row.get("market_cap"),
+        "volume_24h": market_row.get("total_volume"),
+
+        "price_change_24h_pct": price_24h,
+        "price_change_7d_pct": price_7d,
+        "price_change_30d_pct": price_30d,
+
+        "ema20": safe_round(ema20, 6),
+        "ema50": safe_round(ema50, 6),
+        "ema200": safe_round(ema200, 6),
+
+        "rsi14": safe_round(rsi14, 2),
+
+        "macd": safe_round(macd_value, 8),
+        "macd_signal": safe_round(macd_signal, 8),
+        "macd_histogram": safe_round(macd_hist, 8),
+
+        "atr14_proxy": safe_round(atr14, 6),
+
+        "support": safe_round(support, 6),
+        "resistance": safe_round(resistance, 6),
+
+        "trend": trend,
+        "macd_state": macd_state,
+        "rsi_state": rsi_state,
+
+        "volume_pressure": volume_pressure,
+    }
+
+
+# ------------------------------------------------------------
+# MARKET DATA
+# ------------------------------------------------------------
+
+def get_global_market():
+    return cg_get("/global")
+
+
+def get_fear_greed():
+    url = "https://api.alternative.me/fng/?limit=1"
+
+    try:
+        data = http_get(url)
+
+        item = data["data"][0]
+
+        return {
+            "value": int(item["value"]),
+            "classification": item["value_classification"],
+        }
+
+    except Exception:
+        return {
+            "value": None,
+            "classification": "UNKNOWN",
+        }
+
+
+def get_market_rows():
+    ids = ",".join(ALL_TRACKED_IDS)
+
+    return cg_get(
+        "/coins/markets",
+        {
+            "vs_currency": "usd",
+            "ids": ids,
+            "order": "market_cap_desc",
+            "sparkline": "false",
+            "price_change_percentage": "24h,7d,30d",
+        },
+    )
+
+
+# ------------------------------------------------------------
+# NEW COIN SCANNER
+# ------------------------------------------------------------
+
+def get_top_market_candidates():
+    """
+    Pull a wider market universe.
+    Gemini decides whether any coin has a genuinely attractive
+    fundamental + technical opportunity.
+    """
+
+    try:
+        rows = cg_get(
+            "/coins/markets",
+            {
+                "vs_currency": "usd",
+                "order": "market_cap_desc",
+                "per_page": 100,
+                "page": 1,
+                "sparkline": "true",
+                "price_change_percentage": "24h,7d,30d",
+            },
+        )
+
+        candidates = []
+
+        held_ids = set(HELD_COINS.keys())
+
+        for row in rows:
+            coin_id = row.get("id")
+
+            if coin_id in held_ids:
+                continue
+
+            market_cap = row.get("market_cap") or 0
+            volume = row.get("total_volume") or 0
+
+            # Avoid tiny illiquid coins.
+            if market_cap < 200_000_000:
+                continue
+
+            if volume < 10_000_000:
+                continue
+
+            candidates.append({
+                "id": coin_id,
+                "symbol": row.get("symbol", "").upper(),
+                "name": row.get("name"),
+                "price": row.get("current_price"),
+                "market_cap": market_cap,
+                "volume_24h": volume,
+                "change_24h": row.get(
+                    "price_change_percentage_24h"
+                ),
+                "change_7d": row.get(
+                    "price_change_percentage_7d_in_currency",
+                    {}
+                ).get("usd"),
+                "change_30d": row.get(
+                    "price_change_percentage_30d_in_currency",
+                    {}
+                ).get("usd"),
+            })
+
+        return candidates[:60]
+
+    except Exception:
+        return []
+
+
+# ------------------------------------------------------------
+# COINTELEGRAPH RSS
+# ------------------------------------------------------------
+
+def get_news_rss(limit=12):
+    url = (
+        "https://cointelegraph.com/rss"
+    )
+
+    try:
+        raw = urllib.request.urlopen(
+            urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": "CryptoAI-Bot/4.0"
+                },
+            ),
+            timeout=20,
+        ).read()
+
+        root = ET.fromstring(raw)
+
+        items = []
+
+        for item in root.findall(".//item")[:limit]:
+            title = item.findtext("title")
+            link = item.findtext("link")
+            pub_date = item.findtext("pubDate")
+
+            if title:
+                items.append({
+                    "title": title,
+                    "link": link,
+                    "published": pub_date,
+                })
+
+        return items
+
+    except Exception:
+        return []
+
+
+# ------------------------------------------------------------
+# STATE
+# ------------------------------------------------------------
+
+def load_state():
+    try:
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    except Exception:
+        return {}
+
+
+def save_state(state):
+    with open(
+        STATE_FILE,
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            state,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+# ------------------------------------------------------------
+# GEMINI JSON SCHEMA
+# ------------------------------------------------------------
+
+COIN_RESULT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "symbol": {
+            "type": "string"
+        },
+        "status": {
+            "type": "string",
+            "enum": [
+                "NEW BUY",
+                "ADD",
+                "HOLD",
+                "WAIT",
+                "REDUCE",
+                "TAKE PROFIT",
+                "EXIT",
+                "NO TRADE",
+            ],
+        },
+        "opportunity_score": {
+            "type": "integer"
+        },
+        "execution_score": {
+            "type": "integer"
+        },
+        "confidence": {
+            "type": "integer"
+        },
+        "technical_score": {
+            "type": "integer"
+        },
+        "fundamental_score": {
+            "type": "integer"
+        },
+        "fundamental_confidence": {
+            "type": "integer"
+        },
+        "entry": {
+            "type": ["number", "null"]
+        },
+        "stop": {
+            "type": ["number", "null"]
+        },
+        "tp1": {
+            "type": ["number", "null"]
+        },
+        "tp2": {
+            "type": ["number", "null"]
+        },
+        "thesis": {
+            "type": "string"
+        },
+        "fundamental_facts": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "sources": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+    },
+    "required": [
+        "symbol",
+        "status",
+        "opportunity_score",
+        "execution_score",
+        "confidence",
+        "technical_score",
+        "fundamental_score",
+        "fundamental_confidence",
+        "entry",
+        "stop",
+        "tp1",
+        "tp2",
+        "thesis",
+        "fundamental_facts",
+        "sources",
+    ],
+}
+
+
+ANALYSIS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "market_regime": {
+            "type": "string",
+            "enum": [
+                "BULLISH",
+                "NEUTRAL",
+                "BEARISH",
+                "CRITICAL",
+            ],
+        },
+        "market_summary": {
+            "type": "string"
+        },
+        "risk_level": {
+            "type": "string",
+            "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL",
+            ],
+        },
+        "coins": {
+            "type": "array",
+            "items": COIN_RESULT_SCHEMA,
+        },
+        "new_coin": {
+            "type": ["object", "null"],
+            "properties": {
+                "symbol": {"type": "string"},
+                "name": {"type": "string"},
+                "opportunity_score": {"type": "integer"},
+                "execution_score": {"type": "integer"},
+                "confidence": {"type": "integer"},
+                "reason": {"type": "string"},
+                "entry": {"type": ["number", "null"]},
+                "stop": {"type": ["number", "null"]},
+                "tp1": {"type": ["number", "null"]},
+                "tp2": {"type": ["number", "null"]},
+                "sources": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                },
+            },
+            "required": [
+                "symbol",
+                "name",
+                "opportunity_score",
+                "execution_score",
+                "confidence",
+                "reason",
+                "entry",
+                "stop",
+                "tp1",
+                "tp2",
+                "sources",
+            ],
+        },
+        "important_changes": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+        },
+    },
+    "required": [
+        "market_regime",
+        "market_summary",
+        "risk_level",
+        "coins",
+        "new_coin",
+        "important_changes",
+    ],
+}
+
+
+# ------------------------------------------------------------
+# GEMINI
+# ------------------------------------------------------------
+
+def gemini_generate(prompt, schema):
+    url = (
+        "https://generativelanguage.googleapis.com/"
+        f"v1beta/models/{GEMINI_MODEL}:generateContent"
+    )
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": prompt
+                    }
+                ]
+            }
+        ],
+
+        "tools": [
+            {
+                "google_search": {}
+            }
+        ],
+
+        "generationConfig": {
+            "temperature": 0.2,
+            "responseFormat": {
+                "text": {
+                    "mimeType": "application/json",
+                    "schema": schema,
+                }
+            },
+        },
+    }
+
+    response = http_post_json(
+        url,
+        payload,
+        headers={
+            "x-goog-api-key": GEMINI_API_KEY,
+        },
+        timeout=120,
+    )
+
+    try:
+        text = (
+            response["candidates"][0]
+            ["content"]["parts"][0]["text"]
+        )
+
+        return json.loads(text)
+
+    except Exception:
+        print(
+            "Gemini raw response:",
+            json.dumps(
+                response,
+                ensure_ascii=False,
+                indent=2,
+            )[:10000],
+        )
+
+        raise
+
+
+# ------------------------------------------------------------
+# R:R VALIDATION
+# ------------------------------------------------------------
+
+def calculate_rr(entry, stop, tp1):
+    if not entry or not stop or not tp1:
+        return None
+
+    risk = entry - stop
+    reward = tp1 - entry
+
+    if risk <= 0:
+        return None
+
+    return reward / risk
+
+
+def validate_trade(coin):
+    status = coin.get("status")
+
+    if status not in ["NEW BUY", "ADD"]:
+        return coin
+
+    entry = coin.get("entry")
+    stop = coin.get("stop")
+    tp1 = coin.get("tp1")
+
+    rr = calculate_rr(
+        entry,
+        stop,
+        tp1,
+    )
+
+    coin["rr"] = rr
+
+    # No valid setup = no BUY
+    if rr is None:
+        coin["status"] = "WAIT"
+        coin["validation"] = (
+            "BUY/ADD blocked: incomplete setup"
+        )
+
+        return coin
+
+    # Minimum R:R
+    if rr < 2.0:
+        coin["status"] = "WAIT"
+        coin["validation"] = (
+            f"BUY/ADD blocked: R:R {rr:.2f} < 2.0"
+        )
+
+    else:
+        coin["validation"] = (
+            f"R:R validated: {rr:.2f}"
+        )
+
+    return coin
+
+
+# ------------------------------------------------------------
+# MAIN ANALYSIS
+# ------------------------------------------------------------
+
+def run_analysis():
+    print("Running MAIN ANALYSIS")
+
+    global_market = get_global_market()
+    fear_greed = get_fear_greed()
+    market_rows = get_market_rows()
+
+    market_by_id = {
+        row["id"]: row
+        for row in market_rows
+    }
+
+    coin_data = {}
+
+    for coin_id in HELD_COINS:
+        row = market_by_id.get(coin_id)
+
+        if not row:
+            continue
+
+        try:
+            coin_data[coin_id] = build_coin_data(
+                coin_id,
+                row
+            )
+        except Exception as e:
+            print(
+                f"Coin data error {coin_id}: {e}"
             )
 
-        # ----------------------------------------------------
-        # Coin summary
-        # ----------------------------------------------------
+    # BTC / ETH context
+    market_context = {}
 
-        position_type = (
-            "HELD"
-            if sym in HELD_COINS
-            else "WATCHLIST"
-        )
+    for coin_id in MARKET_CONTEXT:
+        row = market_by_id.get(coin_id)
 
-        crypto_summary_lines.append(
-            f"""
-[{sym}] [{position_type}]
-Cena: ${price:,.6f}
-24H: {change_24h:+.2f}%
-7D: {change_7d:+.2f}%
-30D: {change_30d:+.2f}%
-Volume 24H: ${volume:,.0f}
-Market Cap: ${market_cap:,.0f}
-Market Cap Rank: #{market_cap_rank}
-ATH: ${ath:,.6f}
-Od ATH: {ath_change:.1f}%
-{trend_data}
-""".strip()
-        )
+        if not row:
+            continue
 
-except Exception as e:
+        try:
+            market_context[coin_id] = build_coin_data(
+                coin_id,
+                row
+            )
+        except Exception as e:
+            print(
+                f"Market context error {coin_id}: {e}"
+            )
 
-    print(f"CoinGecko market error: {e}")
+    news = get_news_rss()
+    candidates = get_top_market_candidates()
 
+    state = load_state()
 
-market_context = "\n\n".join(
-    crypto_summary_lines
-)
+    prompt = f"""
+You are the main crypto investment analyst.
 
+CURRENT TIME:
+{datetime.now(timezone.utc).isoformat()}
 
-# ============================================================
-# 9. GEMINI PROMPT
-# ============================================================
+LOCAL TIME:
+{datetime.now(LOCAL_TZ).isoformat()}
 
-prompt = f"""
-ROLE:
-Si profesionálny AI krypto analytik a risk manager.
-Tvojou úlohou nie je vytvárať čo najviac obchodov.
-Tvojou úlohou je nájsť iba obchody s dostatočne dobrým Risk/Reward.
+IMPORTANT:
+You are analyzing a real crypto portfolio.
 
-GitHub je iba zberač dát.
-Ty si hlavný analytický mozog.
-Máš k dispozícii aj Google Search grounding a MUSÍŠ ho použiť pri
-aktuálnych správach, makro udalostiach, regulácii, ETF/inštitucionálnych
-udalostiach, token unlockoch, fundamentálnych zmenách a ďalších
-časovo citlivých informáciách.
+HELD COINS:
+AAVE, TAO, FET, SOL, ONDO, RENDER
 
-AKTUÁLNY ČAS:
-{current_time_str}
+BTC and ETH are market-regime references.
 
+You have Google Search available.
+USE GOOGLE SEARCH for CURRENT information.
 
-============================================================
-DÁTA Z GITHUB
-============================================================
+Search and verify important developments from the last 24-72 hours.
 
-GLOBÁLNE MAKRO:
-{macro_context}
+Look specifically for:
+- major crypto market news
+- regulation
+- ETF developments
+- institutional adoption
+- protocol upgrades
+- partnerships
+- hacks/exploits
+- token unlocks
+- tokenomics
+- governance
+- large ecosystem developments
+- macro events
+- Fed / rates / inflation
+- geopolitical events affecting risk assets
+- important coin-specific developments
 
+Do NOT invent fundamentals.
+
+If reliable current information is unavailable,
+reduce FUNDAMENTAL CONFIDENCE.
+
+========================
+MARKET DATA
+========================
+
+GLOBAL:
+{json.dumps(global_market, ensure_ascii=False)}
 
 FEAR & GREED:
-{fng_context}
+{json.dumps(fear_greed, ensure_ascii=False)}
 
+BTC / ETH:
+{json.dumps(market_context, ensure_ascii=False)}
 
-RSS SPRÁVY:
-{news_context}
+========================
+HELD COINS
+========================
 
+{json.dumps(coin_data, ensure_ascii=False)}
 
-TRHOVÉ DÁTA:
-{market_context}
+========================
+COINTELEGRAPH RSS
+========================
 
+{json.dumps(news, ensure_ascii=False)}
 
-============================================================
-PORTFÓLIO
-============================================================
+========================
+NEW COIN UNIVERSE
+========================
 
-AKTUÁLNE DRŽANÉ:
-BTC, SOL, AAVE, FET, TAO
+These are candidates only.
+Do not automatically recommend one.
 
-WATCHLIST:
-ETH, RENDER, ONDO
+{json.dumps(candidates, ensure_ascii=False)}
 
-Pri rozhodovaní rozlišuj medzi:
-- existujúcou pozíciou
-- novým vstupom
-- watchlistom
+========================
+SCORING
+========================
 
+Opportunity Score = 0-100%.
 
-============================================================
-PREDCHÁDZAJÚCA ANALÝZA
-============================================================
+It answers:
+"How attractive is this coin overall?"
 
-{previous_analysis}
+Execution Score = 0-100%.
 
+It answers:
+"How good is the setup RIGHT NOW?"
 
-============================================================
-DÔLEŽITÉ ANALYTICKÉ PRAVIDLÁ
-============================================================
+Example:
+Opportunity 92%
+Execution 55%
+=> excellent asset but poor entry.
+Usually HOLD/WAIT.
 
-1. ŽIADNE HALUCINÁCIE
+Technical Score:
+0-100.
 
-Nikdy si nevymýšľaj:
-- cenu
-- fundament
-- partnerstvo
-- ETF
-- token unlock
-- on-chain údaj
-- volume
-- whale activity
-- funding rate
-- open interest
-- makro udalosť
-- správu
+Fundamental Score:
+0-100.
 
-Ak údaj nemáš, povedz:
-"N/A – dáta nedostupné."
+Fundamental Confidence:
+0-100.
 
-Google Search použi na overenie aktuálnych informácií.
+Confidence:
+How confident are you in the complete conclusion.
 
+========================
+IMPORTANT
+========================
 
-2. TECHNICKÉ SKÓRE
+Do NOT invent support/resistance.
 
-Technické skóre 0–100 určuj podľa dostupných dát.
+Use the supplied Python technical values.
 
-Zohľadni najmä:
-- trend
-- momentum
-- 24H / 7D / 30D
-- cenovú štruktúru
-- supporty
-- rezistencie
-- breakout / breakdown
-- volume
-- vzdialenosť od ATH
-- BTC režim
-- relatívnu silu voči trhu
+Do NOT invent volume direction.
 
-7D cenové pole používaj ako cenovú históriu a proxy pre
-market structure.
+The supplied volume pressure is only a PROXY.
+Do not call it true buy/sell volume.
 
-NEPREDSTIERAJ, že z neho priamo poznáš presné RSI alebo EMA.
-Ak presné RSI/EMA nemáš, neuvádzaj ich ako presné čísla.
+For every coin:
+- interpret technical data
+- interpret current fundamentals
+- explain the most important catalyst/risk
+- decide status
 
-
-3. FUNDAMENTÁLNE SKÓRE
-
-Fundamentálne skóre 0–100.
-
-Zohľadni:
-- adopciu
-- vývoj projektu
-- token utility
-- konkurenciu
-- ekosystém
-- revenue / fees, ak sú dostupné
-- tokenomics
-- unlocky
-- reguláciu
-- významné partnerstvá
-- aktuálne fundamentálne správy
-
-Fundamentálne tvrdenia MUSIA byť založené na dostupných dátach
-alebo overenom Google Search.
-
-Ak je fundamentálnych dát málo:
-zniž confidence.
-Nevymýšľaj skóre.
-
-
-4. GOOGLE SEARCH
-
-Google Search použi najmä na:
-
-- posledné významné správy
-- makro udalosti
-- Fed / ECB
-- reguláciu
-- ETF
-- veľké partnerstvá
-- hacky
-- token unlocky
-- veľké technologické aktualizácie
-- významné on-chain / DeFi udalosti
-- inštitucionálne správy
-
-Nehľadaj zbytočnosti.
-Použi Search iba tam, kde môže zmeniť investičný záver.
-
-
-5. BTC JE HLAVNÝ FILTER
-
-Pred analýzou altcoinov urč:
-
-BTC REGIME:
-
-- BULLISH
-- NEUTRAL
-- BEARISH
-
-Ak je BTC bearish:
-zníž agresivitu pri altcoinoch.
-
-Ak je BTC bullish:
-altcoin long setupy môžu dostať vyššiu prioritu.
-
-
-6. STATUSY
-
-Povolené statusy:
-
+Statuses:
 NEW BUY
 ADD
 HOLD
@@ -582,561 +1230,710 @@ TAKE PROFIT
 EXIT
 NO TRADE
 
-Význam:
+========================
+TRADE SETUPS
+========================
 
-NEW BUY = nový vstup pre coin, ktorý klient aktuálne nedrží.
+Only provide Entry/Stop/TP1/TP2 for NEW BUY or ADD.
 
-ADD = klient coin drží a existuje dobrý setup na dokúpenie.
+For BUY/ADD:
+- entry must make technical sense
+- stop must be below entry
+- TP1 must be above entry
+- R:R must ideally be >= 2.0
 
-HOLD = držať existujúcu pozíciu.
+Python will independently validate R:R.
 
-WAIT = zatiaľ nevstupovať / nedokupovať, čakať na konkrétnu cenu alebo potvrdenie.
+Never force a BUY.
 
-REDUCE = znížiť časť pozície.
+WAIT is better than a bad trade.
 
-TAKE PROFIT = realizovať časť zisku.
+========================
+NEW COIN
+========================
 
-EXIT = opustiť pozíciu.
+Search for ONE new coin outside the current portfolio
+only if there is a genuinely strong opportunity.
 
-NO TRADE = setup nemá dostatočnú kvalitu.
+It should have:
+- strong fundamental catalyst
+- sufficient liquidity
+- credible project
+- attractive valuation OR exceptional growth
+- technical setup
+- asymmetric upside
 
+Do NOT recommend a random small-cap.
 
-7. ANTI-OVERTRADING
+If nothing qualifies:
+new_coin = null.
 
-Nezmeň status iba preto, že cena sa za posledné 4 hodiny
-pohla o malé percento.
+========================
+OUTPUT
+========================
 
-Status zmeň iba vtedy, ak sa zmenilo niečo významné:
+Return ONLY the required JSON.
 
-- market structure
-- support/resistance
-- breakout/breakdown
-- BTC regime
-- fundament
-- významná správa
-- volume
-- risk/reward
-- trend
-
-
-8. RISK / REWARD
-
-Pri NEW BUY alebo ADD vždy definuj:
-
-ENTRY
-STOP
-TP1
-TP2
-
-Minimálny preferovaný R:R = 2:1.
-
-Ak R:R < 2:
-preferuj WAIT alebo NO TRADE.
-
-Nepoužívaj náhodné čísla.
-Entry, Stop a TP musia vychádzať zo supportov,
-rezistencií, volatility a aktuálnej štruktúry trhu.
-
-
-9. CONFIDENCE
-
-Confidence 0–100%.
-
-Confidence nesmie byť iba priemer skóre.
-
-Zohľadni:
-- kvalitu dát
-- zhodu techniky a fundamentu
-- jasnosť market structure
-- BTC regime
-- kvalitu setupu
-- aktuálne správy
-
-
-10. SCENÁRE
-
-Pri dôležitých rozhodnutiach interne zváž:
-
-BULL CASE
-BASE CASE
-BEAR CASE
-
-Do Telegramu však neposielaj dlhý text.
-Použi iba najdôležitejší záver.
-
-
-11. EXISTUJÚCE POZÍCIE
-
-Pri BTC, SOL, AAVE, FET a TAO nepovažuj každý pokles
-automaticky za dôvod na dokúpenie.
-
-Najprv posúď:
-- či sa zlepšil R:R
-- či je support potvrdený
-- či sa nezhoršil fundament
-- či už pozícia nie je príliš veľká
-- koreláciu s ostatnými pozíciami
-
-
-12. PORTFÓLIO RIZIKO
-
-Klient už drží:
-BTC + SOL + AAVE + FET + TAO.
-
-Zohľadni vysokú koreláciu kryptomien.
-
-Nepodporuj agresívne zväčšovanie všetkých pozícií naraz.
-
-Ak je celý trh rizikový:
-uprednostni WAIT / HOLD / REDUCE.
-
-
-13. WATCHLIST
-
-ETH, RENDER a ONDO klient momentálne nedrží.
-
-NEW BUY navrhni iba vtedy, keď setup má jasnú výhodu
-oproti dokúpeniu existujúcej pozície.
-
-Neodporúčaj nový coin iba preto, že rastie.
-
-
-14. RELATÍVNA SILA
-
-Porovnaj mince navzájom.
-
-Ak napríklad:
-SOL má lepší trend než ETH,
-TAO má lepší R:R než FET,
-alebo RENDER má lepší setup než ONDO,
-
-zohľadni to v FINAL VERDICT.
-
-
-15. SCORE
-
-Výsledné skóre nie je mechanický priemer.
-
-Použi orientačne:
-
-Macro / BTC regime: 20%
-Technical: 25%
-Fundamental: 20%
-Market structure / momentum: 15%
-Risk/Reward: 10%
-News / sentiment: 10%
-
-Výsledné skóre používaj ako pomocný nástroj,
-nie ako automatický signál.
-
-
-============================================================
-VÝSTUP
-============================================================
-
-Vráť iba nasledujúci formát.
-
-ŽIADNE DLOUHÉ VYSVETĽOVANIE.
-ŽIADNE ÚVODNÉ POZNÁMKY.
-ŽIADNY DISCLAIMER.
-ŽIADNE TABUĽKY.
-
-📊 **CRYPTO MARKET UPDATE (4H)**
-🕐 {current_time_str}
-
-🌍 **MAKRO & SENTIMENT**
-- BTC Regime: **[BULLISH / NEUTRAL / BEARISH]**
-- Trh: [1 stručná veta]
-- Fear & Greed: [hodnota + interpretácia]
-- Správy: [1–2 najdôležitejšie aktuálne správy a ich dopad]
-
-🔥 **PORTFÓLIO & WATCHLIST**
-
-Rozober VŠETKÝCH 8 mincí v tomto poradí:
-
-BTC
-ETH
-SOL
-TAO
-FET
-AAVE
-RENDER
-ONDO
-
-Pre každú:
-
-- **[SYMBOL]** ($[PRICE]) | Bias: **[STATUS]** | Conf: [XX]%
-  - Tech Skóre: [XX/100] | Fundament Skóre: [XX/100]
-  - Analýza: [max 1 stručná veta]
-  - Exekúcia: [konkrétna akcia]
-
-Pri NEW BUY alebo ADD musí byť:
-
-Entry: $X
-Stop: $X
-TP1: $X
-TP2: $X
-R:R: X.X
-
-Pri WAIT:
-
-Wait for: $X alebo [konkrétna podmienka]
-
-Pri HOLD:
-
-HOLD – [stručný dôvod]
-
-Pri REDUCE / TAKE PROFIT / EXIT:
-
-[stručná konkrétna akcia]
-
-
-🧠 **FINAL VERDICT**
-
-- Najlepší Risk/Reward: **[SYMBOL]**
-- Najslabší setup: **[SYMBOL]**
-- BTC režim: **[BULLISH / NEUTRAL / BEARISH]**
-- Zmena oproti minulej analýze: [max 1 veta]
-
-Ak sa oproti minulej analýze nič významné nezmenilo,
-napíš:
-"Bez významnej zmeny – trhová štruktúra zostáva rovnaká."
-
-
-============================================================
-KONEČNÉ PRAVIDLO
-============================================================
-
-Radšej daj WAIT alebo NO TRADE ako nekvalitný obchod.
-
-Tvoj cieľ nie je predpovedať každý pohyb.
-Tvoj cieľ je identifikovať asymetrické príležitosti
-s dobrým R:R a zároveň chrániť existujúci kapitál.
+No markdown.
+No commentary outside JSON.
 """
 
-
-# ============================================================
-# 10. GEMINI API
-# ============================================================
-
-def call_gemini(prompt_text):
-
-    gemini_url = (
-        f"https://generativelanguage.googleapis.com/"
-        f"v1beta/models/{GEMINI_MODEL}:generateContent"
+    result = gemini_generate(
+        prompt,
+        ANALYSIS_SCHEMA
     )
 
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": prompt_text
-                    }
-                ]
-            }
-        ],
+    # Python validation
+    for coin in result.get("coins", []):
+        validate_trade(coin)
 
-        # AKTUÁLNE GOOGLE SEARCH GROUNDING
-        "tools": [
-            {
-                "google_search": {}
-            }
-        ],
+    # State
+    new_state = {
+        "timestamp_utc": datetime.now(
+            timezone.utc
+        ).isoformat(),
 
-        "generationConfig": {
-            "temperature": 0.25,
-            "topP": 0.90,
-            "maxOutputTokens": 5000
-        }
+        "market_regime": result.get(
+            "market_regime"
+        ),
+
+        "fear_greed": fear_greed,
+
+        "coin_data": coin_data,
+
+        "analysis": result,
     }
 
-    data = json.dumps(payload).encode("utf-8")
+    save_state(new_state)
 
-    request = urllib.request.Request(
-        gemini_url,
-        data=data,
-        headers={
-            "Content-Type": "application/json",
-            "x-goog-api-key": GEMINI_API_KEY
-        },
-        method="POST"
+    message = format_analysis_message(
+        result,
+        coin_data,
+        fear_greed,
     )
 
-    with urllib.request.urlopen(
-        request,
-        timeout=120
-    ) as response:
-
-        result = json.loads(
-            response.read().decode("utf-8")
-        )
-
-    # --------------------------------------------------------
-    # Bezpečné vybratie odpovede
-    # --------------------------------------------------------
-
-    candidates = result.get("candidates", [])
-
-    if not candidates:
-        raise RuntimeError(
-            "Gemini nevrátil žiadne candidates."
-        )
-
-    content = candidates[0].get("content", {})
-
-    parts = content.get("parts", [])
-
-    text_parts = []
-
-    for part in parts:
-
-        if "text" in part:
-            text_parts.append(
-                part["text"]
-            )
-
-    final_text = "\n".join(text_parts).strip()
-
-    if not final_text:
-        raise RuntimeError(
-            "Gemini vrátil prázdnu textovú odpoveď."
-        )
-
-    return final_text
+    send_telegram(message)
 
 
-# ============================================================
-# 11. SPUSTENIE GEMINI
-# ============================================================
+# ------------------------------------------------------------
+# SAFETY MONITOR
+# ------------------------------------------------------------
 
-ai_analysis = ""
+def run_safety_monitor():
+    print("Running SAFETY MONITOR")
 
-try:
+    market_rows = get_market_rows()
 
-    print(
-        f"Spúšťam Gemini {GEMINI_MODEL}..."
-    )
+    market_by_id = {
+        row["id"]: row
+        for row in market_rows
+    }
 
-    ai_analysis = call_gemini(prompt)
+    safety_data = {}
 
-    print(
-        "Gemini analýza úspešne vytvorená."
-    )
+    for coin_id in HELD_COINS:
+        row = market_by_id.get(coin_id)
 
-except urllib.error.HTTPError as e:
-
-    error_body = ""
-
-    try:
-        error_body = e.read().decode("utf-8")[:1000]
-    except Exception:
-        pass
-
-    ai_analysis = (
-        f"⚠️ CHYBA GEMINI API\n"
-        f"HTTP {e.code}\n"
-        f"{error_body}"
-    )
-
-except Exception as e:
-
-    ai_analysis = (
-        f"⚠️ CHYBA AI PRI GENEROVANÍ\n"
-        f"{str(e)[:1000]}"
-    )
-
-
-# ============================================================
-# 12. OCHRANA PROTI PRÍLIŠ DLHEJ TELEGRAM SPRÁVE
-# ============================================================
-
-MAX_TELEGRAM_LENGTH = 3900
-
-
-def split_message(text, max_length=MAX_TELEGRAM_LENGTH):
-
-    if len(text) <= max_length:
-        return [text]
-
-    messages = []
-
-    current = ""
-
-    for line in text.split("\n"):
-
-        if len(current) + len(line) + 1 <= max_length:
-
-            current += line + "\n"
-
-        else:
-
-            if current.strip():
-                messages.append(
-                    current.strip()
-                )
-
-            current = line + "\n"
-
-    if current.strip():
-        messages.append(
-            current.strip()
-        )
-
-    return messages
-
-
-# ============================================================
-# 13. TELEGRAM
-# ============================================================
-
-def send_telegram(text):
-
-    messages = split_message(text)
-
-    for index, message in enumerate(messages):
-
-        url = (
-            f"https://api.telegram.org/"
-            f"bot{TELEGRAM_TOKEN}/sendMessage"
-        )
-
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message,
-            "parse_mode": "Markdown"
-        }
-
-        encoded_payload = urllib.parse.urlencode(
-            payload
-        ).encode("utf-8")
+        if not row:
+            continue
 
         try:
-
-            req = urllib.request.Request(
-                url,
-                data=encoded_payload,
-                method="POST"
+            data = build_coin_data(
+                coin_id,
+                row
             )
 
-            with urllib.request.urlopen(
-                req,
-                timeout=15
-            ) as response:
-
-                print(
-                    f"Telegram OK: "
-                    f"{response.status} "
-                    f"(časť {index + 1}/{len(messages)})"
-                )
+            safety_data[
+                data["symbol"]
+            ] = data
 
         except Exception as e:
-
             print(
-                f"Telegram Markdown chyba: {e}"
+                f"Safety error {coin_id}: {e}"
             )
 
-            # ------------------------------------------------
-            # FALLBACK:
-            # Skús poslať správu bez Markdown.
-            # ------------------------------------------------
+    # BTC is critical to overall safety.
+    btc_row = market_by_id.get("bitcoin")
 
-            try:
+    if btc_row:
+        try:
+            btc_data = build_coin_data(
+                "bitcoin",
+                btc_row
+            )
 
-                fallback_payload = {
-                    "chat_id": TELEGRAM_CHAT_ID,
-                    "text": message
-                }
+            safety_data["BTC"] = btc_data
 
-                fallback_data = urllib.parse.urlencode(
-                    fallback_payload
-                ).encode("utf-8")
+        except Exception:
+            pass
 
-                fallback_req = urllib.request.Request(
-                    url,
-                    data=fallback_data,
-                    method="POST"
-                )
+    # --------------------------------------------------------
+    # Calculate market risk
+    # --------------------------------------------------------
 
-                with urllib.request.urlopen(
-                    fallback_req,
-                    timeout=15
-                ) as response:
+    critical = []
+    warning = []
 
-                    print(
-                        f"Telegram fallback OK: "
-                        f"{response.status}"
-                    )
+    for symbol, data in safety_data.items():
 
-            except Exception as fallback_error:
+        price_change = (
+            data.get("volume_pressure", {})
+            .get("price_change_pct")
+        )
 
-                print(
-                    f"TELEGRAM ERROR: "
-                    f"{fallback_error}"
-                )
+        volume_change = (
+            data.get("volume_pressure", {})
+            .get("volume_change_pct")
+        )
 
-        # malé oneskorenie medzi správami
-        if index < len(messages) - 1:
-            time.sleep(1)
+        pressure = (
+            data.get("volume_pressure", {})
+            .get("label")
+        )
 
+        support = data.get("support")
+        price = data.get("price")
 
-# ============================================================
-# 14. ODOSLANIE ANALÝZY
-# ============================================================
+        support_break = False
 
-send_telegram(ai_analysis)
+        if (
+            price is not None
+            and support is not None
+            and price < support
+        ):
+            support_break = True
 
+        # CRITICAL
+        if (
+            pressure == "VERY_HIGH_SELL_PRESSURE"
+            or (
+                price_change is not None
+                and price_change <= -5
+            )
+            or (
+                price_change is not None
+                and price_change <= -3
+                and volume_change is not None
+                and volume_change >= 80
+            )
+        ):
+            critical.append({
+                "symbol": symbol,
+                "price_change": price_change,
+                "volume_change": volume_change,
+                "pressure": pressure,
+                "support_break": support_break,
+            })
 
-# ============================================================
-# 15. ULOŽENIE PAMÄTE
-# ============================================================
+        # WARNING
+        elif (
+            pressure in [
+                "HIGH_SELL_PRESSURE",
+                "ELEVATED_SELL_PRESSURE",
+            ]
+            or (
+                support_break
+                and price_change is not None
+                and price_change < 0
+            )
+        ):
+            warning.append({
+                "symbol": symbol,
+                "price_change": price_change,
+                "volume_change": volume_change,
+                "pressure": pressure,
+                "support_break": support_break,
+            })
 
-try:
+    # Count broad market weakness.
+    altcoin_count = len(HELD_COINS)
 
-    with open(
-        MEMORY_FILE,
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        f.write(ai_analysis)
-
-    print(
-        "Analýza úspešne uložená do "
-        f"{MEMORY_FILE}"
+    critical_ratio = (
+        len([
+            x for x in critical
+            if x["symbol"] != "BTC"
+        ]) / max(altcoin_count, 1)
     )
 
-except Exception as e:
+    warning_ratio = (
+        len([
+            x for x in warning
+            if x["symbol"] != "BTC"
+        ]) / max(altcoin_count, 1)
+    )
+
+    # CRITICAL if several held coins are collapsing.
+    market_level = "NORMAL"
+
+    if (
+        len(critical) >= 3
+        or critical_ratio >= 0.50
+    ):
+        market_level = "CRITICAL"
+
+    elif (
+        len(critical) >= 1
+        or warning_ratio >= 0.50
+    ):
+        market_level = "WARNING"
+
+    # BTC collapse makes it more serious.
+    btc = safety_data.get("BTC")
+
+    if btc:
+        btc_change = (
+            btc.get("volume_pressure", {})
+            .get("price_change_pct")
+        )
+
+        if btc_change is not None:
+            if btc_change <= -5:
+                market_level = "CRITICAL"
+
+            elif btc_change <= -3:
+                if market_level == "NORMAL":
+                    market_level = "WARNING"
+
+    state = load_state()
+
+    previous_safety = state.get(
+        "safety_level",
+        "NORMAL"
+    )
+
+    # Do not spam Telegram every 15 minutes.
+    should_alert = False
+
+    if market_level == "CRITICAL":
+        if previous_safety != "CRITICAL":
+            should_alert = True
+
+    elif market_level == "WARNING":
+        if previous_safety == "NORMAL":
+            should_alert = True
+
+    # Update state.
+    state["safety_level"] = market_level
+    state["safety_updated_utc"] = (
+        datetime.now(timezone.utc).isoformat()
+    )
+
+    save_state(state)
+
+    if should_alert:
+        message = format_safety_message(
+            market_level,
+            critical,
+            warning,
+            safety_data,
+        )
+
+        send_telegram(message)
 
     print(
-        f"CHYBA PRI UKLADANÍ PAMÄTE: {e}"
+        f"Safety level: {market_level}"
     )
 
 
-# ============================================================
-# 16. KONIEC
-# ============================================================
+# ------------------------------------------------------------
+# TELEGRAM FORMATTING
+# ------------------------------------------------------------
 
-print(
-    "=================================================="
-)
+def fmt_price(value):
+    if value is None:
+        return "N/A"
 
-print(
-    "CRYPTO AI BOT V2 – RUN COMPLETE"
-)
+    if value >= 1000:
+        return f"${value:,.0f}"
 
-print(
-    f"Time: {current_time_str}"
-)
+    if value >= 1:
+        return f"${value:,.2f}"
 
-print(
-    f"Model: {GEMINI_MODEL}"
-)
+    if value >= 0.01:
+        return f"${value:,.4f}"
 
-print(
-    "Google Search: ENABLED"
-)
+    return f"${value:.8f}"
 
-print(
-    "=================================================="
-)
+
+def format_analysis_message(
+    result,
+    coin_data,
+    fear_greed,
+):
+    now_local = datetime.now(
+        LOCAL_TZ
+    ).strftime("%d.%m.%Y %H:%M")
+
+    lines = []
+
+    lines.append(
+        f"📊 CRYPTO AI ANALYSIS V4"
+    )
+
+    lines.append(
+        f"🕒 {now_local} Bratislava"
+    )
+
+    lines.append("")
+
+    lines.append(
+        f"🌐 MARKET: {result.get('market_regime')}"
+    )
+
+    lines.append(
+        f"⚠️ RISK: {result.get('risk_level')}"
+    )
+
+    lines.append(
+        f"😨 Fear & Greed: "
+        f"{fear_greed.get('value', 'N/A')}"
+        f" ({fear_greed.get('classification', '')})"
+    )
+
+    lines.append("")
+
+    lines.append(
+        result.get(
+            "market_summary",
+            ""
+        )
+    )
+
+    lines.append("")
+
+    for coin in result.get("coins", []):
+
+        symbol = coin.get("symbol")
+
+        raw = None
+
+        for key, value in coin_data.items():
+            if value.get("symbol") == symbol:
+                raw = value
+                break
+
+        lines.append(
+            f"━━━━━━━━ {symbol} ━━━━━━━━"
+        )
+
+        if raw:
+            lines.append(
+                f"💰 Price: {fmt_price(raw.get('price'))}"
+            )
+
+            lines.append(
+                f"📈 EMA20/50/200: "
+                f"{fmt_price(raw.get('ema20'))} / "
+                f"{fmt_price(raw.get('ema50'))} / "
+                f"{fmt_price(raw.get('ema200'))}"
+            )
+
+            lines.append(
+                f"RSI: {raw.get('rsi14', 'N/A')} "
+                f"| MACD: {raw.get('macd_state', 'N/A')}"
+            )
+
+            lines.append(
+                f"Support: {fmt_price(raw.get('support'))} "
+                f"| Resistance: {fmt_price(raw.get('resistance'))}"
+            )
+
+            vp = raw.get(
+                "volume_pressure",
+                {}
+            )
+
+            lines.append(
+                f"Volume pressure: "
+                f"{vp.get('label', 'N/A')} "
+                f"({vp.get('volume_change_pct', 'N/A')}%)"
+            )
+
+        lines.append("")
+
+        lines.append(
+            f"🎯 Status: {coin.get('status')}"
+        )
+
+        lines.append(
+            f"⭐ Opportunity: "
+            f"{coin.get('opportunity_score')}%"
+        )
+
+        lines.append(
+            f"⚡ Execution: "
+            f"{coin.get('execution_score')}%"
+        )
+
+        lines.append(
+            f"🧠 Confidence: "
+            f"{coin.get('confidence')}%"
+        )
+
+        lines.append(
+            f"📊 Technical: "
+            f"{coin.get('technical_score')}%"
+        )
+
+        lines.append(
+            f"🏦 Fundamental: "
+            f"{coin.get('fundamental_score')}%"
+            f" "
+            f"(confidence "
+            f"{coin.get('fundamental_confidence')}%)"
+        )
+
+        if coin.get("status") in [
+            "NEW BUY",
+            "ADD",
+        ]:
+            lines.append("")
+
+            lines.append(
+                f"Entry: {fmt_price(coin.get('entry'))}"
+            )
+
+            lines.append(
+                f"Stop: {fmt_price(coin.get('stop'))}"
+            )
+
+            lines.append(
+                f"TP1: {fmt_price(coin.get('tp1'))}"
+            )
+
+            lines.append(
+                f"TP2: {fmt_price(coin.get('tp2'))}"
+            )
+
+            rr = coin.get("rr")
+
+            if rr:
+                lines.append(
+                    f"R:R: {rr:.2f}"
+                )
+
+            if coin.get("validation"):
+                lines.append(
+                    f"Validation: "
+                    f"{coin.get('validation')}"
+                )
+
+        lines.append("")
+
+        lines.append(
+            f"💡 {coin.get('thesis', '')}"
+        )
+
+        facts = coin.get(
+            "fundamental_facts",
+            []
+        )
+
+        if facts:
+            lines.append("")
+            lines.append("📰 FACTS:")
+
+            for fact in facts[:3]:
+                lines.append(
+                    f"• {fact}"
+                )
+
+    # New coin
+    new_coin = result.get("new_coin")
+
+    lines.append("")
+    lines.append("━━━━━━━━ NEW OPPORTUNITY ━━━━━━━━")
+
+    if new_coin:
+        lines.append(
+            f"🆕 {new_coin.get('symbol')} "
+            f"({new_coin.get('name')})"
+        )
+
+        lines.append(
+            f"Opportunity: "
+            f"{new_coin.get('opportunity_score')}%"
+        )
+
+        lines.append(
+            f"Execution: "
+            f"{new_coin.get('execution_score')}%"
+        )
+
+        lines.append(
+            f"Confidence: "
+            f"{new_coin.get('confidence')}%"
+        )
+
+        lines.append(
+            f"Reason: {new_coin.get('reason')}"
+        )
+
+    else:
+        lines.append(
+            "Žiadna nová minca momentálne "
+            "nespĺňa požadovaný pomer potenciál/riziko."
+        )
+
+    # Important changes
+    changes = result.get(
+        "important_changes",
+        []
+    )
+
+    if changes:
+        lines.append("")
+        lines.append("🔄 ZMENY:")
+
+        for change in changes[:5]:
+            lines.append(
+                f"• {change}"
+            )
+
+    return "\n".join(lines)
+
+
+def format_safety_message(
+    level,
+    critical,
+    warning,
+    safety_data,
+):
+    lines = []
+
+    if level == "CRITICAL":
+        lines.append(
+            "🚨🚨 CRYPTO SAFETY ALERT"
+        )
+
+        lines.append(
+            "🔴 MARKET SAFETY MODE: ON"
+        )
+
+        lines.append(
+            "⛔ NOVÉ BUY/ADD SIGNÁLY SÚ DOČASNE BLOKOVANÉ"
+        )
+
+    else:
+        lines.append(
+            "⚠️ CRYPTO SAFETY WARNING"
+        )
+
+    lines.append("")
+
+    lines.append(
+        "Trh vykazuje zvýšený predajný tlak."
+    )
+
+    lines.append("")
+
+    affected = critical + warning
+
+    for item in affected:
+        symbol = item["symbol"]
+
+        lines.append(
+            f"🔻 {symbol}: "
+            f"{item['price_change']}% / 1h | "
+            f"volume proxy "
+            f"{item['volume_change']}% | "
+            f"{item['pressure']}"
+        )
+
+        if item.get("support_break"):
+            lines.append(
+                "   ⚠️ SUPPORT PRERAZENÝ"
+            )
+
+    lines.append("")
+
+    lines.append(
+        "📌 Poznámka: volume pressure je "
+        "proxy, nie priamy buy/sell order-flow."
+    )
+
+    lines.append("")
+
+    lines.append(
+        "Ak sa tlak zvyšuje, pravidelný bot "
+        "nebude otvárať nové BUY/ADD pozície."
+    )
+
+    return "\n".join(lines)
+
+
+# ------------------------------------------------------------
+# TELEGRAM
+# ------------------------------------------------------------
+
+def send_telegram(message):
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        print("Telegram secrets missing.")
+        return
+
+    url = (
+        f"https://api.telegram.org/bot"
+        f"{TELEGRAM_TOKEN}/sendMessage"
+    )
+
+    # Telegram limit ~4096 chars.
+    chunks = []
+
+    while len(message) > 3900:
+        cut = message.rfind(
+            "\n",
+            0,
+            3900
+        )
+
+        if cut < 1000:
+            cut = 3900
+
+        chunks.append(
+            message[:cut]
+        )
+
+        message = message[cut:]
+
+    chunks.append(message)
+
+    for chunk in chunks:
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": chunk,
+        }
+
+        try:
+            http_post_json(
+                url,
+                payload,
+                timeout=30,
+            )
+
+        except Exception as e:
+            print(
+                "Telegram error:",
+                e
+            )
+
+
+# ------------------------------------------------------------
+# MAIN
+# ------------------------------------------------------------
+
+def main():
+
+    if not GEMINI_API_KEY:
+        raise RuntimeError(
+            "Missing GEMINI_API_KEY"
+        )
+
+    if RUN_MODE == "safety":
+        run_safety_monitor()
+        return
+
+    run_analysis()
+
+
+if __name__ == "__main__":
+    main()
