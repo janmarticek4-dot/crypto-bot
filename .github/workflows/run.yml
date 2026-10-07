@@ -1,7 +1,6 @@
-name: Crypto AI Bot V5.1
+name: Crypto AI Bot V5.3
 
 on:
-
   # Safety Monitor každých 15 minút.
   # Hlavný report si Python rozhodne podľa času.
   schedule:
@@ -47,24 +46,27 @@ jobs:
 
 
       # ------------------------------------------------------
+      # Install Dependencies
+      # ------------------------------------------------------
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install google-genai
+
+
+      # ------------------------------------------------------
       # Run bot
       # ------------------------------------------------------
 
-      - name: Run Crypto AI Bot V5.1
+      - name: Run Crypto AI Bot V5.3
         env:
-
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis }}
-
         run: |
-
           python main.py
 
 
@@ -74,21 +76,12 @@ jobs:
 
       - name: Save bot state
         run: |
-
           if [ -f bot_state.json ]; then
-
             git config --global user.name "crypto-ai-bot"
-
             git config --global user.email "crypto-ai-bot@users.noreply.github.com"
-
             git add bot_state.json
-
             git diff --cached --quiet || git commit -m "Update crypto bot state"
-
             git push
-
           else
-
             echo "bot_state.json neexistuje - nič sa neukladá."
-
           fi
