@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.5 (Chat API + Gemini 3.8 Flash)
+# CRYPTO AI BOT V5.6 (Stable GenerateContent + Safety OFF)
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
@@ -130,7 +130,7 @@ def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=4):
 # ============================================================
 
 def coingecko_headers():
-    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.5"}
+    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.6"}
     if COINGECKO_API_KEY:
         headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
     return headers
@@ -357,7 +357,7 @@ def get_market_global():
 
 def get_fear_greed():
     try:
-        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.5"})
+        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.6"})
         item = data["data"][0]
         return {"value": int(item["value"]), "classification": item["value_classification"], "timestamp": item.get("timestamp")}
     except Exception as e:
@@ -401,7 +401,7 @@ def market_safety(global_data, simple_prices):
 
 
 def get_rss_news():
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.5)"}
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.6)"}
     all_items = []
     for source_name, url in RSS_FEEDS:
         try:
@@ -432,12 +432,10 @@ def get_rss_news():
 
 
 # ============================================================
-# GEMINI JSON PARSER & CHAT API
+# GEMINI JSON PARSER & SDK CALL
 # ============================================================
 
 def parse_json_output(text):
-    if not text:
-        raise RuntimeError("Gemini neposlal výstup.")
     text = text.strip()
     text = re.sub(r"^```json\s*", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*```$", "", text)
@@ -462,25 +460,36 @@ def gemini_analyze(prompt):
     if not GEMINI_API_KEY:
         raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
 
-    print("Spúšťam Gemini analýzu (Chat API) cez official google-genai SDK...")
+    print("Spúšťam stabilnú Gemini analýzu cez official google-genai SDK...")
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-    # Použitie Chat prístupu kvôli integrácii Google Search nástroja,
-    # ako priamo odporúča Google v chybovej hláške "AFC in Chat.send_message"
-    chat = client.chats.create(
-        model=GEMINI_MODEL,
-        config={
-            "tools": [{"google_search": {}}],
-            "response_mime_type": "application/json",
-            "temperature": 0.2,
-        }
-    )
-
-    response = chat.send_message(prompt)
+    try:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config={
+                "tools": [{"google_search": {}}],
+                "response_mime_type": "application/json",
+                "temperature": 0.2,
+                # Úplné vypnutie filtrov aby sme predišli empty response
+                "safety_settings": [
+                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+                ]
+            }
+        )
+    except Exception as e:
+        raise RuntimeError(f"Chyba pri volaní Gemini API: {e}")
 
     output_text = response.text
+
     if not output_text:
-        raise RuntimeError("Gemini vrátil prázdnu textovú odpoveď.")
+        reason = "Neznámy"
+        if getattr(response, "candidates", None) and len(response.candidates) > 0:
+            reason = getattr(response.candidates[0], "finish_reason", reason)
+        raise RuntimeError(f"Gemini vrátil prázdnu odpoveď. Finish reason: {reason}. Možný zásah safety filtra alebo interná chyba modelu.")
 
     return parse_json_output(output_text)
 
@@ -528,7 +537,7 @@ For every portfolio coin determine action (BUY NOW, BUY PULLBACK, HOLD, REDUCE, 
 
 Analyze shortlisted new coins. Choose AT MOST ONE new coin, or set new_coin = "NO TRADE". Do NOT recommend APT.
 
-Return ONLY a valid JSON object matching this structure:
+Return ONLY a valid JSON object matching this strict structure:
 {{
   "market_regime": "bullish|neutral|corrective|bearish|capitulation",
   "market_summary": "string",
@@ -626,7 +635,7 @@ def format_bot_message(analysis, safety, fear_greed):
             f"<b>BUY 2:</b> {clean_html(coin.get('buy_zone_2', 'N/A'))}",
             f"<b>Invalidácia:</b> {clean_html(coin.get('invalidation', 'N/A'))}",
             f"<b>TP1:</b> {clean_html(coin.get('tp1', 'N/A'))} | <b>TP2:</b> {clean_html(coin.get('tp2', 'N/A'))}",
-            f"<b>R:R:</b> {clean_html(coin.get('risk_reward', 'N/A'))} | <b>Technika:</b> {coin.get('technical_score', 'N/A')}/10 | <b>Fundament:</b> {coin.get('fundamental_score', 'N/A')}/10",
+            f"<b>R:R:</b> {clean_html(coin.get('risk_reward', 'N/A'))} | <b>Technika:</b> {clean_html(coin.get('technical_score', 'N/A')}/10 | <b>Fundament:</b> {clean_html(coin.get('fundamental_score', 'N/A')}/10",
             f"<i>{clean_html(coin.get('reason', ''))}</i>",
             ""
         ])
@@ -687,7 +696,7 @@ def save_state(state):
 # ============================================================
 
 def main():
-    print("Crypto bot V5.5:", iso_now())
+    print("Crypto bot V5.6:", iso_now())
     if not GEMINI_API_KEY:
         raise RuntimeError("Chýba GEMINI_API_KEY.")
 
@@ -741,7 +750,7 @@ def main():
         telegram_send(message)
         time.sleep(1)
 
-    print("Crypto bot V5.5 finished successfully.")
+    print("Crypto bot V5.6 finished successfully.")
 
 
 if __name__ == "__main__":
