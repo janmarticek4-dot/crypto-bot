@@ -1,7 +1,7 @@
 {
   "safety_level": "NORMAL",
   "safety_updated_utc": "2026-10-07T12:14:27.806941+00:00",
-  "safety_state": "WARNING",
+  "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL"
 }
