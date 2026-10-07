@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.4 (Opravené cez official google-genai SDK)
+# CRYPTO AI BOT V5.5 (Chat API + Gemini 3.8 Flash)
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
@@ -21,7 +21,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "").strip()
 
-GEMINI_MODEL = "gemini-2.5-flash"  # Alebo gemini-3.8-flash podla dostupnosti
+GEMINI_MODEL = "gemini-3.8-flash"
 
 REQUEST_TIMEOUT = 120
 STATE_FILE = "bot_state.json"
@@ -130,7 +130,7 @@ def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=4):
 # ============================================================
 
 def coingecko_headers():
-    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.4"}
+    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.5"}
     if COINGECKO_API_KEY:
         headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
     return headers
@@ -357,7 +357,7 @@ def get_market_global():
 
 def get_fear_greed():
     try:
-        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.4"})
+        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.5"})
         item = data["data"][0]
         return {"value": int(item["value"]), "classification": item["value_classification"], "timestamp": item.get("timestamp")}
     except Exception as e:
@@ -401,7 +401,7 @@ def market_safety(global_data, simple_prices):
 
 
 def get_rss_news():
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.4)"}
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.5)"}
     all_items = []
     for source_name, url in RSS_FEEDS:
         try:
@@ -432,7 +432,7 @@ def get_rss_news():
 
 
 # ============================================================
-# GEMINI JSON PARSER & SDK CALL
+# GEMINI JSON PARSER & CHAT API
 # ============================================================
 
 def parse_json_output(text):
@@ -462,19 +462,21 @@ def gemini_analyze(prompt):
     if not GEMINI_API_KEY:
         raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
 
-    print("Spúšťam Gemini analýzu cez official google-genai SDK...")
+    print("Spúšťam Gemini analýzu (Chat API) cez official google-genai SDK...")
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-    # Použitie stabilného endpointu models.generate_content s JSON výstupom a Google Search
-    response = client.models.generate_content(
+    # Použitie Chat prístupu kvôli integrácii Google Search nástroja,
+    # ako priamo odporúča Google v chybovej hláške "AFC in Chat.send_message"
+    chat = client.chats.create(
         model=GEMINI_MODEL,
-        contents=prompt,
         config={
             "tools": [{"google_search": {}}],
             "response_mime_type": "application/json",
             "temperature": 0.2,
         }
     )
+
+    response = chat.send_message(prompt)
 
     output_text = response.text
     if not output_text:
@@ -685,7 +687,7 @@ def save_state(state):
 # ============================================================
 
 def main():
-    print("Crypto bot V5.4:", iso_now())
+    print("Crypto bot V5.5:", iso_now())
     if not GEMINI_API_KEY:
         raise RuntimeError("Chýba GEMINI_API_KEY.")
 
@@ -739,7 +741,7 @@ def main():
         telegram_send(message)
         time.sleep(1)
 
-    print("Crypto bot V5.4 finished successfully.")
+    print("Crypto bot V5.5 finished successfully.")
 
 
 if __name__ == "__main__":
