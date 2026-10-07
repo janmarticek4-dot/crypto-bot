@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.7 (Opravený SyntaxError v zátvorkách)
+# CRYPTO AI BOT V5.8 (Chat API + Google Search + Telegram Fallback)
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
@@ -130,7 +130,7 @@ def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=4):
 # ============================================================
 
 def coingecko_headers():
-    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.7"}
+    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.8"}
     if COINGECKO_API_KEY:
         headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
     return headers
@@ -357,7 +357,7 @@ def get_market_global():
 
 def get_fear_greed():
     try:
-        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.7"})
+        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.8"})
         item = data["data"][0]
         return {"value": int(item["value"]), "classification": item["value_classification"], "timestamp": item.get("timestamp")}
     except Exception as e:
@@ -401,7 +401,7 @@ def market_safety(global_data, simple_prices):
 
 
 def get_rss_news():
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.7)"}
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.8)"}
     all_items = []
     for source_name, url in RSS_FEEDS:
         try:
@@ -432,7 +432,7 @@ def get_rss_news():
 
 
 # ============================================================
-# GEMINI JSON PARSER & SDK CALL
+# GEMINI JSON PARSER & CHAT API CALL
 # ============================================================
 
 def parse_json_output(text):
@@ -460,35 +460,25 @@ def gemini_analyze(prompt):
     if not GEMINI_API_KEY:
         raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
 
-    print("Spúšťam stabilnú Gemini analýzu cez official google-genai SDK...")
+    print("Spúšťam Gemini analýzu cez Chat API (odporúčaný prístup s Google Search)...")
     client = genai.Client(api_key=GEMINI_API_KEY)
 
     try:
-        response = client.models.generate_content(
+        chat = client.chats.create(
             model=GEMINI_MODEL,
-            contents=prompt,
             config={
                 "tools": [{"google_search": {}}],
                 "response_mime_type": "application/json",
                 "temperature": 0.2,
-                "safety_settings": [
-                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
-                ]
             }
         )
+        response = chat.send_message(prompt)
     except Exception as e:
-        raise RuntimeError(f"Chyba pri volaní Gemini API: {e}")
+        raise RuntimeError(f"Chyba pri volaní Gemini Chat API: {e}")
 
     output_text = response.text
-
     if not output_text:
-        reason = "Neznámy"
-        if getattr(response, "candidates", None) and len(response.candidates) > 0:
-            reason = getattr(response.candidates[0], "finish_reason", reason)
-        raise RuntimeError(f"Gemini vrátil prázdnu odpoveď. Finish reason: {reason}. Možný zásah safety filtra alebo interná chyba modelu.")
+        raise RuntimeError("Gemini cez Chat API vrátil prázdnu textovú odpoveď.")
 
     return parse_json_output(output_text)
 
@@ -580,7 +570,7 @@ def telegram_send(text):
         
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     
-    # Pokus 1: Odoslanie s HTML formátovaním
+    # Pokus 1: HTML formátovanie
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True}
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
@@ -591,7 +581,7 @@ def telegram_send(text):
     except Exception as e:
         print(f"Telegram HTML error: {e}. Skúšam fallback bez HTML...")
         
-        # Pokus 2: Fallback na čistý text (ak Telegram odmietne HTML kvôli špeciálnym znakom)
+        # Pokus 2: Čistý text fallback
         fallback_payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "disable_web_page_preview": True}
         fallback_body = json.dumps(fallback_payload, ensure_ascii=False).encode("utf-8")
         fallback_req = urllib.request.Request(url, data=fallback_body, headers={"Content-Type": "application/json"}, method="POST")
@@ -712,7 +702,7 @@ def save_state(state):
 # ============================================================
 
 def main():
-    print("Crypto bot V5.7:", iso_now())
+    print("Crypto bot V5.8:", iso_now())
     if not GEMINI_API_KEY:
         raise RuntimeError("Chýba GEMINI_API_KEY.")
 
@@ -766,7 +756,7 @@ def main():
         telegram_send(message)
         time.sleep(1)
 
-    print("Crypto bot V5.7 finished successfully.")
+    print("Crypto bot V5.8 finished successfully.")
 
 
 if __name__ == "__main__":
