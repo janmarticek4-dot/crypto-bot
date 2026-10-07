@@ -1,66 +1,101 @@
 name: Crypto AI Bot
 
 on:
+
+  # Spúšťanie každých 15 minút.
+  # Samotný Python rozhodne, či má robiť
+  # Safety Monitor alebo hlavnú analýzu.
   schedule:
-    # Main analysis checker every hour
-    - cron: "0 * * * *"
-
-    # Safety monitor every 15 minutes
     - cron: "*/15 * * * *"
+      timezone: "Europe/Bratislava"
 
+  # Umožní ručné spustenie z GitHubu.
   workflow_dispatch:
+    inputs:
+
+      manual_analysis:
+        description: "Spustiť okamžitú hlavnú analýzu?"
+        required: false
+        default: false
+        type: boolean
+
 
 permissions:
   contents: write
 
+
 jobs:
 
   crypto-bot:
+
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout
+      # =========================================
+      # 1. Stiahnuť repository
+      # =========================================
+
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+
+      # =========================================
+      # 2. Python
+      # =========================================
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
 
-      - name: Decide run mode
-        id: mode
-        run: |
-          MINUTE=$(date -u +%M)
-
-          if [ "$MINUTE" = "00" ]; then
-            echo "mode=analysis" >> $GITHUB_OUTPUT
-          else
-            echo "mode=safety" >> $GITHUB_OUTPUT
-          fi
+      # =========================================
+      # 3. Spustiť bot
+      # =========================================
 
       - name: Run Crypto AI Bot
+
         env:
+
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-          RUN_MODE: ${{ steps.mode.outputs.mode }}
+
+          MANUAL_ANALYSIS: ${{ inputs.manual_analysis }}
+
         run: |
+
           python main.py
 
+
+      # =========================================
+      # 4. Uložiť stav Safety Monitor
+      # =========================================
+
       - name: Save bot state
+
         run: |
-          git config --global user.name "crypto-ai-bot"
-          git config --global user.email "crypto-ai-bot@users.noreply.github.com"
 
-          git add bot_state.json
+          if [ -f bot_state.json ]; then
 
-          git diff --cached --quiet || \
-            git commit -m "Update crypto bot state"
+            git config --global user.name "crypto-ai-bot"
 
-          git push
+            git config --global user.email "crypto-ai-bot@users.noreply.github.com"
+
+            git add bot_state.json
+
+            git diff --cached --quiet || \
+              git commit -m "Update crypto bot state"
+
+            git push
+
+          else
+
+            echo "bot_state.json neexistuje - nič sa neukladá."
+
+          fi
