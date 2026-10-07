@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravená)
+# CRYPTO AI BOT V5.3 (Slovenská verzia - Plain Text Telegram)
 # ============================================================
 # CoinGecko
 # Alternative.me Fear & Greed
@@ -714,37 +714,3 @@ def technical_summary(candles):
             else None
         ),
         "above_ema200": (
-            current > e200
-            if e200 is not None
-            else None
-        ),
-    }
-
-
-def recent_returns(closes):
-
-    if not closes:
-        return {}
-
-    current = closes[-1]
-
-    periods = {
-        "24h": 6,
-        "7d": 42,
-        "30d": 180,
-    }
-
-    result = {}
-
-    for name, bars in periods.items():
-
-        if len(closes) > bars:
-
-            old = closes[
-                -bars - 1
-            ]
-
-            result[name] = pct_change(
-                old,
-                current
-            )
