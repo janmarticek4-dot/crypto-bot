@@ -1,57 +1,57 @@
 📊 **CRYPTO MARKET UPDATE (4H)**
-🕐 2026-10-07 00:08:35 UTC
+🕐 2026-10-07 04:06:52 UTC
 
 🌍 **MAKRO & SENTIMENT**
 - BTC Regime: **BULLISH**
-- Trh: Trh naďalej konsoliduje v úzkych pásmach pod lokálnymi rezistenciami pri stabilnej nákupnej podpore na hlavných kľúčových úrovniach.
-- Fear & Greed: 71/100 (Greed) – trhový sentiment zostáva v pásme kontrolovaného optimizmu bez náznakov paniky či nezdravej eufórie.
-- Správy: Právny spor Conduit vs. Tether o zmrazené prostriedky vnáša lokálnu opatrnosť do stablecoinového sektora, no inštitucionálna chuť pretrváva podporená novými ETF iniciatívami a úspešnou aktiváciou testnet upgradu Glamsterdam na Ethereu.
+- Trh: Trh prechádza plošnou 4-hodinovou korekciou, pričom hlavné aktíva testujú bezprostredné lokálne supporty v rámci širšieho rastúceho trendu.
+- Fear & Greed: 71/100 (Greed) – trhový sentiment zostáva v hladine stabilného optimizmu napriek krátkodobému vyberaniu ziskov.
+- Správy: Nemecký BaFin zamietol MiCA licenciu pre dcérsku spoločnosť Bitcoin.de, zatiaľ čo platobná platforma Conduit zažalovala Tether za neoprávnené zmrazenie 2,8 mil. USD v USDT, čo lokálne zvyšuje regulačnú opatrnosť.
 
 🔥 **PORTFÓLIO & WATCHLIST**
 
-- **BTC** ($85,468.00) | Bias: **HOLD** | Conf: 85%
-  - Tech Skóre: 80/100 | Fundament Skóre: 88/100
-  - Analýza: Cena pokračuje v bezpečnej akumulácii v koridore $85,000–$86,500 s minimálnym predajným tlakom.
-  - Exekúcia: HOLD – držať existujúcu expozíciu; pre ADD vyčkať na prieraz a udržanie nad rezistenciou $87,000.
+- **BTC** ($84,189.00) | Bias: **HOLD** | Conf: 83%
+  - Tech Skóre: 78/100 | Fundament Skóre: 88/100
+  - Analýza: Pullback z $86,400 nachádza prvotnú podporu priamo na hranici $84,000, pričom kľúčová štruktúra nad $83,200 zostáva plne zachovaná.
+  - Exekúcia: HOLD – držať existujúcu pozíciu; pre ADD vyčkať na potvrdený odraz z pásma $83,200–$84,000 alebo prieraz nad $87,000.
 
-- **ETH** ($2,695.63) | Bias: **WAIT** | Conf: 70%
-  - Tech Skóre: 61/100 | Fundament Skóre: 81/100
-  - Analýza: Glamsterdam na testnete Sepolia potvrdzuje dlhodobý vývoj, no spotový kurz zostáva zovretý tesne pod psychologickou hranicou $2,700.
-  - Exekúcia: Wait for: potvrdené uzatvorenie 4H sviečky nad $2,750 alebo korekčný retest nákupnej zóny $2,640–$2,650.
+- **ETH** ($2,613.18) | Bias: **WAIT** | Conf: 68%
+  - Tech Skóre: 58/100 | Fundament Skóre: 80/100
+  - Analýza: Pokles pod $2,650 prehlbuje zaostávanie voči trhu a tlačí cenu k otestovaniu spodnej hranice podpory $2,600.
+  - Exekúcia: Wait for: ubránenie supportu $2,600 a následné potvrdené 4H uzatvorenie nad $2,650 pred uvažovaním o vstupe.
 
-- **SOL** ($120.46) | Bias: **HOLD** | Conf: 78%
-  - Tech Skóre: 73/100 | Fundament Skóre: 83/100
-  - Analýza: Solana rešpektuje kľúčový support $120.00 bez distribučného objemu, čo potvrdzuje pokračovanie bočného trendu.
-  - Exekúcia: HOLD – držať otvorenú pozíciu; dokúpenie zvážiť až po prieraze a reteste hladiny $123.00.
+- **SOL** ($118.29) | Bias: **HOLD** | Conf: 76%
+  - Tech Skóre: 70/100 | Fundament Skóre: 83/100
+  - Analýza: Mierny pokles pod $120 smeruje k testu silnej podpory $117.00–$118.00 bez prítomnosti agresívneho predajného objemu.
+  - Exekúcia: HOLD – držať existujúcu expozíciu so stop úrovňou pod $115.00; nové nákupy realizovať až po návrate nad $121.50.
 
-- **TAO** ($309.12) | Bias: **HOLD** | Conf: 76%
-  - Tech Skóre: 71/100 | Fundament Skóre: 79/100
-  - Analýza: Odraz z pásma $300 potvrdil nákupný záujem, avšak cena zostáva v širšom pásme konsolidácie pod $315.
-  - Exekúcia: HOLD – držať pozíciu nad zónou $295–$300; neotvárať nové vstupy pred breakoutom nad $315.00.
+- **TAO** ($292.90) | Bias: **HOLD** | Conf: 73%
+  - Tech Skóre: 67/100 | Fundament Skóre: 79/100
+  - Analýza: Korekcia pod psychologických $300 smeruje do dopytovej zóny $286–$292, kde minule nastal silný nákupný odraz.
+  - Exekúcia: HOLD – zachovať existujúcu pozíciu a sledovať reakciu na supporte $286.00; do prebiehajúceho poklesu nepridávať.
 
-- **FET** ($0.2390) | Bias: **HOLD** | Conf: 69%
-  - Tech Skóre: 68/100 | Fundament Skóre: 72/100
-  - Analýza: Denný pokles testuje likviditu okolo $0.238, pričom strednodobá rastúca štruktúra na 30-dňovom horizonte zostáva neporušená.
-  - Exekúcia: HOLD – zachovať trpezlivosť a držať existujúcu pozíciu so stop-lossom ukotveným pod $0.2280.
+- **FET** ($0.2300) | Bias: **HOLD** | Conf: 65%
+  - Tech Skóre: 63/100 | Fundament Skóre: 71/100
+  - Analýza: Výraznejší denný pokles (-8.3%) tlačí cenu tesne k validačnej úrovni trendu na $0.225–$0.228.
+  - Exekúcia: HOLD – držať existujúcu pozíciu s prísnou ochranou pod $0.2240; prísny zákaz dokupovania (ADD) bez potvrdeného obratu.
 
-- **AAVE** ($178.90) | Bias: **HOLD** | Conf: 82%
-  - Tech Skóre: 80/100 | Fundament Skóre: 84/100
-  - Analýza: Zdravý pullback pod $180 predstavuje bežné vyberanie ziskov po silnom 30-dňovom rally (+33.9%) bez narušenia trendu.
-  - Exekúcia: HOLD – držať pozíciu; čiastočný Take Profit smerovať do rezistenčného pásma $195–$200.
+- **AAVE** ($173.33) | Bias: **HOLD** | Conf: 80%
+  - Tech Skóre: 77/100 | Fundament Skóre: 84/100
+  - Analýza: Zdravý retest supportu $170–$173 po silnom 30-dňovom náraste (+29.4%) ponúka stabilnú bázu pre ďalší rast.
+  - Exekúcia: HOLD – držať pozíciu bez unáhlených zásahov; čiastočný Take Profit smerovať k hladine $185–$190.
 
-- **RENDER** ($2.14) | Bias: **WAIT** | Conf: 72%
-  - Tech Skóre: 78/100 | Fundament Skóre: 74/100
-  - Analýza: AI rendering token si udržuje silné momentum, no naráža priamo do rezistencie $2.16–$2.20 s nepriaznivým okamžitým pomerom R:R.
-  - Exekúcia: Wait for: potvrdený breakout a retest hladiny $2.20 do supportu, alebo hlbší pullback k $1.98–$2.00.
+- **RENDER** ($2.05) | Bias: **WAIT** | Conf: 74%
+  - Tech Skóre: 76/100 | Fundament Skóre: 74/100
+  - Analýza: Token potvrdzuje vysokú relatívnu silu voči celému trhu (+1.1% 24H), no po odmietnutí na $2.16 hľadá stabilitu nad $2.00.
+  - Exekúcia: Wait for: úspešné otestovanie a konsolidáciu v zóne $1.98–$2.02 pred zvažovaním nového vstupu.
 
-- **ONDO** ($0.4909) | Bias: **WAIT** | Conf: 66%
-  - Tech Skóre: 61/100 | Fundament Skóre: 78/100
-  - Analýza: RWA segment momentálne zaostáva a cena sa naďalej neúspešne snaží stabilizovať nad hranicou $0.50.
-  - Exekúcia: Wait for: návrat a udržanie nad $0.515 alebo konsolidáciu na supportnom dne okolo $0.465.
+- **ONDO** ($0.4682) | Bias: **WAIT** | Conf: 64%
+  - Tech Skóre: 58/100 | Fundament Skóre: 77/100
+  - Analýza: RWA sektor pokračuje v distribúcii a cena prepadla priamo na kľúčovú supportnú úroveň $0.465 bez náznaku odrazu.
+  - Exekúcia: Wait for: zastavenie poklesu na $0.465 a vytvorenie jednoznačnej reverznej formácie; zatiaľ bez vstupu.
 
 🧠 **FINAL VERDICT**
 
 - Najlepší Risk/Reward: **AAVE**
 - Najslabší setup: **ONDO**
 - BTC režim: **BULLISH**
-- Zmena oproti minulej analýze: Bez významnej zmeny – trhová štruktúra zostáva rovnaká.
+- Zmena oproti minulej analýze: Bez významnej zmeny – trhová štruktúra zostáva rovnaká napriek lokálnemu korekčnému pullbacku.
