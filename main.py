@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravená syntax)
+# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravené store=True)
 # ============================================================
 
 
@@ -667,9 +667,9 @@ def technical_summary(candles):
         "ema200": e200,
         "rsi14": rsi(closes, 14),
         "macd": macd(closes),
-        "above_ema20": current > e20 if e20 is not None else None,
-        "above_ema50": current > e50 if e50 is not None else None,
-        "above_ema200": current > e200 if e200 is not None else None,
+        "above_ema20": (current > e20 if e20 is not None else None),
+        "above_ema50": (current > e50 if e50 is not None else None),
+        "above_ema200": (current > e200 if e200 is not None else None),
     }
 
 
@@ -1200,7 +1200,7 @@ def gemini_analyze(prompt):
             "thinking_level": "high"
         },
 
-        store=False,
+        store=True,  # <--- OPRAVENÉ NA TRUE
 
         timeout=120,
     )
