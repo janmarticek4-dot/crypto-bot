@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravené store=True)
+# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravené percentá)
 # ============================================================
 
 
@@ -1200,7 +1200,7 @@ def gemini_analyze(prompt):
             "thinking_level": "high"
         },
 
-        store=True,  # <--- OPRAVENÉ NA TRUE
+        store=True,
 
         timeout=120,
     )
@@ -1420,8 +1420,8 @@ Give:
 - TP1
 - TP2
 - risk/reward
-- bull probability
-- bear probability
+- bull probability (celé číslo 0 až 100 v percentách, napr. 65 pre 65%)
+- bear probability (celé číslo 0 až 100 v percentách, napr. 35 pre 35%)
 - technical score 0-10
 - fundamental score 0-10
 - short reason (PO SLOVENSKY)
@@ -1798,6 +1798,12 @@ def format_bot_message(
                 "bear_probability"
             )
         )
+
+        # Poistka: Ak by model vrátil desatinné číslo od 0 do 1, premeníme ho na percentá
+        if bull is not None and 0 < bull <= 1.0:
+            bull *= 100
+        if bear is not None and 0 < bear <= 1.0:
+            bear *= 100
 
         if bull is not None:
 
