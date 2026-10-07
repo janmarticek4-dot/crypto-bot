@@ -1,38 +1,66 @@
-name: Run Crypto Bot
+name: Crypto AI Bot
+
 on:
   schedule:
-    - cron: '0 */4 * * *'
+    # Main analysis checker every hour
+    - cron: "0 * * * *"
+
+    # Safety monitor every 15 minutes
+    - cron: "*/15 * * * *"
+
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  run-script:
+
+  crypto-bot:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install --upgrade google-generativeai
+        run: |
+          pip install --upgrade pip
 
-      - name: Run script
+      - name: Decide run mode
+        id: mode
+        run: |
+          MINUTE=$(date -u +%M)
+
+          if [ "$MINUTE" = "00" ]; then
+            echo "mode=analysis" >> $GITHUB_OUTPUT
+          else
+            echo "mode=safety" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Crypto AI Bot
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python main.py
-
-      - name: Uloženie pamäte bota
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          RUN_MODE: ${{ steps.mode.outputs.mode }}
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add last_analysis.txt || echo "Súbor ešte neexistuje"
-          git commit -m "Update bot memory" || echo "Žiadna zmena v pamäti"
+          python main.py
+
+      - name: Save bot state
+        run: |
+          git config --global user.name "crypto-ai-bot"
+          git config --global user.email "crypto-ai-bot@users.noreply.github.com"
+
+          git add bot_state.json
+
+          git diff --cached --quiet || \
+            git commit -m "Update crypto bot state"
+
           git push
