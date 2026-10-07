@@ -13,17 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.3 (Slovenská verzia - Plain Text Telegram)
-# ============================================================
-# CoinGecko
-# Alternative.me Fear & Greed
-# CoinTelegraph + CoinDesk RSS
-# Gemini 3.8 Flash
-# Gemini Interactions API
-# Background execution
-# Google Search
-# Telegram
-# bot_state.json
+# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravená syntax)
 # ============================================================
 
 
@@ -657,60 +647,12 @@ def technical_summary(candles):
             )
         }
 
-    ema20 = ema(
-        closes,
-        20
-    )
-
-    ema50 = ema(
-        closes,
-        50
-    )
-
-    ema100 = ema(
-        closes,
-        100
-    )
-
-    ema200 = ema(
-        closes,
-        200
-    )
+    ema20 = ema(closes, 20)
+    ema50 = ema(closes, 50)
+    ema100 = ema(closes, 100)
+    ema200 = ema(closes, 200)
 
     current = closes[-1]
 
-    e20 = last_valid(
-        ema20
-    )
-
+    e20 = last_valid(ema20)
     e50 = last_valid(
-        ema50
-    )
-
-    e100 = last_valid(
-        ema100
-    )
-
-    e200 = last_valid(
-        ema200
-    )
-
-    return {
-        "price": current,
-        "ema20": e20,
-        "ema50": e50,
-        "ema100": e100,
-        "ema200": e200,
-        "rsi14": rsi(closes, 14),
-        "macd": macd(closes),
-        "above_ema20": (
-            current > e20
-            if e20 is not None
-            else None
-        ),
-        "above_ema50": (
-            current > e50
-            if e50 is not None
-            else None
-        ),
-        "above_ema200": (
