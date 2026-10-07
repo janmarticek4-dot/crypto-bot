@@ -2,35 +2,34 @@ import os
 import json
 import time
 import re
-import math
 import urllib.request
 import urllib.parse
 import urllib.error
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
-
-# ============================================================
-# CRYPTO AI BOT V5.2
-# ============================================================
-# - CoinGecko market + technical data
-# - Alternative.me Fear & Greed
-# - RSS news with fallback
-# - Gemini 3.8 Flash Interactions API
-# - Gemini background execution + polling
-# - Google Search grounding
-# - thinking_level = high
-# - NO temperature / top_p / top_k / thinking_budget
-# - Telegram
-# - bot_state.json
-# - FET corrected to fetch-ai
-# ============================================================
+from google import genai
 
 
-# =========================
+# ============================================================
+# CRYPTO AI BOT V5.3
+# ============================================================
+# CoinGecko
+# Alternative.me Fear & Greed
+# CoinTelegraph + CoinDesk RSS
+# Gemini 3.8 Flash
+# Gemini Interactions API
+# Background execution
+# Google Search
+# Telegram
+# bot_state.json
+# ============================================================
+
+
+# ============================================================
 # CONFIG
-# =========================
+# ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -45,14 +44,12 @@ POLL_INTERVAL = 5
 
 STATE_FILE = "bot_state.json"
 
-MANUAL_ANALYSIS = os.getenv("MANUAL_ANALYSIS", "false").lower() == "true"
-
 TZ = ZoneInfo("Europe/Bratislava")
 
 
-# =========================
+# ============================================================
 # PORTFOLIO
-# =========================
+# ============================================================
 
 PORTFOLIO = {
     "AAVE": "aave",
@@ -64,9 +61,9 @@ PORTFOLIO = {
 }
 
 
-# =========================
+# ============================================================
 # CANDIDATES
-# =========================
+# ============================================================
 
 CANDIDATES = [
     "sui",
@@ -84,19 +81,25 @@ CANDIDATES = [
 ]
 
 
-# =========================
-# RSS SOURCES
-# =========================
+# ============================================================
+# RSS
+# ============================================================
 
 RSS_FEEDS = [
-    ("CoinTelegraph", "https://cointelegraph.com/rss"),
-    ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/"),
+    (
+        "CoinTelegraph",
+        "https://cointelegraph.com/rss"
+    ),
+    (
+        "CoinDesk",
+        "https://www.coindesk.com/arc/outboundfeeds/rss/"
+    ),
 ]
 
 
-# =========================
-# HELPERS
-# =========================
+# ============================================================
+# BASIC HELPERS
+# ============================================================
 
 def now_local():
     return datetime.now(TZ)
@@ -115,43 +118,59 @@ def safe_float(value, default=None):
         return default
 
 
-def clamp(value, low, high):
-    return max(low, min(high, value))
-
-
 def pct_change(old, new):
     if old in (None, 0) or new is None:
         return None
+
     return ((new - old) / old) * 100.0
 
 
-# =========================
+# ============================================================
 # HTTP
-# =========================
+# ============================================================
 
-def http_get_request(req, timeout=REQUEST_TIMEOUT, retries=4):
+def http_request(
+    req,
+    timeout=REQUEST_TIMEOUT,
+    retries=4
+):
     last_error = None
 
     for attempt in range(retries):
+
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as response:
+            with urllib.request.urlopen(
+                req,
+                timeout=timeout
+            ) as response:
+
                 return response.read()
 
         except urllib.error.HTTPError as e:
+
             last_error = e
 
             print(
                 f"HTTP {e.code} "
-                f"(pokus {attempt + 1}/{retries}): {e.reason}"
+                f"(pokus {attempt + 1}/{retries}): "
+                f"{e.reason}"
             )
 
-            # 404 / 403 etc. nema zmysel donekonecna retryovat.
-            if e.code in {400, 401, 403, 404}:
+            if e.code in {
+                400,
+                401,
+                403,
+                404
+            }:
                 raise
 
             if attempt < retries - 1:
                 wait = 2 ** attempt
-                print(f"Retry o {wait} sekúnd...")
+
+                print(
+                    f"Retry o {wait} sekúnd..."
+                )
+
                 time.sleep(wait)
 
         except (
@@ -160,22 +179,31 @@ def http_get_request(req, timeout=REQUEST_TIMEOUT, retries=4):
             ConnectionError,
             OSError
         ) as e:
+
             last_error = e
 
             print(
                 f"HTTP chyba "
-                f"(pokus {attempt + 1}/{retries}): {e}"
+                f"(pokus {attempt + 1}/{retries}): "
+                f"{e}"
             )
 
             if attempt < retries - 1:
+
                 wait = 2 ** attempt
-                print(f"Retry o {wait} sekúnd...")
+
+                print(
+                    f"Retry o {wait} sekúnd..."
+                )
+
                 time.sleep(wait)
 
     if last_error:
         raise last_error
 
-    raise RuntimeError("HTTP request zlyhal.")
+    raise RuntimeError(
+        "HTTP request zlyhal."
+    )
 
 
 def http_json(
@@ -184,6 +212,7 @@ def http_json(
     timeout=REQUEST_TIMEOUT,
     retries=4
 ):
+
     if headers is None:
         headers = {}
 
@@ -193,39 +222,61 @@ def http_json(
         method="GET"
     )
 
-    raw = http_get_request(
+    raw = http_request(
         req,
         timeout=timeout,
         retries=retries
     )
 
-    return json.loads(raw.decode("utf-8"))
+    return json.loads(
+        raw.decode("utf-8")
+    )
 
 
-# =========================
+# ============================================================
 # COINGECKO
-# =========================
+# ============================================================
 
 def coingecko_headers():
+
     headers = {
         "Accept": "application/json",
-        "User-Agent": "CryptoAIBot/5.2"
+        "User-Agent": "CryptoAIBot/5.3"
     }
 
     if COINGECKO_API_KEY:
-        headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
+
+        headers["x-cg-demo-api-key"] = (
+            COINGECKO_API_KEY
+        )
 
     return headers
 
 
-def coingecko_get(endpoint, params=None):
-    base = "https://api.coingecko.com/api/v3"
+def coingecko_get(
+    endpoint,
+    params=None
+):
+
+    base = (
+        "https://api.coingecko.com/api/v3"
+    )
 
     if params:
-        query = urllib.parse.urlencode(params)
-        url = f"{base}/{endpoint}?{query}"
+
+        query = urllib.parse.urlencode(
+            params
+        )
+
+        url = (
+            f"{base}/{endpoint}?{query}"
+        )
+
     else:
-        url = f"{base}/{endpoint}"
+
+        url = (
+            f"{base}/{endpoint}"
+        )
 
     return http_json(
         url,
@@ -234,10 +285,11 @@ def coingecko_get(endpoint, params=None):
 
 
 def coingecko_simple_price(ids):
+
     if not ids:
         return {}
 
-    data = coingecko_get(
+    return coingecko_get(
         "simple/price",
         {
             "ids": ",".join(ids),
@@ -249,14 +301,13 @@ def coingecko_simple_price(ids):
         }
     )
 
-    return data
-
 
 def coingecko_markets(ids):
+
     if not ids:
         return []
 
-    data = coingecko_get(
+    return coingecko_get(
         "coins/markets",
         {
             "vs_currency": "usd",
@@ -269,31 +320,32 @@ def coingecko_markets(ids):
         }
     )
 
-    return data
 
-
-def coingecko_chart(coin_id, days=90, interval="hourly"):
-    params = {
-        "vs_currency": "usd",
-        "days": days,
-    }
-
-    # CoinGecko automaticky určuje interval pri dlhších obdobiach.
-    if interval:
-        params["interval"] = interval
+def coingecko_chart(
+    coin_id,
+    days=90
+):
 
     return coingecko_get(
         f"coins/{coin_id}/market_chart",
-        params
+        {
+            "vs_currency": "usd",
+            "days": days,
+            "interval": "hourly",
+        }
     )
 
 
-# =========================
-# TECHNICAL ANALYSIS
-# =========================
+# ============================================================
+# CHART / TECHNICAL DATA
+# ============================================================
 
 def closes_from_chart(chart):
-    prices = chart.get("prices", [])
+
+    prices = chart.get(
+        "prices",
+        []
+    )
 
     return [
         {
@@ -301,25 +353,39 @@ def closes_from_chart(chart):
             "price": safe_float(p[1])
         }
         for p in prices
-        if len(p) >= 2 and safe_float(p[1]) is not None
+        if len(p) >= 2
+        and safe_float(p[1]) is not None
     ]
 
 
-def aggregate_candles(prices, hours=4):
+def aggregate_candles(
+    prices,
+    hours=4
+):
+
     if not prices:
         return []
 
     buckets = {}
 
-    bucket_ms = hours * 60 * 60 * 1000
+    bucket_ms = (
+        hours * 60 * 60 * 1000
+    )
 
     for p in prices:
-        ts = int(p["timestamp"])
+
+        timestamp = int(
+            p["timestamp"]
+        )
+
         price = p["price"]
 
-        bucket = (ts // bucket_ms) * bucket_ms
+        bucket = (
+            timestamp // bucket_ms
+        ) * bucket_ms
 
         if bucket not in buckets:
+
             buckets[bucket] = {
                 "timestamp": bucket,
                 "open": price,
@@ -327,24 +393,31 @@ def aggregate_candles(prices, hours=4):
                 "low": price,
                 "close": price,
             }
+
         else:
+
             buckets[bucket]["high"] = max(
                 buckets[bucket]["high"],
                 price
             )
+
             buckets[bucket]["low"] = min(
                 buckets[bucket]["low"],
                 price
             )
+
             buckets[bucket]["close"] = price
 
     return [
-        buckets[k]
-        for k in sorted(buckets.keys())
+        buckets[key]
+        for key in sorted(
+            buckets.keys()
+        )
     ]
 
 
 def ema(values, period):
+
     if not values:
         return []
 
@@ -353,16 +426,27 @@ def ema(values, period):
 
     result = [None] * len(values)
 
-    sma = sum(values[:period]) / period
+    sma = (
+        sum(values[:period])
+        / period
+    )
+
     result[period - 1] = sma
 
-    multiplier = 2 / (period + 1)
+    multiplier = (
+        2 / (period + 1)
+    )
 
     previous = sma
 
-    for i in range(period, len(values)):
+    for i in range(
+        period,
+        len(values)
+    ):
+
         current = (
-            (values[i] - previous) * multiplier
+            (values[i] - previous)
+            * multiplier
             + previous
         )
 
@@ -372,75 +456,152 @@ def ema(values, period):
     return result
 
 
-def rsi(values, period=14):
+def rsi(
+    values,
+    period=14
+):
+
     if len(values) < period + 1:
         return None
 
     gains = []
     losses = []
 
-    for i in range(1, len(values)):
-        change = values[i] - values[i - 1]
+    for i in range(
+        1,
+        len(values)
+    ):
 
-        gains.append(max(change, 0))
-        losses.append(max(-change, 0))
+        change = (
+            values[i]
+            - values[i - 1]
+        )
 
-    avg_gain = sum(gains[:period]) / period
-    avg_loss = sum(losses[:period]) / period
+        gains.append(
+            max(change, 0)
+        )
+
+        losses.append(
+            max(-change, 0)
+        )
+
+    avg_gain = (
+        sum(gains[:period])
+        / period
+    )
+
+    avg_loss = (
+        sum(losses[:period])
+        / period
+    )
 
     if avg_loss == 0:
         return 100.0
 
-    rs = avg_gain / avg_loss
-    current_rsi = 100 - (100 / (1 + rs))
+    rs = (
+        avg_gain
+        / avg_loss
+    )
 
-    for i in range(period, len(gains)):
+    current_rsi = (
+        100
+        - (
+            100
+            / (1 + rs)
+        )
+    )
+
+    for i in range(
+        period,
+        len(gains)
+    ):
+
         avg_gain = (
-            (avg_gain * (period - 1))
+            (
+                avg_gain
+                * (period - 1)
+            )
             + gains[i]
         ) / period
 
         avg_loss = (
-            (avg_loss * (period - 1))
+            (
+                avg_loss
+                * (period - 1)
+            )
             + losses[i]
         ) / period
 
         if avg_loss == 0:
+
             current_rsi = 100.0
+
         else:
-            rs = avg_gain / avg_loss
-            current_rsi = 100 - (100 / (1 + rs))
+
+            rs = (
+                avg_gain
+                / avg_loss
+            )
+
+            current_rsi = (
+                100
+                - (
+                    100
+                    / (1 + rs)
+                )
+            )
 
     return current_rsi
 
 
 def macd(values):
+
     if len(values) < 35:
+
         return {
             "macd": None,
             "signal": None,
             "histogram": None
         }
 
-    ema12 = ema(values, 12)
-    ema26 = ema(values, 26)
+    ema12 = ema(
+        values,
+        12
+    )
+
+    ema26 = ema(
+        values,
+        26
+    )
 
     macd_values = []
 
-    for a, b in zip(ema12, ema26):
+    for a, b in zip(
+        ema12,
+        ema26
+    ):
+
         if a is None or b is None:
             macd_values.append(None)
+
         else:
-            macd_values.append(a - b)
+            macd_values.append(
+                a - b
+            )
 
     valid = [
-        x for x in macd_values
+        x
+        for x in macd_values
         if x is not None
     ]
 
-    signal_values = ema(valid, 9)
+    signal_values = ema(
+        valid,
+        9
+    )
 
     if not signal_values:
+
         return {
             "macd": None,
             "signal": None,
@@ -453,7 +614,10 @@ def macd(values):
     if current_signal is None:
         histogram = None
     else:
-        histogram = current_macd - current_signal
+        histogram = (
+            current_macd
+            - current_signal
+        )
 
     return {
         "macd": current_macd,
@@ -462,7 +626,18 @@ def macd(values):
     }
 
 
+def last_valid(values):
+
+    for value in reversed(values):
+
+        if value is not None:
+            return value
+
+    return None
+
+
 def technical_summary(candles):
+
     if not candles:
         return {}
 
@@ -473,30 +648,52 @@ def technical_summary(candles):
     ]
 
     if len(closes) < 20:
+
         return {
-            "price": closes[-1] if closes else None
+            "price": (
+                closes[-1]
+                if closes
+                else None
+            )
         }
 
-    ema20 = ema(closes, 20)
-    ema50 = ema(closes, 50)
-    ema100 = ema(closes, 100)
-    ema200 = ema(closes, 200)
+    ema20 = ema(
+        closes,
+        20
+    )
+
+    ema50 = ema(
+        closes,
+        50
+    )
+
+    ema100 = ema(
+        closes,
+        100
+    )
+
+    ema200 = ema(
+        closes,
+        200
+    )
 
     current = closes[-1]
 
-    rsi14 = rsi(closes, 14)
-    macd_data = macd(closes)
+    e20 = last_valid(
+        ema20
+    )
 
-    def last_valid(arr):
-        for x in reversed(arr):
-            if x is not None:
-                return x
-        return None
+    e50 = last_valid(
+        ema50
+    )
 
-    e20 = last_valid(ema20)
-    e50 = last_valid(ema50)
-    e100 = last_valid(ema100)
-    e200 = last_valid(ema200)
+    e100 = last_valid(
+        ema100
+    )
+
+    e200 = last_valid(
+        ema200
+    )
 
     return {
         "price": current,
@@ -504,8 +701,8 @@ def technical_summary(candles):
         "ema50": e50,
         "ema100": e100,
         "ema200": e200,
-        "rsi14": rsi14,
-        "macd": macd_data,
+        "rsi14": rsi(closes, 14),
+        "macd": macd(closes),
         "above_ema20": (
             current > e20
             if e20 is not None
@@ -525,12 +722,11 @@ def technical_summary(candles):
 
 
 def recent_returns(closes):
+
     if not closes:
         return {}
 
     current = closes[-1]
-
-    result = {}
 
     periods = {
         "24h": 6,
@@ -538,68 +734,103 @@ def recent_returns(closes):
         "30d": 180,
     }
 
+    result = {}
+
     for name, bars in periods.items():
+
         if len(closes) > bars:
-            old = closes[-bars - 1]
-            result[name] = pct_change(old, current)
+
+            old = closes[
+                -bars - 1
+            ]
+
+            result[name] = pct_change(
+                old,
+                current
+            )
 
     return result
 
 
-# =========================
+# ============================================================
 # COIN DATA
-# =========================
+# ============================================================
 
-def collect_coin_data(symbol, coin_id):
-    print(f"Collecting: {symbol}")
+def collect_coin_data(
+    symbol,
+    coin_id
+):
 
-    simple = coingecko_simple_price([coin_id])
-    current = simple.get(coin_id, {})
-
-    # 90 dní pre 4H techniku
-    chart_90 = coingecko_chart(
-        coin_id,
-        days=90,
-        interval="hourly"
+    print(
+        f"Collecting: {symbol}"
     )
 
-    prices_90 = closes_from_chart(chart_90)
+    simple = coingecko_simple_price(
+        [coin_id]
+    )
 
-    candles_4h = aggregate_candles(
-        prices_90,
+    current = simple.get(
+        coin_id,
+        {}
+    )
+
+    chart = coingecko_chart(
+        coin_id,
+        days=90
+    )
+
+    prices = closes_from_chart(
+        chart
+    )
+
+    candles = aggregate_candles(
+        prices,
         hours=4
     )
 
-    technical_4h = technical_summary(
-        candles_4h
+    technical = technical_summary(
+        candles
     )
 
-    closes_4h = [
+    closes = [
         x["close"]
-        for x in candles_4h
+        for x in candles
     ]
-
-    returns = recent_returns(closes_4h)
 
     return {
         "symbol": symbol,
         "coin_id": coin_id,
-        "price_usd": current.get("usd"),
-        "market_cap": current.get("usd_market_cap"),
-        "volume_24h": current.get("usd_24h_vol"),
-        "change_24h": current.get("usd_24h_change"),
-        "last_updated": current.get("last_updated_at"),
-        "technical_4h": technical_4h,
-        "returns": returns,
+        "price_usd": current.get(
+            "usd"
+        ),
+        "market_cap": current.get(
+            "usd_market_cap"
+        ),
+        "volume_24h": current.get(
+            "usd_24h_vol"
+        ),
+        "change_24h": current.get(
+            "usd_24h_change"
+        ),
+        "last_updated": current.get(
+            "last_updated_at"
+        ),
+        "technical_4h": technical,
+        "returns": recent_returns(
+            closes
+        ),
     }
 
 
-# =========================
+# ============================================================
 # CANDIDATE SHORTLIST
-# =========================
+# ============================================================
 
 def shortlist_candidates():
-    print("Shortlisting candidate coins...")
+
+    print(
+        "Shortlisting candidate coins..."
+    )
 
     market_data = coingecko_markets(
         CANDIDATES
@@ -608,24 +839,36 @@ def shortlist_candidates():
     if not market_data:
         return CANDIDATES[:3]
 
-    portfolio_ids = set(PORTFOLIO.values())
+    portfolio_ids = set(
+        PORTFOLIO.values()
+    )
 
     filtered = [
-        x for x in market_data
-        if x.get("id") not in portfolio_ids
+        x
+        for x in market_data
+        if x.get("id")
+        not in portfolio_ids
     ]
 
-    # Kombinácia likvidity + market cap.
-    # Neberieme úplne malé illiquid tokeny.
     filtered = [
-        x for x in filtered
-        if safe_float(x.get("market_cap"), 0) > 100_000_000
+        x
+        for x in filtered
+        if safe_float(
+            x.get("market_cap"),
+            0
+        ) > 100_000_000
     ]
 
     filtered.sort(
         key=lambda x: (
-            safe_float(x.get("total_volume"), 0),
-            safe_float(x.get("market_cap"), 0)
+            safe_float(
+                x.get("total_volume"),
+                0
+            ),
+            safe_float(
+                x.get("market_cap"),
+                0
+            )
         ),
         reverse=True
     )
@@ -646,154 +889,86 @@ def shortlist_candidates():
     ]
 
 
-# =========================
-# MARKET DATA
-# =========================
+# ============================================================
+# MARKET
+# ============================================================
 
 def get_market_global():
-    return coingecko_get("global")
+
+    return coingecko_get(
+        "global"
+    )
 
 
 def get_fear_greed():
+
     try:
+
         data = http_json(
             "https://api.alternative.me/fng/?limit=1",
             headers={
-                "User-Agent": "CryptoAIBot/5.2"
+                "User-Agent":
+                    "CryptoAIBot/5.3"
             }
         )
 
         item = data["data"][0]
 
         return {
-            "value": int(item["value"]),
-            "classification": item["value_classification"],
-            "timestamp": item.get("timestamp"),
+            "value": int(
+                item["value"]
+            ),
+            "classification":
+                item["value_classification"],
+            "timestamp":
+                item.get("timestamp"),
         }
 
     except Exception as e:
-        print(f"Fear & Greed error: {e}")
+
+        print(
+            f"Fear & Greed error: {e}"
+        )
 
         return {
             "value": None,
-            "classification": "UNKNOWN",
+            "classification":
+                "UNKNOWN",
             "timestamp": None,
         }
 
 
-# =========================
-# NEWS / RSS
-# =========================
+def market_safety(
+    global_data,
+    simple_prices
+):
 
-def get_rss_news():
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 "
-            "(compatible; CryptoAIBot/5.2; +https://github.com/)"
-        ),
-        "Accept": (
-            "application/rss+xml, "
-            "application/xml, "
-            "text/xml, "
-            "*/*"
-        ),
-    }
-
-    all_items = []
-
-    for source_name, url in RSS_FEEDS:
-        try:
-            print(f"RSS: {source_name}")
-
-            req = urllib.request.Request(
-                url,
-                headers=headers,
-                method="GET"
-            )
-
-            raw = http_get_request(
-                req,
-                timeout=30,
-                retries=2
-            )
-
-            root = ET.fromstring(raw)
-
-            count = 0
-
-            for item in root.iter():
-                if item.tag.lower().endswith("item"):
-                    title = ""
-                    link = ""
-                    pub_date = ""
-
-                    for child in item:
-                        tag = child.tag.lower()
-
-                        if tag.endswith("title"):
-                            title = (
-                                child.text or ""
-                            ).strip()
-
-                        elif tag.endswith("link"):
-                            link = (
-                                child.text or ""
-                            ).strip()
-
-                        elif tag.endswith("pubdate"):
-                            pub_date = (
-                                child.text or ""
-                            ).strip()
-
-                    if title:
-                        all_items.append({
-                            "source": source_name,
-                            "title": title,
-                            "link": link,
-                            "pub_date": pub_date,
-                        })
-
-                        count += 1
-
-                    if count >= 10:
-                        break
-
-            if count:
-                print(
-                    f"RSS {source_name}: "
-                    f"{count} článkov"
-                )
-
-        except Exception as e:
-            print(
-                f"RSS error {source_name}: {e}"
-            )
-
-    return all_items[:20]
-
-
-# =========================
-# MARKET SAFETY
-# =========================
-
-def market_safety(global_data, simple_prices):
     score = 0
     reasons = []
 
     try:
-        total_market_cap_change = (
+
+        change = (
             global_data["data"]
-            .get("market_cap_change_percentage_24h_usd")
+            .get(
+                "market_cap_change_percentage_24h_usd"
+            )
         )
 
-        if total_market_cap_change is not None:
-            if total_market_cap_change < -5:
+        if change is not None:
+
+            if change < -5:
+
                 score += 2
+
                 reasons.append(
                     "celková kapitalizácia prudko klesá"
                 )
-            elif total_market_cap_change < -2:
+
+            elif change < -2:
+
                 score += 1
+
                 reasons.append(
                     "celková kapitalizácia klesá"
                 )
@@ -802,22 +977,38 @@ def market_safety(global_data, simple_prices):
         pass
 
     try:
-        btc = simple_prices.get("bitcoin", {})
-        btc_change = btc.get("usd_24h_change")
+
+        btc = simple_prices.get(
+            "bitcoin",
+            {}
+        )
+
+        btc_change = btc.get(
+            "usd_24h_change"
+        )
 
         if btc_change is not None:
+
             if btc_change < -7:
+
                 score += 3
+
                 reasons.append(
                     "BTC výrazne klesá"
                 )
+
             elif btc_change < -3:
+
                 score += 2
+
                 reasons.append(
                     "BTC prudko klesá"
                 )
+
             elif btc_change < -1.5:
+
                 score += 1
+
                 reasons.append(
                     "BTC klesá"
                 )
@@ -827,8 +1018,10 @@ def market_safety(global_data, simple_prices):
 
     if score >= 5:
         state = "CRITICAL"
+
     elif score >= 2:
         state = "WARNING"
+
     else:
         state = "NORMAL"
 
@@ -839,80 +1032,228 @@ def market_safety(global_data, simple_prices):
     }
 
 
-# =========================
+# ============================================================
+# RSS
+# ============================================================
+
+def get_rss_news():
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 "
+            "(compatible; CryptoAIBot/5.3)"
+        ),
+        "Accept": (
+            "application/rss+xml,"
+            "application/xml,"
+            "text/xml,"
+            "*/*"
+        ),
+    }
+
+    all_items = []
+
+    for source_name, url in RSS_FEEDS:
+
+        try:
+
+            print(
+                f"RSS: {source_name}"
+            )
+
+            req = urllib.request.Request(
+                url,
+                headers=headers,
+                method="GET"
+            )
+
+            raw = http_request(
+                req,
+                timeout=30,
+                retries=2
+            )
+
+            root = ET.fromstring(
+                raw
+            )
+
+            count = 0
+
+            for item in root.iter():
+
+                if not item.tag.lower().endswith(
+                    "item"
+                ):
+                    continue
+
+                title = ""
+                link = ""
+                pub_date = ""
+
+                for child in item:
+
+                    tag = child.tag.lower()
+
+                    if tag.endswith(
+                        "title"
+                    ):
+
+                        title = (
+                            child.text
+                            or ""
+                        ).strip()
+
+                    elif tag.endswith(
+                        "link"
+                    ):
+
+                        link = (
+                            child.text
+                            or ""
+                        ).strip()
+
+                    elif tag.endswith(
+                        "pubdate"
+                    ):
+
+                        pub_date = (
+                            child.text
+                            or ""
+                        ).strip()
+
+                if title:
+
+                    all_items.append({
+                        "source":
+                            source_name,
+                        "title":
+                            title,
+                        "link":
+                            link,
+                        "pub_date":
+                            pub_date,
+                    })
+
+                    count += 1
+
+                if count >= 10:
+                    break
+
+            print(
+                f"RSS {source_name}: "
+                f"{count} článkov"
+            )
+
+        except Exception as e:
+
+            print(
+                f"RSS error "
+                f"{source_name}: {e}"
+            )
+
+    return all_items[:20]
+
+
+# ============================================================
 # GEMINI SCHEMA
-# =========================
+# ============================================================
 
 def gemini_schema():
+
     return {
         "type": "object",
+
         "properties": {
+
             "market_regime": {
                 "type": "string"
             },
+
             "market_summary": {
                 "type": "string"
             },
+
             "action": {
                 "type": "string"
             },
+
             "new_coin": {
                 "type": "string"
             },
+
             "new_coin_action": {
                 "type": "string"
             },
+
             "new_coin_reason": {
                 "type": "string"
             },
+
             "coins": {
                 "type": "array",
+
                 "items": {
                     "type": "object",
+
                     "properties": {
+
                         "symbol": {
                             "type": "string"
                         },
+
                         "action": {
                             "type": "string"
                         },
+
                         "current_price": {
                             "type": "number"
                         },
+
                         "buy_zone_1": {
                             "type": "string"
                         },
+
                         "buy_zone_2": {
                             "type": "string"
                         },
+
                         "invalidation": {
                             "type": "string"
                         },
+
                         "tp1": {
                             "type": "string"
                         },
+
                         "tp2": {
                             "type": "string"
                         },
+
                         "risk_reward": {
                             "type": "string"
                         },
+
                         "bull_probability": {
                             "type": "number"
                         },
+
                         "bear_probability": {
                             "type": "number"
                         },
+
                         "technical_score": {
                             "type": "number"
                         },
+
                         "fundamental_score": {
                             "type": "number"
                         },
+
                         "reason": {
                             "type": "string"
-                        }
+                        },
                     },
+
                     "required": [
                         "symbol",
                         "action",
@@ -927,23 +1268,28 @@ def gemini_schema():
                         "bear_probability",
                         "technical_score",
                         "fundamental_score",
-                        "reason"
-                    ]
-                }
+                        "reason",
+                    ],
+                },
             },
+
             "best_opportunity": {
                 "type": "string"
             },
+
             "avoid": {
                 "type": "string"
             },
+
             "conditions_to_watch": {
                 "type": "array",
+
                 "items": {
                     "type": "string"
-                }
-            }
+                },
+            },
         },
+
         "required": [
             "market_regime",
             "market_summary",
@@ -954,78 +1300,24 @@ def gemini_schema():
             "coins",
             "best_opportunity",
             "avoid",
-            "conditions_to_watch"
-        ]
+            "conditions_to_watch",
+        ],
     }
 
 
-# =========================
-# GEMINI OUTPUT PARSER
-# =========================
-
-def extract_output_text(response):
-    output_text = response.get("output_text")
-
-    if output_text:
-        return output_text
-
-    # Fallback pre prípad, že REST odpoveď vráti output bloky.
-    output = response.get("output")
-
-    if isinstance(output, str):
-        return output
-
-    if isinstance(output, list):
-        texts = []
-
-        for block in output:
-            if isinstance(block, str):
-                texts.append(block)
-
-            elif isinstance(block, dict):
-                text = block.get("text")
-
-                if text:
-                    texts.append(str(text))
-
-        if texts:
-            return "\n".join(texts)
-
-    # Ďalší fallback cez steps.
-    steps = response.get("steps", [])
-
-    texts = []
-
-    if isinstance(steps, list):
-        for step in steps:
-            if not isinstance(step, dict):
-                continue
-
-            step_output = step.get("output")
-
-            if isinstance(step_output, list):
-                for block in step_output:
-                    if isinstance(block, dict):
-                        text = block.get("text")
-
-                        if text:
-                            texts.append(str(text))
-
-    if texts:
-        return "\n".join(texts)
-
-    return None
-
+# ============================================================
+# GEMINI JSON PARSER
+# ============================================================
 
 def parse_json_output(text):
+
     if not text:
         raise RuntimeError(
-            "Gemini neposlal žiadny textový výstup."
+            "Gemini neposlal výstup."
         )
 
     text = text.strip()
 
-    # Odstránenie markdown JSON fences.
     text = re.sub(
         r"^```json\s*",
         "",
@@ -1041,18 +1333,24 @@ def parse_json_output(text):
 
     try:
         return json.loads(text)
+
     except json.JSONDecodeError:
         pass
 
-    # Fallback: nájdenie prvého JSON objektu.
     start = text.find("{")
     end = text.rfind("}")
 
     if start >= 0 and end > start:
-        candidate = text[start:end + 1]
+
+        candidate = text[
+            start:end + 1
+        ]
 
         try:
-            return json.loads(candidate)
+            return json.loads(
+                candidate
+            )
+
         except json.JSONDecodeError:
             pass
 
@@ -1062,138 +1360,104 @@ def parse_json_output(text):
     )
 
 
-# =========================
-# GEMINI BACKGROUND API
-# =========================
+# ============================================================
+# GEMINI 3.8 FLASH
+# OFFICIAL GOOGLE SDK
+# ============================================================
 
 def gemini_analyze(prompt):
 
     if not GEMINI_API_KEY:
+
         raise RuntimeError(
             "GEMINI_API_KEY nie je nastavený."
         )
-
-    create_url = (
-        "https://generativelanguage.googleapis.com"
-        "/v1beta/interactions"
-    )
-
-    payload = {
-        "model": GEMINI_MODEL,
-        "input": prompt,
-        "tools": [
-            {
-                "type": "google_search"
-            }
-        ],
-        "background": True,
-        "generation_config": {
-            "thinking_level": "high"
-        },
-        "response_format": {
-            "type": "text",
-            "mime_type": "application/json",
-            "schema": gemini_schema()
-        }
-    }
-
-    body = json.dumps(
-        payload,
-        ensure_ascii=False
-    ).encode("utf-8")
-
-    req = urllib.request.Request(
-        create_url,
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "x-goog-api-key": GEMINI_API_KEY,
-            "Api-Revision": "2026-05-20",
-        },
-        method="POST"
-    )
 
     print(
         "Spúšťam Gemini background analysis..."
     )
 
-    raw = http_get_request(
-        req,
-        timeout=REQUEST_TIMEOUT,
-        retries=4
+    client = genai.Client(
+        api_key=GEMINI_API_KEY
     )
 
-    response = json.loads(
-        raw.decode("utf-8")
+    interaction = client.interactions.create(
+
+        model=GEMINI_MODEL,
+
+        input=prompt,
+
+        background=True,
+
+        tools=[
+            {
+                "type": "google_search"
+            }
+        ],
+
+        generation_config={
+            "thinking_level": "high"
+        },
+
+        response_format={
+            "type": "json_schema",
+            "json_schema": gemini_schema()
+        },
+
+        store=False,
+
+        timeout=120,
     )
 
-    interaction_id = response.get("id")
-
-    if not interaction_id:
-        raise RuntimeError(
-            "Gemini nevytvoril interaction:\n"
-            + json.dumps(
-                response,
-                ensure_ascii=False
-            )[:5000]
-        )
+    interaction_id = interaction.id
 
     print(
-        f"Gemini interaction ID: "
-        f"{interaction_id}"
-    )
-
-    status_url = (
-        "https://generativelanguage.googleapis.com"
-        f"/v1beta/interactions/{interaction_id}"
+        "Gemini interaction ID:",
+        interaction_id
     )
 
     started = time.time()
 
     while True:
 
-        elapsed = time.time() - started
+        elapsed = (
+            time.time()
+            - started
+        )
 
         if elapsed > GEMINI_MAX_WAIT:
+
             raise TimeoutError(
                 "Gemini background analysis "
                 "trvá dlhšie ako 10 minút."
             )
 
-        status_req = urllib.request.Request(
-            status_url,
-            headers={
-                "x-goog-api-key": GEMINI_API_KEY,
-                "Api-Revision": "2026-05-20",
-            },
-            method="GET"
+        interaction = (
+            client.interactions.get(
+                id=interaction_id
+            )
         )
 
-        raw_status = http_get_request(
-            status_req,
-            timeout=60,
-            retries=4
-        )
-
-        result = json.loads(
-            raw_status.decode("utf-8")
-        )
-
-        status = result.get(
-            "status",
-            "unknown"
-        )
+        status = interaction.status
 
         print(
-            f"Gemini status: {status} "
+            f"Gemini status: "
+            f"{status} "
             f"({int(elapsed)}s)"
         )
 
         if status == "completed":
 
-            output_text = extract_output_text(
-                result
+            output_text = (
+                interaction.output_text
             )
+
+            if not output_text:
+
+                raise RuntimeError(
+                    "Gemini completed, "
+                    "ale output_text je prázdny."
+                )
 
             return parse_json_output(
                 output_text
@@ -1202,32 +1466,29 @@ def gemini_analyze(prompt):
         if status in {
             "failed",
             "cancelled",
-            "incomplete",
-            "budget_exceeded"
+            "expired",
+            "incomplete"
         }:
 
             raise RuntimeError(
                 "Gemini interaction skončila "
-                f"stavom {status}:\n"
-                + json.dumps(
-                    result,
-                    ensure_ascii=False
-                )[:6000]
+                f"stavom {status}."
             )
 
         if status == "requires_action":
+
             raise RuntimeError(
-                "Gemini interaction vyžaduje "
-                "ďalšiu akciu, ktorú tento bot "
-                "nevie automaticky vykonať."
+                "Gemini vyžaduje ďalšiu akciu."
             )
 
-        time.sleep(POLL_INTERVAL)
+        time.sleep(
+            POLL_INTERVAL
+        )
 
 
-# =========================
-# PROMPT
-# =========================
+# ============================================================
+# GEMINI PROMPT
+# ============================================================
 
 def build_prompt(
     market_global,
@@ -1238,191 +1499,248 @@ def build_prompt(
     candidate_data
 ):
 
-    prompt = f"""
-You are the main investment intelligence engine of a crypto trading bot.
+    return f"""
+You are the main investment intelligence engine
+of a crypto trading bot.
 
 CURRENT TIME:
 {iso_now()}
 
-IMPORTANT:
-You MUST use current information from Google Search where relevant.
-Do not rely on old knowledge when judging current events, regulation,
-ETF/news, partnerships, token unlocks, ecosystem developments,
-institutional activity or other fundamental factors.
+Use current information from Google Search whenever
+current fundamental information is relevant.
 
-The user wants practical investment decisions, not generic education.
+Do NOT rely on old knowledge for:
+- regulation
+- ETFs
+- institutional adoption
+- partnerships
+- token unlocks
+- tokenomics
+- ecosystem activity
+- important market events
+- current news
+
+The user wants practical investment decisions.
 
 INVESTMENT HORIZON:
 - Main horizon: now through approximately April 2027.
-- Short-term technical horizon: hours to several weeks.
-- The user prefers buying pullbacks rather than chasing pumps.
-- The user is willing to hold high-risk altcoins if the upside justifies it.
-- The user does NOT want additional APT exposure.
-- The user already owns the portfolio coins listed below.
+- Technical horizon: hours to several weeks.
+- User prefers buying pullbacks.
+- User does NOT want additional APT exposure.
+- User already owns the portfolio coins below.
 
-VERY IMPORTANT:
-If there is no attractive new coin setup, say NO TRADE.
-Do NOT invent a buy opportunity simply because the bot is expected to
-recommend something.
-
-MARKET DATA
-===========
-Global CoinGecko data:
-{json.dumps(market_global, ensure_ascii=False, indent=2)}
-
-Fear & Greed:
-{json.dumps(fear_greed, ensure_ascii=False, indent=2)}
-
-Market safety:
-{json.dumps(safety, ensure_ascii=False, indent=2)}
-
-RECENT NEWS
-==========
-{json.dumps(news, ensure_ascii=False, indent=2)}
-
-CURRENT PORTFOLIO
-=================
-{json.dumps(portfolio_data, ensure_ascii=False, indent=2)}
-
-POTENTIAL NEW COINS
-===================
-These are candidates preselected for liquidity/market-cap reasons.
-You must still independently judge whether any of them is actually
-worth buying.
-
-{json.dumps(candidate_data, ensure_ascii=False, indent=2)}
-
-TASK
-====
-
-Perform a fresh market analysis.
-
-1. Determine the current crypto market regime:
-   - bullish
-   - neutral
-   - corrective
-   - bearish
-   - capitulation
-
-2. Analyze BTC and total market conditions.
-
-3. Analyze each portfolio coin:
-   AAVE
-   TAO
-   FET
-   SOL
-   ONDO
-   RENDER
-
-4. For each portfolio coin decide:
-   - BUY NOW
-   - BUY PULLBACK
-   - HOLD
-   - REDUCE
-   - SELL
-   - NO TRADE
-
-5. Give realistic buy zones based on current price and technical
-   structure. Do NOT choose arbitrary round numbers.
-
-6. Give invalidation levels.
-
-7. Give TP1 and TP2.
-
-8. Estimate bull and bear probabilities.
-   They should reflect the current setup, not simply be 50/50.
-
-9. Give technical score from 0 to 10.
-
-10. Give fundamental score from 0 to 10.
-
-11. For fundamentals consider:
-   - adoption
-   - revenue/fees where relevant
-   - TVL where relevant
-   - developer activity
-   - institutional adoption
-   - token utility
-   - token unlocks
-   - inflation
-   - competition
-   - ecosystem growth
-   - regulatory/news catalysts
-   - valuation
-
-12. Analyze the potential NEW COINS.
-
-13. Choose at most ONE best new coin.
-
-14. The new coin must have a compelling asymmetric setup.
-   High upside alone is NOT enough.
-
-15. Compare the new coin against the user's existing portfolio.
-   If putting more money into an existing position is better,
-   say so and set new_coin_action to NO TRADE.
-
-16. Do NOT recommend APT.
-
-17. Be especially careful if the market safety state is WARNING or CRITICAL.
-   In those conditions prefer pullbacks and smaller risk.
-
-18. If a coin has already pumped heavily, do not recommend chasing it.
-   Instead give a pullback zone or NO TRADE.
-
-19. Search current information for important fundamental claims.
-   Prefer primary sources and reliable financial/crypto sources.
-
-20. Ignore unsupported hype.
-
-21. The output MUST follow the supplied JSON schema exactly.
-
-ACTION DEFINITIONS
-==================
-BUY NOW:
-Current price is attractive enough to enter.
-
-BUY PULLBACK:
-Do not buy current price. Wait for the specified zone.
-
-HOLD:
-Keep the existing position; no aggressive action.
-
-REDUCE:
-Take partial profit / reduce risk.
-
-SELL:
-Exit the position because risk/reward has deteriorated.
-
-NO TRADE:
-No attractive setup.
-
-RISK/REWARD:
-Use practical approximate R:R based on buy zone, invalidation and TP1.
-
-IMPORTANT:
-The user values capital preservation during corrections.
 A missed trade is better than a bad trade.
+
+If there is no attractive setup:
+say NO TRADE.
+
+==================================================
+MARKET DATA
+==================================================
+
+GLOBAL:
+{json.dumps(
+    market_global,
+    ensure_ascii=False,
+    indent=2
+)}
+
+FEAR & GREED:
+{json.dumps(
+    fear_greed,
+    ensure_ascii=False,
+    indent=2
+)}
+
+MARKET SAFETY:
+{json.dumps(
+    safety,
+    ensure_ascii=False,
+    indent=2
+)}
+
+==================================================
+RECENT NEWS
+==================================================
+
+{json.dumps(
+    news,
+    ensure_ascii=False,
+    indent=2
+)}
+
+==================================================
+USER PORTFOLIO
+==================================================
+
+{json.dumps(
+    portfolio_data,
+    ensure_ascii=False,
+    indent=2
+)}
+
+==================================================
+NEW COIN CANDIDATES
+==================================================
+
+{json.dumps(
+    candidate_data,
+    ensure_ascii=False,
+    indent=2
+)}
+
+==================================================
+TASK
+==================================================
+
+Analyze:
+
+AAVE
+TAO
+FET
+SOL
+ONDO
+RENDER
+
+For every portfolio coin determine:
+
+BUY NOW
+BUY PULLBACK
+HOLD
+REDUCE
+SELL
+NO TRADE
+
+Give:
+
+- current price
+- buy zone 1
+- buy zone 2
+- invalidation
+- TP1
+- TP2
+- risk/reward
+- bull probability
+- bear probability
+- technical score 0-10
+- fundamental score 0-10
+- short reason
+
+Do not invent arbitrary price levels.
+
+Buy zones should be based on:
+- support
+- resistance
+- EMA
+- RSI
+- market structure
+- recent volatility
+- current trend
+- BTC conditions
+
+Fundamentals should consider:
+
+- adoption
+- revenue / fees
+- TVL where relevant
+- developer activity
+- institutional adoption
+- token utility
+- token unlocks
+- inflation
+- competition
+- ecosystem growth
+- regulation
+- current catalysts
+- valuation
+
+==================================================
+NEW COIN
+==================================================
+
+Analyze the shortlisted new coins.
+
+Choose AT MOST ONE.
+
+Compare the new coin with the user's existing portfolio.
+
+If an existing coin is clearly a better place
+for additional capital, say:
+
+new_coin_action = NO TRADE
+
+Do NOT recommend APT.
+
+Do NOT recommend a coin simply because it has
+high theoretical upside.
+
+A new coin should have:
+- strong fundamentals
+- sufficient liquidity
+- attractive valuation
+- strong narrative/catalyst
+- reasonable technical entry
+- asymmetric upside/downside
+
+If the current price is too high after a pump:
+recommend BUY PULLBACK rather than chasing.
+
+==================================================
+MARKET REGIME
+==================================================
+
+Determine:
+
+bullish
+neutral
+corrective
+bearish
+capitulation
+
+Pay particular attention to the market safety state.
+
+If WARNING or CRITICAL:
+be more conservative.
+
+==================================================
+OUTPUT
+==================================================
+
+Return ONLY the required JSON structure.
+
+No markdown.
+
+No explanations outside JSON.
+
+Probabilities must be realistic and should reflect
+the actual current setup.
+
+The user prefers capital preservation during corrections.
 """
 
 
-    return prompt
-
-
-# =========================
+# ============================================================
 # TELEGRAM
-# =========================
+# ============================================================
 
 def telegram_send(text):
 
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+    if not TELEGRAM_TOKEN:
         print(
-            "Telegram credentials nie sú nastavené."
+            "TELEGRAM_TOKEN nie je nastavený."
+        )
+        return
+
+    if not TELEGRAM_CHAT_ID:
+        print(
+            "TELEGRAM_CHAT_ID nie je nastavený."
         )
         return
 
     url = (
         "https://api.telegram.org"
-        f"/bot{TELEGRAM_TOKEN}/sendMessage"
+        f"/bot{TELEGRAM_TOKEN}"
+        "/sendMessage"
     )
 
     payload = {
@@ -1441,40 +1759,42 @@ def telegram_send(text):
         url,
         data=body,
         headers={
-            "Content-Type": "application/json"
+            "Content-Type":
+                "application/json"
         },
         method="POST"
     )
 
     try:
-        http_get_request(
+
+        http_request(
             req,
             timeout=30,
             retries=3
         )
 
     except Exception as e:
+
         print(
             f"Telegram error: {e}"
         )
 
 
 def clean_html(text):
+
     if text is None:
         return ""
 
-    text = str(text)
-
-    text = (
-        text.replace("&", "&amp;")
+    return (
+        str(text)
+        .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     )
 
-    return text
-
 
 def format_price(value):
+
     value = safe_float(value)
 
     if value is None:
@@ -1514,32 +1834,51 @@ def format_bot_message(
     lines.append("")
 
     lines.append(
-        f"<b>🌐 Trh:</b> "
-        f"{clean_html(analysis.get('market_regime', 'N/A'))}"
+        "<b>🌐 Trh:</b> "
+        + clean_html(
+            analysis.get(
+                "market_regime",
+                "N/A"
+            )
+        )
     )
 
     lines.append(
-        f"<b>🛡 Safety:</b> "
-        f"{clean_html(safety.get('state', 'N/A'))} "
-        f"({safety.get('score', 0)})"
-    )
-
-    if safety.get("reasons"):
-        lines.append(
-            " • " +
-            " • ".join(
-                clean_html(x)
-                for x in safety["reasons"]
+        "<b>🛡 Safety:</b> "
+        + clean_html(
+            safety.get(
+                "state",
+                "N/A"
             )
         )
+        + f" ({safety.get('score', 0)})"
+    )
 
-    fg_value = fear_greed.get("value")
+    for reason in safety.get(
+        "reasons",
+        []
+    ):
 
-    if fg_value is not None:
+        lines.append(
+            "• "
+            + clean_html(reason)
+        )
+
+    fg = fear_greed.get(
+        "value"
+    )
+
+    if fg is not None:
+
         lines.append(
             f"<b>😱 Fear & Greed:</b> "
-            f"{fg_value}/100 "
-            f"({clean_html(fear_greed.get('classification', ''))})"
+            f"{fg}/100 "
+            f"({clean_html(
+                fear_greed.get(
+                    'classification',
+                    ''
+                )
+            )})"
         )
 
     lines.append("")
@@ -1559,21 +1898,14 @@ def format_bot_message(
 
     lines.append("")
 
-    coins = analysis.get(
+    for coin in analysis.get(
         "coins",
         []
-    )
-
-    for coin in coins:
+    ):
 
         symbol = coin.get(
             "symbol",
             "?"
-        )
-
-        action = coin.get(
-            "action",
-            "N/A"
         )
 
         lines.append(
@@ -1581,71 +1913,140 @@ def format_bot_message(
         )
 
         lines.append(
-            f"<b>Akcia:</b> "
-            f"{clean_html(action)}"
+            "<b>Akcia:</b> "
+            + clean_html(
+                coin.get(
+                    "action",
+                    "N/A"
+                )
+            )
         )
 
         lines.append(
-            f"<b>Cena:</b> "
-            f"{format_price(coin.get('current_price'))}"
+            "<b>Cena:</b> "
+            + format_price(
+                coin.get(
+                    "current_price"
+                )
+            )
         )
 
         lines.append(
-            f"<b>BUY 1:</b> "
-            f"{clean_html(coin.get('buy_zone_1', 'N/A'))}"
+            "<b>BUY 1:</b> "
+            + clean_html(
+                coin.get(
+                    "buy_zone_1",
+                    "N/A"
+                )
+            )
         )
 
         lines.append(
-            f"<b>BUY 2:</b> "
-            f"{clean_html(coin.get('buy_zone_2', 'N/A'))}"
+            "<b>BUY 2:</b> "
+            + clean_html(
+                coin.get(
+                    "buy_zone_2",
+                    "N/A"
+                )
+            )
         )
 
         lines.append(
-            f"<b>Invalidácia:</b> "
-            f"{clean_html(coin.get('invalidation', 'N/A'))}"
+            "<b>Invalidácia:</b> "
+            + clean_html(
+                coin.get(
+                    "invalidation",
+                    "N/A"
+                )
+            )
         )
 
         lines.append(
-            f"<b>TP1:</b> "
-            f"{clean_html(coin.get('tp1', 'N/A'))}"
+            "<b>TP1:</b> "
+            + clean_html(
+                coin.get(
+                    "tp1",
+                    "N/A"
+                )
+            )
         )
 
         lines.append(
-            f"<b>TP2:</b> "
-            f"{clean_html(coin.get('tp2', 'N/A'))}"
+            "<b>TP2:</b> "
+            + clean_html(
+                coin.get(
+                    "tp2",
+                    "N/A"
+                )
+            )
         )
 
         lines.append(
-            f"<b>R:R:</b> "
-            f"{clean_html(coin.get('risk_reward', 'N/A'))}"
+            "<b>R:R:</b> "
+            + clean_html(
+                coin.get(
+                    "risk_reward",
+                    "N/A"
+                )
+            )
         )
 
         bull = safe_float(
-            coin.get("bull_probability")
+            coin.get(
+                "bull_probability"
+            )
         )
 
         bear = safe_float(
-            coin.get("bear_probability")
+            coin.get(
+                "bear_probability"
+            )
         )
 
-        if bull is not None and bear is not None:
+        if bull is not None:
+
             lines.append(
-                f"<b>🐂 Bull:</b> {bull:.0f}% "
-                f"| <b>🐻 Bear:</b> {bear:.0f}%"
+                f"<b>🐂 Bull:</b> "
+                f"{bull:.0f}%"
+                + (
+                    f" | <b>🐻 Bear:</b> "
+                    f"{bear:.0f}%"
+                    if bear is not None
+                    else ""
+                )
             )
 
         lines.append(
-            f"<b>Technika:</b> "
-            f"{coin.get('technical_score', 'N/A')}/10"
+            "<b>Technika:</b> "
+            + str(
+                coin.get(
+                    "technical_score",
+                    "N/A"
+                )
+            )
+            + "/10"
         )
 
         lines.append(
-            f"<b>Fundament:</b> "
-            f"{coin.get('fundamental_score', 'N/A')}/10"
+            "<b>Fundament:</b> "
+            + str(
+                coin.get(
+                    "fundamental_score",
+                    "N/A"
+                )
+            )
+            + "/10"
         )
 
         lines.append(
-            f"<i>{clean_html(coin.get('reason', ''))}</i>"
+            "<i>"
+            + clean_html(
+                coin.get(
+                    "reason",
+                    ""
+                )
+            )
+            + "</i>"
         )
 
         lines.append("")
@@ -1713,38 +2114,55 @@ def format_bot_message(
     )
 
     if conditions:
+
         lines.append("")
+
         lines.append(
             "<b>👀 Sledovať:</b>"
         )
 
         for condition in conditions[:6]:
+
             lines.append(
-                "• " + clean_html(condition)
+                "• "
+                + clean_html(
+                    condition
+                )
             )
 
     lines.append("")
 
     lines.append(
-        "<i>Nie je to finančné poradenstvo. "
-        "Bot pracuje s aktuálnymi dátami a pravdepodobnostnými scenármi.</i>"
+        "<i>Nie je to finančné poradenstvo.</i>"
     )
 
-    message = "\n".join(lines)
+    message = "\n".join(
+        lines
+    )
 
-    # Telegram má limit približne 4096 znakov.
     if len(message) <= 4000:
         return [message]
 
     chunks = []
-
     current = ""
 
     for line in lines:
-        if len(current) + len(line) + 1 > 3900:
-            chunks.append(current)
+
+        if (
+            len(current)
+            + len(line)
+            + 1
+            > 3900
+        ):
+
+            chunks.append(
+                current
+            )
+
             current = line
+
         else:
+
             current += (
                 "\n"
                 if current
@@ -1752,43 +2170,53 @@ def format_bot_message(
             ) + line
 
     if current:
-        chunks.append(current)
+        chunks.append(
+            current
+        )
 
     return chunks
 
 
-# =========================
+# ============================================================
 # STATE
-# =========================
+# ============================================================
 
 def load_state():
 
-    if not os.path.exists(STATE_FILE):
+    if not os.path.exists(
+        STATE_FILE
+    ):
         return {}
 
     try:
+
         with open(
             STATE_FILE,
             "r",
             encoding="utf-8"
         ) as f:
+
             return json.load(f)
 
     except Exception as e:
+
         print(
             f"State load error: {e}"
         )
+
         return {}
 
 
 def save_state(state):
 
     try:
+
         with open(
             STATE_FILE,
             "w",
             encoding="utf-8"
         ) as f:
+
             json.dump(
                 state,
                 f,
@@ -1797,62 +2225,76 @@ def save_state(state):
             )
 
     except Exception as e:
+
         print(
             f"State save error: {e}"
         )
 
 
-# =========================
+# ============================================================
 # MAIN
-# =========================
+# ============================================================
 
 def main():
 
     print(
-        "Crypto bot V5.2:",
+        "Crypto bot V5.3:",
         iso_now()
     )
 
     if not GEMINI_API_KEY:
+
         raise RuntimeError(
             "Chýba GEMINI_API_KEY."
         )
 
-    # --------------------------------
-    # 1. Global market
-    # --------------------------------
+    # --------------------------------------------------------
+    # GLOBAL MARKET
+    # --------------------------------------------------------
 
-    print("Collecting global market...")
+    print(
+        "Collecting global market..."
+    )
 
-    market_global = get_market_global()
+    market_global = (
+        get_market_global()
+    )
 
-    # --------------------------------
-    # 2. Fear & Greed
-    # --------------------------------
+    # --------------------------------------------------------
+    # FEAR & GREED
+    # --------------------------------------------------------
 
-    print("Collecting Fear & Greed...")
+    print(
+        "Collecting Fear & Greed..."
+    )
 
-    fear_greed = get_fear_greed()
+    fear_greed = (
+        get_fear_greed()
+    )
 
-    # --------------------------------
-    # 3. Simple prices for safety
-    # --------------------------------
+    # --------------------------------------------------------
+    # SIMPLE PRICES
+    # --------------------------------------------------------
 
     all_ids = list(
         dict.fromkeys(
-            list(PORTFOLIO.values())
+            list(
+                PORTFOLIO.values()
+            )
             + CANDIDATES
             + ["bitcoin"]
         )
     )
 
-    simple_prices = coingecko_simple_price(
-        all_ids
+    simple_prices = (
+        coingecko_simple_price(
+            all_ids
+        )
     )
 
-    # --------------------------------
-    # 4. Market safety
-    # --------------------------------
+    # --------------------------------------------------------
+    # MARKET SAFETY
+    # --------------------------------------------------------
 
     safety = market_safety(
         market_global,
@@ -1864,21 +2306,24 @@ def main():
         safety
     )
 
-    # --------------------------------
-    # 5. News
-    # --------------------------------
+    # --------------------------------------------------------
+    # NEWS
+    # --------------------------------------------------------
 
     news = get_rss_news()
 
-    # --------------------------------
-    # 6. Portfolio technical data
-    # --------------------------------
+    # --------------------------------------------------------
+    # PORTFOLIO
+    # --------------------------------------------------------
 
     portfolio_data = {}
 
-    for symbol, coin_id in PORTFOLIO.items():
+    for symbol, coin_id in (
+        PORTFOLIO.items()
+    ):
 
         try:
+
             portfolio_data[symbol] = (
                 collect_coin_data(
                     symbol,
@@ -1894,21 +2339,21 @@ def main():
             )
 
             portfolio_data[symbol] = {
-                "symbol": symbol,
-                "coin_id": coin_id,
-                "error": str(e),
+                "symbol":
+                    symbol,
+                "coin_id":
+                    coin_id,
+                "error":
+                    str(e),
             }
 
-    # --------------------------------
-    # 7. Candidate shortlist
-    # --------------------------------
+    # --------------------------------------------------------
+    # CANDIDATES
+    # --------------------------------------------------------
 
-    shortlist = shortlist_candidates()
-
-    # --------------------------------
-    # 8. Deep technical data ONLY
-    #    for top candidates
-    # --------------------------------
+    shortlist = (
+        shortlist_candidates()
+    )
 
     candidate_data = {}
 
@@ -1917,6 +2362,7 @@ def main():
         symbol = coin_id.upper()
 
         try:
+
             candidate_data[symbol] = (
                 collect_coin_data(
                     symbol,
@@ -1928,78 +2374,108 @@ def main():
 
             print(
                 f"ERROR collecting "
-                f"candidate {coin_id}: {e}"
+                f"candidate {coin_id}: "
+                f"{e}"
             )
 
             candidate_data[symbol] = {
-                "coin_id": coin_id,
-                "error": str(e),
+                "coin_id":
+                    coin_id,
+                "error":
+                    str(e),
             }
 
-    # --------------------------------
-    # 9. Build Gemini prompt
-    # --------------------------------
+    # --------------------------------------------------------
+    # PROMPT
+    # --------------------------------------------------------
 
     prompt = build_prompt(
-        market_global=market_global,
-        fear_greed=fear_greed,
-        safety=safety,
-        news=news,
-        portfolio_data=portfolio_data,
-        candidate_data=candidate_data,
+        market_global=
+            market_global,
+        fear_greed=
+            fear_greed,
+        safety=
+            safety,
+        news=
+            news,
+        portfolio_data=
+            portfolio_data,
+        candidate_data=
+            candidate_data,
     )
 
-    # --------------------------------
-    # 10. Gemini analysis
-    # --------------------------------
+    # --------------------------------------------------------
+    # GEMINI
+    # --------------------------------------------------------
 
-    print("Sending data to Gemini...")
+    print(
+        "Sending data to Gemini..."
+    )
 
-    analysis = gemini_analyze(
-        prompt
+    analysis = (
+        gemini_analyze(
+            prompt
+        )
     )
 
     print(
         "Gemini analysis completed."
     )
 
-    # --------------------------------
-    # 11. Save state
-    # --------------------------------
+    # --------------------------------------------------------
+    # STATE
+    # --------------------------------------------------------
 
     state = load_state()
 
-    state["last_run"] = iso_now()
-    state["market_safety"] = safety
-    state["fear_greed"] = fear_greed
-    state["last_analysis"] = analysis
+    state["last_run"] = (
+        iso_now()
+    )
 
-    save_state(state)
+    state["market_safety"] = (
+        safety
+    )
 
-    # --------------------------------
-    # 12. Telegram
-    # --------------------------------
-
-    messages = format_bot_message(
-        analysis,
-        safety,
+    state["fear_greed"] = (
         fear_greed
     )
 
-    for message in messages:
-        telegram_send(message)
+    state["last_analysis"] = (
+        analysis
+    )
 
-        # malé oneskorenie kvôli Telegram API
+    save_state(
+        state
+    )
+
+    # --------------------------------------------------------
+    # TELEGRAM
+    # --------------------------------------------------------
+
+    messages = (
+        format_bot_message(
+            analysis,
+            safety,
+            fear_greed
+        )
+    )
+
+    for message in messages:
+
+        telegram_send(
+            message
+        )
+
         time.sleep(1)
 
     print(
-        "Crypto bot V5.2 finished successfully."
+        "Crypto bot V5.3 finished successfully."
     )
 
 
-# =========================
+# ============================================================
 # RUN
-# =========================
+# ============================================================
 
 if __name__ == "__main__":
     main()
