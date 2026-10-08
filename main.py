@@ -176,6 +176,40 @@ def manual_analysis_requested():
     }
 
 
+def get_main_analysis_slot(now=None):
+    """
+    Vráti identifikátor hlavnej analýzy, ak sme v povolenom časovom okne.
+
+    Používame 15-minútové okno namiesto presnej minúty, pretože GitHub Actions
+    môže cron spustiť s miernym oneskorením.
+
+    Sloty:
+      - 07:00–07:14 Bratislava
+      - 20:00–20:14 Bratislava
+      - 09:15–09:29 New York
+    """
+
+    if now is None:
+        now = datetime.now(TZ)
+
+    if now.hour in BRATISLAVA_MAIN_HOURS and now.minute < 15:
+        return (
+            f"BRATISLAVA_{now.date().isoformat()}_{now.hour:02d}:00"
+        )
+
+    us_now = now.astimezone(US_TZ)
+
+    if (
+        us_now.hour == US_PREOPEN_HOUR
+        and US_PREOPEN_MINUTE <= us_now.minute < US_PREOPEN_MINUTE + 15
+    ):
+        return (
+            f"US_PREOPEN_{us_now.date().isoformat()}"
+        )
+
+    return None
+
+
 def is_main_analysis_time(now=None):
     """
     Hlavná analýza:
@@ -184,29 +218,36 @@ def is_main_analysis_time(now=None):
       - 09:15 New York
 
     GitHub Action beží každých 15 minút.
+
+    Dôležité:
+    - nepoužíva sa presná minúta,
+    - stavový súbor zabráni duplicitnej analýze v rovnakom slote,
+    - ak GitHub spustí job napr. o 07:02 alebo 09:16, analýza sa stále spustí.
     """
 
     if now is None:
         now = datetime.now(TZ)
 
-    # Manuálne spustenie
     if manual_analysis_requested():
         return True, "MANUAL"
 
-    # Bratislava 07:00 / 20:00
-    if (
-        now.minute == 0
-        and now.hour in BRATISLAVA_MAIN_HOURS
-    ):
-        return True, f"BRATISLAVA_{now.hour:02d}:00"
+    slot = get_main_analysis_slot(now)
 
-    # USA pred-open
-    us_now = datetime.now(US_TZ)
+    if not slot:
+        return False, "SAFETY_MONITOR"
 
-    if (
-        us_now.hour == US_PREOPEN_HOUR
-        and us_now.minute == US_PREOPEN_MINUTE
-    ):
+    state = load_state()
+
+    if state.get("last_main_slot") == slot:
+        return False, "SAFETY_MONITOR"
+
+    if slot.startswith("BRATISLAVA_07:00"):
+        return True, "BRATISLAVA_07:00"
+
+    if slot.startswith("BRATISLAVA_20:00"):
+        return True, "BRATISLAVA_20:00"
+
+    if slot.startswith("US_PREOPEN_"):
         return True, "US_PREOPEN"
 
     return False, "SAFETY_MONITOR"
@@ -933,7 +974,8 @@ def recent_returns(closes):
 
 def collect_coin_data(
     symbol,
-    coin_id
+    coin_id,
+    days=90
 ):
 
     print(
@@ -951,7 +993,7 @@ def collect_coin_data(
 
     chart = coingecko_chart(
         coin_id,
-        days=90
+        days=days
     )
 
     prices = closes_from_chart(
@@ -1128,8 +1170,40 @@ def get_fear_greed():
 
 def market_safety(
     global_data,
-    simple_prices
+    simple_prices,
+    btc_data=None
 ):
+    """
+    Safety skóre je určené na zachytenie väčšej korekcie/prepadu.
+
+    Bodovanie:
+      Market cap:
+        <= -2%  = +1
+        <= -3.5% = +2
+        <= -5% = +3
+
+      BTC 24h:
+        <= -1.5% = +1
+        <= -3%   = +2
+        <= -5%   = +3
+        <= -7%   = +4
+
+      BTC 4H technika:
+        pod EMA50  = +1
+        pod EMA200 = +2
+        RSI < 40   = +1
+        RSI < 35   = +1 navyše
+
+      Kombinovaný tlak BTC + market cap:
+        +1
+
+    NORMAL  < 3
+    WARNING >= 3
+    CRITICAL >= 6
+
+    Technické body sú zámerne doplnené až z reálnych BTC dát,
+    aby samotný pokles market capu nevyvolával príliš veľa alertov.
+    """
 
     score = 0
     reasons = []
@@ -1142,7 +1216,6 @@ def market_safety(
     # --------------------------------------------------------
 
     try:
-
         global_change = safe_float(
             global_data["data"].get(
                 "market_cap_change_percentage_24h_usd"
@@ -1150,19 +1223,18 @@ def market_safety(
         )
 
         if global_change is not None:
-
             if global_change <= -5:
-
-                score += 2
-
+                score += 3
                 reasons.append(
                     "celková kapitalizácia prudko klesá"
                 )
-
+            elif global_change <= -3.5:
+                score += 2
+                reasons.append(
+                    "celková kapitalizácia klesá výrazne"
+                )
             elif global_change <= -2:
-
                 score += 1
-
                 reasons.append(
                     "celková kapitalizácia klesá"
                 )
@@ -1171,50 +1243,88 @@ def market_safety(
         pass
 
     # --------------------------------------------------------
-    # BTC
+    # BTC 24H
     # --------------------------------------------------------
 
     try:
-
         btc = simple_prices.get(
             "bitcoin",
             {}
         )
 
         btc_change = safe_float(
-            btc.get(
-                "usd_24h_change"
-            )
+            btc.get("usd_24h_change")
         )
 
         if btc_change is not None:
-
             if btc_change <= -7:
-
+                score += 4
+                reasons.append("BTC prudko klesá")
+            elif btc_change <= -5:
                 score += 3
-
-                reasons.append(
-                    "BTC prudko klesá"
-                )
-
+                reasons.append("BTC výrazne klesá")
             elif btc_change <= -3:
-
                 score += 2
-
-                reasons.append(
-                    "BTC výrazne klesá"
-                )
-
+                reasons.append("BTC klesá výrazne")
             elif btc_change <= -1.5:
-
                 score += 1
-
-                reasons.append(
-                    "BTC klesá"
-                )
+                reasons.append("BTC klesá")
 
     except Exception:
         pass
+
+    # --------------------------------------------------------
+    # BTC 4H TECHNICAL RISK
+    # --------------------------------------------------------
+
+    btc_tech = {}
+    if isinstance(btc_data, dict):
+        btc_tech = btc_data.get("technical_4h", {}) or {}
+
+    btc_price = safe_float(
+        btc_tech.get("price")
+    )
+    btc_ema50 = safe_float(
+        btc_tech.get("ema50")
+    )
+    btc_ema200 = safe_float(
+        btc_tech.get("ema200")
+    )
+    btc_rsi = safe_float(
+        btc_tech.get("rsi14")
+    )
+
+    if (
+        btc_price is not None
+        and btc_ema50 is not None
+        and btc_price < btc_ema50
+    ):
+        score += 1
+        reasons.append(
+            "BTC je pod 4H EMA50"
+        )
+
+    if (
+        btc_price is not None
+        and btc_ema200 is not None
+        and btc_price < btc_ema200
+    ):
+        score += 2
+        reasons.append(
+            "BTC je pod 4H EMA200"
+        )
+
+    if btc_rsi is not None:
+        if btc_rsi < 35:
+            score += 2
+            reasons.append(
+                "BTC 4H RSI je pod 35"
+            )
+        elif btc_rsi < 40:
+            score += 1
+            reasons.append(
+                "BTC 4H RSI je pod 40"
+            )
 
     # --------------------------------------------------------
     # KOMBINOVANÝ TLAK
@@ -1226,9 +1336,7 @@ def market_safety(
         and global_change <= -2
         and btc_change <= -1.5
     ):
-
         score += 1
-
         reasons.append(
             "BTC aj celý kryptotrh klesajú súčasne"
         )
@@ -1237,16 +1345,11 @@ def market_safety(
     # STATE
     # --------------------------------------------------------
 
-    if score >= 5:
-
+    if score >= 6:
         state = "CRITICAL"
-
-    elif score >= 2:
-
+    elif score >= 3:
         state = "WARNING"
-
     else:
-
         state = "NORMAL"
 
     return {
@@ -1255,6 +1358,10 @@ def market_safety(
         "reasons": reasons,
         "market_cap_change_24h": global_change,
         "btc_change_24h": btc_change,
+        "btc_price": btc_price,
+        "btc_ema50": btc_ema50,
+        "btc_ema200": btc_ema200,
+        "btc_rsi14": btc_rsi,
     }
 
 
@@ -1395,6 +1502,28 @@ def format_safety_alert(
         lines.append(
             f"🌐 Market cap 24h: "
             f"{market_change:+.2f}%"
+        )
+
+    btc_ema50 = safety.get("btc_ema50")
+    btc_ema200 = safety.get("btc_ema200")
+    btc_rsi = safety.get("btc_rsi14")
+
+    if btc_ema50 is not None:
+        lines.append(
+            f"₿ BTC 4H EMA50: "
+            f"{format_price(btc_ema50)}"
+        )
+
+    if btc_ema200 is not None:
+        lines.append(
+            f"₿ BTC 4H EMA200: "
+            f"{format_price(btc_ema200)}"
+        )
+
+    if btc_rsi is not None:
+        lines.append(
+            f"₿ BTC 4H RSI: "
+            f"{btc_rsi:.1f}"
         )
 
     fg = fear_greed.get(
@@ -2028,10 +2157,13 @@ The final Telegram R:R will be mathematically
 calculated by Python.
 
 Preferred setup:
-R:R to TP2 >= 2.0
+R:R to TP2 >= 2.0.
+Prefer TP1 R:R >= 1.5 as well.
 
-If R:R is poor:
+If R:R to TP2 < 2.0:
 prefer NO TRADE.
+
+Do NOT describe a setup as "asymmetric" if TP1 R:R is below 1.5.
 
 ==================================================
 PROBABILITIES
@@ -2044,10 +2176,13 @@ They must sum to 100.
 Do NOT automatically give optimistic probabilities.
 
 If MARKET SAFETY = WARNING:
-bull probability should normally NOT exceed 65%.
+bull probability should normally NOT exceed 60%.
 
 If MARKET SAFETY = CRITICAL:
-bull probability should normally NOT exceed 55%.
+bull probability should normally NOT exceed 50%.
+
+Safety WARNING means the market has a meaningful correction risk.
+Safety CRITICAL means capital preservation has priority.
 
 A high probability requires strong technical
 and fundamental evidence.
@@ -2588,7 +2723,7 @@ def validate_and_correct_analysis(
                     "Nebolo možné spoľahlivo vypočítať R:R."
                 )
 
-            elif rr["rr_tp2"] < 1.5:
+            elif rr["rr_tp2"] < 2.0:
 
                 coin["action"] = "NO TRADE"
 
@@ -2601,8 +2736,27 @@ def validate_and_correct_analysis(
                     )
                     + " "
                     f"Matematické R:R do TP2 je iba "
-                    f"1:{rr['rr_tp2']:.1f}."
+                    f"1:{rr['rr_tp2']:.1f}; minimum je 1:2."
                 )
+
+            elif rr["rr_tp1"] < 1.5:
+                # TP2 môže byť stále atraktívne, ale TP1 už nie je
+                # dostatočne asymetrické. Odstránime preto tvrdenie
+                # o "asymetrickom R:R", ak ho Gemini použilo.
+                reason_text = str(
+                    coin.get(
+                        "reason",
+                        ""
+                    )
+                )
+
+                reason_text = re.sub(
+                    r"(?i)asymetrick[^.]*\.",
+                    "",
+                    reason_text
+                ).strip()
+
+                coin["reason"] = reason_text
 
         # ----------------------------------------------------
         # BUY PULLBACK MUSÍ BYŤ POD CENOU
@@ -3159,9 +3313,24 @@ def run_safety_monitor():
         get_fear_greed()
     )
 
+    # Krátky BTC chart stačí na bezpečnostný monitoring.
+    # 35 dní poskytne dostatok 4H sviečok na EMA200.
+    btc_data = {}
+    try:
+        btc_data = collect_coin_data(
+            "BTC",
+            "bitcoin",
+            days=35
+        )
+    except Exception as e:
+        print(
+            f"BTC safety technical data error: {e}"
+        )
+
     safety = market_safety(
         market_global,
-        simple_prices
+        simple_prices,
+        btc_data
     )
 
     state = load_state()
@@ -3241,7 +3410,8 @@ def run_safety_monitor():
 # ============================================================
 
 def run_full_analysis(
-    schedule_reason
+    schedule_reason,
+    schedule_slot=None
 ):
 
     print(
@@ -3307,16 +3477,6 @@ def run_full_analysis(
     # SAFETY
     # --------------------------------------------------------
 
-    safety = market_safety(
-        market_global,
-        simple_prices
-    )
-
-    print(
-        "MARKET SAFETY:",
-        safety
-    )
-
     # --------------------------------------------------------
     # NEWS
     # --------------------------------------------------------
@@ -3334,6 +3494,18 @@ def run_full_analysis(
     btc_data = collect_coin_data(
         "BTC",
         "bitcoin"
+    )
+
+    # Safety sa po získaní BTC techniky prepočíta presnejšie.
+    safety = market_safety(
+        market_global,
+        simple_prices,
+        btc_data
+    )
+
+    print(
+        "MARKET SAFETY:",
+        safety
     )
 
     # --------------------------------------------------------
@@ -3511,6 +3683,11 @@ def run_full_analysis(
         schedule_reason
     )
 
+    # Označíme konkrétny slot až po úspešnom dokončení.
+    # Ak Gemini/API zlyhá, ďalší 15-minútový job ho môže zopakovať.
+    if schedule_slot and schedule_reason != "MANUAL":
+        state["last_main_slot"] = schedule_slot
+
     state["last_safety_state"] = (
         safety.get(
             "state",
@@ -3587,10 +3764,20 @@ def main():
         is_main_analysis_time()
     )
 
+    scheduled_slot = None
+    if should_run and reason != "MANUAL":
+        scheduled_slot = get_main_analysis_slot()
+
     print(
         "Run type:",
         reason
     )
+
+    if scheduled_slot:
+        print(
+            "Main analysis slot:",
+            scheduled_slot
+        )
 
     # ========================================================
     # FULL ANALYSIS
@@ -3599,7 +3786,8 @@ def main():
     if should_run:
 
         run_full_analysis(
-            reason
+            reason,
+            scheduled_slot
         )
 
         return
