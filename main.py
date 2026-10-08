@@ -6,14 +6,27 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.3 (Slovenská verzia - Opravené percentá)
+# CRYPTO AI BOT V5.4
+# ============================================================
+# HLAVNÉ ANALÝZY:
+#   07:00 Europe/Bratislava
+#   09:15 America/New_York  = pred otvorením USA trhu
+#   20:00 Europe/Bratislava
+#
+# MEDZI TÝM:
+#   iba bezpečnostný monitoring
+#
+# SAFETY ALERT:
+#   NORMAL -> WARNING
+#   WARNING -> CRITICAL
+#   alebo výrazné zhoršenie situácie
 # ============================================================
 
 
@@ -35,6 +48,21 @@ POLL_INTERVAL = 5
 STATE_FILE = "bot_state.json"
 
 TZ = ZoneInfo("Europe/Bratislava")
+US_TZ = ZoneInfo("America/New_York")
+
+
+# ============================================================
+# MAIN ANALYSIS SCHEDULE
+# ============================================================
+
+BRATISLAVA_MAIN_HOURS = {
+    7,
+    20,
+}
+
+# 09:15 New York = 45 min pred otvorením NYSE/Nasdaq
+US_PREOPEN_HOUR = 9
+US_PREOPEN_MINUTE = 15
 
 
 # ============================================================
@@ -103,7 +131,17 @@ def safe_float(value, default=None):
     try:
         if value is None:
             return default
+
+        if isinstance(value, str):
+            value = (
+                value
+                .replace("$", "")
+                .replace(",", "")
+                .strip()
+            )
+
         return float(value)
+
     except Exception:
         return default
 
@@ -115,6 +153,65 @@ def pct_change(old, new):
     return ((new - old) / old) * 100.0
 
 
+def clamp(value, minimum, maximum):
+    return max(minimum, min(maximum, value))
+
+
+# ============================================================
+# SCHEDULING
+# ============================================================
+
+def manual_analysis_requested():
+    value = os.getenv(
+        "MANUAL_ANALYSIS",
+        ""
+    ).strip().lower()
+
+    return value in {
+        "true",
+        "1",
+        "yes",
+        "y",
+        "on"
+    }
+
+
+def is_main_analysis_time(now=None):
+    """
+    Hlavná analýza:
+      - 07:00 Bratislava
+      - 20:00 Bratislava
+      - 09:15 New York
+
+    GitHub Action beží každých 15 minút.
+    """
+
+    if now is None:
+        now = datetime.now(TZ)
+
+    # Manuálne spustenie
+    if manual_analysis_requested():
+        return True, "MANUAL"
+
+    # Bratislava 07:00 / 20:00
+    if (
+        now.minute == 0
+        and now.hour in BRATISLAVA_MAIN_HOURS
+    ):
+        return True, f"BRATISLAVA_{now.hour:02d}:00"
+
+    # USA pred-open
+    us_now = datetime.now(US_TZ)
+
+    if (
+        us_now.hour == US_PREOPEN_HOUR
+        and us_now.minute == US_PREOPEN_MINUTE
+    ):
+        return True, "US_PREOPEN"
+
+    return False, "SAFETY_MONITOR"
+
+
 # ============================================================
 # HTTP
 # ============================================================
@@ -124,11 +221,13 @@ def http_request(
     timeout=REQUEST_TIMEOUT,
     retries=4
 ):
+
     last_error = None
 
     for attempt in range(retries):
 
         try:
+
             with urllib.request.urlopen(
                 req,
                 timeout=timeout
@@ -155,6 +254,7 @@ def http_request(
                 raise
 
             if attempt < retries - 1:
+
                 wait = 2 ** attempt
 
                 print(
@@ -231,7 +331,7 @@ def coingecko_headers():
 
     headers = {
         "Accept": "application/json",
-        "User-Agent": "CryptoAIBot/5.3"
+        "User-Agent": "CryptoAIBot/5.4"
     }
 
     if COINGECKO_API_KEY:
@@ -327,7 +427,7 @@ def coingecko_chart(
 
 
 # ============================================================
-# CHART / TECHNICAL DATA
+# CHART DATA
 # ============================================================
 
 def closes_from_chart(chart):
@@ -405,6 +505,10 @@ def aggregate_candles(
         )
     ]
 
+
+# ============================================================
+# TECHNICAL INDICATORS
+# ============================================================
 
 def ema(values, period):
 
@@ -572,9 +676,11 @@ def macd(values):
     ):
 
         if a is None or b is None:
+
             macd_values.append(None)
 
         else:
+
             macd_values.append(
                 a - b
             )
@@ -603,7 +709,9 @@ def macd(values):
 
     if current_signal is None:
         histogram = None
+
     else:
+
         histogram = (
             current_macd
             - current_signal
@@ -626,6 +734,73 @@ def last_valid(values):
     return None
 
 
+def atr(candles, period=14):
+
+    if len(candles) < period + 1:
+        return None
+
+    true_ranges = []
+
+    for i in range(
+        1,
+        len(candles)
+    ):
+
+        current = candles[i]
+        previous = candles[i - 1]
+
+        high = current["high"]
+        low = current["low"]
+        prev_close = previous["close"]
+
+        tr = max(
+            high - low,
+            abs(high - prev_close),
+            abs(low - prev_close)
+        )
+
+        true_ranges.append(tr)
+
+    if len(true_ranges) < period:
+        return None
+
+    return (
+        sum(true_ranges[-period:])
+        / period
+    )
+
+
+def recent_support_resistance(
+    candles,
+    lookback=30
+):
+
+    if not candles:
+        return {
+            "support": None,
+            "resistance": None
+        }
+
+    recent = candles[-lookback:]
+
+    lows = [
+        c["low"]
+        for c in recent
+        if c.get("low") is not None
+    ]
+
+    highs = [
+        c["high"]
+        for c in recent
+        if c.get("high") is not None
+    ]
+
+    return {
+        "support": min(lows) if lows else None,
+        "resistance": max(highs) if highs else None
+    }
+
+
 def technical_summary(candles):
 
     if not candles:
@@ -637,39 +812,87 @@ def technical_summary(candles):
         if c.get("close") is not None
     ]
 
-    if len(closes) < 20:
+    if not closes:
+        return {}
 
-        return {
-            "price": (
-                closes[-1]
-                if closes
-                else None
-            )
-        }
+    current = closes[-1]
 
     ema20 = ema(closes, 20)
     ema50 = ema(closes, 50)
     ema100 = ema(closes, 100)
     ema200 = ema(closes, 200)
 
-    current = closes[-1]
-
     e20 = last_valid(ema20)
     e50 = last_valid(ema50)
     e100 = last_valid(ema100)
     e200 = last_valid(ema200)
 
+    sr = recent_support_resistance(
+        candles,
+        30
+    )
+
+    current_atr = atr(
+        candles,
+        14
+    )
+
+    current_rsi = rsi(
+        closes,
+        14
+    )
+
+    current_macd = macd(
+        closes
+    )
+
     return {
         "price": current,
+
         "ema20": e20,
         "ema50": e50,
         "ema100": e100,
         "ema200": e200,
-        "rsi14": rsi(closes, 14),
-        "macd": macd(closes),
-        "above_ema20": (current > e20 if e20 is not None else None),
-        "above_ema50": (current > e50 if e50 is not None else None),
-        "above_ema200": (current > e200 if e200 is not None else None),
+
+        "rsi14": current_rsi,
+
+        "macd": current_macd,
+
+        "atr14": current_atr,
+
+        "atr_percent": (
+            current_atr / current * 100
+            if current_atr is not None
+            and current
+            else None
+        ),
+
+        "support_30_candles": sr["support"],
+        "resistance_30_candles": sr["resistance"],
+
+        "above_ema20": (
+            current > e20
+            if e20 is not None
+            else None
+        ),
+
+        "above_ema50": (
+            current > e50
+            if e50 is not None
+            else None
+        ),
+
+        "above_ema100": (
+            current > e100
+            if e100 is not None
+            else None
+        ),
+
+        "above_ema200": (
+            current > e200
+            if e200 is not None
+            else None
+        ),
     }
 
 
@@ -752,22 +975,29 @@ def collect_coin_data(
     return {
         "symbol": symbol,
         "coin_id": coin_id,
+
         "price_usd": current.get(
             "usd"
         ),
+
         "market_cap": current.get(
             "usd_market_cap"
         ),
+
         "volume_24h": current.get(
             "usd_24h_vol"
         ),
+
         "change_24h": current.get(
             "usd_24h_change"
         ),
+
         "last_updated": current.get(
             "last_updated_at"
         ),
+
         "technical_4h": technical,
+
         "returns": recent_returns(
             closes
         ),
@@ -860,7 +1090,7 @@ def get_fear_greed():
             "https://api.alternative.me/fng/?limit=1",
             headers={
                 "User-Agent":
-                    "CryptoAIBot/5.3"
+                    "CryptoAIBot/5.4"
             }
         )
 
@@ -870,8 +1100,10 @@ def get_fear_greed():
             "value": int(
                 item["value"]
             ),
+
             "classification":
                 item["value_classification"],
+
             "timestamp":
                 item.get("timestamp"),
         }
@@ -890,6 +1122,10 @@ def get_fear_greed():
         }
 
 
+# ============================================================
+# MARKET SAFETY
+# ============================================================
+
 def market_safety(
     global_data,
     simple_prices
@@ -898,18 +1134,24 @@ def market_safety(
     score = 0
     reasons = []
 
+    global_change = None
+    btc_change = None
+
+    # --------------------------------------------------------
+    # TOTAL MARKET CAP
+    # --------------------------------------------------------
+
     try:
 
-        change = (
-            global_data["data"]
-            .get(
+        global_change = safe_float(
+            global_data["data"].get(
                 "market_cap_change_percentage_24h_usd"
             )
         )
 
-        if change is not None:
+        if global_change is not None:
 
-            if change < -5:
+            if global_change <= -5:
 
                 score += 2
 
@@ -917,7 +1159,7 @@ def market_safety(
                     "celková kapitalizácia prudko klesá"
                 )
 
-            elif change < -2:
+            elif global_change <= -2:
 
                 score += 1
 
@@ -928,6 +1170,10 @@ def market_safety(
     except Exception:
         pass
 
+    # --------------------------------------------------------
+    # BTC
+    # --------------------------------------------------------
+
     try:
 
         btc = simple_prices.get(
@@ -935,29 +1181,31 @@ def market_safety(
             {}
         )
 
-        btc_change = btc.get(
-            "usd_24h_change"
+        btc_change = safe_float(
+            btc.get(
+                "usd_24h_change"
+            )
         )
 
         if btc_change is not None:
 
-            if btc_change < -7:
+            if btc_change <= -7:
 
                 score += 3
-
-                reasons.append(
-                    "BTC výrazne klesá"
-                )
-
-            elif btc_change < -3:
-
-                score += 2
 
                 reasons.append(
                     "BTC prudko klesá"
                 )
 
-            elif btc_change < -1.5:
+            elif btc_change <= -3:
+
+                score += 2
+
+                reasons.append(
+                    "BTC výrazne klesá"
+                )
+
+            elif btc_change <= -1.5:
 
                 score += 1
 
@@ -968,20 +1216,226 @@ def market_safety(
     except Exception:
         pass
 
+    # --------------------------------------------------------
+    # KOMBINOVANÝ TLAK
+    # --------------------------------------------------------
+
+    if (
+        global_change is not None
+        and btc_change is not None
+        and global_change <= -2
+        and btc_change <= -1.5
+    ):
+
+        score += 1
+
+        reasons.append(
+            "BTC aj celý kryptotrh klesajú súčasne"
+        )
+
+    # --------------------------------------------------------
+    # STATE
+    # --------------------------------------------------------
+
     if score >= 5:
+
         state = "CRITICAL"
 
     elif score >= 2:
+
         state = "WARNING"
 
     else:
+
         state = "NORMAL"
 
     return {
         "state": state,
         "score": score,
         "reasons": reasons,
+        "market_cap_change_24h": global_change,
+        "btc_change_24h": btc_change,
     }
+
+
+# ============================================================
+# SAFETY ALERT LOGIC
+# ============================================================
+
+def should_send_safety_alert(
+    current_safety,
+    state
+):
+
+    current_state = current_safety.get(
+        "state",
+        "NORMAL"
+    )
+
+    current_score = safe_float(
+        current_safety.get(
+            "score",
+            0
+        ),
+        0
+    )
+
+    previous_state = state.get(
+        "last_safety_state",
+        "NORMAL"
+    )
+
+    previous_score = safe_float(
+        state.get(
+            "last_safety_score",
+            0
+        ),
+        0
+    )
+
+    # Ak sme NORMAL, netreba alert
+    if current_state == "NORMAL":
+        return False, "NORMAL"
+
+    # Pri prechode do WARNING/CRITICAL
+    if (
+        previous_state == "NORMAL"
+        and current_state in {
+            "WARNING",
+            "CRITICAL"
+        }
+    ):
+        return True, "STATE_CHANGE"
+
+    if (
+        previous_state == "WARNING"
+        and current_state == "CRITICAL"
+    ):
+        return True, "STATE_ESCALATION"
+
+    # Ak sa score výrazne zhorší
+    if (
+        current_score >= previous_score + 2
+    ):
+        return True, "SCORE_WORSENING"
+
+    # Pri prvom spustení, ak už je trh v CRITICAL
+    if (
+        previous_state == "NORMAL"
+        and current_state == "CRITICAL"
+    ):
+        return True, "CRITICAL"
+
+    return False, "NO_NEW_ALERT"
+
+
+def format_safety_alert(
+    safety,
+    fear_greed
+):
+
+    state = safety.get(
+        "state",
+        "NORMAL"
+    )
+
+    score = safety.get(
+        "score",
+        0
+    )
+
+    btc_change = safety.get(
+        "btc_change_24h"
+    )
+
+    market_change = safety.get(
+        "market_cap_change_24h"
+    )
+
+    if state == "CRITICAL":
+
+        title = (
+            "🚨 CRYPTO AI BOT — "
+            "BEZPEČNOSTNÝ ALERT"
+        )
+
+        message = (
+            "Hrozí výraznejší prepad "
+            "alebo pokračovanie korekcie."
+        )
+
+    else:
+
+        title = (
+            "⚠️ CRYPTO AI BOT — "
+            "BEZPEČNOSTNÝ ALERT"
+        )
+
+        message = (
+            "Trh sa zhoršuje a rastie riziko "
+            "väčšej korekcie."
+        )
+
+    lines = [
+        title,
+        "",
+        f"🛡 Safety: {state} ({score})",
+        message,
+        "",
+    ]
+
+    if btc_change is not None:
+
+        lines.append(
+            f"₿ BTC 24h: {btc_change:+.2f}%"
+        )
+
+    if market_change is not None:
+
+        lines.append(
+            f"🌐 Market cap 24h: "
+            f"{market_change:+.2f}%"
+        )
+
+    fg = fear_greed.get(
+        "value"
+    )
+
+    if fg is not None:
+
+        lines.append(
+            f"😱 Fear & Greed: "
+            f"{fg}/100 "
+            f"({fear_greed.get('classification', '')})"
+        )
+
+    reasons = safety.get(
+        "reasons",
+        []
+    )
+
+    if reasons:
+
+        lines.append("")
+        lines.append("Dôvod:")
+
+        for reason in reasons[:5]:
+
+            lines.append(
+                f"• {reason}"
+            )
+
+    lines.extend([
+        "",
+        "➡️ Zatiaľ neotvárať nové pozície "
+        "agresívne.",
+        "➡️ Počkať na stabilizáciu BTC "
+        "a trhu.",
+        "➡️ Hlavná analýza príde v najbližšom "
+        "plánovanom termíne.",
+    ])
+
+    return "\n".join(lines)
 
 
 # ============================================================
@@ -993,7 +1447,7 @@ def get_rss_news():
     headers = {
         "User-Agent": (
             "Mozilla/5.0 "
-            "(compatible; CryptoAIBot/5.3)"
+            "(compatible; CryptoAIBot/5.4)"
         ),
         "Accept": (
             "application/rss+xml,"
@@ -1078,10 +1532,13 @@ def get_rss_news():
                     all_items.append({
                         "source":
                             source_name,
+
                         "title":
                             title,
+
                         "link":
                             link,
+
                         "pub_date":
                             pub_date,
                     })
@@ -1113,6 +1570,7 @@ def get_rss_news():
 def parse_json_output(text):
 
     if not text:
+
         raise RuntimeError(
             "Gemini neposlal výstup."
         )
@@ -1133,7 +1591,10 @@ def parse_json_output(text):
     )
 
     try:
-        return json.loads(text)
+
+        return json.loads(
+            text
+        )
 
     except json.JSONDecodeError:
         pass
@@ -1148,6 +1609,7 @@ def parse_json_output(text):
         ]
 
         try:
+
             return json.loads(
                 candidate
             )
@@ -1162,8 +1624,7 @@ def parse_json_output(text):
 
 
 # ============================================================
-# GEMINI 3.8 FLASH
-# OFFICIAL GOOGLE SDK
+# GEMINI
 # ============================================================
 
 def gemini_analyze(prompt):
@@ -1283,7 +1744,7 @@ def gemini_analyze(prompt):
 
 
 # ============================================================
-# GEMINI PROMPT (SLOVENSKÁ VERZIA)
+# GEMINI PROMPT
 # ============================================================
 
 def build_prompt(
@@ -1292,22 +1753,65 @@ def build_prompt(
     safety,
     news,
     portfolio_data,
-    candidate_data
+    candidate_data,
+    btc_data
 ):
 
     return f"""
 You are the main investment intelligence engine
 of a crypto trading bot.
 
-JAZYK A PREKLAD:
-- DÔLEŽITÉ: Celý textový obsah, ktorý vygeneruješ do hodnôt JSON výstupu (ako sú market_summary, reason, best_opportunity, avoid, conditions_to_watch atď.), MUSÍ byť napísaný VÝHRADNE PO SLOVENSKY.
-- Názvy kryptomien, burzové skratky (BTC, SOL, AAVE atď.) a číselné hodnoty ponechaj štandardne, ale všetky opisné vety, dôvody, analýzy a odporúčania píš plynulou a odbornou slovenčinou.
+==================================================
+LANGUAGE
+==================================================
 
-CURRENT TIME:
+All descriptive output MUST be in Slovak.
+
+Crypto symbols and numerical values stay standard.
+
+==================================================
+CURRENT TIME
+==================================================
+
+Bratislava:
 {iso_now()}
 
-Use current information from Google Search whenever
-current fundamental information is relevant.
+==================================================
+IMPORTANT USER PREFERENCES
+==================================================
+
+Investment horizon:
+now through approximately April 2027.
+
+Technical horizon:
+hours to several weeks.
+
+The user prefers:
+- buying pullbacks
+- capital preservation
+- asymmetric setups
+- clear BUY / WAIT / HOLD decisions
+- NO TRADE when setup is weak
+
+The user does NOT want additional APT exposure.
+
+The user already owns:
+AAVE
+TAO
+FET
+SOL
+ONDO
+RENDER
+
+A missed trade is better than a bad trade.
+
+Do NOT recommend APT.
+
+==================================================
+CURRENT INFORMATION
+==================================================
+
+Use Google Search for CURRENT fundamental/news information.
 
 Do NOT rely on old knowledge for:
 - regulation
@@ -1317,44 +1821,64 @@ Do NOT rely on old knowledge for:
 - token unlocks
 - tokenomics
 - ecosystem activity
-- important market events
-- current news
-
-The user wants practical investment decisions.
-
-INVESTMENT HORIZON:
-- Main horizon: now through approximately April 2027.
-- Technical horizon: hours to several weeks.
-- User prefers buying pullbacks.
-- User does NOT want additional APT exposure.
-- User already owns the portfolio coins below.
-
-A missed trade is better than a bad trade.
-
-If there is no attractive setup:
-say NO TRADE.
+- current catalysts
+- current market events
+- current geopolitical events
 
 ==================================================
-MARKET DATA
+GLOBAL MARKET
 ==================================================
 
-GLOBAL:
 {json.dumps(
     market_global,
     ensure_ascii=False,
     indent=2
 )}
 
-FEAR & GREED:
+==================================================
+FEAR & GREED
+==================================================
+
 {json.dumps(
     fear_greed,
     ensure_ascii=False,
     indent=2
 )}
 
-MARKET SAFETY:
+==================================================
+MARKET SAFETY
+==================================================
+
 {json.dumps(
     safety,
+    ensure_ascii=False,
+    indent=2
+)}
+
+IMPORTANT:
+Safety states are ONLY:
+NORMAL
+WARNING
+CRITICAL
+
+Never write SAFE.
+
+If WARNING:
+be conservative.
+
+If CRITICAL:
+prioritize capital preservation and use NO TRADE
+unless there is an exceptionally strong setup.
+
+==================================================
+BTC TECHNICAL DATA
+==================================================
+
+This data was calculated by Python directly from
+CoinGecko 4H price history.
+
+{json.dumps(
+    btc_data,
     ensure_ascii=False,
     indent=2
 )}
@@ -1390,7 +1914,31 @@ NEW COIN CANDIDATES
 )}
 
 ==================================================
-TASK
+CRITICAL TECHNICAL RULE
+==================================================
+
+Technical data such as:
+
+EMA20
+EMA50
+EMA100
+EMA200
+RSI
+MACD
+ATR
+support
+resistance
+
+has been calculated by Python.
+
+You MUST NOT invent, estimate or hallucinate
+technical indicator values.
+
+If you mention EMA, RSI, support, resistance,
+MACD or ATR, use ONLY the supplied values.
+
+==================================================
+PORTFOLIO ANALYSIS
 ==================================================
 
 Analyze:
@@ -1402,7 +1950,7 @@ SOL
 ONDO
 RENDER
 
-For every portfolio coin determine:
+For every coin choose exactly one:
 
 BUY NOW
 BUY PULLBACK
@@ -1411,7 +1959,7 @@ REDUCE
 SELL
 NO TRADE
 
-Give:
+Provide:
 
 - current price
 - buy zone 1
@@ -1420,25 +1968,95 @@ Give:
 - TP1
 - TP2
 - risk/reward
-- bull probability (celé číslo 0 až 100 v percentách, napr. 65 pre 65%)
-- bear probability (celé číslo 0 až 100 v percentách, napr. 35 pre 35%)
+- bull probability
+- bear probability
 - technical score 0-10
 - fundamental score 0-10
-- short reason (PO SLOVENSKY)
+- short reason in Slovak
 
-Do not invent arbitrary price levels.
+==================================================
+PRICE LEVEL RULES
+==================================================
 
-Buy zones should be based on:
-- support
-- resistance
+Do NOT invent arbitrary price levels.
+
+Use:
+- actual support
+- actual resistance
 - EMA
 - RSI
+- MACD
+- ATR
 - market structure
 - recent volatility
 - current trend
 - BTC conditions
 
-Fundamentals should consider:
+BUY PULLBACK:
+The buy zone should normally be BELOW current price.
+
+BUY NOW:
+Only use if current price itself offers a reasonable
+risk/reward setup.
+
+BUY zones must make sense relative to invalidation.
+
+For a long setup:
+
+invalidation < buy zone < TP1 < TP2
+
+If this structure does not make sense:
+use NO TRADE.
+
+==================================================
+RISK/REWARD
+==================================================
+
+IMPORTANT:
+
+Python will calculate the final R:R after your answer.
+
+Therefore do NOT try to manipulate the R:R.
+
+Give realistic:
+- BUY zone
+- invalidation
+- TP1
+- TP2
+
+The final Telegram R:R will be mathematically
+calculated by Python.
+
+Preferred setup:
+R:R to TP2 >= 2.0
+
+If R:R is poor:
+prefer NO TRADE.
+
+==================================================
+PROBABILITIES
+==================================================
+
+Bull and bear probabilities must be realistic.
+
+They must sum to 100.
+
+Do NOT automatically give optimistic probabilities.
+
+If MARKET SAFETY = WARNING:
+bull probability should normally NOT exceed 65%.
+
+If MARKET SAFETY = CRITICAL:
+bull probability should normally NOT exceed 55%.
+
+A high probability requires strong technical
+and fundamental evidence.
+
+==================================================
+FUNDAMENTALS
+==================================================
+
+Consider:
 
 - adoption
 - revenue / fees
@@ -1454,6 +2072,8 @@ Fundamentals should consider:
 - current catalysts
 - valuation
 
+Use current Google Search information where needed.
+
 ==================================================
 NEW COIN
 ==================================================
@@ -1462,34 +2082,35 @@ Analyze the shortlisted new coins.
 
 Choose AT MOST ONE.
 
-Compare the new coin with the user's existing portfolio.
+Compare it against the user's existing portfolio.
 
-If an existing coin is clearly a better place
-for additional capital, say:
+If an existing coin is a better place for additional
+capital:
 
 new_coin_action = NO TRADE
 
 Do NOT recommend APT.
 
-Do NOT recommend a coin simply because it has
-high theoretical upside.
+Do NOT recommend a coin merely because theoretical
+upside is high.
 
-A new coin should have:
+A new coin must have:
+
 - strong fundamentals
 - sufficient liquidity
-- attractive valuation
+- reasonable valuation
 - strong narrative/catalyst
 - reasonable technical entry
 - asymmetric upside/downside
 
-If the current price is too high after a pump:
-recommend BUY PULLBACK rather than chasing.
+If a coin has recently pumped heavily:
+prefer BUY PULLBACK.
 
 ==================================================
 MARKET REGIME
 ==================================================
 
-Determine:
+Choose one:
 
 bullish
 neutral
@@ -1497,26 +2118,25 @@ corrective
 bearish
 capitulation
 
-Pay particular attention to the market safety state.
-
-If WARNING or CRITICAL:
-be more conservative.
-
 ==================================================
-OUTPUT FORMAT (JSON ONLY)
+OUTPUT
 ==================================================
 
-Return ONLY a valid JSON object matching this exact structure:
+Return ONLY valid JSON.
+
+Structure:
+
 {{
   "market_regime": "string",
-  "market_summary": "string (PO SLOVENSKY)",
+  "market_summary": "string",
   "action": "string",
   "new_coin": "string",
   "new_coin_action": "string",
-  "new_coin_reason": "string (PO SLOVENSKY)",
+  "new_coin_reason": "string",
+
   "coins": [
     {{
-      "symbol": "string",
+      "symbol": "AAVE",
       "action": "string",
       "current_price": 0.0,
       "buy_zone_1": "string",
@@ -1524,35 +2144,516 @@ Return ONLY a valid JSON object matching this exact structure:
       "invalidation": "string",
       "tp1": "string",
       "tp2": "string",
-      "risk_reward": "string",
-      "bull_probability": 0.0,
-      "bear_probability": 0.0,
-      "technical_score": 0.0,
-      "fundamental_score": 0.0,
-      "reason": "string (PO SLOVENSKY)"
+      "risk_reward": "Python will calculate this",
+      "bull_probability": 0,
+      "bear_probability": 0,
+      "technical_score": 0,
+      "fundamental_score": 0,
+      "reason": "string"
     }}
   ],
-  "best_opportunity": "string (PO SLOVENSKY)",
-  "avoid": "string (PO SLOVENSKY)",
-  "conditions_to_watch": ["string (PO SLOVENSKY)"]
+
+  "best_opportunity": "string",
+  "avoid": "string",
+  "conditions_to_watch": [
+    "string"
+  ]
 }}
 
-No markdown formatting outside JSON. No explanations.
+No markdown.
+No explanations outside JSON.
 """
 
 
 # ============================================================
-# TELEGRAM (PLAIN TEXT)
+# PRICE PARSING
+# ============================================================
+
+def extract_numbers(value):
+
+    if value is None:
+        return []
+
+    text = str(value)
+
+    # normalizácia rôznych pomlčiek
+    text = (
+        text
+        .replace("–", "-")
+        .replace("—", "-")
+        .replace("−", "-")
+    )
+
+    matches = re.findall(
+        r"(?<!\d)(?:\d+(?:[.,]\d+)?|\.\d+)(?!\d)",
+        text
+    )
+
+    result = []
+
+    for item in matches:
+
+        item = item.replace(
+            ",",
+            "."
+        )
+
+        try:
+            result.append(
+                float(item)
+            )
+        except Exception:
+            pass
+
+    return result
+
+
+def parse_price_level(value):
+
+    numbers = extract_numbers(
+        value
+    )
+
+    if not numbers:
+        return None
+
+    return numbers[0]
+
+
+def parse_price_range(value):
+
+    numbers = extract_numbers(
+        value
+    )
+
+    if not numbers:
+        return None
+
+    if len(numbers) == 1:
+
+        return (
+            numbers[0],
+            numbers[0]
+        )
+
+    return (
+        min(numbers[0], numbers[1]),
+        max(numbers[0], numbers[1])
+    )
+
+
+# ============================================================
+# R:R CALCULATION
+# ============================================================
+
+def calculate_rr(
+    buy_zone,
+    invalidation,
+    tp1,
+    tp2
+):
+
+    zone = parse_price_range(
+        buy_zone
+    )
+
+    invalidation_value = (
+        parse_price_level(
+            invalidation
+        )
+    )
+
+    tp1_value = parse_price_level(
+        tp1
+    )
+
+    tp2_value = parse_price_level(
+        tp2
+    )
+
+    if (
+        zone is None
+        or invalidation_value is None
+        or tp1_value is None
+        or tp2_value is None
+    ):
+        return None
+
+    entry = (
+        zone[0] + zone[1]
+    ) / 2
+
+    risk = entry - invalidation_value
+
+    reward1 = tp1_value - entry
+    reward2 = tp2_value - entry
+
+    if risk <= 0:
+        return None
+
+    if reward1 <= 0 or reward2 <= 0:
+        return None
+
+    rr1 = reward1 / risk
+    rr2 = reward2 / risk
+
+    return {
+        "entry": entry,
+        "risk": risk,
+        "tp1_reward": reward1,
+        "tp2_reward": reward2,
+        "rr_tp1": rr1,
+        "rr_tp2": rr2,
+    }
+
+
+def format_rr(rr):
+
+    if not rr:
+        return "N/A"
+
+    return (
+        f"1:{rr['rr_tp1']:.1f} / "
+        f"1:{rr['rr_tp2']:.1f}"
+    )
+
+
+# ============================================================
+# ANALYSIS VALIDATION / CORRECTION
+# ============================================================
+
+def validate_and_correct_analysis(
+    analysis,
+    safety,
+    portfolio_data
+):
+
+    if not isinstance(
+        analysis,
+        dict
+    ):
+        raise RuntimeError(
+            "Gemini analysis nie je objekt."
+        )
+
+    coins = analysis.get(
+        "coins",
+        []
+    )
+
+    if not isinstance(
+        coins,
+        list
+    ):
+        raise RuntimeError(
+            "Gemini coins nie je zoznam."
+        )
+
+    safety_state = safety.get(
+        "state",
+        "NORMAL"
+    )
+
+    for coin in coins:
+
+        symbol = str(
+            coin.get(
+                "symbol",
+                ""
+            )
+        ).upper()
+
+        # ----------------------------------------------------
+        # PRICE - preferuj CoinGecko
+        # ----------------------------------------------------
+
+        if symbol in portfolio_data:
+
+            actual_price = safe_float(
+                portfolio_data[symbol].get(
+                    "price_usd"
+                )
+            )
+
+            if actual_price is not None:
+
+                coin["current_price"] = (
+                    actual_price
+                )
+
+        # ----------------------------------------------------
+        # PROBABILITIES
+        # ----------------------------------------------------
+
+        bull = safe_float(
+            coin.get(
+                "bull_probability"
+            )
+        )
+
+        bear = safe_float(
+            coin.get(
+                "bear_probability"
+            )
+        )
+
+        if bull is None:
+            bull = 50
+
+        # Ak Gemini omylom vráti 0-1
+        if 0 < bull <= 1:
+            bull *= 100
+
+        bull = clamp(
+            bull,
+            0,
+            100
+        )
+
+        # WARNING / CRITICAL caps
+        if safety_state == "WARNING":
+            bull = min(
+                bull,
+                65
+            )
+
+        elif safety_state == "CRITICAL":
+            bull = min(
+                bull,
+                55
+            )
+
+        bear = 100 - bull
+
+        coin["bull_probability"] = round(
+            bull
+        )
+
+        coin["bear_probability"] = round(
+            bear
+        )
+
+        # ----------------------------------------------------
+        # SCORES
+        # ----------------------------------------------------
+
+        technical = safe_float(
+            coin.get(
+                "technical_score"
+            )
+        )
+
+        fundamental = safe_float(
+            coin.get(
+                "fundamental_score"
+            )
+        )
+
+        if technical is not None:
+
+            coin["technical_score"] = round(
+                clamp(
+                    technical,
+                    0,
+                    10
+                ),
+                1
+            )
+
+        if fundamental is not None:
+
+            coin["fundamental_score"] = round(
+                clamp(
+                    fundamental,
+                    0,
+                    10
+                ),
+                1
+            )
+
+        # ----------------------------------------------------
+        # R:R
+        # ----------------------------------------------------
+
+        rr = calculate_rr(
+            coin.get(
+                "buy_zone_1"
+            ),
+            coin.get(
+                "invalidation"
+            ),
+            coin.get(
+                "tp1"
+            ),
+            coin.get(
+                "tp2"
+            )
+        )
+
+        coin["_calculated_rr"] = rr
+
+        coin["risk_reward"] = format_rr(
+            rr
+        )
+
+        # ----------------------------------------------------
+        # PRICE STRUCTURE VALIDATION
+        # ----------------------------------------------------
+
+        zone = parse_price_range(
+            coin.get(
+                "buy_zone_1"
+            )
+        )
+
+        invalidation = parse_price_level(
+            coin.get(
+                "invalidation"
+            )
+        )
+
+        tp1 = parse_price_level(
+            coin.get(
+                "tp1"
+            )
+        )
+
+        tp2 = parse_price_level(
+            coin.get(
+                "tp2"
+            )
+        )
+
+        current = safe_float(
+            coin.get(
+                "current_price"
+            )
+        )
+
+        action = str(
+            coin.get(
+                "action",
+                ""
+            )
+        ).upper()
+
+        valid_long_structure = (
+            zone is not None
+            and invalidation is not None
+            and tp1 is not None
+            and tp2 is not None
+            and invalidation < zone[0]
+            and tp1 > zone[1]
+            and tp2 > tp1
+        )
+
+        # ----------------------------------------------------
+        # BAD SETUP -> NO TRADE
+        # ----------------------------------------------------
+
+        if action in {
+            "BUY NOW",
+            "BUY PULLBACK"
+        }:
+
+            if not valid_long_structure:
+
+                coin["action"] = "NO TRADE"
+
+                coin["reason"] = (
+                    str(
+                        coin.get(
+                            "reason",
+                            ""
+                        )
+                    )
+                    + " "
+                    "Setup neprešiel matematickou "
+                    "kontrolou vstupu, invalidácie "
+                    "a profit targetov."
+                )
+
+            elif rr is None:
+
+                coin["action"] = "NO TRADE"
+
+                coin["reason"] = (
+                    str(
+                        coin.get(
+                            "reason",
+                            ""
+                        )
+                    )
+                    + " "
+                    "Nebolo možné spoľahlivo vypočítať R:R."
+                )
+
+            elif rr["rr_tp2"] < 1.5:
+
+                coin["action"] = "NO TRADE"
+
+                coin["reason"] = (
+                    str(
+                        coin.get(
+                            "reason",
+                            ""
+                        )
+                    )
+                    + " "
+                    f"Matematické R:R do TP2 je iba "
+                    f"1:{rr['rr_tp2']:.1f}."
+                )
+
+        # ----------------------------------------------------
+        # BUY PULLBACK MUSÍ BYŤ POD CENOU
+        # ----------------------------------------------------
+
+        if (
+            coin.get("action") == "BUY PULLBACK"
+            and current is not None
+            and zone is not None
+        ):
+
+            # Ak celý BUY1 leží nad aktuálnou cenou,
+            # nie je to pullback.
+            if zone[0] >= current:
+
+                coin["action"] = "NO TRADE"
+
+                coin["reason"] = (
+                    str(
+                        coin.get(
+                            "reason",
+                            ""
+                        )
+                    )
+                    + " "
+                    "BUY PULLBACK zóna nie je pod aktuálnou cenou."
+                )
+
+    return analysis
+
+
+# ============================================================
+# TELEGRAM
 # ============================================================
 
 def telegram_send(text):
 
     if not TELEGRAM_TOKEN:
-        print("TELEGRAM_TOKEN nie je nastavený.")
+
+        print(
+            "TELEGRAM_TOKEN nie je nastavený."
+        )
+
         return
 
     if not TELEGRAM_CHAT_ID:
-        print("TELEGRAM_CHAT_ID nie je nastavený.")
+
+        print(
+            "TELEGRAM_CHAT_ID nie je nastavený."
+        )
+
         return
 
     url = (
@@ -1584,8 +2685,15 @@ def telegram_send(text):
 
     try:
 
-        with urllib.request.urlopen(req, timeout=30) as response:
-            print(f"Telegram response status: {response.status}")
+        with urllib.request.urlopen(
+            req,
+            timeout=30
+        ) as response:
+
+            print(
+                f"Telegram response status: "
+                f"{response.status}"
+            )
 
     except Exception as e:
 
@@ -1596,7 +2704,9 @@ def telegram_send(text):
 
 def format_price(value):
 
-    value = safe_float(value)
+    value = safe_float(
+        value
+    )
 
     if value is None:
         return "N/A"
@@ -1799,12 +2909,6 @@ def format_bot_message(
             )
         )
 
-        # Poistka: Ak by model vrátil desatinné číslo od 0 do 1, premeníme ho na percentá
-        if bull is not None and 0 < bull <= 1.0:
-            bull *= 100
-        if bear is not None and 0 < bear <= 1.0:
-            bear *= 100
-
         if bull is not None:
 
             lines.append(
@@ -1925,9 +3029,7 @@ def format_bot_message(
 
             lines.append(
                 "• "
-                + str(
-                    condition
-                )
+                + str(condition)
             )
 
     lines.append("")
@@ -2032,21 +3134,128 @@ def save_state(state):
 
 
 # ============================================================
-# MAIN
+# SAFETY MONITOR
 # ============================================================
 
-def main():
+def run_safety_monitor():
 
     print(
-        "Crypto bot V5.3:",
+        "Running safety monitor..."
+    )
+
+    market_global = (
+        get_market_global()
+    )
+
+    simple_prices = (
+        coingecko_simple_price(
+            [
+                "bitcoin"
+            ]
+        )
+    )
+
+    fear_greed = (
+        get_fear_greed()
+    )
+
+    safety = market_safety(
+        market_global,
+        simple_prices
+    )
+
+    state = load_state()
+
+    should_alert, reason = (
+        should_send_safety_alert(
+            safety,
+            state
+        )
+    )
+
+    print(
+        "Safety:",
+        safety
+    )
+
+    print(
+        "Safety alert:",
+        should_alert,
+        reason
+    )
+
+    if should_alert:
+
+        alert = format_safety_alert(
+            safety,
+            fear_greed
+        )
+
+        telegram_send(
+            alert
+        )
+
+        state["last_safety_alert"] = (
+            iso_now()
+        )
+
+        state["last_safety_alert_reason"] = (
+            reason
+        )
+
+    state["last_safety_state"] = (
+        safety.get(
+            "state",
+            "NORMAL"
+        )
+    )
+
+    state["last_safety_score"] = (
+        safety.get(
+            "score",
+            0
+        )
+    )
+
+    state["last_safety_check"] = (
         iso_now()
     )
 
-    if not GEMINI_API_KEY:
+    state["market_safety"] = (
+        safety
+    )
 
-        raise RuntimeError(
-            "Chýba GEMINI_API_KEY."
-        )
+    state["fear_greed"] = (
+        fear_greed
+    )
+
+    save_state(
+        state
+    )
+
+    return safety
+
+
+# ============================================================
+# FULL MAIN ANALYSIS
+# ============================================================
+
+def run_full_analysis(
+    schedule_reason
+):
+
+    print(
+        "========================================"
+    )
+
+    print(
+        "FULL ANALYSIS:",
+        schedule_reason
+    )
+
+    print(
+        "========================================"
+    )
 
     # --------------------------------------------------------
     # GLOBAL MARKET
@@ -2082,7 +3291,9 @@ def main():
                 PORTFOLIO.values()
             )
             + CANDIDATES
-            + ["bitcoin"]
+            + [
+                "bitcoin"
+            ]
         )
     )
 
@@ -2093,7 +3304,7 @@ def main():
     )
 
     # --------------------------------------------------------
-    # MARKET SAFETY
+    # SAFETY
     # --------------------------------------------------------
 
     safety = market_safety(
@@ -2111,6 +3322,19 @@ def main():
     # --------------------------------------------------------
 
     news = get_rss_news()
+
+    # --------------------------------------------------------
+    # BTC TECHNICAL DATA
+    # --------------------------------------------------------
+
+    print(
+        "Collecting BTC technical data..."
+    )
+
+    btc_data = collect_coin_data(
+        "BTC",
+        "bitcoin"
+    )
 
     # --------------------------------------------------------
     # PORTFOLIO
@@ -2141,8 +3365,10 @@ def main():
             portfolio_data[symbol] = {
                 "symbol":
                     symbol,
+
                 "coin_id":
                     coin_id,
+
                 "error":
                     str(e),
             }
@@ -2181,6 +3407,7 @@ def main():
             candidate_data[symbol] = {
                 "coin_id":
                     coin_id,
+
                 "error":
                     str(e),
             }
@@ -2192,16 +3419,24 @@ def main():
     prompt = build_prompt(
         market_global=
             market_global,
+
         fear_greed=
             fear_greed,
+
         safety=
             safety,
+
         news=
             news,
+
         portfolio_data=
             portfolio_data,
+
         candidate_data=
             candidate_data,
+
+        btc_data=
+            btc_data,
     )
 
     # --------------------------------------------------------
@@ -2223,6 +3458,22 @@ def main():
     )
 
     # --------------------------------------------------------
+    # VALIDATION
+    # --------------------------------------------------------
+
+    print(
+        "Validating analysis..."
+    )
+
+    analysis = (
+        validate_and_correct_analysis(
+            analysis,
+            safety,
+            portfolio_data
+        )
+    )
+
+    # --------------------------------------------------------
     # STATE
     # --------------------------------------------------------
 
@@ -2230,6 +3481,14 @@ def main():
 
     state["last_run"] = (
         iso_now()
+    )
+
+    state["last_full_analysis"] = (
+        iso_now()
+    )
+
+    state["last_analysis_reason"] = (
+        schedule_reason
     )
 
     state["market_safety"] = (
@@ -2240,8 +3499,30 @@ def main():
         fear_greed
     )
 
+    state["btc_data"] = (
+        btc_data
+    )
+
     state["last_analysis"] = (
         analysis
+    )
+
+    state["last_main_schedule"] = (
+        schedule_reason
+    )
+
+    state["last_safety_state"] = (
+        safety.get(
+            "state",
+            "NORMAL"
+        )
+    )
+
+    state["last_safety_score"] = (
+        safety.get(
+            "score",
+            0
+        )
     )
 
     save_state(
@@ -2269,7 +3550,68 @@ def main():
         time.sleep(1)
 
     print(
-        "Crypto bot V5.3 finished successfully."
+        "Full analysis sent."
+    )
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+
+    print(
+        "========================================"
+    )
+
+    print(
+        "Crypto AI Bot V5.4"
+    )
+
+    print(
+        "Time:",
+        iso_now()
+    )
+
+    print(
+        "========================================"
+    )
+
+    if not GEMINI_API_KEY:
+
+        raise RuntimeError(
+            "Chýba GEMINI_API_KEY."
+        )
+
+    should_run, reason = (
+        is_main_analysis_time()
+    )
+
+    print(
+        "Run type:",
+        reason
+    )
+
+    # ========================================================
+    # FULL ANALYSIS
+    # ========================================================
+
+    if should_run:
+
+        run_full_analysis(
+            reason
+        )
+
+        return
+
+    # ========================================================
+    # SAFETY ONLY
+    # ========================================================
+
+    run_safety_monitor()
+
+    print(
+        "Safety monitor finished."
     )
 
 
