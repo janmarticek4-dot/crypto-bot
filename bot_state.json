@@ -15,12 +15,12 @@
       "BTC 4H RSI je pod 35",
       "BTC aj celý kryptotrh klesajú súčasne"
     ],
-    "market_cap_change_24h": -5.176542410205444,
-    "btc_change_24h": -1.9189848111428507,
-    "btc_price": 81755.36671066661,
-    "btc_ema50": 84173.81125074015,
-    "btc_ema200": 81614.84471687989,
-    "btc_rsi14": 30.42424587922592
+    "market_cap_change_24h": -5.075304794620816,
+    "btc_change_24h": -1.9445513153956953,
+    "btc_price": 81692.45793571648,
+    "btc_ema50": 84171.3442399578,
+    "btc_ema200": 81614.2187589202,
+    "btc_rsi14": 29.668144935138997
   },
   "fear_greed": {
     "value": 64,
@@ -230,7 +230,7 @@
   "last_main_schedule": "MANUAL",
   "last_safety_state": "CRITICAL",
   "last_safety_score": 8,
-  "last_safety_check": "2026-10-08T22:46:56.676272+02:00",
+  "last_safety_check": "2026-10-08T23:05:43.897325+02:00",
   "last_safety_alert": "2026-10-08T17:29:47.579888+02:00",
   "last_safety_alert_reason": "STATE_ESCALATION"
 }
