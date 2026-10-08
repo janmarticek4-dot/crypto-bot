@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.7 (Opravená syntax a krízový monitoring)
+# CRYPTO AI BOT V5.9 (Action-First, 24h Outlook & Clean Formatting)
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
@@ -185,7 +185,7 @@ def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=4):
 
 
 def coingecko_headers():
-    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.7"}
+    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.9"}
     if COINGECKO_API_KEY:
         headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
     return headers
@@ -437,7 +437,7 @@ def get_market_global():
 
 def get_fear_greed():
     try:
-        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.7"})
+        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.9"})
         item = data["data"][0]
         return {"value": int(item["value"]), "classification": item["value_classification"], "timestamp": item.get("timestamp")}
     except Exception as e:
@@ -629,7 +629,7 @@ def format_safety_alert(safety, fear_greed, portfolio_analysis=None):
 
 def get_rss_news():
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.7)",
+        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.9)",
         "Accept": "application/rss+xml,application/xml,text/xml,*/*",
     }
     all_items = []
@@ -731,6 +731,7 @@ PORTFOLIO DATA: {json.dumps(portfolio_data, ensure_ascii=False, indent=2)}
 CANDIDATES: {json.dumps(candidate_data, ensure_ascii=False, indent=2)}
 
 Analyze AAVE, TAO, FET, SOL, ONDO, RENDER. Choose BUY NOW, BUY PULLBACK, HOLD, REDUCE, SELL, NO TRADE.
+Pre každú mincu uveď aj presný 24-hodinový výhľad (či sa čaká pokles alebo obrat/rast, o koľko percent, a s akou pravdepodobnosťou v %).
 Return ONLY valid JSON with structure:
 {{
   "market_regime": "string",
@@ -752,6 +753,9 @@ Return ONLY valid JSON with structure:
       "risk_reward": "Python will calculate this",
       "bull_probability": 0,
       "bear_probability": 0,
+      "outlook_direction": "pokles alebo rast",
+      "outlook_pct": -2.5,
+      "outlook_probability": 70,
       "technical_score": 0,
       "fundamental_score": 0,
       "reason": "string"
@@ -879,7 +883,34 @@ def format_price(value):
     return f"${value:.8f}"
 
 
+def coin_sort_priority(coin):
+    action = str(coin.get("action", "")).upper()
+    if "SELL" in action:
+        return 0
+    if "REDUCE" in action:
+        return 1
+    if "HOLD" in action:
+        return 2
+    if "BUY" in action:
+        return 3
+    return 4
+
+
 def format_bot_message(analysis, safety, fear_greed):
+    coins = analysis.get("coins", [])
+    coins_sorted = sorted(coins, key=coin_sort_priority)
+
+    actions_summary = []
+    for c in coins_sorted:
+        sym = c.get("symbol", "?")
+        act = c.get("action", "HOLD")
+        if "SELL" in act.upper() or "REDUCE" in act.upper():
+            actions_summary.append(f"🔴 {sym}: {act}")
+        elif "BUY" in act.upper():
+            actions_summary.append(f"🟢 {sym}: {act}")
+        else:
+            actions_summary.append(f"🟡 {sym}: {act}")
+
     lines = [
         "📊 CRYPTO AI BOT — 4H ANALÝZA",
         f"🕒 {iso_now()}",
@@ -893,21 +924,53 @@ def format_bot_message(analysis, safety, fear_greed):
     if fg is not None:
         lines.append(f"😱 Fear & Greed: {fg}/100 ({fear_greed.get('classification', '')})")
 
+    lines.extend([
+        "",
+        "⚡ RÝCHLY AKČNÝ PLÁN:",
+    ])
+    lines.extend(actions_summary)
+
     lines.extend(["", "🧠 Makro:", str(analysis.get("market_summary", "")), ""])
 
-    for coin in analysis.get("coins", []):
+    for coin in coins_sorted:
         symbol = coin.get("symbol", "?")
+        action = str(coin.get("action", "N/A")).upper()
+        
+        emoji = "🟡"
+        if "SELL" in action or "REDUCE" in action:
+            emoji = "🔴"
+        elif "BUY" in action:
+            emoji = "🟢"
+
         lines.extend([
-            f"━━ {symbol} ━━",
-            f"Akcia: {coin.get('action', 'N/A')}",
+            f"━━ {emoji} {symbol} ━━",
+            f"Akcia: {action}",
             f"Cena: {format_price(coin.get('current_price'))}",
-            f"BUY 1: {coin.get('buy_zone_1', 'N/A')}",
-            f"BUY 2: {coin.get('buy_zone_2', 'N/A')}",
-            f"Invalidácia: {coin.get('invalidation', 'N/A')}",
-            f"TP1: {coin.get('tp1', 'N/A')}",
-            f"TP2: {coin.get('tp2', 'N/A')}",
-            f"R:R: {coin.get('risk_reward', 'N/A')}",
-            f"🐂 Bull: {coin.get('bull_probability', 50)}% | 🐻 Bear: {coin.get('bear_probability', 50)}%",
+        ])
+
+        outlook_dir = coin.get("outlook_direction", "pokles")
+        outlook_pct = safe_float(coin.get("outlook_pct"), 0.0)
+        outlook_prob = safe_float(coin.get("outlook_probability"), 50)
+        
+        dir_emoji = "📉" if "pokles" in outlook_dir.lower() else "📈"
+        lines.append(f"Predikcia 24h: {dir_emoji} {outlook_dir.capitalize()} o {outlook_pct:+.1f}% (Pravdepodobnosť: {outlook_prob:.0f}%)")
+
+        if "BUY" in action:
+            lines.extend([
+                f"BUY 1: {coin.get('buy_zone_1', 'N/A')}",
+                f"BUY 2: {coin.get('buy_zone_2', 'N/A')}",
+                f"Invalidácia: {coin.get('invalidation', 'N/A')}",
+                f"TP1: {coin.get('tp1', 'N/A')}",
+                f"TP2: {coin.get('tp2', 'N/A')}",
+                f"R:R: {coin.get('risk_reward', 'N/A')}",
+            ])
+
+        bull = safe_float(coin.get("bull_probability"))
+        bear = safe_float(coin.get("bear_probability"))
+        if bull is not None:
+            lines.append(f"🐂 Bull: {bull:.0f}%" + (f" | 🐻 Bear: {bear:.0f}%" if bear is not None else ""))
+
+        lines.extend([
             f"Technika: {coin.get('technical_score', 'N/A')}/10",
             f"Fundament: {coin.get('fundamental_score', 'N/A')}/10",
             str(coin.get("reason", "")),
