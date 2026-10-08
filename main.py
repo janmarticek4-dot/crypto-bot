@@ -13,7 +13,7 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V5.6 (Pokročilý krízový monitoring portfólia)
+# CRYPTO AI BOT V5.7 (Opravená syntax a krízový monitoring)
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
@@ -185,7 +185,7 @@ def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=4):
 
 
 def coingecko_headers():
-    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.6"}
+    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/5.7"}
     if COINGECKO_API_KEY:
         headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
     return headers
@@ -437,7 +437,7 @@ def get_market_global():
 
 def get_fear_greed():
     try:
-        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.6"})
+        data = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/5.7"})
         item = data["data"][0]
         return {"value": int(item["value"]), "classification": item["value_classification"], "timestamp": item.get("timestamp")}
     except Exception as e:
@@ -598,7 +598,6 @@ def format_safety_alert(safety, fear_greed, portfolio_analysis=None):
         for reason in reasons[:5]:
             lines.append(f"• {reason}")
 
-    # Pridanie detailnej analýzy každého coinu v portfóliu
     if portfolio_analysis:
         lines.extend(["", "📊 ANALÝZA PORTFÓLIA V OHROZENÍ:"])
         for item in portfolio_analysis:
@@ -630,7 +629,7 @@ def format_safety_alert(safety, fear_greed, portfolio_analysis=None):
 
 def get_rss_news():
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.6)",
+        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/5.7)",
         "Accept": "application/rss+xml,application/xml,text/xml,*/*",
     }
     all_items = []
@@ -840,4 +839,288 @@ def validate_and_correct_analysis(analysis, safety, portfolio_data):
         coin["bull_probability"] = round(bull)
         coin["bear_probability"] = round(100 - bull)
 
-        tech = safe_float(coin.
+        tech = safe_float(coin.get("technical_score"))
+        fund = safe_float(coin.get("fundamental_score"))
+        if tech is not None:
+            coin["technical_score"] = round(clamp(tech, 0, 10), 1)
+        if fund is not None:
+            coin["fundamental_score"] = round(clamp(fund, 0, 10), 1)
+
+        rr = calculate_rr(coin.get("buy_zone_1"), coin.get("invalidation"), coin.get("tp1"), coin.get("tp2"))
+        coin["risk_reward"] = format_rr(rr)
+    return analysis
+
+
+def telegram_send(text):
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "disable_web_page_preview": True}
+    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        urllib.request.urlopen(req, timeout=30)
+    except Exception as e:
+        print(f"Telegram error: {e}")
+
+
+def format_price(value):
+    value = safe_float(value)
+    if value is None:
+        return "N/A"
+    if value >= 1000:
+        return f"${value:,.0f}"
+    if value >= 100:
+        return f"${value:,.2f}"
+    if value >= 1:
+        return f"${value:,.3f}"
+    if value >= 0.01:
+        return f"${value:,.4f}"
+    return f"${value:.8f}"
+
+
+def format_bot_message(analysis, safety, fear_greed):
+    lines = [
+        "📊 CRYPTO AI BOT — 4H ANALÝZA",
+        f"🕒 {iso_now()}",
+        "",
+        f"🌐 Trh: {analysis.get('market_regime', 'N/A')}",
+        f"🛡 Safety: {safety.get('state', 'N/A')} ({safety.get('score', 0)})",
+    ]
+    for reason in safety.get("reasons", []):
+        lines.append(f" • {reason}")
+    fg = fear_greed.get("value")
+    if fg is not None:
+        lines.append(f"😱 Fear & Greed: {fg}/100 ({fear_greed.get('classification', '')})")
+
+    lines.extend(["", "🧠 Makro:", str(analysis.get("market_summary", "")), ""])
+
+    for coin in analysis.get("coins", []):
+        symbol = coin.get("symbol", "?")
+        lines.extend([
+            f"━━ {symbol} ━━",
+            f"Akcia: {coin.get('action', 'N/A')}",
+            f"Cena: {format_price(coin.get('current_price'))}",
+            f"BUY 1: {coin.get('buy_zone_1', 'N/A')}",
+            f"BUY 2: {coin.get('buy_zone_2', 'N/A')}",
+            f"Invalidácia: {coin.get('invalidation', 'N/A')}",
+            f"TP1: {coin.get('tp1', 'N/A')}",
+            f"TP2: {coin.get('tp2', 'N/A')}",
+            f"R:R: {coin.get('risk_reward', 'N/A')}",
+            f"🐂 Bull: {coin.get('bull_probability', 50)}% | 🐻 Bear: {coin.get('bear_probability', 50)}%",
+            f"Technika: {coin.get('technical_score', 'N/A')}/10",
+            f"Fundament: {coin.get('fundamental_score', 'N/A')}/10",
+            str(coin.get("reason", "")),
+            "",
+        ])
+
+    lines.extend([
+        "🚀 Najlepšia príležitosť:",
+        str(analysis.get("best_opportunity", "N/A")),
+        "",
+        f"🆕 Nová kryptomena: {analysis.get('new_coin', 'NO TRADE')}",
+        f"Akcia: {analysis.get('new_coin_action', 'NO TRADE')}",
+        f"Dôvod: {analysis.get('new_coin_reason', '')}",
+        "",
+        f"⚠️ Vyhnúť sa: {analysis.get('avoid', '')}",
+    ])
+
+    conditions = analysis.get("conditions_to_watch", [])
+    if conditions:
+        lines.extend(["", "👀 Sledovať:"])
+        for condition in conditions[:6]:
+            lines.append(f"• {condition}")
+
+    lines.extend(["", "Nie je to finančné poradenstvo."])
+    message = "\n".join(lines)
+    if len(message) <= 4000:
+        return [message]
+
+    chunks, current = [], ""
+    for line in lines:
+        if len(current) + len(line) + 1 > 3900:
+            chunks.append(current)
+            current = line
+        else:
+            current += ("\n" if current else "") + line
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+def load_state():
+    if not os.path.exists(STATE_FILE):
+        return {}
+    try:
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_state(state):
+    try:
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+# ============================================================
+# SAFETY MONITOR S ANALÝZOU PORTFÓLIA A PRAVIDLAMI PREDAJA
+# ============================================================
+
+def run_safety_monitor():
+    market_global = get_market_global()
+    simple_prices = coingecko_simple_price(["bitcoin"])
+    fear_greed = get_fear_greed()
+    
+    btc_data = {}
+    try:
+        btc_data = collect_coin_data("BTC", "bitcoin", days=35)
+    except Exception:
+        pass
+
+    safety = market_safety(market_global, simple_prices, btc_data)
+
+    portfolio_analysis = []
+    safety_score = safety.get("score", 0)
+
+    for symbol, coin_id in PORTFOLIO.items():
+        try:
+            cdata = collect_coin_data(symbol, coin_id, days=35)
+            tech = cdata.get("technical_4h", {})
+            cur_price = safe_float(cdata.get("price_usd"))
+            support = safe_float(tech.get("support_30_candles"))
+            rsi_val = safe_float(tech.get("rsi14", 50))
+            above_200 = tech.get("above_ema200", True)
+
+            expected_drop = 5.0
+            if cur_price and support and support < cur_price:
+                expected_drop = ((cur_price - support) / cur_price) * 100
+            else:
+                expected_drop = 6.5 + (safety_score * 0.5)
+
+            bear_prob = int(clamp(50 + (safety_score * 3) + (14 if not above_200 else 0), 10, 95))
+
+            if rsi_val < 35:
+                duration = "Krátkodobý výplach (24–48 hodín)"
+            elif not above_200:
+                duration = "3–5 dňová korekcia / Týždenný tlak"
+            else:
+                duration = "Krátkodobá korekcia (1–3 dni)"
+
+            tech_breakdown = not above_200 or rsi_val < 40
+
+            if expected_drop > 10 and bear_prob >= 70:
+                action = "SELL (Predať 100% pozície)"
+            elif expected_drop > 7 and bear_prob >= 60 and tech_breakdown:
+                action = "SELL PARTIAL (Predať 30–50% pozície)"
+            else:
+                action = "HOLD (Držať / Bežný výplach)"
+
+            portfolio_analysis.append({
+                "symbol": symbol,
+                "price": cur_price,
+                "expected_drop": expected_drop,
+                "duration": duration,
+                "bear_prob": bear_prob,
+                "action": action
+            })
+        except Exception as e:
+            print(f"Chyba pri analýze {symbol} pre safety alert: {e}")
+
+    state = load_state()
+    should_alert, reason = should_send_safety_alert(safety, state)
+
+    if should_alert:
+        alert = format_safety_alert(safety, fear_greed, portfolio_analysis)
+        telegram_send(alert)
+        state["last_safety_alert"] = iso_now()
+        state["last_safety_alert_reason"] = reason
+
+    state["last_safety_state"] = safety.get("state", "NORMAL")
+    state["last_safety_score"] = safety.get("score", 0)
+    state["last_safety_check"] = iso_now()
+    state["market_safety"] = safety
+    state["fear_greed"] = fear_greed
+    save_state(state)
+    return safety
+
+
+# ============================================================
+# FULL MAIN ANALYSIS
+# ============================================================
+
+def run_full_analysis(schedule_reason, schedule_slot=None):
+    market_global = get_market_global()
+    fear_greed = get_fear_greed()
+    all_ids = list(dict.fromkeys(list(PORTFOLIO.values()) + CANDIDATES + ["bitcoin"]))
+    simple_prices = coingecko_simple_price(all_ids)
+    news = get_rss_news()
+    btc_data = collect_coin_data("BTC", "bitcoin")
+    safety = market_safety(market_global, simple_prices, btc_data)
+
+    portfolio_data = {}
+    for symbol, coin_id in PORTFOLIO.items():
+        try:
+            portfolio_data[symbol] = collect_coin_data(symbol, coin_id)
+        except Exception as e:
+            portfolio_data[symbol] = {"symbol": symbol, "coin_id": coin_id, "error": str(e)}
+
+    shortlist = shortlist_candidates()
+    candidate_data = {}
+    for coin_id in shortlist:
+        symbol = coin_id.upper()
+        try:
+            candidate_data[symbol] = collect_coin_data(symbol, coin_id)
+        except Exception as e:
+            candidate_data[symbol] = {"coin_id": coin_id, "error": str(e)}
+
+    prompt = build_prompt(market_global, fear_greed, safety, news, portfolio_data, candidate_data, btc_data)
+    analysis = gemini_analyze(prompt)
+    analysis = validate_and_correct_analysis(analysis, safety, portfolio_data)
+
+    state = load_state()
+    state["last_run"] = iso_now()
+    state["last_full_analysis"] = iso_now()
+    state["last_analysis_reason"] = schedule_reason
+    state["market_safety"] = safety
+    state["fear_greed"] = fear_greed
+    state["btc_data"] = btc_data
+    state["last_analysis"] = analysis
+    state["last_main_schedule"] = schedule_reason
+    if schedule_slot and schedule_reason != "MANUAL":
+        state["last_main_slot"] = schedule_slot
+    state["last_safety_state"] = safety.get("state", "NORMAL")
+    state["last_safety_score"] = safety.get("score", 0)
+    save_state(state)
+
+    messages = format_bot_message(analysis, safety, fear_greed)
+    for message in messages:
+        telegram_send(message)
+        time.sleep(1)
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+    if not GEMINI_API_KEY:
+        raise RuntimeError("Chýba GEMINI_API_KEY.")
+
+    should_run, reason = is_main_analysis_time()
+    scheduled_slot = None
+    if should_run and reason != "MANUAL":
+        scheduled_slot = get_main_analysis_slot()
+
+    if should_run:
+        run_full_analysis(reason, scheduled_slot)
+        return
+
+    run_safety_monitor()
+
+
+if __name__ == "__main__":
+    main()
