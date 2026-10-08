@@ -13,12 +13,12 @@
       "BTC je pod 4H EMA50",
       "BTC 4H RSI je pod 40"
     ],
-    "market_cap_change_24h": -3.443365876202299,
-    "btc_change_24h": -1.3450085381364398,
-    "btc_price": 82960.82955061809,
-    "btc_ema50": 84469.31528571255,
-    "btc_ema200": 81633.42889593166,
-    "btc_rsi14": 36.13724602606782
+    "market_cap_change_24h": -3.452109558680505,
+    "btc_change_24h": -1.3273828240513048,
+    "btc_price": 82924.67645790872,
+    "btc_ema50": 84467.897517371,
+    "btc_ema200": 81633.06916366589,
+    "btc_rsi14": 35.71814373308065
   },
   "fear_greed": {
     "value": 64,
@@ -228,5 +228,5 @@
   "last_main_schedule": "MANUAL",
   "last_safety_state": "WARNING",
   "last_safety_score": 3,
-  "last_safety_check": "2026-10-08T10:06:36.181390+02:00"
+  "last_safety_check": "2026-10-08T10:30:00.217959+02:00"
 }
