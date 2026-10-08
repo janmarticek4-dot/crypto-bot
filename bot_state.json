@@ -7,21 +7,21 @@
   "last_run": "2026-10-08T09:46:39.434274+02:00",
   "market_safety": {
     "state": "CRITICAL",
-    "score": 11,
+    "score": 10,
     "reasons": [
       "celková kapitalizácia prudko klesá",
-      "BTC klesá výrazne",
+      "BTC klesá",
       "BTC je pod 4H EMA50",
       "BTC je pod 4H EMA200",
       "BTC 4H RSI je pod 35",
       "BTC aj celý kryptotrh klesajú súčasne"
     ],
-    "market_cap_change_24h": -6.2969294389648285,
-    "btc_change_24h": -3.311199441555034,
-    "btc_price": 80588.664375739,
-    "btc_ema50": 84237.91745472349,
-    "btc_ema200": 81614.4180802901,
-    "btc_rsi14": 23.4283992712203
+    "market_cap_change_24h": -6.2696233755770505,
+    "btc_change_24h": -2.3618666259522043,
+    "btc_price": 81361.11227573328,
+    "btc_ema50": 84268.20952923308,
+    "btc_ema200": 81622.10412904626,
+    "btc_rsi14": 26.391898816276495
   },
   "fear_greed": {
     "value": 64,
@@ -230,8 +230,8 @@
   },
   "last_main_schedule": "MANUAL",
   "last_safety_state": "CRITICAL",
-  "last_safety_score": 11,
-  "last_safety_check": "2026-10-08T20:08:10.443879+02:00",
+  "last_safety_score": 10,
+  "last_safety_check": "2026-10-08T20:30:04.662435+02:00",
   "last_safety_alert": "2026-10-08T17:29:47.579888+02:00",
   "last_safety_alert_reason": "STATE_ESCALATION"
 }
