@@ -1,4 +1,3 @@
-
 import os
 import json
 import time
@@ -7,58 +6,51 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from google import genai
 
-
 # ============================================================
-# CRYPTO AI BOT V6.0
-# Ochrana pred predčasným predajom, bezpečnejšie alerty,
-# kontrola doručenia Telegram správ a porovnanie odporúčaní.
+# CRYPTO AI BOT V7.0
+# - pravidlá pre BUY NOW / BUY PULLBACK / HOLD / REDUCE / SELL
+# - technické skóre vypočítané z dát, nie vymyslené Gemini
+# - fundamentálne skóre s povinným odôvodnením a istotou
+# - nadväznosť na predchádzajúce odporúčania
+# - kontrola starších 24h predpovedí
+# - konzervatívna ochrana pred panickým predajom
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "").strip()
-
-GEMINI_MODEL = "gemini-3.8-flash"
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
 
 REQUEST_TIMEOUT = 60
 GEMINI_MAX_WAIT = 600
 POLL_INTERVAL = 5
 STATE_FILE = "bot_state.json"
-
 TZ = ZoneInfo("Europe/Bratislava")
 US_TZ = ZoneInfo("America/New_York")
 
 PORTFOLIO = {
-    "AAVE": "aave",
-    "TAO": "bittensor",
-    "FET": "fetch-ai",
-    "SOL": "solana",
-    "ONDO": "ondo-finance",
-    "RENDER": "render-token",
+    "AAVE": "aave", "TAO": "bittensor", "FET": "fetch-ai",
+    "SOL": "solana", "ONDO": "ondo-finance", "RENDER": "render-token",
 }
-
 CANDIDATES = [
-    "sui", "chainlink", "compound-governance-token",
-    "avalanche-2", "hyperliquid", "near",
-    "injective-protocol", "uniswap", "arbitrum",
-    "optimism", "maker", "mantle",
+    "sui", "chainlink", "compound-governance-token", "avalanche-2",
+    "hyperliquid", "near", "injective-protocol", "uniswap",
+    "arbitrum", "optimism", "maker", "mantle",
 ]
-
 RSS_FEEDS = [
     ("CoinTelegraph", "https://cointelegraph.com/rss"),
     ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/"),
 ]
+VALID_ACTIONS = {"BUY NOW", "BUY PULLBACK", "HOLD", "REDUCE", "SELL", "NO TRADE"}
 
 
-# ============================================================
-# ZÁKLADNÉ FUNKCIE
-# ============================================================
+# ----------------------------- Utilities -----------------------------
 
 def now_local():
     return datetime.now(TZ)
@@ -79,20 +71,18 @@ def safe_float(value, default=None):
         return default
 
 
+def clamp(value, low, high):
+    return max(low, min(high, value))
+
+
 def pct_change(old, new):
     if old in (None, 0) or new is None:
         return None
     return (new - old) / old * 100.0
 
 
-def clamp(value, minimum, maximum):
-    return max(minimum, min(maximum, value))
-
-
 def manual_analysis_requested():
-    return os.getenv("MANUAL_ANALYSIS", "").strip().lower() in {
-        "true", "1", "yes", "y", "on"
-    }
+    return os.getenv("MANUAL_ANALYSIS", "").strip().lower() in {"true", "1", "yes", "y", "on"}
 
 
 def load_state():
@@ -102,113 +92,83 @@ def load_state():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, dict) else {}
-    except Exception as e:
-        print(f"State read error: {e}")
+    except Exception as exc:
+        print(f"State read error: {exc}")
         return {}
 
 
 def save_state(state):
-    temporary = STATE_FILE + ".tmp"
-    try:
-        with open(temporary, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False, indent=2)
-        os.replace(temporary, STATE_FILE)
-    except Exception as e:
-        print(f"State save error: {e}")
-        raise
+    temp = STATE_FILE + ".tmp"
+    with open(temp, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+    os.replace(temp, STATE_FILE)
 
 
-# ============================================================
-# PLÁNOVANIE
-# ============================================================
+# ----------------------------- Schedule -----------------------------
 
 def get_main_analysis_slot(now=None):
     now = now or now_local()
-
     if now.hour == 7 and now.minute < 30:
         return f"BRATISLAVA_{now.date().isoformat()}_07:00"
-
     if now.hour == 20 and now.minute < 30:
         return f"BRATISLAVA_{now.date().isoformat()}_20:00"
-
     us_now = now.astimezone(US_TZ)
     if us_now.hour == 9 and 15 <= us_now.minute < 45:
         return f"US_PREOPEN_{us_now.date().isoformat()}"
-
     return None
 
 
 def is_main_analysis_time(now=None):
     if manual_analysis_requested():
         return True, "MANUAL"
-
     slot = get_main_analysis_slot(now)
     if not slot:
         return False, "SAFETY_MONITOR"
-
-    state = load_state()
-    if state.get("last_main_slot") == slot:
+    if load_state().get("last_main_slot") == slot:
         return False, "SAFETY_MONITOR"
-
     if "07:00" in slot:
         return True, "BRATISLAVA_07:00"
     if "20:00" in slot:
         return True, "BRATISLAVA_20:00"
     if "US_PREOPEN" in slot:
         return True, "US_PREOPEN"
-
     return False, "SAFETY_MONITOR"
 
 
-# ============================================================
-# HTTP A COINGECKO
-# ============================================================
+# ----------------------------- HTTP / CoinGecko -----------------------------
 
 def http_request(req, timeout=REQUEST_TIMEOUT, retries=4):
     last_error = None
-
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
                 return response.read()
-
-        except urllib.error.HTTPError as e:
-            last_error = e
-            if e.code in {400, 401, 403, 404}:
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if exc.code in {400, 401, 403, 404}:
                 raise
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)
-
-        except (urllib.error.URLError, TimeoutError,
-                ConnectionError, OSError) as e:
-            last_error = e
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)
-
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as exc:
+            last_error = exc
+        if attempt < retries - 1:
+            time.sleep(2 ** attempt)
     raise last_error or RuntimeError("HTTP požiadavka zlyhala.")
 
 
 def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=4):
-    req = urllib.request.Request(
-        url, headers=headers or {}, method="GET"
-    )
+    req = urllib.request.Request(url, headers=headers or {}, method="GET")
     raw = http_request(req, timeout, retries)
     return json.loads(raw.decode("utf-8"))
 
 
 def coingecko_headers():
-    headers = {
-        "Accept": "application/json",
-        "User-Agent": "CryptoAIBot/6.0",
-    }
+    headers = {"Accept": "application/json", "User-Agent": "CryptoAIBot/7.0"}
     if COINGECKO_API_KEY:
         headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
     return headers
 
 
 def coingecko_get(endpoint, params=None):
-    base = "https://api.coingecko.com/api/v3"
-    url = f"{base}/{endpoint}"
+    url = f"https://api.coingecko.com/api/v3/{endpoint}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
     return http_json(url, headers=coingecko_headers())
@@ -218,12 +178,9 @@ def coingecko_simple_price(ids):
     if not ids:
         return {}
     return coingecko_get("simple/price", {
-        "ids": ",".join(ids),
-        "vs_currencies": "usd",
-        "include_market_cap": "true",
-        "include_24hr_vol": "true",
-        "include_24hr_change": "true",
-        "include_last_updated_at": "true",
+        "ids": ",".join(ids), "vs_currencies": "usd",
+        "include_market_cap": "true", "include_24hr_vol": "true",
+        "include_24hr_change": "true", "include_last_updated_at": "true",
     })
 
 
@@ -231,84 +188,51 @@ def coingecko_markets(ids):
     if not ids:
         return []
     return coingecko_get("coins/markets", {
-        "vs_currency": "usd",
-        "ids": ",".join(ids),
-        "order": "market_cap_desc",
-        "per_page": len(ids),
-        "page": 1,
-        "sparkline": "false",
-        "price_change_percentage": "24h,7d",
+        "vs_currency": "usd", "ids": ",".join(ids),
+        "order": "market_cap_desc", "per_page": len(ids), "page": 1,
+        "sparkline": "false", "price_change_percentage": "24h,7d",
     })
 
 
 def coingecko_chart(coin_id, days=90):
-    return coingecko_get(
-        f"coins/{coin_id}/market_chart",
-        {
-            "vs_currency": "usd",
-            "days": days,
-            "interval": "hourly",
-        },
-    )
+    return coingecko_get(f"coins/{coin_id}/market_chart", {
+        "vs_currency": "usd", "days": days, "interval": "hourly",
+    })
 
 
-# ============================================================
-# TECHNICKÁ ANALÝZA
-# ============================================================
+# ----------------------------- Technical indicators -----------------------------
 
 def closes_from_chart(chart):
-    return [
-        {"timestamp": p[0], "price": safe_float(p[1])}
-        for p in chart.get("prices", [])
-        if len(p) >= 2 and safe_float(p[1]) is not None
-    ]
+    return [{"timestamp": p[0], "price": safe_float(p[1])}
+            for p in chart.get("prices", []) if len(p) >= 2 and safe_float(p[1]) is not None]
 
 
 def aggregate_candles(prices, hours=4):
     buckets = {}
-    bucket_ms = hours * 60 * 60 * 1000
-
-    for p in prices:
-        timestamp = int(p["timestamp"])
-        price = p["price"]
-        bucket = (timestamp // bucket_ms) * bucket_ms
-
+    width = hours * 60 * 60 * 1000
+    for point in prices:
+        ts, price = int(point["timestamp"]), point["price"]
+        bucket = (ts // width) * width
         if bucket not in buckets:
-            buckets[bucket] = {
-                "timestamp": bucket,
-                "open": price,
-                "high": price,
-                "low": price,
-                "close": price,
-            }
+            buckets[bucket] = {"timestamp": bucket, "open": price, "high": price, "low": price, "close": price}
         else:
-            buckets[bucket]["high"] = max(
-                buckets[bucket]["high"], price
-            )
-            buckets[bucket]["low"] = min(
-                buckets[bucket]["low"], price
-            )
+            buckets[bucket]["high"] = max(buckets[bucket]["high"], price)
+            buckets[bucket]["low"] = min(buckets[bucket]["low"], price)
             buckets[bucket]["close"] = price
-
     return [buckets[k] for k in sorted(buckets)]
 
 
 def ema(values, period):
     if len(values) < period:
         return [None] * len(values)
-
-    result = [None] * len(values)
+    out = [None] * len(values)
     previous = sum(values[:period]) / period
-    result[period - 1] = previous
-    multiplier = 2 / (period + 1)
-
+    out[period - 1] = previous
+    mult = 2 / (period + 1)
     for i in range(period, len(values)):
-        previous = (
-            (values[i] - previous) * multiplier + previous
-        )
-        result[i] = previous
-
-    return result
+        previous = (values[i] - previous) * mult + previous
+        out[i] = previous
+    return out
 
 
 def last_valid(values):
@@ -321,70 +245,36 @@ def last_valid(values):
 def rsi(values, period=14):
     if len(values) < period + 1:
         return None
-
-    changes = [
-        values[i] - values[i - 1]
-        for i in range(1, len(values))
-    ]
-    gains = [max(x, 0) for x in changes]
-    losses = [max(-x, 0) for x in changes]
-
-    avg_gain = sum(gains[:period]) / period
-    avg_loss = sum(losses[:period]) / period
-
+    changes = [values[i] - values[i - 1] for i in range(1, len(values))]
+    gains, losses = [max(x, 0) for x in changes], [max(-x, 0) for x in changes]
+    avg_gain, avg_loss = sum(gains[:period]) / period, sum(losses[:period]) / period
     for i in range(period, len(gains)):
-        avg_gain = (
-            avg_gain * (period - 1) + gains[i]
-        ) / period
-        avg_loss = (
-            avg_loss * (period - 1) + losses[i]
-        ) / period
-
+        avg_gain = (avg_gain * (period - 1) + gains[i]) / period
+        avg_loss = (avg_loss * (period - 1) + losses[i]) / period
     if avg_loss == 0:
         return 100.0
     rs = avg_gain / avg_loss
-    return 100 - (100 / (1 + rs))
+    return 100 - 100 / (1 + rs)
 
 
 def macd(values):
     if len(values) < 35:
         return {"macd": None, "signal": None, "histogram": None}
-
-    e12 = ema(values, 12)
-    e26 = ema(values, 26)
-    values_macd = [
-        a - b if a is not None and b is not None else None
-        for a, b in zip(e12, e26)
-    ]
-
-    valid = [x for x in values_macd if x is not None]
-    signal_values = ema(valid, 9)
+    e12, e26 = ema(values, 12), ema(values, 26)
+    series = [a - b if a is not None and b is not None else None for a, b in zip(e12, e26)]
+    valid = [x for x in series if x is not None]
+    signal = last_valid(ema(valid, 9))
     current = valid[-1]
-    signal = signal_values[-1]
-
-    return {
-        "macd": current,
-        "signal": signal,
-        "histogram": (
-            current - signal if signal is not None else None
-        ),
-    }
+    return {"macd": current, "signal": signal, "histogram": current - signal if signal is not None else None}
 
 
 def atr(candles, period=14):
     if len(candles) < period + 1:
         return None
-
     ranges = []
     for i in range(1, len(candles)):
-        current = candles[i]
-        previous = candles[i - 1]
-        ranges.append(max(
-            current["high"] - current["low"],
-            abs(current["high"] - previous["close"]),
-            abs(current["low"] - previous["close"]),
-        ))
-
+        c, prev = candles[i], candles[i - 1]
+        ranges.append(max(c["high"] - c["low"], abs(c["high"] - prev["close"]), abs(c["low"] - prev["close"])))
     return sum(ranges[-period:]) / period if ranges else None
 
 
@@ -392,52 +282,27 @@ def recent_support_resistance(candles, lookback=30):
     recent = candles[-lookback:]
     if not recent:
         return {"support": None, "resistance": None}
-
-    return {
-        "support": min(c["low"] for c in recent),
-        "resistance": max(c["high"] for c in recent),
-    }
+    return {"support": min(c["low"] for c in recent), "resistance": max(c["high"] for c in recent)}
 
 
 def technical_summary(candles):
     if not candles:
         return {}
-
     closes = [c["close"] for c in candles]
-    current = closes[-1]
-    e20 = last_valid(ema(closes, 20))
-    e50 = last_valid(ema(closes, 50))
-    e100 = last_valid(ema(closes, 100))
-    e200 = last_valid(ema(closes, 200))
+    price = closes[-1]
+    averages = {f"ema{n}": last_valid(ema(closes, n)) for n in (20, 50, 100, 200)}
     sr = recent_support_resistance(candles)
     current_atr = atr(candles)
-
+    above = {f"above_ema{n}": price > averages[f"ema{n}"] if averages[f"ema{n}"] is not None else None for n in (20, 50, 100, 200)}
     return {
-        "price": current,
-        "ema20": e20,
-        "ema50": e50,
-        "ema100": e100,
-        "ema200": e200,
-        "rsi14": rsi(closes),
-        "macd": macd(closes),
-        "atr14": current_atr,
-        "atr_percent": (
-            current_atr / current * 100
-            if current_atr and current else None
-        ),
-        "support_30_candles": sr["support"],
-        "resistance_30_candles": sr["resistance"],
-        "above_ema20": current > e20 if e20 is not None else None,
-        "above_ema50": current > e50 if e50 is not None else None,
-        "above_ema100": current > e100 if e100 is not None else None,
-        "above_ema200": current > e200 if e200 is not None else None,
+        "price": price, **averages, **above, "rsi14": rsi(closes), "macd": macd(closes),
+        "atr14": current_atr, "atr_percent": current_atr / price * 100 if current_atr and price else None,
+        "support_30_candles": sr["support"], "resistance_30_candles": sr["resistance"],
+        "candles_4h_available": len(candles),
     }
 
 
 def recent_returns(closes):
-    if not closes:
-        return {}
-
     result = {}
     for name, bars in {"24h": 6, "7d": 42, "30d": 180}.items():
         if len(closes) > bars:
@@ -445,1080 +310,653 @@ def recent_returns(closes):
     return result
 
 
+def calculate_technical_score(tech):
+    """Deterministické skóre 0–10: trend, priemery, RSI, MACD. Nie je predikcia ceny."""
+    if not tech or safe_float(tech.get("price")) is None:
+        return {"score": None, "label": "nedostatok dát", "reasons": []}
+    score = 5.0
+    reasons = []
+    for key, weight, label in [
+        ("above_ema20", 0.45, "EMA20"), ("above_ema50", 0.8, "EMA50"),
+        ("above_ema100", 0.65, "EMA100"), ("above_ema200", 1.0, "EMA200"),
+    ]:
+        value = tech.get(key)
+        if value is True:
+            score += weight
+            reasons.append(f"cena nad {label}")
+        elif value is False:
+            score -= weight
+            reasons.append(f"cena pod {label}")
+    r = safe_float(tech.get("rsi14"))
+    if r is not None:
+        if 50 <= r <= 65:
+            score += 0.8; reasons.append(f"RSI {r:.1f}: pozitívne momentum")
+        elif r > 65:
+            score += 0.3; reasons.append(f"RSI {r:.1f}: silné, ale môže byť prekúpené")
+        elif 40 <= r < 50:
+            score -= 0.2; reasons.append(f"RSI {r:.1f}: neutrálne až slabšie")
+        elif 30 <= r < 40:
+            score -= 0.6; reasons.append(f"RSI {r:.1f}: slabé momentum")
+        elif r < 30:
+            score -= 0.3; reasons.append(f"RSI {r:.1f}: prepredané, možný odraz aj pokračovanie poklesu")
+    hist = safe_float((tech.get("macd") or {}).get("histogram"))
+    if hist is not None:
+        if hist > 0:
+            score += 0.6; reasons.append("MACD histogram kladný")
+        elif hist < 0:
+            score -= 0.6; reasons.append("MACD histogram záporný")
+    return {"score": round(clamp(score, 0, 10), 1), "label": "silná" if score >= 7 else "slabá" if score <= 3 else "zmiešaná", "reasons": reasons}
+
+
 def collect_coin_data(symbol, coin_id, days=90):
     print(f"Collecting: {symbol}")
-
     simple = coingecko_simple_price([coin_id])
     current = simple.get(coin_id, {})
     chart = coingecko_chart(coin_id, days=days)
-    prices = closes_from_chart(chart)
-    candles = aggregate_candles(prices)
-    technical = technical_summary(candles)
-
+    candles = aggregate_candles(closes_from_chart(chart))
+    tech = technical_summary(candles)
     return {
-        "symbol": symbol,
-        "coin_id": coin_id,
-        "price_usd": current.get("usd"),
-        "market_cap": current.get("usd_market_cap"),
-        "volume_24h": current.get("usd_24h_vol"),
-        "change_24h": current.get("usd_24h_change"),
-        "last_updated": current.get("last_updated_at"),
-        "technical_4h": technical,
+        "symbol": symbol, "coin_id": coin_id, "price_usd": current.get("usd"),
+        "market_cap": current.get("usd_market_cap"), "volume_24h": current.get("usd_24h_vol"),
+        "change_24h": current.get("usd_24h_change"), "last_updated": current.get("last_updated_at"),
+        "technical_4h": tech, "technical_score_calc": calculate_technical_score(tech),
         "returns": recent_returns([c["close"] for c in candles]),
     }
 
 
 def shortlist_candidates():
     print("Shortlisting candidate coins...")
-    market_data = coingecko_markets(CANDIDATES)
-    if not market_data:
+    markets = coingecko_markets(CANDIDATES)
+    if not markets:
         return CANDIDATES[:3]
-
     portfolio_ids = set(PORTFOLIO.values())
-    filtered = [
-        x for x in market_data
-        if x.get("id") not in portfolio_ids
-        and safe_float(x.get("market_cap"), 0) > 100_000_000
-    ]
-    filtered.sort(
-        key=lambda x: (
-            safe_float(x.get("total_volume"), 0),
-            safe_float(x.get("market_cap"), 0),
-        ),
-        reverse=True,
-    )
+    filtered = [x for x in markets if x.get("id") not in portfolio_ids and safe_float(x.get("market_cap"), 0) > 100_000_000]
+    filtered.sort(key=lambda x: (safe_float(x.get("total_volume"), 0), safe_float(x.get("market_cap"), 0)), reverse=True)
     return [x["id"] for x in filtered[:3]]
 
 
-# ============================================================
-# TRHOVÉ RIZIKO
-# ============================================================
-
-def get_market_global():
-    return coingecko_get("global")
-
+# ----------------------------- Market safety -----------------------------
 
 def get_fear_greed():
     try:
-        data = http_json(
-            "https://api.alternative.me/fng/?limit=1",
-            headers={"User-Agent": "CryptoAIBot/6.0"},
-        )
-        item = data["data"][0]
-        return {
-            "value": int(item["value"]),
-            "classification": item["value_classification"],
-            "timestamp": item.get("timestamp"),
-        }
-    except Exception as e:
-        print(f"Fear & Greed error: {e}")
-        return {
-            "value": None,
-            "classification": "UNKNOWN",
-            "timestamp": None,
-        }
+        item = http_json("https://api.alternative.me/fng/?limit=1", headers={"User-Agent": "CryptoAIBot/7.0"})["data"][0]
+        return {"value": int(item["value"]), "classification": item["value_classification"], "timestamp": item.get("timestamp")}
+    except Exception as exc:
+        print(f"Fear & Greed error: {exc}")
+        return {"value": None, "classification": "UNKNOWN", "timestamp": None}
 
 
 def market_safety(global_data, simple_prices, btc_data=None):
-    score = 0
-    reasons = []
-
-    global_change = safe_float(
-        global_data.get("data", {}).get(
-            "market_cap_change_percentage_24h_usd"
-        )
-    )
-    btc_change = safe_float(
-        simple_prices.get("bitcoin", {}).get("usd_24h_change")
-    )
-
+    score, reasons = 0, []
+    global_change = safe_float(global_data.get("data", {}).get("market_cap_change_percentage_24h_usd"))
+    btc_change = safe_float(simple_prices.get("bitcoin", {}).get("usd_24h_change"))
     if global_change is not None:
-        if global_change <= -5:
-            score += 3
-            reasons.append("celková kapitalizácia prudko klesá")
-        elif global_change <= -3.5:
-            score += 2
-            reasons.append("celková kapitalizácia výrazne klesá")
-        elif global_change <= -2:
-            score += 1
-            reasons.append("celková kapitalizácia klesá")
-
+        if global_change <= -5: score += 3; reasons.append("celková kapitalizácia prudko klesá")
+        elif global_change <= -3.5: score += 2; reasons.append("celková kapitalizácia výrazne klesá")
+        elif global_change <= -2: score += 1; reasons.append("celková kapitalizácia klesá")
     if btc_change is not None:
-        if btc_change <= -7:
-            score += 4
-            reasons.append("BTC prudko klesá")
-        elif btc_change <= -5:
-            score += 3
-            reasons.append("BTC výrazne klesá")
-        elif btc_change <= -3:
-            score += 2
-            reasons.append("BTC klesá výrazne")
-        elif btc_change <= -1.5:
-            score += 1
-            reasons.append("BTC klesá")
-
-    btc_tech = (
-        btc_data.get("technical_4h", {})
-        if isinstance(btc_data, dict) else {}
-    )
-
-    btc_price = safe_float(btc_tech.get("price"))
-    btc_ema50 = safe_float(btc_tech.get("ema50"))
-    btc_ema200 = safe_float(btc_tech.get("ema200"))
-    btc_rsi = safe_float(btc_tech.get("rsi14"))
-
-    if btc_price is not None and btc_ema50 is not None:
-        if btc_price < btc_ema50:
-            score += 1
-            reasons.append("BTC je pod 4H EMA50")
-
-    if btc_price is not None and btc_ema200 is not None:
-        if btc_price < btc_ema200:
-            score += 2
-            reasons.append("BTC je pod 4H EMA200")
-
-    if btc_rsi is not None:
-        if btc_rsi < 35:
-            score += 2
-            reasons.append("BTC 4H RSI je pod 35")
-        elif btc_rsi < 40:
-            score += 1
-            reasons.append("BTC 4H RSI je pod 40")
-
-    if (
-        global_change is not None and btc_change is not None
-        and global_change <= -2 and btc_change <= -1.5
-    ):
-        score += 1
-        reasons.append("BTC aj celý kryptotrh klesajú súčasne")
-
-    state = "CRITICAL" if score >= 6 else (
-        "WARNING" if score >= 3 else "NORMAL"
-    )
-
-    return {
-        "state": state,
-        "score": score,
-        "reasons": reasons,
-        "market_cap_change_24h": global_change,
-        "btc_change_24h": btc_change,
-        "btc_price": btc_price,
-        "btc_ema50": btc_ema50,
-        "btc_ema200": btc_ema200,
-        "btc_rsi14": btc_rsi,
-    }
+        if btc_change <= -7: score += 4; reasons.append("BTC prudko klesá")
+        elif btc_change <= -5: score += 3; reasons.append("BTC výrazne klesá")
+        elif btc_change <= -3: score += 2; reasons.append("BTC klesá výrazne")
+        elif btc_change <= -1.5: score += 1; reasons.append("BTC klesá")
+    tech = btc_data.get("technical_4h", {}) if isinstance(btc_data, dict) else {}
+    price, e50, e200, rsi_value = [safe_float(tech.get(k)) for k in ("price", "ema50", "ema200", "rsi14")]
+    if price is not None and e50 is not None and price < e50:
+        score += 1; reasons.append("BTC je pod 4H EMA50")
+    if price is not None and e200 is not None and price < e200:
+        score += 2; reasons.append("BTC je pod 4H EMA200")
+    if rsi_value is not None and rsi_value < 35:
+        score += 2; reasons.append("BTC 4H RSI je pod 35")
+    elif rsi_value is not None and rsi_value < 40:
+        score += 1; reasons.append("BTC 4H RSI je pod 40")
+    if global_change is not None and btc_change is not None and global_change <= -2 and btc_change <= -1.5:
+        score += 1; reasons.append("BTC aj celý kryptotrh klesajú súčasne")
+    state = "CRITICAL" if score >= 6 else "WARNING" if score >= 3 else "NORMAL"
+    return {"state": state, "score": score, "reasons": reasons, "market_cap_change_24h": global_change,
+            "btc_change_24h": btc_change, "btc_price": price, "btc_ema50": e50, "btc_ema200": e200, "btc_rsi14": rsi_value}
 
 
-def should_send_safety_alert(current_safety, state):
-    current_state = current_safety.get("state", "NORMAL")
-    current_score = safe_float(current_safety.get("score"), 0)
-    previous_state = state.get("last_safety_state", "NORMAL")
-    previous_score = safe_float(state.get("last_safety_score"), 0)
-
-    if current_state == "NORMAL":
-        return False, "NORMAL"
-
-    if previous_state == "NORMAL":
-        return True, "STATE_CHANGE"
-
-    if previous_state == "WARNING" and current_state == "CRITICAL":
-        return True, "STATE_ESCALATION"
-
-    if current_score >= previous_score + 2:
-        return True, "SCORE_WORSENING"
-
+def should_send_safety_alert(current, state):
+    level, score = current.get("state", "NORMAL"), safe_float(current.get("score"), 0)
+    prev_level, prev_score = state.get("last_safety_state", "NORMAL"), safe_float(state.get("last_safety_score"), 0)
+    if level == "NORMAL": return False, "NORMAL"
+    if prev_level == "NORMAL": return True, "STATE_CHANGE"
+    if prev_level == "WARNING" and level == "CRITICAL": return True, "STATE_ESCALATION"
+    if score >= prev_score + 2: return True, "SCORE_WORSENING"
     return False, "NO_NEW_ALERT"
 
 
-# ============================================================
-# TELEGRAM
-# ============================================================
+# ----------------------------- Telegram -----------------------------
 
 def telegram_send(text):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        raise RuntimeError(
-            "Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID."
-        )
-
+        raise RuntimeError("Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID.")
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": text,
-        "disable_web_page_preview": True,
-    }
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(
-        url,
-        data=body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "disable_web_page_preview": True}
+    req = urllib.request.Request(url, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                                 headers={"Content-Type": "application/json"}, method="POST")
     with urllib.request.urlopen(req, timeout=30) as response:
         result = json.loads(response.read().decode("utf-8"))
-
     if not result.get("ok"):
         raise RuntimeError(f"Telegram odmietol správu: {result}")
-
     print("Telegram message sent.")
     return True
 
 
 def telegram_send_long(text):
-    # Telegram má limit približne 4096 znakov na správu.
-    chunks = []
-    current = ""
-
+    chunks, current = [], ""
     for line in text.splitlines():
         if len(current) + len(line) + 1 > 3900:
-            if current:
-                chunks.append(current)
+            if current: chunks.append(current)
             current = line
         else:
             current += ("\n" if current else "") + line
-
-    if current:
-        chunks.append(current)
-
+    if current: chunks.append(current)
     for chunk in chunks:
         telegram_send(chunk)
         time.sleep(1)
 
 
-# ============================================================
-# RSS A GEMINI
-# ============================================================
+# ----------------------------- News / Gemini -----------------------------
 
 def get_rss_news():
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/6.0)",
-        "Accept": "application/rss+xml,application/xml,text/xml,*/*",
-    }
     all_items = []
-
-    for source_name, url in RSS_FEEDS:
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/7.0)", "Accept": "application/rss+xml,application/xml,text/xml,*/*"}
+    for source, url in RSS_FEEDS:
         try:
-            req = urllib.request.Request(
-                url, headers=headers, method="GET"
-            )
-            raw = http_request(req, timeout=30, retries=2)
+            raw = http_request(urllib.request.Request(url, headers=headers), timeout=30, retries=2)
             root = ET.fromstring(raw)
             count = 0
-
             for item in root.iter():
-                if not item.tag.lower().endswith("item"):
-                    continue
-
-                entry = {
-                    "source": source_name,
-                    "title": "",
-                    "link": "",
-                    "pub_date": "",
-                }
-
+                if not item.tag.lower().endswith("item"): continue
+                entry = {"source": source, "title": "", "link": "", "pub_date": ""}
                 for child in item:
                     tag = child.tag.lower()
-                    if tag.endswith("title"):
-                        entry["title"] = (child.text or "").strip()
-                    elif tag.endswith("link"):
-                        entry["link"] = (child.text or "").strip()
-                    elif tag.endswith("pubdate"):
-                        entry["pub_date"] = (child.text or "").strip()
-
+                    if tag.endswith("title"): entry["title"] = (child.text or "").strip()
+                    elif tag.endswith("link"): entry["link"] = (child.text or "").strip()
+                    elif tag.endswith("pubdate"): entry["pub_date"] = (child.text or "").strip()
                 if entry["title"]:
-                    all_items.append(entry)
-                    count += 1
-
-                if count >= 10:
-                    break
-
-        except Exception as e:
-            print(f"RSS error {source_name}: {e}")
-
+                    all_items.append(entry); count += 1
+                if count >= 10: break
+        except Exception as exc:
+            print(f"RSS error {source}: {exc}")
     return all_items[:20]
 
 
 def parse_json_output(text):
-    if not text:
-        raise RuntimeError("Gemini neposlal výstup.")
-
-    text = text.strip()
-    text = re.sub(r"^```json\s*", "", text, flags=re.IGNORECASE)
+    if not text: raise RuntimeError("Gemini neposlal výstup.")
+    text = re.sub(r"^```json\s*", "", text.strip(), flags=re.I)
     text = re.sub(r"\s*```$", "", text)
-
-    try:
-        return json.loads(text)
+    try: return json.loads(text)
     except json.JSONDecodeError:
         start, end = text.find("{"), text.rfind("}")
-        if start >= 0 and end > start:
-            return json.loads(text[start:end + 1])
+        if start >= 0 and end > start: return json.loads(text[start:end + 1])
         raise RuntimeError("Gemini neposlal validný JSON.")
 
 
 def gemini_analyze(prompt):
-    if not GEMINI_API_KEY:
-        raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
-
+    if not GEMINI_API_KEY: raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
     client = genai.Client(api_key=GEMINI_API_KEY)
     interaction = client.interactions.create(
-        model=GEMINI_MODEL,
-        input=prompt,
-        background=True,
+        model=GEMINI_MODEL, input=prompt, background=True,
         tools=[{"type": "google_search"}],
-        generation_config={"thinking_level": "high"},
-        store=True,
-        timeout=120,
+        generation_config={"thinking_level": "high"}, store=True, timeout=120,
     )
-
-    interaction_id = interaction.id
-    started = time.time()
-
+    interaction_id, started = interaction.id, time.time()
     while True:
         if time.time() - started > GEMINI_MAX_WAIT:
             raise TimeoutError("Gemini analýza trvá dlhšie ako 10 minút.")
-
         interaction = client.interactions.get(id=interaction_id)
         status = interaction.status
-
         if status == "completed":
-            if not interaction.output_text:
-                raise RuntimeError("Gemini vrátil prázdny výstup.")
+            if not interaction.output_text: raise RuntimeError("Gemini vrátil prázdny výstup.")
             return parse_json_output(interaction.output_text)
-
-        if status in {"failed", "cancelled", "expired", "incomplete"}:
+        if status in {"failed", "cancelled", "expired", "incomplete", "requires_action"}:
             raise RuntimeError(f"Gemini analýza skončila: {status}")
-
-        if status == "requires_action":
-            raise RuntimeError("Gemini vyžaduje ďalšiu akciu.")
-
         time.sleep(POLL_INTERVAL)
 
 
-def build_prompt(market_global, fear_greed, safety, news,
-                 portfolio_data, candidate_data, btc_data):
+def build_prompt(market_global, fear_greed, safety, news, portfolio_data, candidate_data, btc_data, state):
+    previous = state.get("last_analysis", {})
+    previous_coins = previous.get("coins", []) if isinstance(previous, dict) else []
+    prior_summary = []
+    for c in previous_coins:
+        if isinstance(c, dict):
+            prior_summary.append({
+                "symbol": c.get("symbol"), "action": c.get("action"),
+                "price": c.get("current_price"), "outlook_direction": c.get("outlook_direction"),
+                "outlook_pct": c.get("outlook_pct"), "technical_score": c.get("technical_score"),
+                "fundamental_score": c.get("fundamental_score"), "reason": c.get("reason"),
+            })
     return f"""
-Si analytik kryptomien a riadiš riziko portfólia.
-Všetok opisný výstup musí byť v slovenčine.
-Aktuálny čas Bratislava: {iso_now()}
+Si disciplinovaný analytik kryptomien a správca rizika. Píš po slovensky.
+Čas Bratislava: {iso_now()}
+Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER. APT nikdy neodporúčaj.
 
-PORTFÓLIO: AAVE, TAO, FET, SOL, ONDO, RENDER.
-APT neodporúčaj.
+CIEĽ: odporúčanie musí pomôcť rozhodnúť, čo urobiť teraz s už držanou pozíciou a čo urobiť s NOVÝMI PENIAZMI.
+Tieto dve rozhodnutia rozlišuj. HOLD na držanú mincu neznamená, že sa nemá čakať na nákupnú príležitosť.
+Pre každú mincu vyber jednu akciu: BUY NOW, BUY PULLBACK, HOLD, REDUCE, SELL, NO TRADE.
+- BUY NOW: technika a trhový kontext dávajú dostatočne potvrdený vstup teraz; uveď vstup, invalidáciu a ciele.
+- BUY PULLBACK: projekt je atraktívny, ale nákup až v uvedenej zóne a po potvrdení odrazu; nepíš, že vstup je potvrdený, ak nie je.
+- HOLD: existujúcu pozíciu držať; zatiaľ nekupovať ani nepredávať. Vysvetli, na čo čakáme.
+- REDUCE: zmenšiť časť pozície len pri konkrétnom zhoršení trendu/rizika. Uveď dôkaz a čo by zmenilo názor.
+- SELL: úplný odchod len pri silnom dôvode, nie na základe jedného indikátora.
+- NO TRADE: vstup nemá výhodný pomer rizika a výnosu alebo dáta nestačia.
 
-DÔLEŽITÉ PRAVIDLÁ:
-1. Nerad automaticky predaj len preto, že cena prudko klesla,
-   RSI je pod 30/40 alebo cena je pod EMA200.
-2. Prudký pokles môže pokračovať, ale môže prísť aj odraz.
-   Uveď oba scenáre a čo by ich potvrdilo.
-3. Rozlišuj medzi potvrdeným prerazením podpory a obyčajným
-   dotykom alebo krátkym prepichnutím úrovne.
-4. Pri predaji uveď konkrétny dôvod, mieru neistoty a podmienku,
-   pri ktorej by si odporúčanie zmenil.
-5. Pri nejednoznačných signáloch preferuj HOLD pred panickým
-   predajom. HOLD však neznamená, že riziko neexistuje.
-6. Nezamieňaj vzdialenosť k podpore s predpoveďou prepadu.
-7. Neuvádzaj vymyslené aktuálne ceny ani správy.
-8. 24-hodinový výhľad je odhad, nie istota. Pravdepodobnosti
-   musia byť primerané neistote a nesmú predstierať presnosť.
-9. BUY PULLBACK neznamená automaticky nákup za každú cenu.
-10. Ak sú dáta neúplné alebo si odporujú, výslovne to uveď.
-11. Pri REDUCE/SELL rozlišuj medzi potvrdeným trendovým
-    zhoršením a prepredaním, po ktorom môže nasledovať odraz.
-12. Zohľadni trhový kontext BTC, kapitalizáciu, objem, techniku,
-    fundamenty a relevantné správy.
+SKÓRE:
+Technické skóre bude dodané skriptom a musíš ho použiť, nie si ho vymýšľať. Znamená trend/indikátory, nie pravdepodobnosť zisku.
+Fundamentálne skóre 0–10 hodnotí využitie, adopciu, príjmy/poplatky, tokenomiku/odomykanie, konkurenciu, vývoj a aktuálne overiteľné správy. Vysvetli skóre aj istotu podkladov. Ak chýbajú dáta, zníž istotu; nevymýšľaj fakty.
+Skóre nie je samo osebe signál na nákup/predaj. Vysoký fundament + slabá technika často znamená sledovať BUY PULLBACK; vysoká technika + zlý pomer výnos/riziko nemusí znamenať BUY NOW.
+Pri REDUCE/SELL nestačí samotné RSI pod 30/40 ani samotná cena pod EMA200. Hľadaj súlad viacerých signálov, potvrdenie uzavretím sviečky, prerazenie podpory, negatívne momentum a širší trh. RSI pod 30 môže znamenať aj prepredanie a odraz.
+Nepovažuj vzdialenosť k podpore za predpoveď poklesu. Uveď samostatne krátkodobý výhľad a úrovne invalidácie.
+Nedávaj BUY len preto, aby nebol všade HOLD. Ak nie je výhoda, HOLD/NO TRADE je správne.
+Predchádzajúca analýza je kontext: napíš, či sa scenár napĺňa, čo sa zmenilo a či akcia zostáva rovnaká. Nezachovávaj starý názor len zo zotrvačnosti.
+Pravdepodobnosti musia byť konzervatívne, súčet bull/bear = 100, žiadne predstieranie presnosti. 24h predikcia je odhad.
+Novú mincu odporuč iba vtedy, ak je lepšia než držané alternatívy po zohľadnení rizika; inak NO TRADE.
 
-TRH:
-{json.dumps(market_global, ensure_ascii=False)}
+MARKET GLOBAL: {json.dumps(market_global, ensure_ascii=False)}
+FEAR & GREED: {json.dumps(fear_greed, ensure_ascii=False)}
+SAFETY: {json.dumps(safety, ensure_ascii=False)}
+BTC DATA: {json.dumps(btc_data, ensure_ascii=False)}
+PORTFOLIO DATA: {json.dumps(portfolio_data, ensure_ascii=False)}
+CANDIDATES: {json.dumps(candidate_data, ensure_ascii=False)}
+RSS NEWS (titulky nie sú automaticky overené fakty): {json.dumps(news, ensure_ascii=False)}
+PREVIOUS ANALYSIS: {json.dumps(prior_summary, ensure_ascii=False)}
 
-FEAR & GREED:
-{json.dumps(fear_greed, ensure_ascii=False)}
-
-SAFETY:
-{json.dumps(safety, ensure_ascii=False)}
-
-BTC TECHNIKA:
-{json.dumps(btc_data, ensure_ascii=False)}
-
-SPRÁVY:
-{json.dumps(news, ensure_ascii=False)}
-
-PORTFÓLIO DÁTA:
-{json.dumps(portfolio_data, ensure_ascii=False)}
-
-KANDIDÁTI:
-{json.dumps(candidate_data, ensure_ascii=False)}
-
-Analyzuj AAVE, TAO, FET, SOL, ONDO a RENDER.
-Pre každú mincu vyber jednu akciu:
-BUY NOW, BUY PULLBACK, HOLD, REDUCE, SELL, NO TRADE.
-
-Vráť iba validný JSON v tomto formáte:
+Vráť iba validný JSON:
 {{
-  "market_regime": "string",
-  "market_summary": "string",
-  "action": "string",
-  "new_coin": "string",
-  "new_coin_action": "string",
-  "new_coin_reason": "string",
-  "coins": [
-    {{
-      "symbol": "string",
-      "action": "HOLD",
-      "current_price": 0.0,
-      "buy_zone_1": "string",
-      "buy_zone_2": "string",
-      "invalidation": "string",
-      "tp1": "string",
-      "tp2": "string",
-      "risk_reward": "will be calculated",
-      "bull_probability": 50,
-      "bear_probability": 50,
-      "outlook_direction": "pokles alebo rast alebo do strany",
-      "outlook_pct": 0.0,
-      "outlook_probability": 50,
-      "technical_score": 0,
-      "fundamental_score": 0,
-      "reason": "string",
-      "bear_case": "string",
-      "bull_case": "string",
-      "confirmation_needed": "string"
-    }}
-  ],
-  "best_opportunity": "string",
-  "avoid": "string",
-  "conditions_to_watch": ["string"]
+ "market_regime":"string",
+ "market_summary":"string",
+ "new_coin":"string",
+ "new_coin_action":"BUY NOW or BUY PULLBACK or NO TRADE",
+ "new_coin_reason":"string",
+ "coins":[
+  {{
+   "symbol":"AAVE",
+   "action":"HOLD",
+   "current_price":0,
+   "buy_zone_1":"cenová zóna alebo N/A",
+   "buy_zone_2":"cenová zóna alebo N/A",
+   "invalidation":"cena a podmienka",
+   "tp1":"cena alebo N/A",
+   "tp2":"cena alebo N/A",
+   "bull_probability":50,
+   "bear_probability":50,
+   "outlook_direction":"rast/pokles/do strany",
+   "outlook_pct":0,
+   "outlook_probability":50,
+   "fundamental_score":5,
+   "fundamental_confidence":"nízka/stredná/vysoká",
+   "fundamental_evidence":"konkrétne dôvody a limity dát",
+   "reason":"rozhodnutie a čo robiť s existujúcou pozíciou",
+   "new_money_plan":"čo robiť s novými peniazmi",
+   "bear_case":"medvedí scenár",
+   "bull_case":"býčí scenár",
+   "confirmation_needed":"čo presne musí nastať",
+   "previous_comparison":"čo sa zmenilo oproti poslednej analýze"
+  }}
+ ],
+ "best_opportunity":"string",
+ "avoid":"string",
+ "conditions_to_watch":["string"]
 }}
-
-Pri SELL/REDUCE vysvetli, čo konkrétne potvrdzuje pokračovanie
-poklesu a prečo nestačí vysvetlenie samotným RSI alebo EMA.
-Žiadny Markdown ani text mimo JSON.
+V poli coins uveď presne AAVE, TAO, FET, SOL, ONDO, RENDER, každú raz. Bez Markdownu mimo JSON.
 """
 
 
-# ============================================================
-# KONTROLA A OPRAVA VÝSTUPU GEMINI
-# ============================================================
+# ----------------------------- Validation and recommendation continuity -----------------------------
 
-def extract_numbers(value):
-    if value is None:
-        return []
+def price_number(value):
+    if value is None: return None
     text = str(value).replace("–", "-").replace("—", "-").replace("−", "-")
-    found = re.findall(
-        r"(?<!\d)(?:\d+(?:[.,]\d+)?|\.\d+)(?!\d)", text
-    )
-    result = []
-    for item in found:
-        try:
-            result.append(float(item.replace(",", ".")))
-        except ValueError:
-            pass
-    return result
+    matches = re.findall(r"(?<![A-Za-z])(?:\d+(?:[.,]\d+)?|\.\d+)", text.replace(",", "."))
+    try: return float(matches[0]) if matches else None
+    except (ValueError, TypeError): return None
 
 
-def parse_price_level(value):
-    numbers = extract_numbers(value)
-    return numbers[0] if numbers else None
-
-
-def parse_price_range(value):
-    numbers = extract_numbers(value)
-    if not numbers:
+def price_range(value):
+    if value is None: return None
+    text = str(value).replace("–", "-").replace("—", "-").replace("−", "-")
+    vals = re.findall(r"(?<![A-Za-z])(?:\d+(?:\.\d+)?|\.\d+)", text.replace(",", "."))
+    try:
+        nums = [float(v) for v in vals]
+        return (min(nums[:2]), max(nums[:2])) if nums else None
+    except ValueError:
         return None
-    if len(numbers) == 1:
-        return numbers[0], numbers[0]
-    return min(numbers[:2]), max(numbers[:2])
 
 
 def calculate_rr(buy_zone, invalidation, tp1, tp2):
-    zone = parse_price_range(buy_zone)
-    inv = parse_price_level(invalidation)
-    t1 = parse_price_level(tp1)
-    t2 = parse_price_level(tp2)
-
-    if zone is None or inv is None or t1 is None or t2 is None:
-        return None
-
+    zone, inv, t1, t2 = price_range(buy_zone), price_number(invalidation), price_number(tp1), price_number(tp2)
+    if not zone or inv is None or t1 is None or t2 is None: return None
     entry = sum(zone) / 2
     risk = entry - inv
-    reward1 = t1 - entry
-    reward2 = t2 - entry
-
-    if risk <= 0 or reward1 <= 0 or reward2 <= 0:
-        return None
-
-    return {
-        "rr_tp1": reward1 / risk,
-        "rr_tp2": reward2 / risk,
-    }
+    if risk <= 0 or t1 <= entry or t2 <= entry: return None
+    return {"rr_tp1": (t1 - entry) / risk, "rr_tp2": (t2 - entry) / risk}
 
 
-def format_rr(rr):
-    if not rr:
-        return "N/A"
-    return f"1:{rr['rr_tp1']:.1f} / 1:{rr['rr_tp2']:.1f}"
+def validate_and_correct_analysis(analysis, safety, portfolio_data, previous_analysis):
+    if not isinstance(analysis, dict) or not isinstance(analysis.get("coins"), list):
+        raise RuntimeError("Gemini neposlal analýzu v očakávanom JSON formáte.")
+    previous = {str(c.get("symbol", "")).upper(): c for c in previous_analysis.get("coins", []) if isinstance(c, dict)}
+    by_symbol = {str(c.get("symbol", "")).upper(): c for c in analysis["coins"] if isinstance(c, dict)}
+    validated = []
 
+    for symbol, coin_id in PORTFOLIO.items():
+        coin = by_symbol.get(symbol, {"symbol": symbol, "action": "HOLD", "reason": "Gemini neposkytol kompletné odporúčanie; bezpečný náhradný stav HOLD."})
+        coin["symbol"] = symbol
+        data = portfolio_data.get(symbol, {})
+        actual_price = safe_float(data.get("price_usd"))
+        tech = data.get("technical_4h", {})
+        calc = data.get("technical_score_calc", {})
+        if actual_price is not None: coin["current_price"] = actual_price
 
-def validate_and_correct_analysis(analysis, safety, portfolio_data):
-    if not isinstance(analysis, dict):
-        raise RuntimeError("Gemini analýza nie je JSON objekt.")
+        # Skóre techniky sa počíta z indikátorov v Pythone; Gemini ho nemôže svojvoľne meniť.
+        coin["technical_score"] = calc.get("score")
+        coin["technical_score_label"] = calc.get("label", "nedostatok dát")
+        coin["technical_score_reasons"] = calc.get("reasons", [])
+        coin["fundamental_score"] = round(clamp(safe_float(coin.get("fundamental_score"), 5) or 5, 0, 10), 1)
+        coin["fundamental_confidence"] = str(coin.get("fundamental_confidence", "nízka"))
+        coin["fundamental_evidence"] = str(coin.get("fundamental_evidence", "Gemini neuviedol dostatočné dôkazy."))
 
-    coins = analysis.get("coins", [])
-    if not isinstance(coins, list):
-        raise RuntimeError("Gemini pole coins nie je zoznam.")
+        action = str(coin.get("action", "HOLD")).upper().strip()
+        if action not in VALID_ACTIONS: action = "HOLD"
 
-    safety_state = safety.get("state", "NORMAL")
-    valid_actions = {
-        "BUY NOW", "BUY PULLBACK", "HOLD",
-        "REDUCE", "SELL", "NO TRADE",
-    }
-
-    for coin in coins:
-        if not isinstance(coin, dict):
-            continue
-
-        symbol = str(coin.get("symbol", "")).upper()
-        if symbol not in PORTFOLIO:
-            continue
-
-        actual_price = safe_float(
-            portfolio_data.get(symbol, {}).get("price_usd")
-        )
-        if actual_price is not None:
-            coin["current_price"] = actual_price
-
-        action = str(coin.get("action", "HOLD")).upper()
-        if action not in valid_actions:
-            coin["action"] = "HOLD"
+        # Brzda: predaj musí mať viac než jeden signál. Nezakazujeme ho navždy,
+        # ale RSI alebo EMA200 samostatne nestačia.
+        price, e50, e100, e200 = [safe_float(tech.get(k)) for k in ("price", "ema50", "ema100", "ema200")]
+        rsi_value = safe_float(tech.get("rsi14"))
+        hist = safe_float((tech.get("macd") or {}).get("histogram"))
+        support = safe_float(tech.get("support_30_candles"))
+        below_50_200 = price is not None and e50 is not None and e200 is not None and price < e50 and price < e200
+        momentum_negative = hist is not None and hist < 0
+        support_broken = price is not None and support is not None and price < support * 0.995
+        bearish_signals = sum([bool(below_50_200), bool(momentum_negative), bool(support_broken)])
+        if action in {"SELL", "REDUCE"} and bearish_signals < 2:
+            coin["action_guard_note"] = (
+                f"Gemini navrhol {action}, ale dáta nepotvrdzujú aspoň 2 nezávislé signály zhoršenia trendu; "
+                "akcia upravená na HOLD, kým sa pokles nepotvrdí."
+            )
+            action = "HOLD"
+        elif action == "SELL" and rsi_value is not None and rsi_value < 30 and bearish_signals < 3:
+            coin["action_guard_note"] = "SELL zmenené na HOLD: RSI je výrazne prepredané a pokles nie je potvrdený viacerými signálmi."
             action = "HOLD"
 
+        # Safety ovplyvňuje veľkosť rizika a istotu, nie mechanický predaj.
+        if safety.get("state") == "CRITICAL" and action == "BUY NOW":
+            coin["action_guard_note"] = (coin.get("action_guard_note", "") + " Safety CRITICAL: BUY NOW zmenené na BUY PULLBACK, počkaj na potvrdenie.").strip()
+            action = "BUY PULLBACK"
+        coin["action"] = action
+
         bull = safe_float(coin.get("bull_probability"), 50)
-        if bull is None:
-            bull = 50
-        if 0 < bull <= 1:
-            bull *= 100
-
+        bull = 50 if bull is None else bull
+        if 0 < bull <= 1: bull *= 100
         bull = clamp(bull, 0, 100)
-
-        # Safety upravuje maximálnu býčiu pravdepodobnosť,
-        # ale samo osebe nevynucuje SELL/REDUCE.
-        if safety_state == "WARNING":
-            bull = min(bull, 65)
-        elif safety_state == "CRITICAL":
-            bull = min(bull, 55)
-
+        if safety.get("state") == "WARNING": bull = min(bull, 65)
+        elif safety.get("state") == "CRITICAL": bull = min(bull, 55)
         coin["bull_probability"] = round(bull)
         coin["bear_probability"] = round(100 - bull)
+        coin["outlook_probability"] = round(clamp(safe_float(coin.get("outlook_probability"), 50) or 50, 5, 95))
+        coin["outlook_pct"] = round(clamp(safe_float(coin.get("outlook_pct"), 0) or 0, -30, 30), 2)
 
-        for field in ("technical_score", "fundamental_score"):
-            value = safe_float(coin.get(field))
-            if value is not None:
-                coin[field] = round(clamp(value, 0, 10), 1)
+        old = previous.get(symbol, {})
+        old_action = str(old.get("action", "")).upper()
+        if old:
+            coin["action_change"] = f"{old_action} → {action}" if old_action and old_action != action else "Akcia bez zmeny"
+            coin["previous_price"] = old.get("current_price")
+            coin["previous_action"] = old_action
+            if not coin.get("previous_comparison"):
+                coin["previous_comparison"] = "Porovnaj cenu, indikátory, pôvodný scenár a zmenu skóre s poslednou analýzou."
+        else:
+            coin["action_change"] = "Prvá uložená analýza pre túto mincu"
+            coin["previous_comparison"] = "Zatiaľ nie je staršia analýza na porovnanie."
 
-        outlook_probability = safe_float(
-            coin.get("outlook_probability"), 50
-        )
-        coin["outlook_probability"] = round(
-            clamp(outlook_probability or 50, 5, 95)
-        )
+        rr = calculate_rr(coin.get("buy_zone_1"), coin.get("invalidation"), coin.get("tp1"), coin.get("tp2"))
+        coin["risk_reward"] = f"1:{rr['rr_tp1']:.1f} / 1:{rr['rr_tp2']:.1f}" if rr else "N/A"
+        validated.append(coin)
 
-        outlook_pct = safe_float(coin.get("outlook_pct"), 0)
-        coin["outlook_pct"] = round(
-            clamp(outlook_pct or 0, -30, 30), 2
-        )
-
-        rr = calculate_rr(
-            coin.get("buy_zone_1"),
-            coin.get("invalidation"),
-            coin.get("tp1"),
-            coin.get("tp2"),
-        )
-        coin["risk_reward"] = format_rr(rr)
-
+    analysis["coins"] = validated
+    analysis["action"] = "INDIVIDUAL COIN ACTIONS"
     return analysis
 
 
-# ============================================================
-# FORMÁTOVANIE SPRÁV
-# ============================================================
+def evaluate_previous_forecasts(previous_analysis, current_data):
+    """Vyhodnoť len predpovede, ktoré majú aspoň približne 24 hodín."""
+    forecasts = previous_analysis.get("forecast_history", [])
+    now = datetime.now(timezone.utc)
+    results = []
+    for f in forecasts[-40:]:
+        try:
+            created = datetime.fromisoformat(f["timestamp"].replace("Z", "+00:00"))
+            if (now - created).total_seconds() < 23 * 3600:
+                continue
+            symbol = f["symbol"]
+            price_now = safe_float(current_data.get(symbol, {}).get("price_usd"))
+            price_then = safe_float(f.get("price"))
+            if not price_now or not price_then:
+                continue
+            actual_pct = pct_change(price_then, price_now)
+            predicted_pct = safe_float(f.get("outlook_pct"), 0) or 0
+            predicted_dir = str(f.get("outlook_direction", "")).lower()
+            actual_dir = "rast" if actual_pct > 0.5 else "pokles" if actual_pct < -0.5 else "do strany"
+            hit = (predicted_dir == actual_dir)
+            results.append({"symbol": symbol, "predicted_pct": predicted_pct, "actual_pct": round(actual_pct, 2),
+                            "predicted_direction": predicted_dir, "actual_direction": actual_dir, "direction_hit": hit})
+        except Exception:
+            continue
+    return results
+
+
+# ----------------------------- Message formatting -----------------------------
 
 def format_price(value):
     value = safe_float(value)
-    if value is None:
-        return "N/A"
-    if value >= 1000:
-        return f"${value:,.0f}"
-    if value >= 100:
-        return f"${value:,.2f}"
-    if value >= 1:
-        return f"${value:,.3f}"
-    if value >= 0.01:
-        return f"${value:,.4f}"
+    if value is None: return "N/A"
+    if value >= 1000: return f"${value:,.0f}"
+    if value >= 100: return f"${value:,.2f}"
+    if value >= 1: return f"${value:,.3f}"
+    if value >= 0.01: return f"${value:,.4f}"
     return f"${value:.8f}"
 
 
 def format_safety_alert(safety, fear_greed, portfolio_analysis=None):
-    state = safety.get("state", "NORMAL")
-    score = safety.get("score", 0)
-
-    if state == "CRITICAL":
-        title = "🚨 CRYPTO AI BOT — KRÍZOVÝ ALERT"
-        message = (
-            "Riziko na trhu je vysoké. Alert nie je automatickým "
-            "pokynom na predaj."
-        )
-    else:
-        title = "⚠️ CRYPTO AI BOT — BEZPEČNOSTNÝ ALERT"
-        message = (
-            "Trh sa zhoršuje. Sleduj potvrdenie pohybu, "
-            "nie iba jeden indikátor."
-        )
-
+    critical = safety.get("state") == "CRITICAL"
     lines = [
-        title, "",
-        f"🛡 Safety: {state} ({score})",
-        message, "",
+        "🚨 CRYPTO AI BOT — KRÍZOVÝ ALERT" if critical else "⚠️ CRYPTO AI BOT — BEZPEČNOSTNÝ ALERT",
+        "", f"🛡 Safety: {safety.get('state')} ({safety.get('score', 0)})",
+        "Toto je upozornenie na riziko, nie automatický pokyn na predaj.",
     ]
-
-    if safety.get("btc_change_24h") is not None:
-        lines.append(f"₿ BTC 24h: {safety['btc_change_24h']:+.2f}%")
-    if safety.get("market_cap_change_24h") is not None:
-        lines.append(
-            f"🌐 Market cap 24h: "
-            f"{safety['market_cap_change_24h']:+.2f}%"
-        )
-    if safety.get("btc_ema50") is not None:
-        lines.append(
-            f"₿ BTC 4H EMA50: {format_price(safety['btc_ema50'])}"
-        )
-    if safety.get("btc_ema200") is not None:
-        lines.append(
-            f"₿ BTC 4H EMA200: {format_price(safety['btc_ema200'])}"
-        )
-    if safety.get("btc_rsi14") is not None:
-        lines.append(f"₿ BTC 4H RSI: {safety['btc_rsi14']:.1f}")
-
-    fg = fear_greed.get("value")
-    if fg is not None:
-        lines.append(
-            f"😱 Fear & Greed: {fg}/100 "
-            f"({fear_greed.get('classification', '')})"
-        )
-
-    if safety.get("reasons"):
-        lines.extend(["", "Dôvody:"])
-        lines.extend(f"• {x}" for x in safety["reasons"][:6])
-
+    for key, label in [("btc_change_24h", "BTC 24h"), ("market_cap_change_24h", "Market cap 24h")]:
+        if safety.get(key) is not None: lines.append(f"{label}: {safety[key]:+.2f}%")
+    for key, label in [("btc_ema50", "BTC 4H EMA50"), ("btc_ema200", "BTC 4H EMA200")]:
+        if safety.get(key) is not None: lines.append(f"{label}: {format_price(safety[key])}")
+    if safety.get("btc_rsi14") is not None: lines.append(f"BTC 4H RSI: {safety['btc_rsi14']:.1f}")
+    if fear_greed.get("value") is not None:
+        lines.append(f"Fear & Greed: {fear_greed['value']}/100 ({fear_greed.get('classification', '')})")
+    if safety.get("reasons"): lines.extend(["", "Dôvody:", *[f"• {x}" for x in safety["reasons"][:6]]])
     if portfolio_analysis:
-        lines.extend(["", "📊 PORTFÓLIO — RIZIKO:"])
-
+        lines.extend(["", "📊 PORTFÓLIO — KONTEXT:"])
         for item in portfolio_analysis:
-            lines.extend([
-                f"━━ {item['symbol']} ({format_price(item['price'])}) ━━",
-                f"• Odporúčanie z hlavnej analýzy: {item['action']}",
-            ])
-
-            if item.get("rsi") is not None:
-                lines.append(f"• RSI 4H: {item['rsi']:.1f}")
-
-            if item.get("support_distance") is not None:
-                lines.append(
-                    f"• Podpora je približne "
-                    f"{item['support_distance']:.1f}% pod cenou"
-                )
-
-            if item.get("reasons"):
-                lines.extend(f"• {x}" for x in item["reasons"])
-
-            lines.append(f"• {item['interpretation']}")
-
-    lines.extend([
-        "",
-        "⚠️ RSI pod 30 môže znamenať prepredanie, ale aj možný odraz.",
-        "Samotné RSI, EMA200 ani vzdialenosť k podpore nepotvrdzujú "
-        "budúci prepad.",
-        "Pred rozhodnutím sleduj uzatvorenie sviečky, podporu, BTC "
-        "a širší trh. Predikcie nie sú zárukou výsledku.",
-    ])
-
+            lines.append(f"• {item['symbol']} {format_price(item.get('price'))}: posledná akcia {item.get('action', 'N/A')}; RSI {item.get('rsi', 'N/A')}; technika {item.get('technical_score', 'N/A')}/10")
+            lines.append(f"  {item.get('interpretation', '')}")
+    lines.extend(["", "Samotné RSI, EMA200 ani vzdialenosť k podpore nepotvrdzujú budúci prepad.",
+                  "Sleduj uzatvorenie 4H sviečok, potvrdenie podpory, MACD a širší trh."])
     return "\n".join(lines)
 
 
-def coin_sort_priority(coin):
+def coin_priority(coin):
     action = str(coin.get("action", "")).upper()
-    if action == "SELL":
-        return 0
-    if action == "REDUCE":
-        return 1
-    if action == "HOLD":
-        return 2
-    if "BUY" in action:
-        return 3
-    return 4
+    return {"SELL": 0, "REDUCE": 1, "BUY NOW": 2, "BUY PULLBACK": 3, "HOLD": 4, "NO TRADE": 5}.get(action, 6)
 
 
-def format_bot_message(analysis, safety, fear_greed):
-    coins = sorted(
-        analysis.get("coins", []),
-        key=coin_sort_priority,
-    )
-
-    lines = [
-        "📊 CRYPTO AI BOT — 4H ANALÝZA",
-        f"🕒 {iso_now()}",
-        "",
-        f"🌐 Trh: {analysis.get('market_regime', 'N/A')}",
-        f"🛡 Safety: {safety.get('state', 'N/A')} "
-        f"({safety.get('score', 0)})",
-    ]
-
-    for reason in safety.get("reasons", []):
-        lines.append(f"• {reason}")
-
-    fg = fear_greed.get("value")
-    if fg is not None:
-        lines.append(
-            f"😱 Fear & Greed: {fg}/100 "
-            f"({fear_greed.get('classification', '')})"
-        )
-
+def format_bot_message(analysis, safety, fear_greed, forecast_results=None):
+    coins = sorted(analysis.get("coins", []), key=coin_priority)
+    lines = ["📊 CRYPTO AI BOT — 4H ANALÝZA", f"🕒 {iso_now()}",
+             f"🌐 Trh: {analysis.get('market_regime', 'N/A')}",
+             f"🛡 Safety: {safety.get('state', 'N/A')} ({safety.get('score', 0)})"]
+    lines.extend(f"• {r}" for r in safety.get("reasons", []))
+    if fear_greed.get("value") is not None:
+        lines.append(f"😱 Fear & Greed: {fear_greed['value']}/100 ({fear_greed.get('classification', '')})")
     lines.extend(["", "⚡ RÝCHLY AKČNÝ PLÁN:"])
-
-    for coin in coins:
-        symbol = coin.get("symbol", "?")
-        action = str(coin.get("action", "HOLD")).upper()
-        emoji = (
-            "🔴" if action in {"SELL", "REDUCE"}
-            else "🟢" if "BUY" in action
-            else "🟡"
-        )
-        lines.append(f"{emoji} {symbol}: {action}")
-
-    lines.extend([
-        "",
-        "🧠 Makro:",
-        str(analysis.get("market_summary", "")),
-    ])
-
-    for coin in coins:
-        symbol = coin.get("symbol", "?")
-        action = str(coin.get("action", "HOLD")).upper()
-        emoji = (
-            "🔴" if action in {"SELL", "REDUCE"}
-            else "🟢" if "BUY" in action
-            else "🟡"
-        )
-
-        lines.extend([
-            "",
-            f"━━ {emoji} {symbol} ━━",
-            f"Akcia: {action}",
-            f"Cena: {format_price(coin.get('current_price'))}",
-        ])
-
-        direction = str(
-            coin.get("outlook_direction", "do strany")
-        )
-        pct = safe_float(coin.get("outlook_pct"), 0) or 0
-        probability = safe_float(
-            coin.get("outlook_probability"), 50
-        ) or 50
-
-        dir_emoji = (
-            "📉" if "pokles" in direction.lower()
-            else "📈" if "rast" in direction.lower()
-            else "↔️"
-        )
-        lines.append(
-            f"Predikcia 24h: {dir_emoji} {direction}, "
-            f"{pct:+.1f}% (odhadovaná pravdepodobnosť "
-            f"{probability:.0f}%)"
-        )
-
+    for c in coins:
+        action = c.get("action", "HOLD")
+        emoji = "🔴" if action in {"SELL", "REDUCE"} else "🟢" if "BUY" in action else "🟡"
+        lines.append(f"{emoji} {c.get('symbol')}: {action}")
+    lines.extend(["", "🧠 Makro:", str(analysis.get("market_summary", ""))])
+    for c in coins:
+        action, symbol = c.get("action", "HOLD"), c.get("symbol", "?")
+        emoji = "🔴" if action in {"SELL", "REDUCE"} else "🟢" if "BUY" in action else "🟡"
+        lines.extend(["", f"━━ {emoji} {symbol} ━━", f"Akcia: {action}", f"Cena: {format_price(c.get('current_price'))}"])
+        direction = str(c.get("outlook_direction", "do strany"))
+        move = safe_float(c.get("outlook_pct"), 0) or 0
+        prob = safe_float(c.get("outlook_probability"), 50) or 50
+        de = "📈" if "rast" in direction.lower() else "📉" if "pokles" in direction.lower() else "↔️"
+        lines.append(f"Predikcia 24h: {de} {direction}, {move:+.1f}% (odhad {prob:.0f}%)")
+        lines.append(f"🐂 Bull: {c.get('bull_probability', 'N/A')}% | 🐻 Bear: {c.get('bear_probability', 'N/A')}%")
+        lines.append(f"Technika: {c.get('technical_score', 'N/A')}/10 ({c.get('technical_score_label', 'N/A')})")
+        if c.get("technical_score_reasons"): lines.append("Technické signály: " + "; ".join(c["technical_score_reasons"][:5]))
+        lines.append(f"Fundament: {c.get('fundamental_score', 'N/A')}/10 | istota: {c.get('fundamental_confidence', 'N/A')}")
+        if c.get("fundamental_evidence"): lines.append(f"Fundament – dôvody: {c['fundamental_evidence']}")
         if "BUY" in action:
-            lines.extend([
-                f"BUY 1: {coin.get('buy_zone_1', 'N/A')}",
-                f"BUY 2: {coin.get('buy_zone_2', 'N/A')}",
-                f"Invalidácia: {coin.get('invalidation', 'N/A')}",
-                f"TP1: {coin.get('tp1', 'N/A')}",
-                f"TP2: {coin.get('tp2', 'N/A')}",
-                f"R:R: {coin.get('risk_reward', 'N/A')}",
-            ])
-
-        lines.append(
-            f"🐂 Bull: {coin.get('bull_probability', 'N/A')}% | "
-            f"🐻 Bear: {coin.get('bear_probability', 'N/A')}%"
-        )
-        lines.append(
-            f"Technika: {coin.get('technical_score', 'N/A')}/10"
-        )
-        lines.append(
-            f"Fundament: {coin.get('fundamental_score', 'N/A')}/10"
-        )
-
-        if coin.get("action_change"):
-            lines.append(f"Zmena: {coin['action_change']}")
-        if coin.get("confirmation_needed"):
-            lines.append(
-                f"Potvrdenie: {coin['confirmation_needed']}"
-            )
-        if coin.get("bear_case"):
-            lines.append(f"Medvedí scenár: {coin['bear_case']}")
-        if coin.get("bull_case"):
-            lines.append(f"Býčí scenár: {coin['bull_case']}")
-
-        lines.append(str(coin.get("reason", "")))
-
-    lines.extend([
-        "",
-        "🚀 Najlepšia príležitosť:",
-        str(analysis.get("best_opportunity", "N/A")),
-        "",
-        f"🆕 Nová kryptomena: {analysis.get('new_coin', 'NO TRADE')}",
-        f"Akcia: {analysis.get('new_coin_action', 'NO TRADE')}",
-        f"Dôvod: {analysis.get('new_coin_reason', '')}",
-        "",
-        f"⚠️ Vyhnúť sa: {analysis.get('avoid', '')}",
-    ])
-
-    conditions = analysis.get("conditions_to_watch", [])
-    if conditions:
-        lines.extend(["", "👀 Sledovať:"])
-        lines.extend(f"• {x}" for x in conditions[:6])
-
-    lines.extend([
-        "",
-        "Poznámka: Pravdepodobnosti a cenové výhľady sú odhady, "
-        "nie záruky. Nie je to finančné poradenstvo.",
-    ])
-
+            for label, key in [("Nákupná zóna 1", "buy_zone_1"), ("Nákupná zóna 2", "buy_zone_2"),
+                               ("Invalidácia", "invalidation"), ("TP1", "tp1"), ("TP2", "tp2"), ("R:R", "risk_reward")]:
+                lines.append(f"{label}: {c.get(key, 'N/A')}")
+        lines.append(f"Zmena akcie: {c.get('action_change', 'N/A')}")
+        if c.get("action_guard_note"): lines.append("🛡 Ochranné pravidlo: " + c["action_guard_note"])
+        if c.get("previous_comparison"): lines.append("Oproti minule: " + str(c["previous_comparison"]))
+        if c.get("new_money_plan"): lines.append("Nové peniaze: " + str(c["new_money_plan"]))
+        if c.get("confirmation_needed"): lines.append("Potvrdenie: " + str(c["confirmation_needed"]))
+        if c.get("bear_case"): lines.append("Medvedí scenár: " + str(c["bear_case"]))
+        if c.get("bull_case"): lines.append("Býčí scenár: " + str(c["bull_case"]))
+        if c.get("reason"): lines.append("Záver: " + str(c["reason"]))
+    lines.extend(["", "🚀 Najlepšia príležitosť:", str(analysis.get("best_opportunity", "N/A")),
+                  "", f"🆕 Nová kryptomena: {analysis.get('new_coin', 'NO TRADE')}",
+                  f"Akcia: {analysis.get('new_coin_action', 'NO TRADE')}",
+                  f"Dôvod: {analysis.get('new_coin_reason', '')}",
+                  "", f"⚠️ Vyhnúť sa: {analysis.get('avoid', '')}"])
+    if analysis.get("conditions_to_watch"):
+        lines.extend(["", "👀 Sledovať:", *[f"• {x}" for x in analysis["conditions_to_watch"][:6]]])
+    if forecast_results:
+        lines.extend(["", "📉 KONTROLA PREDCHÁDZAJÚCICH 24H PREDPOVEDÍ:"])
+        for r in forecast_results[-12:]:
+            lines.append(f"• {r['symbol']}: predikcia {r['predicted_direction']} {r['predicted_pct']:+.1f}%, skutočnosť {r['actual_direction']} {r['actual_pct']:+.2f}% — {'zhoda' if r['direction_hit'] else 'nezhoda'}")
+    lines.extend(["", "Poznámka: skóre a pravdepodobnosti sú odhady, nie záruky. Nie je to finančné poradenstvo."])
     return "\n".join(lines)
 
 
-# ============================================================
-# SAFETY MONITOR
-# ============================================================
+# ----------------------------- Safety monitor -----------------------------
 
 def run_safety_monitor():
-    market_global = get_market_global()
-    simple_prices = coingecko_simple_price(["bitcoin"])
-    fear_greed = get_fear_greed()
-
-    btc_data = {}
-    try:
-        btc_data = collect_coin_data("BTC", "bitcoin", days=35)
-    except Exception as e:
-        print(f"BTC technical data error: {e}")
-
-    safety = market_safety(market_global, simple_prices, btc_data)
+    market_global = coingecko_get("global")
+    simple = coingecko_simple_price(["bitcoin"])
+    fear = get_fear_greed()
+    btc = {}
+    try: btc = collect_coin_data("BTC", "bitcoin", days=35)
+    except Exception as exc: print(f"BTC technical data error: {exc}")
+    safety = market_safety(market_global, simple, btc)
     state = load_state()
-
-    previous_analysis = state.get("last_analysis", {})
-    previous_coins = {
-        str(c.get("symbol", "")).upper(): c
-        for c in previous_analysis.get("coins", [])
-        if isinstance(c, dict)
-    }
-
-    portfolio_analysis = []
-
+    previous = state.get("last_analysis", {})
+    prev_coins = {str(c.get("symbol", "")).upper(): c for c in previous.get("coins", []) if isinstance(c, dict)}
+    portfolio_context = []
     for symbol, coin_id in PORTFOLIO.items():
         try:
             data = collect_coin_data(symbol, coin_id, days=35)
             tech = data.get("technical_4h", {})
             price = safe_float(data.get("price_usd"))
-            support = safe_float(tech.get("support_30_candles"))
             rsi_value = safe_float(tech.get("rsi14"))
-            above_200 = tech.get("above_ema200")
-
-            support_distance = None
-            if price and support and support < price:
-                support_distance = (price - support) / price * 100
-
-            previous = previous_coins.get(symbol, {})
-            previous_action = str(
-                previous.get("action", "N/A")
-            ).upper()
-
-            reasons = []
-            if above_200 is False:
-                reasons.append("cena je pod 4H EMA200")
+            prev = prev_coins.get(symbol, {})
             if rsi_value is not None and rsi_value < 30:
-                reasons.append(
-                    "RSI pod 30: silný tlak, ale aj možnosť odrazu"
-                )
-            elif rsi_value is not None and rsi_value < 40:
-                reasons.append("RSI pod 40: slabé momentum")
-
-            if support_distance is not None:
-                reasons.append(
-                    f"podpora približne {support_distance:.1f}% pod cenou"
-                )
-
-            if rsi_value is not None and rsi_value < 30:
-                interpretation = (
-                    "Možné prepredanie. Nepredávať automaticky; "
-                    "sledovať potvrdenie alebo odraz."
-                )
-            elif above_200 is False:
-                interpretation = (
-                    "Zvýšené riziko, ale samotná EMA200 "
-                    "nie je potvrdením na predaj."
-                )
+                interpretation = "Prepredané; možný odraz aj pokračovanie poklesu. Nie je to samostatný signál na predaj."
+            elif tech.get("above_ema200") is False:
+                interpretation = "Zvýšené riziko, ale samotná EMA200 nepotvrdzuje predaj."
             else:
-                interpretation = (
-                    "Tieto indikátory samy nepotvrdzujú nútený predaj."
-                )
-
-            portfolio_analysis.append({
-                "symbol": symbol,
-                "price": price,
-                "support_distance": support_distance,
-                "rsi": rsi_value,
-                "action": previous_action,
-                "reasons": reasons,
-                "interpretation": interpretation,
-            })
-
-        except Exception as e:
-            print(f"Safety monitor error for {symbol}: {e}")
-
-    should_alert, alert_reason = should_send_safety_alert(
-        safety, state
-    )
-
+                interpretation = "Indikátory samy osebe nepotvrdzujú nútený predaj."
+            portfolio_context.append({"symbol": symbol, "price": price, "rsi": round(rsi_value, 1) if rsi_value is not None else None,
+                                      "technical_score": data.get("technical_score_calc", {}).get("score"),
+                                      "action": prev.get("action", "N/A"), "interpretation": interpretation})
+        except Exception as exc:
+            print(f"Safety monitor error for {symbol}: {exc}")
+    should_alert, reason = should_send_safety_alert(safety, state)
     if should_alert:
-        alert = format_safety_alert(
-            safety, fear_greed, portfolio_analysis
-        )
-        telegram_send_long(alert)
+        telegram_send_long(format_safety_alert(safety, fear, portfolio_context))
         state["last_safety_alert"] = iso_now()
-        state["last_safety_alert_reason"] = alert_reason
-
+        state["last_safety_alert_reason"] = reason
     state["last_safety_state"] = safety.get("state", "NORMAL")
     state["last_safety_score"] = safety.get("score", 0)
     state["last_safety_check"] = iso_now()
     state["market_safety"] = safety
-    state["fear_greed"] = fear_greed
+    state["fear_greed"] = fear
     save_state(state)
-
     return safety
 
 
-# ============================================================
-# HLAVNÁ ANALÝZA
-# ============================================================
+# ----------------------------- Main analysis -----------------------------
 
 def run_full_analysis(schedule_reason, schedule_slot=None):
-    market_global = get_market_global()
-    fear_greed = get_fear_greed()
-
-    all_ids = list(dict.fromkeys(
-        list(PORTFOLIO.values()) + CANDIDATES + ["bitcoin"]
-    ))
-    simple_prices = coingecko_simple_price(all_ids)
+    market_global = coingecko_get("global")
+    fear = get_fear_greed()
+    all_ids = list(dict.fromkeys(list(PORTFOLIO.values()) + CANDIDATES + ["bitcoin"]))
+    simple = coingecko_simple_price(all_ids)
     news = get_rss_news()
     btc_data = collect_coin_data("BTC", "bitcoin")
-    safety = market_safety(market_global, simple_prices, btc_data)
+    safety = market_safety(market_global, simple, btc_data)
 
     portfolio_data = {}
     for symbol, coin_id in PORTFOLIO.items():
-        try:
-            portfolio_data[symbol] = collect_coin_data(symbol, coin_id)
-        except Exception as e:
-            portfolio_data[symbol] = {
-                "symbol": symbol,
-                "coin_id": coin_id,
-                "error": str(e),
-            }
-
-    shortlist = shortlist_candidates()
+        try: portfolio_data[symbol] = collect_coin_data(symbol, coin_id)
+        except Exception as exc: portfolio_data[symbol] = {"symbol": symbol, "coin_id": coin_id, "error": str(exc), "technical_4h": {}, "technical_score_calc": {"score": None, "label": "nedostatok dát", "reasons": []}}
     candidate_data = {}
-
-    for coin_id in shortlist:
-        symbol = coin_id.upper()
-        try:
-            candidate_data[symbol] = collect_coin_data(symbol, coin_id)
-        except Exception as e:
-            candidate_data[symbol] = {
-                "coin_id": coin_id,
-                "error": str(e),
-            }
-
-    prompt = build_prompt(
-        market_global, fear_greed, safety, news,
-        portfolio_data, candidate_data, btc_data,
-    )
-
-    analysis = gemini_analyze(prompt)
-    analysis = validate_and_correct_analysis(
-        analysis, safety, portfolio_data
-    )
+    for coin_id in shortlist_candidates():
+        try: candidate_data[coin_id.upper()] = collect_coin_data(coin_id.upper(), coin_id)
+        except Exception as exc: candidate_data[coin_id.upper()] = {"coin_id": coin_id, "error": str(exc)}
 
     state = load_state()
     previous_analysis = state.get("last_analysis", {})
-    previous_actions = {
-        str(c.get("symbol", "")).upper():
-            str(c.get("action", "N/A")).upper()
-        for c in previous_analysis.get("coins", [])
-        if isinstance(c, dict)
-    }
+    prompt = build_prompt(market_global, fear, safety, news, portfolio_data, candidate_data, btc_data, state)
+    analysis = gemini_analyze(prompt)
+    analysis = validate_and_correct_analysis(analysis, safety, portfolio_data, previous_analysis)
 
+    # vyhodnoť staršie predpovede pred pridaním nových
+    forecast_results = evaluate_previous_forecasts(state, portfolio_data)
+    message = format_bot_message(analysis, safety, fear, forecast_results)
+
+    # Uloženie histórie predpovedí. Nevymažeme staršie záznamy pri každom behu.
+    history = state.get("forecast_history", [])
+    now_utc = datetime.now(timezone.utc).isoformat()
     for coin in analysis.get("coins", []):
-        symbol = str(coin.get("symbol", "")).upper()
-        old_action = previous_actions.get(symbol)
-        new_action = str(coin.get("action", "N/A")).upper()
+        history.append({
+            "timestamp": now_utc, "symbol": coin["symbol"],
+            "price": safe_float(coin.get("current_price")),
+            "outlook_direction": str(coin.get("outlook_direction", "do strany")).lower(),
+            "outlook_pct": safe_float(coin.get("outlook_pct"), 0),
+        })
+    state["forecast_history"] = history[-240:]
 
-        if old_action and old_action != new_action:
-            coin["action_change"] = (
-                f"{old_action} → {new_action}"
-            )
-        else:
-            coin["action_change"] = "Bez zmeny oproti poslednej analýze"
-
-    message = format_bot_message(analysis, safety, fear_greed)
-
-    # Najprv doruč správu. Až potom označ slot za dokončený.
+    # Doručenie musí prebehnúť pred označením časového slotu za vybavený.
     telegram_send_long(message)
 
     state["last_run"] = iso_now()
     state["last_full_analysis"] = iso_now()
     state["last_analysis_reason"] = schedule_reason
     state["market_safety"] = safety
-    state["fear_greed"] = fear_greed
+    state["fear_greed"] = fear
     state["btc_data"] = btc_data
     state["last_analysis"] = analysis
     state["last_main_schedule"] = schedule_reason
-
-    if schedule_slot and schedule_reason != "MANUAL":
-        state["last_main_slot"] = schedule_slot
-
     state["last_safety_state"] = safety.get("state", "NORMAL")
     state["last_safety_score"] = safety.get("score", 0)
+    if schedule_slot and schedule_reason != "MANUAL":
+        state["last_main_slot"] = schedule_slot
     save_state(state)
-
     print("Hlavná analýza bola odoslaná a uložená.")
 
 
-# ============================================================
-# SPUSTENIE
-# ============================================================
-
 def main():
-    if not GEMINI_API_KEY:
-        raise RuntimeError("Chýba GEMINI_API_KEY.")
-
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        raise RuntimeError(
-            "Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID."
-        )
-
-    should_run, reason = is_main_analysis_time()
-    scheduled_slot = None
-
-    if should_run and reason != "MANUAL":
-        scheduled_slot = get_main_analysis_slot()
-
-    if should_run:
-        run_full_analysis(reason, scheduled_slot)
+    if not GEMINI_API_KEY: raise RuntimeError("Chýba GEMINI_API_KEY.")
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: raise RuntimeError("Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID.")
+    run_main, reason = is_main_analysis_time()
+    slot = get_main_analysis_slot() if run_main and reason != "MANUAL" else None
+    if run_main:
+        run_full_analysis(reason, slot)
     else:
         run_safety_monitor()
 
