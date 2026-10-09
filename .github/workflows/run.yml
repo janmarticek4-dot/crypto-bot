@@ -1,16 +1,16 @@
-name: Crypto AI Bot V5.3
+
+name: Crypto AI Bot V8.0
 
 on:
-  # Safety Monitor každých 15 minút.
-  # Hlavný report si Python rozhodne podľa času.
+  # Bezpecnostna kontrola kazdych 15 minut.
   schedule:
     - cron: "*/15 * * * *"
-      timezone: "Europe/Bratislava"
 
+  # Rucne spustenie cez GitHub Actions.
   workflow_dispatch:
     inputs:
       manual_analysis:
-        description: "Spustiť okamžitú hlavnú analýzu?"
+        description: "Spustit okamzitu hlavnu analyzu?"
         required: false
         default: false
         type: boolean
@@ -18,70 +18,55 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: crypto-ai-bot
+  cancel-in-progress: false
 
 jobs:
-
   crypto-bot:
-
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-
-      # ------------------------------------------------------
-      # Checkout
-      # ------------------------------------------------------
-
       - name: Checkout repository
         uses: actions/checkout@v4
-
-
-      # ------------------------------------------------------
-      # Python
-      # ------------------------------------------------------
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-
-      # ------------------------------------------------------
-      # Install Dependencies
-      # ------------------------------------------------------
-
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install google-genai
+          python -m pip install --upgrade pip
+          python -m pip install google-genai
 
-
-      # ------------------------------------------------------
-      # Run bot
-      # ------------------------------------------------------
-
-      - name: Run Crypto AI Bot V5.3
+      - name: Run Crypto AI Bot
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-          MANUAL_ANALYSIS: ${{ inputs.manual_analysis }}
+          MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          PYTHONUNBUFFERED: "1"
         run: |
           python main.py
 
-
-      # ------------------------------------------------------
-      # Save state
-      # ------------------------------------------------------
-
       - name: Save bot state
+        if: always() && !cancelled()
         run: |
           if [ -f bot_state.json ]; then
-            git config --global user.name "crypto-ai-bot"
-            git config --global user.email "crypto-ai-bot@users.noreply.github.com"
+            git config user.name "crypto-ai-bot"
+            git config user.email "crypto-ai-bot@users.noreply.github.com"
             git add bot_state.json
-            git diff --cached --quiet || git commit -m "Update crypto bot state"
-            git push
+
+            if ! git diff --cached --quiet; then
+              git commit -m "Update crypto bot state"
+              git push
+            else
+              echo "Stav bota sa nezmenil."
+            fi
           else
-            echo "bot_state.json neexistuje - nič sa neukladá."
+            echo "bot_state.json neexistuje."
           fi
