@@ -12,12 +12,12 @@
       "celková kapitalizácia klesá",
       "BTC je pod 4H EMA50"
     ],
-    "market_cap_change_24h": -3.095680470507639,
-    "btc_change_24h": 1.8083324530025824,
-    "btc_price": 82856.58447423935,
-    "btc_ema50": 83929.05166682802,
-    "btc_ema200": 81627.03985103646,
-    "btc_rsi14": 43.16196818495181
+    "market_cap_change_24h": -3.0123883412155066,
+    "btc_change_24h": 2.212095213971984,
+    "btc_price": 82920.85507828102,
+    "btc_ema50": 83931.57208267278,
+    "btc_ema200": 81627.67935953439,
+    "btc_rsi14": 43.837638007853386
   },
   "fear_greed": {
     "value": 59,
@@ -323,7 +323,7 @@
   "last_main_schedule": "MANUAL",
   "last_safety_state": "NORMAL",
   "last_safety_score": 2,
-  "last_safety_check": "2026-10-09T17:27:41.766211+02:00",
+  "last_safety_check": "2026-10-09T17:44:57.645319+02:00",
   "last_safety_alert": "2026-10-09T04:41:45.921459+02:00",
   "last_safety_alert_reason": "STATE_ESCALATION",
   "last_main_slot": "US_PREOPEN_2026-10-09",
