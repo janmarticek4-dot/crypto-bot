@@ -6,21 +6,22 @@
   "main_analysis_slot": "MANUAL",
   "last_run": "2026-10-09T20:13:33.781702+02:00",
   "market_safety": {
-    "state": "NORMAL",
-    "score": 2,
+    "state": "WARNING",
+    "score": 3,
     "reasons": [
+      "celková kapitalizácia klesá",
       "BTC je pod 4H EMA50",
       "BTC je pod 4H EMA100"
     ],
-    "market_cap_change_24h": -1.9935634502221158,
-    "btc_change_24h": 0.702717215490374,
-    "btc_price": 82621.0,
-    "btc_ema20": 83067.77818050126,
-    "btc_ema50": 83774.4840594708,
-    "btc_ema100": 83516.89842078892,
-    "btc_ema200": 81659.1642544924,
-    "btc_rsi14": 42.47567667889875,
-    "btc_macd_histogram": 52.610250297695984,
+    "market_cap_change_24h": -2.0365052966663617,
+    "btc_change_24h": 0.8187811370342767,
+    "btc_price": 82567.0,
+    "btc_ema20": 83062.30699741858,
+    "btc_ema50": 83772.23121937792,
+    "btc_ema100": 83515.76084806875,
+    "btc_ema200": 81658.59263834944,
+    "btc_rsi14": 41.82518479630111,
+    "btc_macd_histogram": 48.944090009813294,
     "data_warnings": []
   },
   "fear_greed": {
@@ -331,10 +332,10 @@
     }
   },
   "last_main_schedule": "BRATISLAVA_20:00",
-  "last_safety_state": "NORMAL",
-  "last_safety_score": 2,
-  "last_safety_check": "2026-10-10T04:10:34.623699+02:00",
-  "last_safety_alert": "2026-10-10T01:09:14.361064+02:00",
+  "last_safety_state": "WARNING",
+  "last_safety_score": 3,
+  "last_safety_check": "2026-10-10T04:29:31.827892+02:00",
+  "last_safety_alert": "2026-10-10T04:29:31.827876+02:00",
   "last_safety_alert_reason": "STATE_CHANGE",
   "last_main_slot": "BRATISLAVA_2026-10-09_20:00",
   "forecast_history": [
