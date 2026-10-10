@@ -18,12 +18,42 @@ from google import genai
 # Opatrnejšie odporúčania, ochrana dát a meranie predpovedí
 # ============================================================
 
-VERSION = "8.2"
+VERSION = "8.3"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "").strip()
+
+# Verejné trhové dáta; API kľúče ani obchodné oprávnenia netreba.
+BINANCE_BASE_URL = "https://data-api.binance.vision"
+COINBASE_BASE_URL = "https://api.exchange.coinbase.com"
+EXCHANGE_CANDLE_INTERVAL = "4h"
+EXCHANGE_CANDLE_LIMIT = 300
+CANDLE_GRANULARITY_SECONDS = 4 * 60 * 60
+
+# CoinGecko ID -> burzový ticker. Nie všetky coiny sú dostupné na každej burze.
+COIN_ID_TICKERS = {
+    "bitcoin": "BTC", "aave": "AAVE", "bittensor": "TAO",
+    "artificial-superintelligence-alliance": "FET", "fetch-ai": "FET",
+    "solana": "SOL", "ondo-finance": "ONDO", "render-token": "RENDER",
+    "sui": "SUI", "chainlink": "LINK",
+    "compound-governance-token": "COMP", "avalanche-2": "AVAX",
+    "hyperliquid": "HYPE", "near": "NEAR", "injective-protocol": "INJ",
+    "uniswap": "UNI", "arbitrum": "ARB", "optimism": "OP",
+    "maker": "MKR", "mantle": "MNT",
+}
+
+# Coinbase produkty sa líšia podľa dostupnosti; skúšame len známe bežné USD páry.
+COINBASE_PRODUCT_ALIASES = {
+    "BTC": ["BTC-USD"], "AAVE": ["AAVE-USD"], "TAO": ["TAO-USD"],
+    "FET": ["FET-USD", "ASI-USD"], "SOL": ["SOL-USD"],
+    "ONDO": ["ONDO-USD"], "RENDER": ["RENDER-USD", "RNDR-USD"],
+    "SUI": ["SUI-USD"], "LINK": ["LINK-USD"], "COMP": ["COMP-USD"],
+    "AVAX": ["AVAX-USD"], "HYPE": ["HYPE-USD"], "NEAR": ["NEAR-USD"],
+    "INJ": ["INJ-USD"], "UNI": ["UNI-USD"], "ARB": ["ARB-USD"],
+    "OP": ["OP-USD"], "MKR": ["MKR-USD"], "MNT": ["MNT-USD"],
+}
 
 # Model môžeš zmeniť cez GitHub Actions variable GEMINI_MODEL.
 GEMINI_MODEL = (os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.8-flash")
@@ -366,6 +396,142 @@ def get_coin_price_with_fallback(symbol, coin_id):
 
 
 # ============================================================
+# BURZOVÉ DÁTA: BINANCE + COINBASE
+# ============================================================
+
+def ticker_for_coin(symbol, coin_id=None):
+    symbol = str(symbol or "").upper().strip()
+    if symbol in {"BTC", "AAVE", "TAO", "FET", "SOL", "ONDO", "RENDER", "SUI", "LINK", "COMP", "AVAX", "HYPE", "NEAR", "INJ", "UNI", "ARB", "OP", "MKR", "MNT"}:
+        return symbol
+    return COIN_ID_TICKERS.get(str(coin_id or "").lower(), symbol)
+
+
+def binance_get(path, params=None):
+    url = BINANCE_BASE_URL + path
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    return http_json(url, headers={"Accept": "application/json", "User-Agent": f"CryptoAIBot/{VERSION}"}, timeout=20, retries=2)
+
+
+def binance_candles(ticker, limit=EXCHANGE_CANDLE_LIMIT):
+    symbol = f"{ticker}USDT"
+    rows = binance_get("/api/v3/klines", {"symbol": symbol, "interval": EXCHANGE_CANDLE_INTERVAL, "limit": min(int(limit), 1000)})
+    now_ms = int(time.time() * 1000)
+    candles = []
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, list) or len(row) < 7:
+            continue
+        open_ms = safe_float(row[0]); close_ms = safe_float(row[6])
+        # Nepoužívaj neuzavretú aktuálnu sviečku na výpočet indikátorov.
+        if open_ms is None or close_ms is None or close_ms > now_ms:
+            continue
+        o, h, lo, c, vol = (safe_float(row[i]) for i in (1, 2, 3, 4, 5))
+        if None in (o, h, lo, c):
+            continue
+        candles.append({"timestamp": int(open_ms), "open": o, "high": h, "low": lo, "close": c, "volume": vol})
+    if len(candles) < 35:
+        raise RuntimeError(f"Binance {symbol}: málo uzavretých sviečok ({len(candles)})")
+    return candles
+
+
+def iso_utc(seconds):
+    return datetime.fromtimestamp(seconds, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def coinbase_get(path, params=None):
+    url = COINBASE_BASE_URL + path
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    return http_json(url, headers={"Accept": "application/json", "User-Agent": f"CryptoAIBot/{VERSION}"}, timeout=20, retries=2)
+
+
+def coinbase_ticker(ticker):
+    errors = []
+    for product in COINBASE_PRODUCT_ALIASES.get(ticker, [f"{ticker}-USD"]):
+        try:
+            data = coinbase_get(f"/products/{product}/ticker")
+            price = safe_float(data.get("price")) if isinstance(data, dict) else None
+            if price is not None and price > 0:
+                return {"price": price, "product": product}
+        except Exception as exc:
+            errors.append(f"{product}: {exc}")
+    if errors:
+        raise RuntimeError("Coinbase ticker nedostupný: " + "; ".join(errors[-2:]))
+    raise RuntimeError(f"Coinbase ticker nedostupný pre {ticker}")
+
+
+def coinbase_candles(ticker, limit=EXCHANGE_CANDLE_LIMIT):
+    errors = []
+    now = int(time.time())
+    end = (now // CANDLE_GRANULARITY_SECONDS) * CANDLE_GRANULARITY_SECONDS
+    start = end - min(int(limit), 300) * CANDLE_GRANULARITY_SECONDS
+    for product in COINBASE_PRODUCT_ALIASES.get(ticker, [f"{ticker}-USD"]):
+        try:
+            rows = coinbase_get(
+                f"/products/{product}/candles",
+                {"granularity": CANDLE_GRANULARITY_SECONDS, "start": iso_utc(start), "end": iso_utc(end)},
+            )
+            candles = []
+            # Coinbase Exchange vracia [time, low, high, open, close, volume], často od najnovšej.
+            for row in rows if isinstance(rows, list) else []:
+                if not isinstance(row, list) or len(row) < 6:
+                    continue
+                stamp = safe_float(row[0])
+                if stamp is None or int(stamp) + CANDLE_GRANULARITY_SECONDS > now:
+                    continue
+                lo, hi, opn, close = (safe_float(row[i]) for i in (1, 2, 3, 4))
+                vol = safe_float(row[5])
+                if None in (lo, hi, opn, close):
+                    continue
+                candles.append({"timestamp": int(stamp) * 1000, "open": opn, "high": hi, "low": lo, "close": close, "volume": vol})
+            candles.sort(key=lambda x: x["timestamp"])
+            if len(candles) >= 35:
+                return candles, product
+            errors.append(f"{product}: málo uzavretých sviečok ({len(candles)})")
+        except Exception as exc:
+            errors.append(f"{product}: {exc}")
+    raise RuntimeError("Coinbase 4H sviečky nedostupné: " + "; ".join(errors[-2:]))
+
+
+def exchange_market_data(symbol, coin_id=None):
+    """Binance je primárny zdroj OHLC; Coinbase je nezávislá kontrola a záloha."""
+    ticker = ticker_for_coin(symbol, coin_id)
+    result = {"ticker": ticker, "candles": None, "candle_source": None,
+              "binance_price": None, "coinbase_price": None,
+              "coinbase_product": None, "warnings": [], "errors": []}
+    try:
+        result["candles"] = binance_candles(ticker)
+        result["candle_source"] = "Binance Spot"
+        try:
+            tick = binance_get("/api/v3/ticker/price", {"symbol": f"{ticker}USDT"})
+            result["binance_price"] = safe_float(tick.get("price")) if isinstance(tick, dict) else None
+        except Exception as exc:
+            result["warnings"].append(f"Binance aktuálna cena nedostupná: {exc}")
+    except Exception as exc:
+        result["errors"].append(f"Binance: {exc}")
+
+    # Coinbase ticker je nezávislá kontrola ceny; sviečky použijeme ako zálohu.
+    try:
+        tick = coinbase_ticker(ticker)
+        result["coinbase_price"] = tick["price"]
+        result["coinbase_product"] = tick["product"]
+    except Exception as exc:
+        result["errors"].append(str(exc))
+
+    if result["candles"] is None:
+        try:
+            candles, product = coinbase_candles(ticker)
+            result["candles"] = candles
+            result["candle_source"] = f"Coinbase Exchange ({product})"
+        except Exception as exc:
+            result["errors"].append(str(exc))
+
+    if result["candles"] is None:
+        result["warnings"].append("Burzové 4H sviečky nie sú dostupné; použije sa núdzový graf CoinGecko.")
+    return result
+
+
+# ============================================================
 # TECHNICKÉ UKAZOVATELE
 # ============================================================
 
@@ -705,82 +871,88 @@ def calculate_technical_score(tech):
 
 def collect_coin_data(symbol, coin_id, days=90):
     print(f"Collecting: {symbol}")
+    actual_id, current = get_coin_price_with_fallback(symbol, coin_id)
+    coingecko_price = safe_float(current.get("usd"))
+    if coingecko_price is None or coingecko_price <= 0:
+        raise RuntimeError(f"CoinGecko neposkytol platnú cenu pre {symbol}.")
 
-    actual_id, current = get_coin_price_with_fallback(
-        symbol, coin_id
-    )
+    exchange = exchange_market_data(symbol, actual_id)
+    candles = exchange.get("candles") or []
+    candle_source = exchange.get("candle_source")
+    warnings = list(exchange.get("warnings", []))
 
-    live_price = safe_float(current.get("usd"))
+    if not candles:
+        # Núdzová záloha: CoinGecko market_chart nemá skutočné OHLC sviečky.
+        chart = coingecko_chart(actual_id, days=days)
+        candles = aggregate_candles(closes_from_chart(chart))
+        candle_source = "CoinGecko agregované cenové body (núdzová záloha)"
+        warnings.append("Technické indikátory sú menej presné: CoinGecko poskytuje cenové body, nie skutočné OHLC sviečky.")
 
-    if live_price is None or live_price <= 0:
-        raise RuntimeError(
-            f"CoinGecko neposkytol platnú cenu pre {symbol}."
-        )
+    # CoinGecko ostáva referenciou pre širší trh; burzové ceny kontrolujú jej vierohodnosť.
+    live_candidates = [
+        ("Binance", safe_float(exchange.get("binance_price"))),
+        ("Coinbase", safe_float(exchange.get("coinbase_price"))),
+    ]
+    usable = [(name, price) for name, price in live_candidates if price is not None and price > 0]
+    live_price = coingecko_price
+    price_source = "CoinGecko"
+    if usable:
+        # Ak sa zdroje zhodujú, používame priemer dostupných burzových cien.
+        exchange_prices = [price for _, price in usable]
+        mean_exchange = sum(exchange_prices) / len(exchange_prices)
+        price_source = "+".join(name for name, _ in usable)
+        if abs(mean_exchange / coingecko_price - 1) <= 0.03:
+            live_price = mean_exchange
+        else:
+            warnings.append(
+                f"Cena CoinGecko sa od burzového priemeru líši o {abs(mean_exchange / coingecko_price - 1) * 100:.2f} %; použije sa burzová cena a rozdiel treba preveriť."
+            )
+            live_price = mean_exchange
+        if len(exchange_prices) == 2 and abs(exchange_prices[0] / exchange_prices[1] - 1) > 0.02:
+            warnings.append("Binance a Coinbase sa líšia o viac než 2 %; skontroluj likviditu a čas dát.")
+    else:
+        warnings.append("Aktuálna burzová cena nie je dostupná; použije sa CoinGecko.")
 
-    chart = coingecko_chart(actual_id, days=days)
-    candles = aggregate_candles(closes_from_chart(chart))
     tech = technical_summary(candles, live_price)
-
     if not tech:
-        raise RuntimeError(
-            f"Nedostatočné technické dáta: {symbol}"
-        )
+        raise RuntimeError(f"Nedostatočné technické dáta: {symbol}")
 
     last_updated = safe_float(current.get("last_updated_at"))
-    data_age_seconds = (
-        max(0, time.time() - last_updated)
-        if last_updated else None
-    )
-
-    warnings = []
-
+    data_age_seconds = max(0, time.time() - last_updated) if last_updated else None
     if len(candles) < 200:
-        warnings.append(
-            f"len {len(candles)} agregovaných sviečok; "
-            "EMA200 môže chýbať"
-        )
-
+        warnings.append(f"len {len(candles)} uzavretých 4H sviečok; EMA200 môže chýbať")
     if data_age_seconds is None:
-        warnings.append("chýba čas aktualizácie ceny")
+        warnings.append("chýba čas aktualizácie ceny CoinGecko")
     elif data_age_seconds > 900:
-        warnings.append("cena môže byť zastaraná")
-
+        warnings.append("cena CoinGecko môže byť zastaraná")
     chart_price = safe_float(tech.get("chart_last_close"))
-
     if chart_price and abs(live_price / chart_price - 1) > 0.05:
-        warnings.append(
-            "živá cena sa líši od posledného uzavretia grafu o viac než 5 %"
-        )
-
+        warnings.append("živá cena sa líši od posledného uzavretia 4H grafu o viac než 5 %")
     if safe_float(tech.get("rsi14")) is None:
         warnings.append("RSI sa nedá vypočítať z dostupných dát")
-
     if safe_float(tech.get("ema50")) is None:
         warnings.append("EMA50 nie je dostupná")
-
     if safe_float(tech.get("ema200")) is None:
         warnings.append("EMA200 nie je dostupná")
 
     score = calculate_technical_score(tech)
-
     return {
-        "symbol": symbol,
-        "coin_id": actual_id,
-        "price_usd": live_price,
+        "symbol": symbol, "coin_id": actual_id, "ticker": exchange.get("ticker"),
+        "price_usd": live_price, "price_source": price_source,
+        "coingecko_price_usd": coingecko_price,
+        "binance_price_usd": exchange.get("binance_price"),
+        "coinbase_price_usd": exchange.get("coinbase_price"),
+        "candle_source": candle_source,
         "market_cap": safe_float(current.get("usd_market_cap")),
         "volume_24h": safe_float(current.get("usd_24h_vol")),
         "change_24h": safe_float(current.get("usd_24h_change")),
         "last_updated": last_updated,
-        "data_age_seconds": (
-            round(data_age_seconds)
-            if data_age_seconds is not None else None
-        ),
-        "data_warnings": warnings,
+        "data_age_seconds": round(data_age_seconds) if data_age_seconds is not None else None,
+        "data_warnings": list(dict.fromkeys(warnings)),
+        "exchange_errors": exchange.get("errors", []),
         "technical_4h": tech,
         "technical_score_calc": score,
-        "returns": recent_returns(
-            [candle["close"] for candle in candles]
-        ),
+        "returns": recent_returns([candle["close"] for candle in candles]),
     }
 
 
@@ -1258,6 +1430,9 @@ Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER.
 APTOS nikdy neodporúčaj ako novú investíciu.
 
 DÁTA A OVEROVANIE:
+- Technické indikátory sa prednostne počítajú z uzavretých 4H OHLC sviečok Binance Spot; Coinbase je nezávislá kontrola ceny a záložný zdroj sviečok.
+- CoinGecko slúži na širší trh a doplnkové trhové údaje. Ak report uvádza núdzový graf CoinGecko, považuj technickú analýzu za menej spoľahlivú.
+- Skontroluj polia candle_source, price_source, exchange_errors a data_warnings; pri konfliktoch zníž istotu a nevydávaj silný BUY/SELL.
 - Používaj dodané trhové dáta ako základ technickej analýzy.
 - Google Search používaj na overovanie aktuálnych správ a fundamentov.
 - Nezamieňaj cenu z vyhľadávania za dodanú aktuálnu cenu.
@@ -2044,6 +2219,8 @@ def format_bot_message(
     fear_greed,
     forecast_results=None,
     accuracy=None,
+    portfolio_data=None,
+    btc_data=None,
 ):
     coins = sorted(
         analysis.get("coins", []),
@@ -2103,6 +2280,20 @@ def format_bot_message(
         str(analysis.get("market_summary", "")),
     ])
 
+    # Transparentný prehľad dátových zdrojov, aby report neskrýval fallbacky.
+    source_rows = []
+    for label, data in [("BTC", btc_data)] + list((portfolio_data or {}).items()):
+        if not isinstance(data, dict):
+            continue
+        candle_source = data.get("candle_source") or "nedostupný"
+        price_source = data.get("price_source") or "N/A"
+        source_rows.append(f"• {label}: sviečky {candle_source}; cena {price_source}")
+        warnings = data.get("data_warnings") or []
+        if warnings:
+            source_rows.append(f"  ⚠️ {str(warnings[0])[:180]}")
+    if source_rows:
+        lines.extend(["", "📡 ZDROJE A KVALITA DÁT:", *source_rows[:18]])
+
     for coin in coins:
         action = coin.get("action", "HOLD")
         symbol = coin.get("symbol", "?")
@@ -2131,6 +2322,7 @@ def format_bot_message(
             f"Technika: {coin.get('technical_score', 'N/A')}/10 "
             f"({coin.get('technical_score_label', 'N/A')})",
         ])
+        # Zdroje sa doplnia z portfolio dát pri skladaní správy nižšie, ak sú dostupné.
 
         if coin.get("technical_score_reasons"):
             lines.append(
@@ -2233,7 +2425,7 @@ def format_bot_message(
     lines.extend([
         "",
         "Poznámka: skóre a predikcie sú odhady, nie záruky.",
-        "4H ukazovatele sú približne odvodené z CoinGecko cenových bodov, nie z burzových OHLC sviečok.",
+        "Technické ukazovatele sa prednostne počítajú z uzavretých 4H OHLC sviečok Binance; Coinbase slúži na kontrolu ceny a ako záloha. Pri nedostupnosti burzových dát môže byť použitá menej presná núdzová záloha CoinGecko.",
         "Bot nevykonáva obchody. Nie je to finančné poradenstvo.",
     ])
 
@@ -2477,6 +2669,8 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
         fear,
         forecast_results,
         accuracy,
+        portfolio_data=portfolio_data,
+        btc_data=btc_data,
     )
 
     # Predpovede sa ukladajú s presnou časovou značkou a cenou.
