@@ -18,7 +18,7 @@ from google import genai
 # Opatrnejšie odporúčania, ochrana dát a meranie predpovedí
 # ============================================================
 
-VERSION = "8.1"
+VERSION = "8.2"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -26,7 +26,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "").strip()
 
 # Model môžeš zmeniť cez GitHub Actions variable GEMINI_MODEL.
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview").strip()
+GEMINI_MODEL = (os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.8-flash")
 
 REQUEST_TIMEOUT = 45
 GEMINI_MAX_WAIT = 600
@@ -185,6 +185,9 @@ def get_main_analysis_slot(now=None):
     if now.hour == 7 and now.minute < 30:
         return f"BRATISLAVA_{now.date().isoformat()}_07:00"
 
+    if now.hour == 15 and now.minute < 30:
+        return f"BRATISLAVA_{now.date().isoformat()}_15:00"
+
     if now.hour == 20 and now.minute < 30:
         return f"BRATISLAVA_{now.date().isoformat()}_20:00"
 
@@ -210,6 +213,9 @@ def is_main_analysis_time(now=None):
 
     if "07:00" in slot:
         return True, "BRATISLAVA_07:00"
+
+    if "15:00" in slot:
+        return True, "BRATISLAVA_15:00"
 
     if "20:00" in slot:
         return True, "BRATISLAVA_20:00"
@@ -1166,6 +1172,7 @@ def gemini_analyze(prompt):
         raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
 
     client = genai.Client(api_key=GEMINI_API_KEY)
+    print(f"Gemini model: {GEMINI_MODEL}")
 
     interaction = client.interactions.create(
         model=GEMINI_MODEL,
@@ -1704,10 +1711,33 @@ def validate_and_correct_analysis(
 
             coin["previous_price"] = old.get("current_price")
 
-            if not coin.get("previous_comparison"):
-                coin["previous_comparison"] = (
-                    "Porovnaj aktuálne dáta s predchádzajúcou analýzou."
+            old_price = safe_float(old.get("current_price"))
+            old_score = safe_float(old.get("technical_score"))
+            new_score = safe_float(calc.get("score"))
+            price_change = pct_change(old_price, actual_price)
+
+            comparison_parts = []
+            if old_price is not None and actual_price is not None and old_price > 0:
+                comparison_parts.append(
+                    f"cena {format_price(old_price)} → {format_price(actual_price)} "
+                    f"({price_change:+.2f}%)"
+                    if price_change is not None
+                    else f"cena {format_price(old_price)} → {format_price(actual_price)}"
                 )
+            else:
+                comparison_parts.append("chýba porovnateľná staršia cena")
+
+            if old_score is not None and new_score is not None:
+                comparison_parts.append(
+                    f"technika {old_score:.1f} → {new_score:.1f}/10"
+                )
+
+            if old_action:
+                comparison_parts.append(f"akcia {old_action} → {action}")
+
+            # Nepoužívame voľný text od Gemini pre historické porovnanie:
+            # porovnanie sa počíta z reálne uložených cien a skóre.
+            coin["previous_comparison"] = "; ".join(comparison_parts)
         else:
             coin["action_change"] = "Prvá uložená analýza"
             coin["previous_comparison"] = (
@@ -1990,6 +2020,7 @@ def format_safety_alert(safety, fear_greed, portfolio_analysis=None):
         "",
         "RSI, EMA200 ani vzdialenosť od podpory samy osebe "
         "nepotvrdzujú budúci prepad.",
+        "Pozn.: 4H ukazovatele sú približne odvodené z cenových bodov CoinGecko, nie z burzových OHLC sviečok.",
         "Sleduj uzavretie 4H sviečok, podporu, MACD a širší trh.",
     ])
 
@@ -2202,6 +2233,7 @@ def format_bot_message(
     lines.extend([
         "",
         "Poznámka: skóre a predikcie sú odhady, nie záruky.",
+        "4H ukazovatele sú približne odvodené z CoinGecko cenových bodov, nie z burzových OHLC sviečok.",
         "Bot nevykonáva obchody. Nie je to finančné poradenstvo.",
     ])
 
