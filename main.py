@@ -14,11 +14,11 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V9.4
-# Plná pôvodná dĺžka + Číselné metriky, slovné predikcie a dynamický vrchol
+# CRYPTO AI BOT V9.5
+# Pôvodná štruktúra zachovaná; prísnejšia validácia obchodov a nezávislá ochrana mincí
 # ============================================================
 
-VERSION = "9.4"
+VERSION = "9.5"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -1086,18 +1086,21 @@ def add_altcoin_breadth_risk(safety, coin_data):
         and safe_float((tech.get("macd") or {}).get("histogram")) < 0
         for _, tech in valid
     )
+    # Altcoin breadth je len doplnkový signál: korelované ukazovatele
+    # nesmú neobmedzene nafukovať celkové bezpečnostné skóre.
     extra = 0
     reasons = list(safety.get("reasons", []))
     if below50 >= threshold:
         extra += 1
         reasons.append(f"široká slabosť altcoinov: {below50}/{len(valid)} pod EMA50")
     if below200 >= threshold:
-        extra += 2
+        extra += 1
         reasons.append(f"väčšina sledovaných altcoinov pod EMA200 ({below200}/{len(valid)})")
     if negative_macd >= threshold:
-        extra += 1
+        if extra == 0:
+            extra += 1
         reasons.append(f"negatívne momentum u väčšiny altcoinov ({negative_macd}/{len(valid)})")
-    safety["score"] = int(safe_float(safety.get("score"), 0) + extra)
+    safety["score"] = int(clamp(safe_float(safety.get("score"), 0) + min(extra, 2), 0, 10))
     safety["state"] = ("CRITICAL" if safety["score"] >= 7 else "WARNING" if safety["score"] >= 3 else "NORMAL")
     safety["reasons"] = list(dict.fromkeys(reasons))
     safety["altcoin_breadth"] = {
@@ -1192,7 +1195,7 @@ def telegram_send_long(message):
 def get_rss_news():
     all_items = []
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/9.4)",
+        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/9.5)",
         "Accept": "application/rss+xml,application/xml,text/xml,*/*",
     }
 
@@ -1337,8 +1340,12 @@ FORMÁTOVANIE ČÍSEL V TEXTE:
 INVESTIČNÁ STRATÉGIA A BULLRUN:
 - Naša stratégia je dlhodobé držanie portfólia počas prebiehajúceho bullrunu, pričom pozície držíme tak dlho, kým trh rastie.
 - Vrchol bullrunu nefixuj na pevný dátum – na základe aktuálnych trhových cyklov, on-chain dát a správania trhu **neustále prehodnocuj a predpovedaj, kedy by mohol prísť vrchol bullrunu**. Ak trh ukáže väčšiu silu, príde neskôr, ak sa objavia znaky vyčerpania, príde skôr.
-- Korekcie a poklesy cien (napr. pokles pod kĺzavé priemery EMA) **nie sú** dôvodom na panický predaj ani na príkaz REDUCE/SELL. Poklesy berieme primárne ako príležitosť na dokupovanie (BUY PULLBACK) alebo pokojné držanie (HOLD).
-- K akciám REDUCE alebo SELL pristupuj **výhradne** v prípade fatálneho a potvrdeného fundamentálneho zlyhania projektu.
+- Neodporúčaj panický predaj len na základe jednej červenej sviečky alebo samotného RSI. Zároveň však nikdy automaticky nepotláčaj REDUCE/SELL len preto, že celkový trh nie je CRITICAL.
+- Posudzuj riziko každej mince samostatne: 24h zmena ceny, 4H EMA50/EMA200, RSI, MACD a potvrdené fundamentálne správy.
+- Dlhodobé držanie počas bullrunu je cieľ, nie absolútne pravidlo. Ochrana kapitálu má prednosť pri potvrdenom rozpade trendu alebo zásadnom fundamentálnom riziku.
+- Ak je 24h pokles mince aspoň 7 %, pravdepodobnosť poklesu aspoň 60 % a cena je pod EMA50 spolu s negatívnym MACD alebo RSI pod 40, zvažuj REDUCE.
+- Ak je 24h pokles aspoň 10 %, pravdepodobnosť poklesu aspoň 70 %, cena je pod EMA50 aj EMA200 a súčasne RSI pod 35 alebo MACD negatívny, zvažuj SELL. Nevyhlasuj SELL automaticky, ak dáta chýbajú alebo sú nekonzistentné.
+- Pre BUY NOW a BUY PULLBACK musia byť entry_price, hard_stop_level a tp1 platné a pomer potenciálneho zisku k riziku aspoň 1.5:1. Ak to nevychádza, zvoľ HOLD alebo NO TRADE.
 
 PREDIKCIA A VÝHĽAD:
 - V položkách 'outlook_direction' a v texte **nepoužívaj konkrétne číselné percentá rastu** (napr. nepíš rast +2.5%). Namiesto toho používaj výhradne slovné vyjadrenia očakávaného pohybu: "mierny rast", "výrazný rast", "mierny pokles", "hlboký pokles", alebo "konsolidácia do strany".
@@ -1440,6 +1447,58 @@ def calculate_rr(entry, hard_stop, tp1, tp2):
     return res
 
 
+def coin_risk_guard(data, bear_probability):
+    """Vyhodnotí prísne, samostatné pravidlá ochrany jednej mince."""
+    if not isinstance(data, dict) or data.get("error"):
+        return None, "Nedostatok dát na nezávislé posúdenie rizika."
+
+    change_24h = safe_float(data.get("change_24h"))
+    tech = data.get("technical_4h", {}) or {}
+    price = safe_float(tech.get("price", data.get("price_usd")))
+    ema50 = safe_float(tech.get("ema50"))
+    ema200 = safe_float(tech.get("ema200"))
+    rsi_value = safe_float(tech.get("rsi14"))
+    histogram = safe_float((tech.get("macd") or {}).get("histogram"))
+
+    if change_24h is None or price is None or price <= 0:
+        return None, "Chýba spoľahlivá 24h zmena alebo aktuálna cena."
+
+    below50 = ema50 is not None and price < ema50
+    below200 = ema200 is not None and price < ema200
+    macd_negative = histogram is not None and histogram < 0
+    rsi_weak = rsi_value is not None and rsi_value < 40
+    bear = safe_float(bear_probability, 50)
+    if bear is None:
+        bear = 50
+
+    # SELL je zámerne prísnejší než REDUCE a vyžaduje viac súhlasných signálov.
+    if (
+        change_24h <= -10
+        and bear >= 70
+        and below50
+        and below200
+        and ((rsi_value is not None and rsi_value < 35) or macd_negative)
+    ):
+        return "SELL", (
+            f"Pravidlo ochrany kapitálu: 24h zmena {change_24h:.1f} %, "
+            f"pravdepodobnosť poklesu {bear:.0f} %, cena pod EMA50 aj EMA200 "
+            "a potvrdený slabý technický signál."
+        )
+
+    if (
+        change_24h <= -7
+        and bear >= 60
+        and below50
+        and (macd_negative or rsi_weak)
+    ):
+        return "REDUCE", (
+            f"Pravidlo ochrany kapitálu: 24h zmena {change_24h:.1f} %, "
+            f"pravdepodobnosť poklesu {bear:.0f} % a potvrdená slabosť pod EMA50."
+        )
+
+    return None, "Samostatné pravidlá pre REDUCE/SELL neboli potvrdené."
+
+
 def validate_and_correct_analysis(
     analysis,
     safety,
@@ -1508,24 +1567,34 @@ def validate_and_correct_analysis(
         coin["fundamental_evidence"] = str(coin.get("fundamental_evidence", "Chýbajú dôkazy."))
 
         action = str(coin.get("action", "HOLD")).upper().strip()
-        if action not in VALID_ACTIONS: action = "HOLD"
-
-        if action in {"SELL", "REDUCE"} and safety.get("state") != "CRITICAL":
+        if action not in VALID_ACTIONS:
             action = "HOLD"
-            coin["action_guard_note"] = "Akcia upravená na HOLD v súlade s dlhodobou stratégiou držania počas bullrunu."
 
+        # Globálny stav trhu nesmie blokovať predajný signál konkrétnej mince.
         if safety.get("state") == "CRITICAL" and action == "BUY NOW":
             action = "BUY PULLBACK"
 
-        coin["action"] = action
-
         bull = safe_float(coin.get("bull_probability"), 50)
-        if bull is None: bull = 50
-        if 0 < bull <= 1: bull *= 100
+        if bull is None:
+            bull = 50
+        if 0 < bull <= 1:
+            bull *= 100
         bull = clamp(bull, 0, 100)
 
         coin["bull_probability"] = round(bull)
         coin["bear_probability"] = round(100 - bull)
+
+        risk_action, risk_reason = coin_risk_guard(data, coin["bear_probability"])
+        coin["coin_risk_guard"] = risk_reason
+        if risk_action == "SELL":
+            action = "SELL"
+            coin["action_guard_note"] = risk_reason
+        elif risk_action == "REDUCE" and action not in {"SELL"}:
+            # REDUCE má prednosť pred HOLD alebo nákupom, keď sú potvrdené pravidlá rizika.
+            action = "REDUCE"
+            coin["action_guard_note"] = risk_reason
+
+        coin["action"] = action
 
         outlook_prob = safe_float(coin.get("outlook_probability"), 50)
         if outlook_prob is None: outlook_prob = 50
@@ -1539,51 +1608,92 @@ def validate_and_correct_analysis(
         coin["forecast_horizon"] = str(coin.get("forecast_horizon", "24h"))[:30] or "24h"
         coin["confirmation_needed"] = str(coin.get("confirmation_needed", "N/A"))[:300]
 
-        rr = calculate_rr(
-            coin.get("entry_price"),
-            coin.get("hard_stop_level"),
-            coin.get("tp1"),
-            coin.get("tp2"),
-        )
-        coin["risk_reward"] = (f"1:{rr['rr_tp1']:.1f}" + (f" / 1:{rr['rr_tp2']:.1f}" if "rr_tp2" in rr else "")) if rr else None
+        entry = safe_float(coin.get("entry_price"))
+        stop = safe_float(coin.get("hard_stop_level"))
+        tp1 = safe_float(coin.get("tp1"))
+        tp2 = safe_float(coin.get("tp2"))
+
+        # Nulové, záporné alebo obrátené úrovne nesmú vytvoriť falošný obchod.
+        for key, value in (("entry_price", entry), ("hard_stop_level", stop),
+                           ("tp1", tp1), ("tp2", tp2),
+                           ("revaluation_level", safe_float(coin.get("revaluation_level")))):
+            if value is not None and value <= 0:
+                coin[key] = None
+
+        entry = safe_float(coin.get("entry_price"))
+        stop = safe_float(coin.get("hard_stop_level"))
+        tp1 = safe_float(coin.get("tp1"))
+        tp2 = safe_float(coin.get("tp2"))
+        rr = calculate_rr(entry, stop, tp1, tp2)
+
+        if action in {"BUY NOW", "BUY PULLBACK"}:
+            if actual_price is None or entry is None or stop is None or tp1 is None or not rr:
+                action = "HOLD"
+                coin["action_guard_note"] = (
+                    "Nákup zablokovaný: chýba platná vstupná cena, stop-loss alebo cieľ."
+                )
+            elif rr.get("rr_tp1", 0) < 1.5:
+                action = "HOLD"
+                coin["action_guard_note"] = (
+                    f"Nákup zablokovaný: pomer potenciálneho zisku k riziku "
+                    f"je len 1:{rr.get('rr_tp1', 0):.2f}; požadované minimum je 1:1.5."
+                )
+            elif action == "BUY NOW" and abs(entry / actual_price - 1) > 0.04:
+                action = "BUY PULLBACK" if entry < actual_price else "HOLD"
+                coin["action_guard_note"] = (
+                    "Vstupná cena je príliš vzdialená od aktuálnej ceny; okamžitý nákup nie je potvrdený."
+                )
+
+        coin["action"] = action
+        coin["risk_reward"] = (
+            f"1:{rr['rr_tp1']:.1f}"
+            + (f" / 1:{rr['rr_tp2']:.1f}" if rr and "rr_tp2" in rr else "")
+        ) if rr else None
 
         validated.append(coin)
 
     analysis["coins"] = validated
 
-    ranking = analysis.get("opportunity_ranking", [])
-    if not isinstance(ranking, list): ranking = []
-    
+    # Rebríček sa počíta z už validovaných odporúčaní, nie zo samostatného,
+    # potenciálne protichodného zoznamu vygenerovaného modelom.
     normalized_ranking = []
-    seen_ranked = set()
-    
-    for item in ranking:
-        if not isinstance(item, dict): continue
-        symbol = str(item.get("symbol", "")).upper().strip()
-        
-        if not symbol or symbol in seen_ranked or symbol not in REQUIRED_SYMBOLS:
+    for coin in validated:
+        action = str(coin.get("action", "HOLD")).upper()
+        if action not in {"BUY NOW", "BUY PULLBACK"}:
             continue
-            
-        action = str(item.get("action", "NO TRADE")).upper().strip()
-        if action not in {"BUY NOW", "BUY PULLBACK", "NO TRADE"}: action = "NO TRADE"
-        
-        up = safe_float(item.get("upside_pct"))
-        down = safe_float(item.get("downside_pct"))
-        entry = safe_float(item.get("entry_price"))
-        
-        normalized_ranking.append({
-            "symbol": symbol,
-            "action": action,
-            "reason": str(item.get("reason", ""))[:300],
-            "entry_price": entry,
-            "upside_pct": round(clamp(up, 0, 100), 1) if up is not None else None,
-            "downside_pct": round(clamp(abs(down), 0, 100), 1) if down is not None else None,
-        })
-        seen_ranked.add(symbol)
-        if len(normalized_ranking) >= 3:
-            break
 
-    analysis["opportunity_ranking"] = normalized_ranking
+        entry = safe_float(coin.get("entry_price"))
+        stop = safe_float(coin.get("hard_stop_level"))
+        tp1 = safe_float(coin.get("tp1"))
+        rr = calculate_rr(entry, stop, tp1, coin.get("tp2"))
+        if entry is None or stop is None or tp1 is None or not rr:
+            continue
+        if rr.get("rr_tp1", 0) < 1.5:
+            continue
+
+        upside = (tp1 / entry - 1) * 100
+        downside = (entry - stop) / entry * 100
+        normalized_ranking.append({
+            "symbol": coin["symbol"],
+            "action": action,
+            "reason": str(coin.get("reason", ""))[:300],
+            "entry_price": entry,
+            "upside_pct": round(max(0, upside), 1),
+            "downside_pct": round(max(0, downside), 1),
+            "risk_reward_ratio": round(rr["rr_tp1"], 2),
+            "technical_score": safe_float(coin.get("technical_score"), 0),
+            "fundamental_score": safe_float(coin.get("fundamental_score"), 5),
+        })
+
+    normalized_ranking.sort(
+        key=lambda item: (
+            item["risk_reward_ratio"],
+            item["technical_score"],
+            item["fundamental_score"],
+        ),
+        reverse=True,
+    )
+    analysis["opportunity_ranking"] = normalized_ranking[:3]
     return analysis
 
 
@@ -1722,6 +1832,13 @@ def format_safety_alert(safety, fear_greed, portfolio_analysis=None):
                 f"RSI {item.get('rsi', 'N/A')}; technika {item.get('technical_score', 'N/A')}/10"
             )
             lines.append(f"  {item.get('interpretation', '')}")
+            if item.get("risk_action") in {"REDUCE", "SELL"}:
+                change = safe_float(item.get("change_24h"))
+                change_text = f" | 24h {change:+.1f}%" if change is not None else ""
+                lines.append(
+                    f"  🚨 INDIVIDUÁLNE RIZIKO: {item.get('risk_action')}{change_text}. "
+                    f"{item.get('risk_reason', '')}"
+                )
 
     return "\n".join(lines)
 
@@ -1768,7 +1885,7 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
     if fear_greed.get("value") is not None:
         lines.append(f"Strach/chamtivosť: {fear_greed['value']}/100 ({fear_greed.get('classification', '')})")
 
-    lines.extend(["", "📌 POZÍCIE A OBCHODNÉ POKYNY (Držíme počas celého bullrunu)"])
+    lines.extend(["", "📌 POZÍCIE A OBCHODNÉ POKYNY (dlhodobý trend + ochrana kapitálu)"])
     for coin in coins:
         action = str(coin.get("action", "HOLD")).upper()
         symbol = coin.get("symbol", "?")
@@ -1778,6 +1895,9 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
         
         lines.append(f"{emoji} {symbol} — {action} | {price}")
         lines.append(f"   Analýza: {reason}")
+        guard_note = coin.get("action_guard_note")
+        if guard_note:
+            lines.append(f"   Kontrola rizika: {guard_note}")
 
         entry = safe_float(coin.get("entry_price"))
         hard_stop = safe_float(coin.get("hard_stop_level"))
@@ -1830,7 +1950,7 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
     if accuracy and accuracy.get("sample_size", 0) >= 10:
         lines.extend(["", f"📏 Presnosť smeru: {accuracy.get('direction_accuracy_pct', 'N/A')}% ({accuracy.get('sample_size')} vyhodnotení)"])
         
-    lines.extend(["", "Dlhodobá stratégia: Držíme počas celého bullrunu. Korekcie sú príležitosťou na akumuláciu."])
+    lines.extend(["", "Stratégia: dlhodobé držanie počas rastového trendu, ale s nezávislou kontrolou rizika každej mince. Dokupovanie vyžaduje platný vstup, stop-loss a pomer zisku k riziku aspoň 1:1.5."])
     return "\n".join(lines)
 
 
@@ -1874,11 +1994,14 @@ def run_safety_monitor():
             price = safe_float(data.get("price_usd"))
             rsi_value = safe_float(tech.get("rsi14"))
             previous_coin = prev_coins.get(symbol, {})
+            risk_action, risk_reason = coin_risk_guard(
+                data, previous_coin.get("bear_probability", 50)
+            )
 
             if rsi_value is not None and rsi_value < 30:
-                interpretation = "Prepredané v rámci bullrunu; ideálny priestor na postupné dokupovanie, nie na panický predaj."
+                interpretation = "RSI je v prepredanej oblasti. Môže ísť o odraz, ale pred dokúpením treba potvrdenie stabilizácie; samotné nízke RSI nie je nákupný signál."
             elif tech.get("above_ema200") is False:
-                interpretation = "Cena pod dlhodobým priemerom, čo pri dlhodobej držbe počas bullrunu predstavuje zľavu na akumuláciu."
+                interpretation = "Cena je pod dlhodobým priemerom, čo môže znamenať slabý trend aj riziko ďalšieho poklesu. Nejde automaticky o zľavu ani nákupný signál."
             else:
                 interpretation = "Trhová pozícia stabilná."
 
@@ -1889,6 +2012,9 @@ def run_safety_monitor():
                 "technical_score": data.get("technical_score_calc", {}).get("score"),
                 "action": previous_coin.get("action", "N/A"),
                 "interpretation": interpretation,
+                "risk_action": risk_action,
+                "risk_reason": risk_reason,
+                "change_24h": safe_float(data.get("change_24h")),
             })
 
         except Exception as exc:
@@ -1897,10 +2023,51 @@ def run_safety_monitor():
     safety = add_altcoin_breadth_risk(safety, monitor_coin_data)
     should_alert, reason = should_send_safety_alert(safety, state)
 
-    if should_alert:
-        telegram_send_long(format_safety_alert(safety, fear, portfolio_context))
+    # Individuálny risk mince môže vyvolať upozornenie aj pri NORMAL/WARNING trhu.
+    prior_coin_alerts = state.get("last_coin_risk_alerts", {})
+    if not isinstance(prior_coin_alerts, dict):
+        prior_coin_alerts = {}
+    coin_risk_alerts = []
+    now_utc = datetime.now(timezone.utc)
+
+    for item in portfolio_context:
+        risk_action = item.get("risk_action")
+        if risk_action not in {"REDUCE", "SELL"}:
+            continue
+        symbol = item.get("symbol")
+        previous_alert = prior_coin_alerts.get(symbol, {})
+        if not isinstance(previous_alert, dict):
+            previous_alert = {"action": str(previous_alert)}
+        previous_action = str(previous_alert.get("action", "NORMAL")).upper()
+        previous_time = parse_timestamp(previous_alert.get("timestamp"))
+        elapsed_hours = (
+            (now_utc - previous_time).total_seconds() / 3600
+            if previous_time is not None else None
+        )
+        escalation = risk_action == "SELL" and previous_action != "SELL"
+        changed = risk_action != previous_action
+        cooldown_passed = elapsed_hours is None or elapsed_hours >= 6
+
+        if (changed and (escalation or cooldown_passed)) or (not changed and cooldown_passed):
+            coin_risk_alerts.append(item)
+            prior_coin_alerts[symbol] = {
+                "action": risk_action,
+                "timestamp": utc_now_iso(),
+            }
+        elif previous_action == "NORMAL":
+            prior_coin_alerts[symbol] = {
+                "action": risk_action,
+                "timestamp": utc_now_iso(),
+            }
+
+    state["last_coin_risk_alerts"] = prior_coin_alerts
+
+    if should_alert or coin_risk_alerts:
+        alert_context = portfolio_context if should_alert else coin_risk_alerts
+        alert_reason = reason if should_alert else "INDIVIDUAL_COIN_RISK"
+        telegram_send_long(format_safety_alert(safety, fear, alert_context))
         state["last_safety_alert"] = iso_now()
-        state["last_safety_alert_reason"] = reason
+        state["last_safety_alert_reason"] = alert_reason
         state["last_safety_alert_score"] = safety.get("score", 0)
 
     state["last_safety_state"] = safety.get("state", "NORMAL")
