@@ -12,11 +12,11 @@
       "celková kapitalizácia klesá",
       "BTC je pod 4H EMA50",
       "BTC je pod 4H EMA100",
-      "široká slabosť altcoinov: 6/6 pod EMA50"
+      "široká slabosť altcoinov: 4/6 pod EMA50"
     ],
-    "market_cap_change_24h": -2.5943467885945326,
-    "btc_change_24h": 0.3541912938597871,
-    "btc_price": 83079.4,
+    "market_cap_change_24h": -3.4461029558122256,
+    "btc_change_24h": 0.1971474296138068,
+    "btc_price": 83065.49,
     "btc_ema20": 83033.41710413511,
     "btc_ema50": 83559.90385478664,
     "btc_ema100": 83473.0207752932,
@@ -26,7 +26,7 @@
     "data_warnings": [],
     "altcoin_breadth": {
       "sample_size": 6,
-      "below_ema50": 6,
+      "below_ema50": 4,
       "below_ema200": 1,
       "negative_macd": 1
     }
@@ -349,7 +349,7 @@
   "last_main_schedule": "BRATISLAVA_15:00",
   "last_safety_state": "WARNING",
   "last_safety_score": 4,
-  "last_safety_check": "2026-10-11T16:09:08.805038+02:00",
+  "last_safety_check": "2026-10-11T16:28:50.499030+02:00",
   "last_safety_alert": "2026-10-10T14:14:30.588342+02:00",
   "last_safety_alert_reason": "SCORE_WORSENING",
   "last_main_slot": "BRATISLAVA_2026-10-11_15:00",
