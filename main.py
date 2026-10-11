@@ -14,11 +14,11 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V9.1
-# Plná verzia: Úprava pre bullrun 2027, celé vety, bez orezávania
+# CRYPTO AI BOT V9.4
+# Plná pôvodná dĺžka + Číselné metriky, slovné predikcie a dynamický vrchol
 # ============================================================
 
-VERSION = "9.1"
+VERSION = "9.4"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -1192,7 +1192,7 @@ def telegram_send_long(message):
 def get_rss_news():
     all_items = []
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/9.1)",
+        "User-Agent": "Mozilla/5.0 (compatible; CryptoAIBot/9.4)",
         "Accept": "application/rss+xml,application/xml,text/xml,*/*",
     }
 
@@ -1316,7 +1316,6 @@ def build_prompt(
                 "action": coin.get("action"),
                 "price": coin.get("current_price"),
                 "outlook_direction": coin.get("outlook_direction"),
-                "outlook_pct": coin.get("outlook_pct"),
                 "technical_score": coin.get("technical_score"),
                 "fundamental_score": coin.get("fundamental_score"),
                 "reason": coin.get("reason"),
@@ -1331,25 +1330,28 @@ Píš po slovensky, zrozumiteľne, kompletne a bez skratiek. **Všetky vety musi
 
 Čas Bratislava: {iso_now()}
 Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER.
-APTOS nikdy neodporúčaj ako novú investíciu.
+
+FORMÁTOVANIE ČÍSEL V TEXTE:
+- V celkovej textovej analýze trhu (market_summary) **musíš všetky čísla, sumy, percentá a kapitalizáciu písať výhradne ako číslice** (napr. 2.81T USD, -2.57%, 59.17%, 44.37B USD, 83,038 USD), **nikdy ich nepíš slovami** (žiadne slovné opisy čísel).
 
 INVESTIČNÁ STRATÉGIA A BULLRUN:
-- Naša stratégia je dlhodobé držanie portfólia počas celého aktuálneho bullrunu, ktorý prebieha a potrvá predbežne až do apríla 2027.
+- Naša stratégia je dlhodobé držanie portfólia počas prebiehajúceho bullrunu, pričom pozície držíme tak dlho, kým trh rastie.
+- Vrchol bullrunu nefixuj na pevný dátum – na základe aktuálnych trhových cyklov, on-chain dát a správania trhu **neustále prehodnocuj a predpovedaj, kedy by mohol prísť vrchol bullrunu**. Ak trh ukáže väčšiu silu, príde neskôr, ak sa objavia znaky vyčerpania, príde skôr.
 - Korekcie a poklesy cien (napr. pokles pod kĺzavé priemery EMA) **nie sú** dôvodom na panický predaj ani na príkaz REDUCE/SELL. Poklesy berieme primárne ako príležitosť na dokupovanie (BUY PULLBACK) alebo pokojné držanie (HOLD).
-- K akciám REDUCE alebo SELL pristupuj **výhradne** v prípade fatálneho a potvrdeného fundamentálneho zlyhania projektu, nie pri bežných trhových výplachoch alebo technických korekciách silných mincí (ako je SOL alebo AAVE).
-- Akcie a dôvody musia presne hovoriť, čo robiť (napr. pri cene X prehodnotiť prikúpenie/podržanie, nie len neúplné frázy).
+- K akciám REDUCE alebo SELL pristupuj **výhradne** v prípade fatálneho a potvrdeného fundamentálneho zlyhania projektu.
+
+PREDIKCIA A VÝHĽAD:
+- V položkách 'outlook_direction' a v texte **nepoužívaj konkrétne číselné percentá rastu** (napr. nepíš rast +2.5%). Namiesto toho používaj výhradne slovné vyjadrenia očakávaného pohybu: "mierny rast", "výrazný rast", "mierny pokles", "hlboký pokles", alebo "konsolidácia do strany".
 
 DÁTA A OVEROVANIE:
 - Používaj dodané trhové dáta ako základ technickej analýzy.
 - Google Search používaj na overovanie aktuálnych správ a fundamentov.
-- Nezamieňaj cenu z vyhľadáwania za dodanú aktuálnu cenu.
+- Nezamieňaj cenu z vyhľadávania za dodanú aktuálnu cenu.
 - Nevymýšľaj citácie, zdroje, ceny, partnerstvá, príjmy ani udalosti.
 
 STRIKTNÉ PRAVIDLÁ A HODNOTY (R:R):
-- Pre každú mincu generuj presné číselné hodnoty vo formáte FLOAT (čísla, nie textové reťazce): 
-  'entry_price' (vstupná cena na dokúpenie), 'hard_stop_level' (tvrdý stop-loss), 'revaluation_level' (cena, pri ktorej prehodnotíme vývoj – presne popíš, čo sa pri nej sleduje).
-- Zoraď tvoje VLASTNÉ mince z portfólia do 'opportunity_ranking' (rebríček) od najlepšej po najhoršiu na dokúpenie/otvorenie novej pozície. NESMIEŠ sem dávať mince mimo portfólia.
-- Mince zaradené v 'opportunity_ranking' NESMÚ byť zároveň v 'avoid'.
+- Pre každú mincu generuj presné číselné hodnoty vo formáte FLOAT: 'entry_price', 'hard_stop_level', 'revaluation_level', 'tp1', 'tp2'.
+- Zoraď mince z portfólia do 'opportunity_ranking' od najlepšej po najhoršiu na dokúpenie. Mince v rebríčku NESMÚ byť v 'avoid'.
 
 MARKET GLOBAL (aktuálne dáta vrátane BTC dominancie a objemu):
 {json.dumps(market_global, ensure_ascii=False)}
@@ -1381,7 +1383,7 @@ HISTORICKÁ PRESNOSŤ:
 Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
 {{
  "market_regime":"string",
- "market_summary":"podrobné a úplne dokončené zhrnutie trhu, tokov peňazí a sentimentu",
+ "market_summary":"podrobné zhrnutie trhu s číselnými údajmi vo forme číslic, odhadom vrcholu bullrunu a vývojom tokov",
  "coins":[
   {{
    "symbol":"AAVE",
@@ -1394,21 +1396,20 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
    "tp2":0.0,
    "bull_probability":50,
    "bear_probability":50,
-   "outlook_direction":"rast/pokles/do strany",
-   "outlook_pct":0,
+   "outlook_direction":"mierny rast / výrazný rast / mierny pokles / hlboký pokles / do strany",
    "outlook_probability":50,
    "fundamental_score":5,
    "fundamental_confidence":"nízka/stredná/vysoká",
-   "fundamental_evidence":"úplné znenie dôvodov a limitov dát",
+   "fundamental_evidence":"úplné znenie dôvodov",
    "reason":"kompletný, plne dokončený hlavný dôvod bez skratiek",
-   "forecast_horizon":"24h alebo konkrétny horizont",
+   "forecast_horizon":"24h",
    "bear_case":"medvedí scenár",
    "bull_case":"býčí scenár",
    "confirmation_needed":"čo presne musí nastať"
   }}
  ],
  "opportunity_ranking":[
-  {{"symbol":"AAVE","action":"BUY PULLBACK","reason":"kompletný dôvod prečo vybrať mincu","entry_price":0.0,"hard_stop_level":0.0,"upside_pct":0,"downside_pct":0}}
+  {{"symbol":"AAVE","action":"BUY PULLBACK","reason":"kompletný dôvod","entry_price":0.0,"hard_stop_level":0.0,"upside_pct":0,"downside_pct":0}}
  ],
  "avoid":"string",
  "conditions_to_watch":["string"]
@@ -1509,8 +1510,6 @@ def validate_and_correct_analysis(
         action = str(coin.get("action", "HOLD")).upper().strip()
         if action not in VALID_ACTIONS: action = "HOLD"
 
-        # V súlade s dlhodobou stratégiou bullrunu do r. 2027 zamedzujeme agresívnemu predaju
-        # pri bežných korekciách. SELL/REDUCE povolíme len pri extrémnom zlyhaní.
         if action in {"SELL", "REDUCE"} and safety.get("state") != "CRITICAL":
             action = "HOLD"
             coin["action_guard_note"] = "Akcia upravená na HOLD v súlade s dlhodobou stratégiou držania počas bullrunu."
@@ -1532,16 +1531,9 @@ def validate_and_correct_analysis(
         if outlook_prob is None: outlook_prob = 50
         coin["outlook_probability"] = round(clamp(outlook_prob, 5, 95))
 
-        outlook_pct = safe_float(coin.get("outlook_pct"), 0)
-        if outlook_pct is None: outlook_pct = 0
-        coin["outlook_pct"] = round(clamp(outlook_pct, -30, 30), 2)
-
         direction = str(coin.get("outlook_direction", "do strany")).lower().strip()
-        if direction not in {"rast", "pokles", "do strany"}: direction = "do strany"
-
-        if outlook_pct > 0.5: direction = "rast"
-        elif outlook_pct < -0.5: direction = "pokles"
-        else: direction = "do strany"
+        if direction not in {"mierny rast", "výrazný rast", "mierny pokles", "hlboký pokles", "do strany", "rast", "pokles"}:
+            direction = "mierny rast"
         
         coin["outlook_direction"] = direction
         coin["forecast_horizon"] = str(coin.get("forecast_horizon", "24h"))[:30] or "24h"
@@ -1635,21 +1627,17 @@ def evaluate_previous_forecasts(state, current_data):
             actual_pct = pct_change(price_then, price_now)
             if actual_pct is None: continue
 
-            predicted_pct = safe_float(forecast.get("outlook_pct"), 0)
-            if predicted_pct is None: predicted_pct = 0
-
             predicted_dir = str(forecast.get("outlook_direction", "do strany")).lower()
             actual_dir = ("rast" if actual_pct > 0.5 else "pokles" if actual_pct < -0.5 else "do strany")
+            direction_hit = (predicted_dir in actual_dir or actual_dir in predicted_dir)
 
             results.append({
                 "forecast_timestamp": timestamp,
                 "symbol": symbol,
-                "predicted_pct": round(predicted_pct, 2),
                 "actual_pct": round(actual_pct, 2),
                 "predicted_direction": predicted_dir,
                 "actual_direction": actual_dir,
-                "direction_hit": predicted_dir == actual_dir,
-                "absolute_error_pct": round(abs(predicted_pct - actual_pct), 2),
+                "direction_hit": direction_hit,
                 "age_hours": round(age_hours, 1),
             })
             evaluated_keys.add(key)
@@ -1663,23 +1651,20 @@ def forecast_accuracy_summary(state):
     history = state.get("forecast_evaluations", [])
     usable = [
         item for item in history
-        if isinstance(item, dict) and "direction_hit" in item and safe_float(item.get("absolute_error_pct")) is not None
+        if isinstance(item, dict) and "direction_hit" in item
     ]
 
     if not usable:
         return {
             "sample_size": 0,
             "direction_accuracy_pct": None,
-            "mean_absolute_error_pct": None,
         }
 
     hits = sum(bool(item["direction_hit"]) for item in usable)
-    errors = [safe_float(item.get("absolute_error_pct")) for item in usable]
 
     return {
         "sample_size": len(usable),
         "direction_accuracy_pct": round(hits / len(usable) * 100, 1),
-        "mean_absolute_error_pct": round(sum(errors) / len(errors), 2),
     }
 
 
@@ -1772,7 +1757,7 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
         
     if btc_dom is not None:
         dom_line = f"BTC dominancia: {btc_dom:.2f}%"
-        if dom_delta is not None: dom_line += f" ({dom_delta:+.2f} p. b. od minulej analýzy)"
+        if dom_delta is not None: dom_line += f" ({dom_delta:+.2f} p. b.)"
         lines.append(dom_line)
         
     if volume is not None: lines.append(f"Objem 24h: ${volume/1e9:.1f} mld.")
@@ -1783,7 +1768,7 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
     if fear_greed.get("value") is not None:
         lines.append(f"Strach/chamtivosť: {fear_greed['value']}/100 ({fear_greed.get('classification', '')})")
 
-    lines.extend(["", "📌 POZÍCIE A OBCHODNÉ POKYNY (Držíme do apríla 2027)"])
+    lines.extend(["", "📌 POZÍCIE A OBCHODNÉ POKYNY (Držíme počas celého bullrunu)"])
     for coin in coins:
         action = str(coin.get("action", "HOLD")).upper()
         symbol = coin.get("symbol", "?")
@@ -1808,12 +1793,11 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
             lines.append(f"   R:R: {coin.get('risk_reward')}")
 
         direction = str(coin.get("outlook_direction", "do strany")).lower()
-        pct = safe_float(coin.get("outlook_pct"))
         prob = safe_float(coin.get("outlook_probability"))
         horizon = coin.get("forecast_horizon", "24h")
         
-        if pct is not None and prob is not None:
-            lines.append(f"   Výhľad {horizon}: {direction} {pct:+.1f}% | odhad šance {prob:.0f}%")
+        if prob is not None:
+            lines.append(f"   Výhľad {horizon}: {direction} | odhad šance {prob:.0f}%")
             
         confirmation = coin.get("confirmation_needed")
         if confirmation and confirmation != "N/A":
@@ -1844,9 +1828,9 @@ def format_bot_message(analysis, safety, fear_greed, forecast_results=None, accu
         lines.extend(["", "👀 Sledovať: " + " | ".join(str(x) for x in conditions[:3])])
         
     if accuracy and accuracy.get("sample_size", 0) >= 10:
-        lines.extend(["", f"📏 Historická presnosť smeru: {accuracy.get('direction_accuracy_pct', 'N/A')}% ({accuracy.get('sample_size')} vyhodnotení)"])
+        lines.extend(["", f"📏 Presnosť smeru: {accuracy.get('direction_accuracy_pct', 'N/A')}% ({accuracy.get('sample_size')} vyhodnotení)"])
         
-    lines.extend(["", "Dlhodobá stratégia: Držíme počas celého bullrunu do apríla 2027. Korekcie sú príležitosťou."])
+    lines.extend(["", "Dlhodobá stratégia: Držíme počas celého bullrunu. Korekcie sú príležitosťou na akumuláciu."])
     return "\n".join(lines)
 
 
@@ -1894,7 +1878,7 @@ def run_safety_monitor():
             if rsi_value is not None and rsi_value < 30:
                 interpretation = "Prepredané v rámci bullrunu; ideálny priestor na postupné dokupovanie, nie na panický predaj."
             elif tech.get("above_ema200") is False:
-                interpretation = "Cena pod dlhodobým priemerom, čo pri dlhodobej držbe do apríla 2027 predstavuje zľavu na akumuláciu."
+                interpretation = "Cena pod dlhodobým priemerom, čo pri dlhodobej držbe počas bullrunu predstavuje zľavu na akumuláciu."
             else:
                 interpretation = "Trhová pozícia stabilná."
 
@@ -2074,7 +2058,6 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
             "symbol": coin["symbol"],
             "price": safe_float(coin.get("current_price")),
             "outlook_direction": str(coin.get("outlook_direction", "do strany")).lower(),
-            "outlook_pct": safe_float(coin.get("outlook_pct"), 0),
         })
 
     state["forecast_history"] = history[-500:]
