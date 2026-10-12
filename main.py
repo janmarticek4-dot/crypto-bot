@@ -14,11 +14,11 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V9.6
-# Úprava alertov (rast mincí > 3%), valuácie, toky peňazí, skrátený report
+# CRYPTO AI BOT V9.7
+# Inteligentné posúdenie mincí po rastoch > 5% + Predikcie a pravdepodobnosti
 # ============================================================
 
-VERSION = "9.6"
+VERSION = "9.7"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -929,7 +929,6 @@ def market_safety(global_data, simple_prices, btc_data=None):
     price = safe_float(tech.get("price"))
     e200 = safe_float(tech.get("ema200"))
 
-    # Ak trh rastie alebo je BTC nad EMA200, nepotrebujeme vyvolávať poplach.
     is_bullish_context = (btc_change is not None and btc_change >= 0) or (price is not None and e200 is not None and price >= e200)
 
     if not is_bullish_context:
@@ -958,7 +957,6 @@ def market_safety(global_data, simple_prices, btc_data=None):
 
 
 def should_send_pump_alerts(coin_data):
-    """Vrátí zoznam mincí, ktoré za posledný deň (24h) vzrástli o viac ako 3%."""
     pumping = []
     for symbol, data in (coin_data or {}).items():
         if not isinstance(data, dict) or data.get("error"):
@@ -1174,12 +1172,14 @@ Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER.
 
 FORMÁTOVANIE A PRAVIDLÁ:
 - Všetky čísla, sumy, percentá, kapitalizácie, podiely a valuácie **musíš písať výhradne ako číslice** (napr. 2.83T USD, 1.34%, 59.68%, 18.5B USD, 0.45%), nikdy nie slovami.
-- V úvodnom zhrnutí (market_summary) explicitne zhodnoť, či sa korekcia skončila, či trh prechádza do rastu a či je bezpečné otvárať pozície formou BUY PULLBACK.
+- V úvodnom zhrnutí (market_summary) explicitne zhodnoť, či sa korekcia skončila, či trh prechádza do rastu a či je bezpečné otvárť pozície.
+- **PRAVIDLO PRE MINCE PO RASTE > 5%**: Ak minca v posledných 24 hodinách vzrástla o viac ako 5%, bot MUSÍ dôkladne zvážiť silu tohto rastu. Ak hrozí, že ide o silný trend a k nízkej limitke (pullbacku) už nemusí dôjsť, odporúčaj radšej HOLD alebo opatrný nákup za trhovú cenu, prípadne stanov reálnu, dosiahnuteľnú limitku (nie utopicky nízku, ktorá sa neaktivuje).
 - Pri každej minci z portfólia povinno uveď:
   1. Trhovú kapitalizáciu / celkovú valuáciu v USD.
   2. Percentuálnu zmenu valuácie oproti predchádzajúcej analýze.
   3. Podiel mince na celkovom kryptotrhu v percentách.
   4. 24-hodinový objem obchodovania a jeho zmenu v percentách.
+  5. **Predikciu smeru a pravdepodobnosť**: Jasne uveď očakávaný scenár (mierny rast, vysoký rast, mierny pokles, hlboký pokles alebo range) spolu s číselnou pravdepodobnosťou v percentách.
 - Sekcie ako rebríček najlepších mincí ('opportunity_ranking') a zoznam 'avoid' sú ZRUŠENÉ – nevracaj ich do JSONu.
 
 MARKET GLOBAL:
@@ -1216,7 +1216,7 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
    "revaluation_level":0.0,
    "tp1":0.0,
    "tp2":0.0,
-   "outlook_direction":"mierny rast / výrazný rast / konsolidácia",
+   "outlook_direction":"mierny rast / vysoký rast / mierny pokles / hlboký pokles / range",
    "outlook_probability":60,
    "reason":"kompletný dôvod",
    "confirmation_needed":"podmienka"
@@ -1289,7 +1289,6 @@ def validate_and_correct_analysis(
         if actual_price is not None:
             coin["current_price"] = actual_price
 
-        # Doplnenie reálnych dát z CoinGecko pre istotu
         coin["market_cap"] = safe_float(data.get("market_cap"), coin.get("market_cap", 0))
         coin["volume_24h"] = safe_float(data.get("volume_24h"), coin.get("volume_24h", 0))
 
@@ -1355,9 +1354,13 @@ def format_bot_message(analysis, safety, fear_greed):
         vol_str = f"${vol/1e9:.2f}B" if vol and vol >= 1e9 else f"${vol/1e6:.1f}M" if vol else "N/A"
         vol_change = safe_float(coin.get("volume_change_pct"), 0.0)
         
+        direction = str(coin.get("outlook_direction", "mierny rast"))
+        prob = safe_float(coin.get("outlook_probability"), 60)
+
         lines.append(f"{emoji} {symbol} — {action} | Cena: {price}")
         lines.append(f"   Valuácia: {cap_str} (Zmena: {cap_change:+.2f}% | Podiel na trhu: {share:.3f}%)")
         lines.append(f"   Objem 24h: {vol_str} (Zmena objemu: {vol_change:+.2f}%)")
+        lines.append(f"   Predikcia: {direction} | Odhad šance: {prob:.0f}%")
         lines.append(f"   Analýza: {coin.get('reason', '—')}")
 
         entry = safe_float(coin.get("entry_price"))
@@ -1386,7 +1389,6 @@ def run_safety_monitor():
         except Exception as exc:
             print(f"Safety monitor error for {symbol}: {exc}")
 
-    # Kontrola rastových alertov (>3% za 24h)
     pumping_coins = should_send_pump_alerts(portfolio_data)
     state = load_state()
     
@@ -1452,7 +1454,6 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
     analysis = gemini_analyze(prompt)
     analysis = validate_and_correct_analysis(analysis, safety, portfolio_data, previous_analysis)
 
-    # Doplnenie reálnych kapitalizácií a podielov do výstupu pre istotu
     for coin in analysis.get("coins", []):
         sym = coin.get("symbol")
         if sym in portfolio_data:
@@ -1460,7 +1461,6 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
             coin["market_cap"] = d.get("market_cap")
             coin["market_share_pct"] = d.get("market_share_pct")
             coin["volume_24h"] = d.get("volume_24h")
-            # Simulácia zmeny valuácie a objemu oproti minulému stavu
             coin["market_cap_change_pct"] = d.get("change_24h", 0.0)
             coin["volume_change_pct"] = 1.5
 
