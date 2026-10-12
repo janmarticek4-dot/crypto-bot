@@ -16,7 +16,7 @@ from google import genai
 # ============================================================
 # CRYPTO AI BOT V10.2
 # Vylepšenia: TP & R:R, časové horizonty, striktné fázy trhu,
-# umiernený tón, orientačné skóre a explicitné dôvody pohybov.
+# umiernený tón, orientačné skóre a overovanie príčin pohybu.
 # ============================================================
 
 VERSION = "10.2"
@@ -1187,7 +1187,7 @@ FORMÁTOVANIE A PRAVIDLÁ:
   2. **Konsolidácia** (ceny sa pohybujú do strany, trh aktívne hľadá nový smer).
   3. **Potvrdený rast** (tvorba vyšších maxím a miním, podporená rastúcim objemom a zlepšením širšieho trhu).
 - **ODDELENIE SMERU TRHU OD ALERTU**: Smer trhu opisuj čisto podľa technických a trhových reálií (rastúci / klesajúci / konsolidácia). Bezpečnostný alert zapoj do úvahy len vtedy, ak sú splnené reálne rizikové podmienky v poli SAFETY.
-- **DÔVOD POHYBU**: Vždy explicitne uveď dôvod pohybu trhu alebo aktíva (napr. odraz Bitcoinu, nárast objemu, sektorový záujem o altcoiny). Ak dôvod nie je možné spoľahlivo identifikovať z dostupných dát, otvorene to priznaj.
+- **OVEROVANIE PRÍČIN POHYBU**: Vždy explicitne uveď dôvod pohybu trhu alebo aktíva. **Ak bot nevie doložiť z dostupných dát, prečo cena rastie alebo klesá, má výslovne napísať, že príčina nie je potvrdená.**
 - **PREDIKCIA A HORIZONT**: Každá predikcia (outlook_direction) musí obsahovať nielen slovný smer, ale aj **explicitný cenový cieľ** a **časový horizont** v poli `target_horizon` (napr. 4H alebo 24H).
 - **TAKE-PROFITY**: Pre každú mincu povinne uveď hodnoty **tp1** a **tp2** rešpektujúce logické hladiny rezistencií.
 - **ORIENTAČNÉ SKÓRE**: Namiesto vymyslených presných pravdepodobností používaj **orientačné skóre** v poli `outlook_score` (napr. "Orientačné skóre 6.5/10").
@@ -1211,7 +1211,7 @@ PORTFOLIO DATA (vrátane zmien od poslednej analýzy):
 Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
 {{
  "market_regime":"Odraz / Konsolidácia / Potvrdený rast",
- "market_summary":"zhrnutie trhu, vývoj od poslednej analýzy, dôvod pohybu, zohľadnenie sentimentu a likvidity",
+ "market_summary":"zhrnutie trhu, vývoj od poslednej analýzy, dôvod pohybu (prípadne uvedenie, že príčina nie je potvrdená), zohľadnenie sentimentu a likvidity",
  "coins":[
   {{
    "symbol":"AAVE",
@@ -1229,7 +1229,7 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
    "target_horizon":"4H",
    "outlook_direction":"mierny rast na úroveň $XXX",
    "outlook_score":"Orientačné skóre 6.5/10",
-   "reason":"odôvodnenie rešpektujúce zmenu od poslednej analýzy, dôvod pohybu, umiernený tón a interpretáciu indikátorov",
+   "reason":"odôvodnenie rešpektujúce zmenu od poslednej analýzy, overenie príčiny pohybu (ak nie je známa, uviesť, že príčina nie je potvrdená), umiernený tón a interpretáciu indikátorov",
    "confirmation_needed":"podmienka"
   }}
  ],
