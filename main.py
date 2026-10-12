@@ -14,11 +14,11 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V9.7
-# Inteligentné posúdenie mincí po rastoch > 5% + Predikcie a pravdepodobnosti
+# CRYPTO AI BOT V9.8
+# Odstránenie dulicít v texte, interpretácia indikátorov, inteligentné alerty (±3%/5%)
 # ============================================================
 
-VERSION = "9.7"
+VERSION = "9.8"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -956,19 +956,36 @@ def market_safety(global_data, simple_prices, btc_data=None):
     }
 
 
-def should_send_pump_alerts(coin_data):
-    pumping = []
-    for symbol, data in (coin_data or {}).items():
+def should_send_smart_pump_alerts(portfolio_data, state):
+    """
+    Odošle alert len vtedy, ak nastala ZMENA oproti poslednému odoslanému stavu:
+    - Ďalší nárast o ďalšie 3% alebo viac.
+    - Alebo hlbší pokles o viac ako 5%.
+    """
+    alerts_state = state.get("coin_change_alerts", {})
+    if not isinstance(alerts_state, dict):
+        alerts_state = {}
+
+    triggered = []
+    for symbol, data in (portfolio_data or {}).items():
         if not isinstance(data, dict) or data.get("error"):
             continue
-        change = safe_float(data.get("change_24h"))
-        if change is not None and change > 3.0:
-            pumping.append({
+        current_change = safe_float(data.get("change_24h"), 0.0)
+        last_alerted = safe_float(alerts_state.get(symbol), 0.0)
+
+        diff = current_change - last_alerted
+        # Podmienka: ďalší rast o >= 3% od posledného alertu, alebo pokles o >= 5%
+        if diff >= 3.0 or diff <= -5.0:
+            triggered.append({
                 "symbol": symbol,
-                "change_24h": change,
+                "change_24h": current_change,
                 "price": data.get("price_usd"),
+                "diff": diff,
             })
-    return pumping
+            alerts_state[symbol] = current_change
+
+    state["coin_change_alerts"] = alerts_state
+    return triggered
 
 
 # ============================================================
@@ -1172,14 +1189,11 @@ Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER.
 
 FORMÁTOVANIE A PRAVIDLÁ:
 - Všetky čísla, sumy, percentá, kapitalizácie, podiely a valuácie **musíš písať výhradne ako číslice** (napr. 2.83T USD, 1.34%, 59.68%, 18.5B USD, 0.45%), nikdy nie slovami.
-- V úvodnom zhrnutí (market_summary) explicitne zhodnoť, či sa korekcia skončila, či trh prechádza do rastu a či je bezpečné otvárť pozície.
-- **PRAVIDLO PRE MINCE PO RASTE > 5%**: Ak minca v posledných 24 hodinách vzrástla o viac ako 5%, bot MUSÍ dôkladne zvážiť silu tohto rastu. Ak hrozí, že ide o silný trend a k nízkej limitke (pullbacku) už nemusí dôjsť, odporúčaj radšej HOLD alebo opatrný nákup za trhovú cenu, prípadne stanov reálnu, dosiahnuteľnú limitku (nie utopicky nízku, ktorá sa neaktivuje).
-- Pri každej minci z portfólia povinno uveď:
-  1. Trhovú kapitalizáciu / celkovú valuáciu v USD.
-  2. Percentuálnu zmenu valuácie oproti predchádzajúcej analýze.
-  3. Podiel mince na celkovom kryptotrhu v percentách.
-  4. 24-hodinový objem obchodovania a jeho zmenu v percentách.
-  5. **Predikciu smeru a pravdepodobnosť**: Jasne uveď očakávaný scenár (mierny rast, vysoký rast, mierny pokles, hlboký pokles alebo range) spolu s číselnou pravdepodobnosťou v percentách.
+- V úvodnom zhrnutí (market_summary) explicitne zhodnoť, či sa korekcia skončila, či trh prechádza do rastu a či je bezpečné otvárať pozície.
+- **ZÁKAZ DUPLICITY V TEXTE MINCE**: V textovej analýze pre každú mincu **neopakuj** základné údaje, ktoré sú už v hlavičke (valuácia, 24h objem, predikcia). Textová analýza (reason) musí obsahovať **výhradne**:
+  1. Odôvodnenie zmien valuácie a predikcie.
+  2. Jasnú interpretáciu technických ukazovateľov (napr. čo znamená, že cena je nad EMA 100/200, aký vplyv má kladný MACD histogram alebo RSI – či to podporuje rast, korekciu, prepad alebo range).
+- **PRAVIDLO PRE MINCE PO RASTE > 5%**: Ak minca v posledných 24 hodinách vzrástla o viac ako 5%, bot MUSÍ zvážiť silu trendu. Ak hrozí, že k hlbokej limitke už nedôjde, odporúčaj reálnu dosiahnuteľnú cenu alebo HOLD, aby nákup nezostal neaktivovaný.
 - Sekcie ako rebríček najlepších mincí ('opportunity_ranking') a zoznam 'avoid' sú ZRUŠENÉ – nevracaj ich do JSONu.
 
 MARKET GLOBAL:
@@ -1218,7 +1232,7 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
    "tp2":0.0,
    "outlook_direction":"mierny rast / vysoký rast / mierny pokles / hlboký pokles / range",
    "outlook_probability":60,
-   "reason":"kompletný dôvod",
+   "reason":"iba čisté odôvodnenie zmien, interpretácia technických ukazovateľov a čo z nich vyplýva (žiadne opakovanie hlavičkových údajov)",
    "confirmation_needed":"podmienka"
   }}
  ],
@@ -1313,15 +1327,15 @@ def format_price(value):
     return f"${value:.8f}"
 
 
-def format_pump_alert(pumping_coins):
+def format_smart_pump_alert(triggered_items):
     lines = [
-        "🚀 CRYPTO AI BOT — ALERT RASTU MINCE",
+        "🚀 CRYPTO AI BOT — ALERT ZMENY TRHU",
         "",
-        "Nasledujúce aktíva zaznamenali za daný deň výrazný rast o viac ako 3%:",
+        "Nasledujúce aktíva zaznamenali významnú zmenu (ďalší nárast o 3%+ alebo hlbší pokles o 5%+):",
     ]
-    for item in pumping_coins:
-        lines.append(f"• {item['symbol']} — Cena: {format_price(item['price'])} | 24h zmena: {item['change_24h']:+.2f}%")
-        lines.append("  Dôvod: Silný nákupný dopyt a priaznivý obrat na trhu.")
+    for item in triggered_items:
+        direction_text = f"rast o +{item['diff']:.2f}%" if item['diff'] > 0 else f"pokles o {item['diff']:.2f}%"
+        lines.append(f"• {item['symbol']} — Cena: {format_price(item['price'])} | Celková 24h zmena: {item['change_24h']:+.2f}% ({direction_text})")
     return "\n".join(lines)
 
 
@@ -1389,11 +1403,11 @@ def run_safety_monitor():
         except Exception as exc:
             print(f"Safety monitor error for {symbol}: {exc}")
 
-    pumping_coins = should_send_pump_alerts(portfolio_data)
     state = load_state()
+    triggered_alerts = should_send_smart_pump_alerts(portfolio_data, state)
     
-    if pumping_coins:
-        telegram_send_long(format_pump_alert(pumping_coins))
+    if triggered_alerts:
+        telegram_send_long(format_smart_pump_alert(triggered_alerts))
 
     save_state(state)
     return {"state": "NORMAL", "score": 0}
