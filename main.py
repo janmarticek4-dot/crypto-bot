@@ -14,11 +14,12 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V10.1
-# Všetky hodnoty a zmeny (kapitalizácia, cena, objem) počítané od poslednej analýzy (4H sloty)
+# CRYPTO AI BOT V10.2
+# Vylepšenia: TP & R:R, časové horizonty, striktné fázy trhu,
+# umiernený tón, orientačné skóre a explicitné dôvody pohybov.
 # ============================================================
 
-VERSION = "10.1"
+VERSION = "10.2"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -929,18 +930,16 @@ def market_safety(global_data, simple_prices, btc_data=None):
     price = safe_float(tech.get("price"))
     e200 = safe_float(tech.get("ema200"))
 
-    is_bullish_context = (btc_change is not None and btc_change >= 0) or (price is not None and e200 is not None and price >= e200)
-
-    if not is_bullish_context:
-        if global_change is not None and global_change <= -3.5:
-            score += 2
-            reasons.append("celková kapitalizácia výrazne klesá mimo rastového trendu")
-        if btc_change is not None and btc_change <= -5:
-            score += 2
-            reasons.append("BTC prudko klesá mimo rastového trendu")
+    # Bezpečnostný alert spúšťame výhradne pri špecifických rizikových podmienkach
+    if global_change is not None and global_change <= -4.0:
+        score += 3
+        reasons.append("celková trhová kapitalizácia zaznamenáva prudký pokles")
+    if btc_change is not None and btc_change <= -6.0:
+        score += 3
+        reasons.append("Bitcoin prudko padá a ohrozuje kľúčové podpory")
 
     state = (
-        "CRITICAL" if score >= 7
+        "CRITICAL" if score >= 6
         else "WARNING" if score >= 3
         else "NORMAL"
     )
@@ -951,8 +950,6 @@ def market_safety(global_data, simple_prices, btc_data=None):
         "reasons": reasons,
         "market_cap_change_24h": global_change,
         "btc_change_24h": btc_change,
-        "btc_price": price,
-        "btc_ema200": e200,
     }
 
 
@@ -1184,14 +1181,17 @@ Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER.
 
 FORMÁTOVANIE A PRAVIDLÁ:
 - Všetky čísla, sumy, percentá, kapitalizácie, podiely **musíš písať výhradne ako číslice** (napr. 2.83T USD, 1.34%, 59.68%, 18.5B USD, 0.45%), nikdy nie slovami.
-- V úvodnom zhrnutí (market_summary) explicitne zhodnoť, či sa korekcia skončila, či trh prechádza do rastu a či je bezpečné otvárať pozície.
-- **VŠETKY HODNOTY A ZMENY OD POSLEDNEJ ANALÝZY (4H INTERVALY)**: Všetky zmeny percent (kapitalizácie, ceny aj objemu obchodovania) sa vzťahujú **výhradne k stavu z predchádzajúcej analýzy (medzi 4H slotmi)**. Analýzy na seba plynulo nadväzujú a vyhodnocujú reálny progres od posledného behu bota.
-- **ABSOLÚTNA ZHODA S DÁTAMI (ŽIADNE HALUCINÁCIE)**: Ak je premenná zmeny kapitalizácie alebo objemu od poslednej analýzy v dátach KLADNÁ, textová analýza ('reason') **MUSÍ** hovoriť o raste, expanzii alebo raste objemu, a **NIKDY** nesmie tvrdiť opak!
-- **ZÁKAZ DUPLICITY V TEXTE MINCE**: V textovej analýze pre každú mincu **neopakuj** základné údaje z hlavičky (presnú výšku kapitalizácie v miliardách, presný objem, predikciu). Textová analýza (reason) musí obsahovať **výhradne**:
-  1. Odôvodnenie pohybu kapitalizácie, ceny a objemu vzhľadom na zmenu od poslednej analýzy.
-  2. Jasnú interpretáciu technických ukazovateľov (napr. čo znamená, že cena je nad EMA 100/200, aký vplyv má kladný MACD histogram alebo RSI – či to podporuje rast, korekciu, prepad alebo range).
-- **PRAVIDLO pre mince po raste > 5% od poslednej analýzy**: Ak minca prudko narastie, bot zváži silu trendu a ak hrozí, že k hlbokej limitke nedôjde, odporučí reálnu cenu alebo HOLD.
-- Sekcie ako rebríček najlepších mincí ('opportunity_ranking') a zoznam 'avoid' sú ZRUŠENÉ – nevracaj ich do JSONu.
+- **TÓN A REALISTICKÝ POHĽAD**: Vyvaruj sa prehnane sebavedomým slovám ako „jednoznačne“ či „spoľahlivo“, nakoľko základné indikátory (MACD, RSI) poskytujú len pravdepodobnostný pohľad. Súčasná hodnota Fear & Greed sa blíži k extrémnej chamtivosti, čo v analýze zohľadniť ako dôvod na zvýšenú opatrnosť a obozretnosť pri nákupoch.
+- **FÁZY TRHU**: Trhový režim (market_regime) striktne rozlišuj na základe dát do jednej z troch kategórií:
+  1. **Odraz** (ceny sa po predchádzajúcom poklese zotavujú, ale ďalší smer a stabilita ešte nie sú potvrdené).
+  2. **Konsolidácia** (ceny sa pohybujú do strany, trh aktívne hľadá nový smer).
+  3. **Potvrdený rast** (tvorba vyšších maxím a miním, podporená rastúcim objemom a zlepšením širšieho trhu).
+- **ODDELENIE SMERU TRHU OD ALERTU**: Smer trhu opisuj čisto podľa technických a trhových reálií (rastúci / klesajúci / konsolidácia). Bezpečnostný alert zapoj do úvahy len vtedy, ak sú splnené reálne rizikové podmienky v poli SAFETY.
+- **DÔVOD POHYBU**: Vždy explicitne uveď dôvod pohybu trhu alebo aktíva (napr. odraz Bitcoinu, nárast objemu, sektorový záujem o altcoiny). Ak dôvod nie je možné spoľahlivo identifikovať z dostupných dát, otvorene to priznaj.
+- **PREDIKCIA A HORIZONT**: Každá predikcia (outlook_direction) musí obsahovať nielen slovný smer, ale aj **explicitný cenový cieľ** a **časový horizont** v poli `target_horizon` (napr. 4H alebo 24H).
+- **TAKE-PROFITY**: Pre každú mincu povinne uveď hodnoty **tp1** a **tp2** rešpektujúce logické hladiny rezistencií.
+- **ORIENTAČNÉ SKÓRE**: Namiesto vymyslených presných pravdepodobností používaj **orientačné skóre** v poli `outlook_score` (napr. "Orientačné skóre 6.5/10").
+- **VŠETKY HODNOTY A ZMENY OD POSLEDNEJ ANALÝZY (4H INTERVALY)**: Všetky zmeny percent (kapitalizácie, ceny aj objemu obchodovania) sa vzťahujú **výhradne k stavu z predchádzajúcej analýzy (medzi 4H slotmi)**.
 
 MARKET GLOBAL:
 {json.dumps(market_global, ensure_ascii=False)}
@@ -1210,8 +1210,8 @@ PORTFOLIO DATA (vrátane zmien od poslednej analýzy):
 
 Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
 {{
- "market_regime":"string",
- "market_summary":"zhrnutie trhu, vývoj od poslednej analýzy, prechod do rastu a stav likvidity",
+ "market_regime":"Odraz / Konsolidácia / Potvrdený rast",
+ "market_summary":"zhrnutie trhu, vývoj od poslednej analýzy, dôvod pohybu, zohľadnenie sentimentu a likvidity",
  "coins":[
   {{
    "symbol":"AAVE",
@@ -1224,12 +1224,12 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
    "volume_change_pct":0.0,
    "entry_price":0.0,
    "hard_stop_level":0.0,
-   "revaluation_level":0.0,
    "tp1":0.0,
    "tp2":0.0,
-   "outlook_direction":"mierny rast / vysoký rast / mierny pokles / hlboký pokles / range",
-   "outlook_probability":60,
-   "reason":"čisté odôvodnenie rešpektujúce zmenu od poslednej analýzy + interpretácia indikátorov a čo z nich vyplýva",
+   "target_horizon":"4H",
+   "outlook_direction":"mierny rast na úroveň $XXX",
+   "outlook_score":"Orientačné skóre 6.5/10",
+   "reason":"odôvodnenie rešpektujúce zmenu od poslednej analýzy, dôvod pohybu, umiernený tón a interpretáciu indikátorov",
    "confirmation_needed":"podmienka"
   }}
  ],
@@ -1239,7 +1239,7 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
 
 
 # ============================================================
-# VALIDÁCIA ODPORÚČANÍ A R:R VÝPOČET
+# VÝPOČET R:R
 # ============================================================
 
 def calculate_rr(entry, hard_stop, tp1, tp2):
@@ -1249,16 +1249,15 @@ def calculate_rr(entry, hard_stop, tp1, tp2):
     target2 = safe_float(tp2)
 
     if None in (entry, hard_stop, target1) or entry <= hard_stop:
-        return None
+        return None, None
 
     risk = entry - hard_stop
     if risk <= 0 or target1 <= entry:
-        return None
+        return None, None
 
-    res = {"rr_tp1": (target1 - entry) / risk}
-    if target2 and target2 > entry:
-        res["rr_tp2"] = (target2 - entry) / risk
-    return res
+    rr1 = round((target1 - entry) / risk, 2)
+    rr2 = round((target2 - entry) / risk, 2) if target2 and target2 > entry else None
+    return rr1, rr2
 
 
 def validate_and_correct_analysis(
@@ -1365,17 +1364,28 @@ def format_bot_message(analysis, safety, fear_greed):
         vol_change = safe_float(coin.get("volume_change_pct"), 0.0)
         
         direction = str(coin.get("outlook_direction", "mierny rast"))
-        prob = safe_float(coin.get("outlook_probability"), 60)
+        score = str(coin.get("outlook_score", "Orientačné skóre: N/A"))
+        horizon = str(coin.get("target_horizon", "4H"))
 
         lines.append(f"{emoji} {symbol} — {action} | Cena: {price}")
         lines.append(f"   Kapitalizácia: {cap_str} (Zmena od posl. analýzy: {cap_change:+.2f}% | Podiel na trhu: {share:.3f}%)")
         lines.append(f"   Objem 24h: {vol_str} (Zmena objemu od posl. analýzy: {vol_change:+.2f}%)")
-        lines.append(f"   Predikcia: {direction} | Odhad šance: {prob:.0f}%")
+        lines.append(f"   Predikcia: {direction} (Horizont: {horizon}) | {score}")
         lines.append(f"   Analýza: {coin.get('reason', '—')}")
 
         entry = safe_float(coin.get("entry_price"))
+        stop = safe_float(coin.get("hard_stop_level"))
+        tp1 = safe_float(coin.get("tp1"))
+        tp2 = safe_float(coin.get("tp2"))
+
         if entry is not None and action.startswith("BUY"):
-            lines.append(f"   Vstup: {format_price(entry)} | Stop-Loss: {format_price(coin.get('hard_stop_level'))}")
+            rr1, rr2 = calculate_rr(entry, stop, tp1, tp2)
+            rr_str = f"R:R TP1: 1:{rr1}" if rr1 else "R:R: N/A"
+            if rr2:
+                rr_str += f" | TP2: 1:{rr2}"
+
+            lines.append(f"   Vstup: {format_price(entry)} | Stop-Loss: {format_price(stop)}")
+            lines.append(f"   Take-Profit: TP1 {format_price(tp1)} | TP2 {format_price(tp2)} ({rr_str})")
 
     conditions = analysis.get("conditions_to_watch", [])
     if conditions:
