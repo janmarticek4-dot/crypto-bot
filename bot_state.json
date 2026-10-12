@@ -1927,5 +1927,6 @@
     "total_volume_usd": 58822329905.19731
   },
   "last_safety_alert_score": 3,
-  "last_coin_risk_alerts": {}
+  "last_coin_risk_alerts": {},
+  "coin_change_alerts": {}
 }
