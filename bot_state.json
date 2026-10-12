@@ -11,9 +11,9 @@
     "reasons": [
       "celková kapitalizácia klesá"
     ],
-    "market_cap_change_24h": -3.062597113627395,
-    "btc_change_24h": 0.8645270747268085,
-    "btc_price": 83690.02,
+    "market_cap_change_24h": -3.147762086505881,
+    "btc_change_24h": 0.7632987119581605,
+    "btc_price": 83629.42,
     "btc_ema20": 83226.90464067196,
     "btc_ema50": 83585.02237769018,
     "btc_ema100": 83492.04760249704,
@@ -360,7 +360,7 @@
   "last_main_schedule": "BRATISLAVA_20:00",
   "last_safety_state": "NORMAL",
   "last_safety_score": 1,
-  "last_safety_check": "2026-10-12T05:18:01.451170+02:00",
+  "last_safety_check": "2026-10-12T05:48:47.151963+02:00",
   "last_safety_alert": "2026-10-11T23:28:20.336343+02:00",
   "last_safety_alert_reason": "STATE_CHANGE",
   "last_main_slot": "BRATISLAVA_2026-10-11_20:00",
