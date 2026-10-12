@@ -14,11 +14,11 @@ from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V9.8
-# Odstránenie dulicít v texte, interpretácia indikátorov, inteligentné alerty (±3%/5%)
+# CRYPTO AI BOT V10.1
+# Všetky hodnoty a zmeny (kapitalizácia, cena, objem) počítané od poslednej analýzy (4H sloty)
 # ============================================================
 
-VERSION = "9.8"
+VERSION = "10.1"
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -957,11 +957,6 @@ def market_safety(global_data, simple_prices, btc_data=None):
 
 
 def should_send_smart_pump_alerts(portfolio_data, state):
-    """
-    Odošle alert len vtedy, ak nastala ZMENA oproti poslednému odoslanému stavu:
-    - Ďalší nárast o ďalšie 3% alebo viac.
-    - Alebo hlbší pokles o viac ako 5%.
-    """
     alerts_state = state.get("coin_change_alerts", {})
     if not isinstance(alerts_state, dict):
         alerts_state = {}
@@ -970,19 +965,18 @@ def should_send_smart_pump_alerts(portfolio_data, state):
     for symbol, data in (portfolio_data or {}).items():
         if not isinstance(data, dict) or data.get("error"):
             continue
-        current_change = safe_float(data.get("change_24h"), 0.0)
+        change_since_last = safe_float(data.get("change_since_last"), 0.0)
         last_alerted = safe_float(alerts_state.get(symbol), 0.0)
 
-        diff = current_change - last_alerted
-        # Podmienka: ďalší rast o >= 3% od posledného alertu, alebo pokles o >= 5%
+        diff = change_since_last - last_alerted
         if diff >= 3.0 or diff <= -5.0:
             triggered.append({
                 "symbol": symbol,
-                "change_24h": current_change,
+                "change_since_last": change_since_last,
                 "price": data.get("price_usd"),
                 "diff": diff,
             })
-            alerts_state[symbol] = current_change
+            alerts_state[symbol] = change_since_last
 
     state["coin_change_alerts"] = alerts_state
     return triggered
@@ -1177,6 +1171,7 @@ def build_prompt(
                 "action": coin.get("action"),
                 "price": coin.get("current_price"),
                 "market_cap": coin.get("market_cap"),
+                "volume_24h": coin.get("volume_24h"),
                 "outlook_direction": coin.get("outlook_direction"),
             })
 
@@ -1188,18 +1183,20 @@ Píš po slovensky, zrozumiteľne, kompletne a bez skratiek. **Všetky vety musi
 Portfólio: AAVE, TAO, FET, SOL, ONDO, RENDER.
 
 FORMÁTOVANIE A PRAVIDLÁ:
-- Všetky čísla, sumy, percentá, kapitalizácie, podiely a valuácie **musíš písať výhradne ako číslice** (napr. 2.83T USD, 1.34%, 59.68%, 18.5B USD, 0.45%), nikdy nie slovami.
+- Všetky čísla, sumy, percentá, kapitalizácie, podiely **musíš písať výhradne ako číslice** (napr. 2.83T USD, 1.34%, 59.68%, 18.5B USD, 0.45%), nikdy nie slovami.
 - V úvodnom zhrnutí (market_summary) explicitne zhodnoť, či sa korekcia skončila, či trh prechádza do rastu a či je bezpečné otvárať pozície.
-- **ZÁKAZ DUPLICITY V TEXTE MINCE**: V textovej analýze pre každú mincu **neopakuj** základné údaje, ktoré sú už v hlavičke (valuácia, 24h objem, predikcia). Textová analýza (reason) musí obsahovať **výhradne**:
-  1. Odôvodnenie zmien valuácie a predikcie.
+- **VŠETKY HODNOTY A ZMENY OD POSLEDNEJ ANALÝZY (4H INTERVALY)**: Všetky zmeny percent (kapitalizácie, ceny aj objemu obchodovania) sa vzťahujú **výhradne k stavu z predchádzajúcej analýzy (medzi 4H slotmi)**. Analýzy na seba plynulo nadväzujú a vyhodnocujú reálny progres od posledného behu bota.
+- **ABSOLÚTNA ZHODA S DÁTAMI (ŽIADNE HALUCINÁCIE)**: Ak je premenná zmeny kapitalizácie alebo objemu od poslednej analýzy v dátach KLADNÁ, textová analýza ('reason') **MUSÍ** hovoriť o raste, expanzii alebo raste objemu, a **NIKDY** nesmie tvrdiť opak!
+- **ZÁKAZ DUPLICITY V TEXTE MINCE**: V textovej analýze pre každú mincu **neopakuj** základné údaje z hlavičky (presnú výšku kapitalizácie v miliardách, presný objem, predikciu). Textová analýza (reason) musí obsahovať **výhradne**:
+  1. Odôvodnenie pohybu kapitalizácie, ceny a objemu vzhľadom na zmenu od poslednej analýzy.
   2. Jasnú interpretáciu technických ukazovateľov (napr. čo znamená, že cena je nad EMA 100/200, aký vplyv má kladný MACD histogram alebo RSI – či to podporuje rast, korekciu, prepad alebo range).
-- **PRAVIDLO PRE MINCE PO RASTE > 5%**: Ak minca v posledných 24 hodinách vzrástla o viac ako 5%, bot MUSÍ zvážiť silu trendu. Ak hrozí, že k hlbokej limitke už nedôjde, odporúčaj reálnu dosiahnuteľnú cenu alebo HOLD, aby nákup nezostal neaktivovaný.
+- **PRAVIDLO pre mince po raste > 5% od poslednej analýzy**: Ak minca prudko narastie, bot zváži silu trendu a ak hrozí, že k hlbokej limitke nedôjde, odporučí reálnu cenu alebo HOLD.
 - Sekcie ako rebríček najlepších mincí ('opportunity_ranking') a zoznam 'avoid' sú ZRUŠENÉ – nevracaj ich do JSONu.
 
 MARKET GLOBAL:
 {json.dumps(market_global, ensure_ascii=False)}
 
-PREDCHÁDZAJÚCI STAV MINCI (pre výpočet zmeny valuácie):
+PREDCHÁDZAJÚCI STAV MINCI (pre výpočet zmeny od posledného behu):
 {json.dumps(prior_summary, ensure_ascii=False)}
 
 FEAR & GREED:
@@ -1208,13 +1205,13 @@ FEAR & GREED:
 SAFETY:
 {json.dumps(safety, ensure_ascii=False)}
 
-PORTFOLIO DATA:
+PORTFOLIO DATA (vrátane zmien od poslednej analýzy):
 {json.dumps(portfolio_data, ensure_ascii=False)}
 
 Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
 {{
  "market_regime":"string",
- "market_summary":"zhrnutie trhu, vyhodnotenie konca korekcie, prechod do rastu a stav likvidity",
+ "market_summary":"zhrnutie trhu, vývoj od poslednej analýzy, prechod do rastu a stav likvidity",
  "coins":[
   {{
    "symbol":"AAVE",
@@ -1232,7 +1229,7 @@ Vráť iba validný JSON v tejto štruktúre bez Markdown syntaxe:
    "tp2":0.0,
    "outlook_direction":"mierny rast / vysoký rast / mierny pokles / hlboký pokles / range",
    "outlook_probability":60,
-   "reason":"iba čisté odôvodnenie zmien, interpretácia technických ukazovateľov a čo z nich vyplýva (žiadne opakovanie hlavičkových údajov)",
+   "reason":"čisté odôvodnenie rešpektujúce zmenu od poslednej analýzy + interpretácia indikátorov a čo z nich vyplýva",
    "confirmation_needed":"podmienka"
   }}
  ],
@@ -1331,11 +1328,10 @@ def format_smart_pump_alert(triggered_items):
     lines = [
         "🚀 CRYPTO AI BOT — ALERT ZMENY TRHU",
         "",
-        "Nasledujúce aktíva zaznamenali významnú zmenu (ďalší nárast o 3%+ alebo hlbší pokles o 5%+):",
+        "Nasledujúce aktíva zaznamenali významnú zmenu od poslednej kontroly:",
     ]
     for item in triggered_items:
-        direction_text = f"rast o +{item['diff']:.2f}%" if item['diff'] > 0 else f"pokles o {item['diff']:.2f}%"
-        lines.append(f"• {item['symbol']} — Cena: {format_price(item['price'])} | Celková 24h zmena: {item['change_24h']:+.2f}% ({direction_text})")
+        lines.append(f"• {item['symbol']} — Cena: {format_price(item['price'])} | Zmena od posledného slotu: {item['change_since_last']:+.2f}%")
     return "\n".join(lines)
 
 
@@ -1352,7 +1348,7 @@ def format_bot_message(analysis, safety, fear_greed):
     if market_summary: 
         lines.append(f"📈 {market_summary}")
         
-    lines.extend(["", "📌 PORTFÓLIO A VALUÁCIE AKTÍV"])
+    lines.extend(["", "📌 PORTFÓLIO A KAPITALIZÁCIE AKTÍV"])
     for coin in coins:
         action = str(coin.get("action", "HOLD")).upper()
         symbol = coin.get("symbol", "?")
@@ -1372,8 +1368,8 @@ def format_bot_message(analysis, safety, fear_greed):
         prob = safe_float(coin.get("outlook_probability"), 60)
 
         lines.append(f"{emoji} {symbol} — {action} | Cena: {price}")
-        lines.append(f"   Valuácia: {cap_str} (Zmena: {cap_change:+.2f}% | Podiel na trhu: {share:.3f}%)")
-        lines.append(f"   Objem 24h: {vol_str} (Zmena objemu: {vol_change:+.2f}%)")
+        lines.append(f"   Kapitalizácia: {cap_str} (Zmena od posl. analýzy: {cap_change:+.2f}% | Podiel na trhu: {share:.3f}%)")
+        lines.append(f"   Objem 24h: {vol_str} (Zmena objemu od posl. analýzy: {vol_change:+.2f}%)")
         lines.append(f"   Predikcia: {direction} | Odhad šance: {prob:.0f}%")
         lines.append(f"   Analýza: {coin.get('reason', '—')}")
 
@@ -1396,14 +1392,28 @@ def run_safety_monitor():
     market_global = coingecko_get("global")
     fear = get_fear_greed()
 
+    state = load_state()
+    previous_analysis = state.get("last_analysis", {})
+    previous_coins_map = {}
+    for coin in previous_analysis.get("coins", []):
+        if isinstance(coin, dict):
+            sym = coin.get("symbol")
+            if sym:
+                previous_coins_map[sym] = safe_float(coin.get("current_price"))
+
     portfolio_data = {}
     for symbol, coin_id in PORTFOLIO.items():
         try:
-            portfolio_data[symbol] = collect_coin_data(symbol, coin_id, days=35)
+            data = collect_coin_data(symbol, coin_id, days=35)
+            curr_price = data["price_usd"]
+            prev_price = previous_coins_map.get(symbol)
+            
+            change_since_last = pct_change(prev_price, curr_price) if prev_price else 0.0
+            data["change_since_last"] = change_since_last
+            portfolio_data[symbol] = data
         except Exception as exc:
             print(f"Safety monitor error for {symbol}: {exc}")
 
-    state = load_state()
     triggered_alerts = should_send_smart_pump_alerts(portfolio_data, state)
     
     if triggered_alerts:
@@ -1436,6 +1446,19 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
     btc_data = collect_coin_data("BTC", "bitcoin")
     safety = market_safety(market_global, simple, btc_data)
 
+    state = load_state()
+    previous_analysis = state.get("last_analysis", {})
+    previous_coins_map = {}
+    for coin in previous_analysis.get("coins", []):
+        if isinstance(coin, dict):
+            sym = coin.get("symbol")
+            if sym:
+                previous_coins_map[sym] = {
+                    "price": safe_float(coin.get("current_price")),
+                    "market_cap": safe_float(coin.get("market_cap")),
+                    "volume_24h": safe_float(coin.get("volume_24h")),
+                }
+
     portfolio_data = {}
     total_market_cap = safe_float(market_global.get("data", {}).get("total_market_cap", {}).get("usd"), 2.83e12)
 
@@ -1444,15 +1467,31 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
             data = collect_coin_data(symbol, coin_id)
             cap = safe_float(data.get("market_cap"), 0)
             data["market_share_pct"] = (cap / total_market_cap * 100) if total_market_cap > 0 else 0.0
+
+            # Výpočet zmien od poslednej analýzy (medzi slotmi)
+            prev = previous_coins_map.get(symbol, {})
+            prev_price = prev.get("price")
+            prev_mcap = prev.get("market_cap")
+            prev_vol = prev.get("volume_24h")
+
+            curr_price = data["price_usd"]
+            curr_vol = data["volume_24h"]
+
+            price_change_since_last = pct_change(prev_price, curr_price) if prev_price else 0.0
+            mcap_change_since_last = pct_change(prev_mcap, cap) if prev_mcap else 0.0
+            vol_change_since_last = pct_change(prev_vol, curr_vol) if prev_vol else 0.0
+
+            data["change_since_last"] = price_change_since_last
+            data["mcap_change_since_last"] = mcap_change_since_last
+            data["vol_change_since_last"] = vol_change_since_last
+
             portfolio_data[symbol] = data
         except Exception as exc:
             print(f"Portfolio data error {symbol}: {exc}")
             portfolio_data[symbol] = {
                 "symbol": symbol, "error": str(exc), "market_cap": 0, "market_share_pct": 0,
+                "change_since_last": 0.0, "mcap_change_since_last": 0.0, "vol_change_since_last": 0.0,
             }
-
-    state = load_state()
-    previous_analysis = state.get("last_analysis", {})
 
     prompt = build_prompt(
         market_global,
@@ -1468,6 +1507,7 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
     analysis = gemini_analyze(prompt)
     analysis = validate_and_correct_analysis(analysis, safety, portfolio_data, previous_analysis)
 
+    # Priradenie reálnych hodnôt zmien od poslednej analýzy do výstupu
     for coin in analysis.get("coins", []):
         sym = coin.get("symbol")
         if sym in portfolio_data:
@@ -1475,8 +1515,8 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
             coin["market_cap"] = d.get("market_cap")
             coin["market_share_pct"] = d.get("market_share_pct")
             coin["volume_24h"] = d.get("volume_24h")
-            coin["market_cap_change_pct"] = d.get("change_24h", 0.0)
-            coin["volume_change_pct"] = 1.5
+            coin["market_cap_change_pct"] = d.get("mcap_change_since_last", 0.0)
+            coin["volume_change_pct"] = d.get("vol_change_since_last", 0.0)
 
     message = format_bot_message(analysis, safety, fear)
 
