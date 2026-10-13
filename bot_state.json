@@ -1927,6 +1927,7 @@
   "last_safety_alert_score": 3,
   "last_coin_risk_alerts": {},
   "coin_change_alerts": {
-    "RENDER": 4.433497536945828
+    "RENDER": 4.433497536945828,
+    "FET": -5.0649932765576
   }
 }
