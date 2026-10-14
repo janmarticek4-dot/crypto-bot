@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-14T20:55:45.264537+02:00",
+  "last_run": "2026-10-14T21:27:44.789124+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2182,18 +2182,19 @@
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 9,
+    "score": 10,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
       "celková trhová kapitalizácia -4.5% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "MACD Bitcoinu je záporný",
+      "prelomený support: FET, ONDO",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-14T18:14:06.174592+00:00",
+    "ts": "2026-10-14T19:27:44.789115+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 9,
+    "last_alert_score": 9.0,
     "last_alert_ts": "2026-10-14T18:14:06.174595+00:00"
   },
   "alerts": {
@@ -2211,9 +2212,9 @@
     },
     "FET": {
       "level": "DEEP",
-      "drawdown": 15.51,
+      "drawdown": 18.54,
       "action": "SELL",
-      "ts": "2026-10-14T15:17:07.800341+00:00"
+      "ts": "2026-10-14T19:27:44.789078+00:00"
     },
     "SOL": {
       "level": "DEEP",
