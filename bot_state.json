@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-14T07:23:58.260732+02:00",
+  "last_run": "2026-10-14T16:59:48.891026+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -19,133 +19,65 @@
     "source": "Alternative.me"
   },
   "last_analysis": {
-    "market_regime": "Odraz",
-    "market_summary": "Globálna trhová kapitalizácia kryptomien sa nachádza na hodnote 2829.73B USD, čo predstavuje pokles o 2.69% za posledných 24 hodín. Medzi 4-hodinovými intervalmi väčšina sledovaných aktív v portfóliu zaznamenala mierny cenový odraz v rozmedzí od 0.06% do 1.92%, s výnimkou mince SOL, ktorá oslabila o 0.19%. Zároveň však došlo k výraznému prepadu 24-hodinových objemov obchodovania o 20.59% až 31.43% naprieč všetkými mincami v portfóliu, čo poukazuje na nízku likviditu a slabé nákupné presvedčenie. Konkrétna fundamentálna príčina tohto pohybu nie je z dostupných dát potvrdená. Index Fear & Greed dosahuje hodnotu 62 bodov, čo indikuje chamtivosť blížiacu sa k pásmu extrémnej chamtivosti, a preto je potrebné zachovať zvýšenú opatrnosť a vyhnúť sa unáhleným nákupom. Bezpečnostný stav systému je NORMAL so skóre 0 bodov, takže trh nečelí žiadnemu systémovému alertu.",
+    "market_regime": "Konsolidácia",
     "coins": [
       {
         "symbol": "AAVE",
-        "action": "BUY PULLBACK",
-        "current_price": 161.5,
-        "market_cap": 2492210901.528878,
-        "market_cap_change_pct": 0.8591887528750236,
-        "market_share_pct": 0.08807247721279803,
-        "volume_24h": 225880823.99753734,
-        "volume_change_pct": -20.594592017536957,
-        "entry_price": 159.5,
-        "hard_stop_level": 151.0,
-        "tp1": 165.5,
-        "tp2": 176.0,
-        "target_horizon": "24H",
-        "outlook_direction": "mierny odraz smerom k rezistencii na úrovni 165.50 USD",
-        "outlook_score": "Orientačné skóre 5.5/10",
-        "reason": "Cena aktíva zaznamenala od poslednej analýzy nárast o 0.90%, pričom trhová kapitalizácia vzrástla o 0.86% a objem obchodovania poklesol o 20.59%. Konkrétna príčina tohto pohybu nie je z dostupných dát potvrdená. Z technického hľadiska sa cena drží nad kĺzavým priemerom EMA200 na úrovni 155.68 USD, no zostáva pod kĺzavými priemermi EMA20 na úrovni 163.64 USD a EMA50 na úrovni 167.16 USD. Indikátor RSI na hodnote 43.19 spolu so záporným histogramom indikátora MACD naznačujú krehké momentum, čo odôvodňuje opatrný prístup.",
-        "confirmation_needed": "Udržanie cenovej podpory nad úrovňou 159.50 USD a nárast nákupného objemu."
+        "action": "REDUCE",
+        "current_price": 156.02,
+        "market_cap": 2405997401.2756944,
+        "volume_24h": 219311783.76367533,
+        "trend_score": 4.5,
+        "risk_level": "VYSOKÉ"
       },
       {
         "symbol": "TAO",
-        "action": "BUY PULLBACK",
-        "current_price": 279.4,
-        "market_cap": 3167986089.154973,
-        "market_cap_change_pct": 1.016231029213712,
-        "market_share_pct": 0.11195376060525168,
-        "volume_24h": 157109113.3930283,
-        "volume_change_pct": -29.173138084077475,
-        "entry_price": 275.0,
-        "hard_stop_level": 261.0,
-        "tp1": 286.0,
-        "tp2": 302.0,
-        "target_horizon": "24H",
-        "outlook_direction": "pokus o odraz k rezistencii na úrovni 286.00 USD",
-        "outlook_score": "Orientačné skóre 5.5/10",
-        "reason": "Od predchádzajúcej analýzy cena vzrástla o 1.09%, kapitalizácia stúpla o 1.02% a objem obchodovania poklesol o 29.17%. Priama príčina tohto rastu nie je z dostupných trhových dát potvrdená. Cena nachádza podporu nad kĺzavým priemerom EMA200 na úrovni 277.06 USD, avšak naráža na odpor kĺzavých priemerov EMA20 na úrovni 282.01 USD a EMA50 na úrovni 285.96 USD. Hodnota indikátora RSI na úrovni 48.01 a záporný histogram MACD indikujú neutrálnu fázu vyžadujúcu trpezlivosť pri vstupoch.",
-        "confirmation_needed": "Prekonanie kĺzavého priemeru EMA20 na úrovni 282.01 USD pri náraste objemu."
+        "action": "SELL",
+        "current_price": 267.3,
+        "market_cap": 3032977053.5377846,
+        "volume_24h": 162250428.37955925,
+        "trend_score": 1.3,
+        "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "FET",
-        "action": "BUY PULLBACK",
-        "current_price": 0.2171,
-        "market_cap": 501885204.67041016,
-        "market_cap_change_pct": 1.8315230326175107,
-        "market_share_pct": 0.01773616880684485,
-        "volume_24h": 107346834.61027205,
-        "volume_change_pct": -24.544337642397704,
-        "entry_price": 0.212,
-        "hard_stop_level": 0.2,
-        "tp1": 0.225,
-        "tp2": 0.244,
-        "target_horizon": "24H",
-        "outlook_direction": "pokus o odraz smerom k rezistencii na úrovni 0.2250 USD",
-        "outlook_score": "Orientačné skóre 5.0/10",
-        "reason": "Cena od posledného intervalu vzrástla o 1.92% a kapitalizácia stúpla o 1.83%, kým objem klesol o 24.54%. Špecifická príčina tohto pohybu nie je z dostupných dát potvrdená. Aktívum zostáva nad kĺzavým priemerom EMA200 na úrovni 0.2089 USD, ale je limitované kĺzavými priemermi EMA20 na úrovni 0.2207 USD a EMA50 na úrovni 0.2250 USD. Indikátor RSI s hodnotou 45.87 a záporný histogram MACD svedčia o slabšom nákupnom tlaku.",
-        "confirmation_needed": "Úspešné uzavretie 4-hodinovej sviečky nad kĺzavým priemerom EMA20 na úrovni 0.2207 USD."
+        "action": "SELL",
+        "current_price": 0.2061,
+        "market_cap": 476264604.3899757,
+        "volume_24h": 99101669.48938848,
+        "trend_score": 1.3,
+        "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "SOL",
-        "action": "BUY PULLBACK",
-        "current_price": 107.37,
-        "market_cap": 63214850434.414185,
-        "market_cap_change_pct": -0.3091509969070427,
-        "market_share_pct": 2.233955589785733,
-        "volume_24h": 2876950007.6558375,
-        "volume_change_pct": -30.43783226035118,
-        "entry_price": 103.5,
-        "hard_stop_level": 100.5,
-        "tp1": 111.4,
-        "tp2": 113.4,
-        "target_horizon": "24H",
-        "outlook_direction": "konsolidácia nad podporou s cieľom na úrovni 111.40 USD",
-        "outlook_score": "Orientačné skóre 4.0/10",
-        "reason": "Cena zaznamenala od predchádzajúceho stavu pokles o 0.19%, trhová kapitalizácia klesla o 0.31% a objem spadol o 30.44%. Konkrétna príčina tohto poklesu nie je z dostupných dát potvrdená. Solana vykazuje najslabšiu technickú štruktúru v portfóliu, keďže sa nachádza pod kĺzavými priemermi EMA20 na úrovni 108.87 USD, EMA50 na úrovni 111.55 USD aj EMA200 na úrovni 111.45 USD. Indikátor RSI na úrovni 43.58 a klesajúci MACD upozorňujú na pretrvávajúce riziko predajného tlaku.",
-        "confirmation_needed": "Stabilizácia na lokálnej podpore a návrat ceny nad kĺzavý priemer EMA20 na úrovni 108.87 USD."
+        "action": "SELL",
+        "current_price": 103.63,
+        "market_cap": 61031322964.236946,
+        "volume_24h": 2953986125.3181996,
+        "trend_score": 2.5,
+        "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "ONDO",
-        "action": "BUY PULLBACK",
-        "current_price": 0.4671,
-        "market_cap": 2271842766.931623,
-        "market_cap_change_pct": -0.0024040904752501077,
-        "market_share_pct": 0.08028486682202521,
-        "volume_24h": 158282860.05071443,
-        "volume_change_pct": -26.484979489816702,
-        "entry_price": 0.456,
-        "hard_stop_level": 0.448,
-        "tp1": 0.485,
-        "tp2": 0.51,
-        "target_horizon": "24H",
-        "outlook_direction": "hľadanie podpory pri kĺzavom priemere EMA200 s cieľom na úrovni 0.4850 USD",
-        "outlook_score": "Orientačné skóre 5.0/10",
-        "reason": "Cena zaznamenala od poslednej analýzy minimálny posun o 0.06%, kapitalizácia stagnovala so zmenou o -0.00% a objem klesol o 26.48%. Príčina tohto vývoja nie je z dostupných dát potvrdená. Cena sa pohybuje v blízkosti kĺzavého priemeru EMA200 na úrovni 0.4534 USD a horizontálnej podpory na úrovni 0.4539 USD, avšak zhora pôsobí odpor kĺzavých priemerov EMA20 na úrovni 0.4825 USD a EMA50 na úrovni 0.4868 USD. Hodnota RSI na úrovni 42.74 potvrdzuje prevahu opatrnosti na trhu.",
-        "confirmation_needed": "Udržanie podpory na úrovni 0.4539 USD a rast nákupnej aktivity."
+        "action": "SELL",
+        "current_price": 0.4457,
+        "market_cap": 2171860721.8031054,
+        "volume_24h": 154315852.79713282,
+        "trend_score": 1.3,
+        "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "RENDER",
-        "action": "BUY PULLBACK",
-        "current_price": 2.029,
-        "market_cap": 1050967766.247746,
-        "market_cap_change_pct": 0.13488136169895884,
-        "market_share_pct": 0.037140249481878496,
-        "volume_24h": 111478870.67038147,
-        "volume_change_pct": -31.42585510820509,
-        "entry_price": 1.98,
-        "hard_stop_level": 1.83,
-        "tp1": 2.15,
-        "tp2": 2.23,
-        "target_horizon": "24H",
-        "outlook_direction": "pokračovanie rastu s cieľom na úrovni 2.150 USD",
-        "outlook_score": "Orientačné skóre 7.0/10",
-        "reason": "Cena vzrástla od poslednej analýzy o 0.30%, kapitalizácia stúpla o 0.13% a objem klesol o 31.43%. Priama príčina tohto pohybu nie je z dostupných dát potvrdená. Z technického pohľadu má aktívum najlepšiu pozíciu v portfóliu, keďže sa drží nad všetkými kľúčovými kĺzavými priemermi EMA20 na úrovni 2.0228 USD, EMA50 na úrovni 1.9935 USD aj EMA200 na úrovni 1.8168 USD. Indikátor RSI na úrovni 53.18 signalizuje mierne pozitívne momentum, hoci pokles objemu nabáda k trpezlivému čakaniu na pullback.",
-        "confirmation_needed": "Udržanie ceny nad kĺzavým priemerom EMA20 na úrovni 2.0228 USD."
+        "action": "REDUCE",
+        "current_price": 1.897,
+        "market_cap": 984747857.0667728,
+        "volume_24h": 88526475.56225324,
+        "trend_score": 3.3,
+        "risk_level": "VEĽMI VYSOKÉ"
       }
-    ],
-    "conditions_to_watch": [
-      "Sledovanie vývoja celkovej trhovej kapitalizácie na úrovni 2829.73B USD a schopnosti trhu udržať lokálnu podporu.",
-      "Kontrola nákupného objemu pri jednotlivých minciach, keďže pokles objemu o 20.59% až 31.43% počas posledných 4 hodín signalizuje slabú účasť kupujúcich.",
-      "Monitorovanie indexu Fear & Greed na hodnote 62 bodov z dôvodu rizika prehriatia trhu pri priblížení k pásmu extrémnej chamtivosti.",
-      "Sledovanie reakcie cien kľúčových aktív na ich kĺzavé priemery EMA20 a EMA200 v 4-hodinovom časovom rámci."
-    ],
-    "opportunity_ranking": []
+    ]
   },
-  "last_full_analysis": "2026-10-14T07:23:58.260766+02:00",
+  "last_full_analysis": "2026-10-14T16:59:48.891033+02:00",
   "last_analysis_reason": "BRATISLAVA_07:00",
   "btc_data": {
     "symbol": "BTC",
@@ -1917,7 +1849,7 @@
       "evaluated_at": "2026-10-12T05:23:44.605136+00:00"
     }
   ],
-  "bot_version": "10.2",
+  "bot_version": "10.3",
   "last_market_snapshot": {
     "timestamp": "2026-10-12T05:23:48.995939+00:00",
     "total_market_cap": 2825036396916.8486,
@@ -1926,10 +1858,341 @@
   },
   "last_safety_alert_score": 3,
   "last_coin_risk_alerts": {},
-  "coin_change_alerts": {
-    "RENDER": -1.9714144898964916,
-    "FET": -2.901888530631046,
-    "TAO": 0.24787535410766484,
-    "ONDO": -4.774138300149869
+  "coin_change_alerts": {},
+  "peaks": {
+    "BTC": {
+      "price": 84352.0,
+      "ts": "2026-10-12T04:00:00+00:00"
+    },
+    "AAVE": {
+      "price": 176.15,
+      "ts": "2026-10-08T00:00:00+00:00"
+    },
+    "TAO": {
+      "price": 302.0,
+      "ts": "2026-10-12T04:00:00+00:00"
+    },
+    "FET": {
+      "price": 0.2443,
+      "ts": "2026-10-11T16:00:00+00:00"
+    },
+    "SOL": {
+      "price": 117.5,
+      "ts": "2026-10-07T12:00:00+00:00"
+    },
+    "ONDO": {
+      "price": 0.5325,
+      "ts": "2026-10-12T00:00:00+00:00"
+    },
+    "RENDER": {
+      "price": 2.233,
+      "ts": "2026-10-13T04:00:00+00:00"
+    }
+  },
+  "fundamentals": {
+    "generated_at": "2026-10-14T14:55:18.765909+00:00",
+    "mode": "morning",
+    "status": "ok",
+    "symbols": [
+      "AAVE",
+      "TAO",
+      "FET",
+      "SOL",
+      "ONDO",
+      "RENDER"
+    ],
+    "market": {
+      "findings": [
+        {
+          "headline": "Vyššia než očakávaná inflácia v USA (septembrové CPI) vyvolala výpredaj rizikových aktív",
+          "summary": "Index spotrebiteľských cien (CPI) v USA zrýchlil medziročne na 3,7 % (očakávaných 3,6 %), čo okamžite vyhnalo výnosy amerických štátnych dlhopisov a poslalo Bitcoin pod úroveň 83 000 USD. Trhy podľa CME FedWatch začali oceňovať 47 % šancu na sprísnenie úrokových sadzieb na zasadnutí Fedu 28. októbra",
+          "category": "makro",
+          "impact": "negative",
+          "severity": 3,
+          "date": "2026-10-14",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHfdWo5mBwRr-M5nY6vogR3w1zG5AhKB0LDh1b9f4pNDLuHJH_1ettd5GhAJ-M3bHnLcMBBrMOiDJh2UqCHLlgOLZdMgWkUVA74gfAtdhRn_LEvQ96e5L2KYdYpNCKiY1fR5LR1g-xNeuIXacBD45QfWbrgaldXCgsXjxVpXxob1EM5E2iaRahDAnktPu2DpjYUnoHruVuqR-ReaLA65CN_gbq996ZF"
+        },
+        {
+          "headline": "Masívne likvidácie pákových pozícií a de-risking technologického/AI sektora",
+          "summary": "Počas posledných 24 hodín bolo na derivátovom trhu zlikvidovaných približne 800 miliónov USD v pákových pozíciách. Výpredaj na krypto trhu bol navyše zosilnený poklesom akcií na Nasdaqu spojených s AI a polovodičmi (Nvidia, pamäťové čipy).",
+          "category": "trh",
+          "impact": "negative",
+          "severity": 2,
+          "date": "2026-10-14",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF04fUBVlTAXZ-ECfyIKh_wMZvatSgeZa9MPFz6LPaKrFE7Sslf4iACJp4gxReHgcyeW4rrF9QJD8AaUgtR_ZqMlmE7bH1nDaxoKK_KD66W8ap263FT-JIuzgtNGw7Z_Vs3P8KXLVOoMlmSI68B33EX9f7huRo="
+        },
+        {
+          "headline": "Standard Chartered spúšťa CFD spotové krypto stoly pre bohatých klientov v SAE",
+          "summary": "Bankový gigant Standard Chartered otvoril priame inštitucionálne obchodovanie pre BTC a ETH v Spojených arabských emirátoch s uzavretou bankovou úschovou a vysporiadaním.",
+          "category": "iné",
+          "impact": "positive",
+          "severity": 2,
+          "date": "2026-10-14",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEreys8zJx3chodti2VlvoosVhC-_tAV4xP8A_jkxO9wUvueTJhwc45ewZ7a6EKYRtKNQVcfcWxF_Nmi9UQ1yju5Tq1V0px9kGrJYfVgvqUMyi-6PiHWVuOGIEbcuone0UwsNlISBPS4kRNg3ajr_SYmQp1Rm1GCtUeKkKjvwTQAIZIeMkYMc4Vdk5cY1b5bJY3GcQerARZd60UFTQLdhr6fg=="
+        },
+        {
+          "headline": "Plánované rozsiahle odomykanie tokenov (token unlocks) v 3. októbrovom týždni",
+          "summary": "Do trhu vstupuje nová ponuka v hodnote vyše 845 miliónov USD, vrátane odomknutí pre Starknet (15. októbra), Arbitrum (16. októbra – 18,4 mil. USD) a Cronos (17. októbra – 70,8 mil. USD), čo vytvára tlak na likviditu altcoinov.",
+          "category": "token unlock",
+          "impact": "neutral",
+          "severity": 2,
+          "date": "2026-10-12",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEw1Zpo9aQSM3h3b9hTau_Uw26fh7FH52SsAtAVBaWWPs5UMez32B0svT_nbhtQad3KspqQD50Cya-QGDb8JSGv0cxZCW_9uP6UGjUNBlERsymDcv7YmVrHZvLR856Q3r2oNHoXsSr659vSXH-4pXC19hoteqHR"
+        }
+      ],
+      "risk_pts": 1
+    },
+    "coins": {
+      "AAVE": {
+        "findings": [
+          {
+            "headline": "Aave DAO schválilo stimuly pre trh s tokenizovanými akciami na sieti Base a rast V4",
+            "summary": "Komunita schválila dotácie pre tokenizované akcie Coinbase (Apple, Nvidia, Microsoft a ďalšie) v rámci Aave V4 Equities Hub na sieti Base. Zároveň vklady do verzie V4 na sieti Arc prekonali 300 miliónov USD.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQET4BRZHYXFLopwTuHhMXQQCgNgUKG_Jpc4QsccqxEYbdj7DfuPyIcN8nWxZCcD6s03t9lsr-5bYy7lsdMgI1Qpum5Pos6rVRi4j37g40u1epsK1a1mn61Ni-0Zm9TCPa9PfT4-2AdoJV0mQJzIEQkwpm5BuMU="
+          },
+          {
+            "headline": "Babylon predložil návrh na pôžičky stablecoinov kryté natívnym Bitcoinom v Aave V4",
+            "summary": "Babylon Labs zverejnil oficiálny ARFC governance návrh, ktorý umožní používateľom Aave zakladať priamy Bitcoin na bitcoinovom mainnete cez Taproot bez centralizovaných správcov či cross-chain bridgeov.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFHAli_Gt2t0OQQuz7KHkKtIa420F7rlv__SEuJHMsk_sr4JpVbdJRJTRMUmijlo4yxmHKj7AzaDF1W9TaNPI5ZIjHvA3mPM6D96joMmnYHSJZnc2UJUmZblxAYyAdBIljHPEGPHFqA1r4f2sIxCUmGponxozi7Qegt0fM0adfc5j9CXFFxLRnAJOZCd7SrQ7jq"
+          },
+          {
+            "headline": "Ratingová agentúra S&P Global zverejnila hĺbkovú správu hodnotiacu Aave",
+            "summary": "Správa vyzdvihuje Aave ako kľúčovú infraštruktúru s TVL vyše 19 miliárd USD, no súčasne poukazuje na riziká zraniteľností v smart kontraktoch a koncentráciu likvidity.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG01-A5RHHeJcwcLT7vWydksT4-qeMYxcKGfgCnupyL4jGBzRSbJ1qe0eNOHvVV4ZdXO5uS6kjUcvZbvC3mJAObThzzyQ0YOD9lBMZFGWX_XeNByItDe9ElpGKE0hkFv6X7x8cS2eL0SvxIkFjuV8GtofYR5ila1trVu7V6G2Nvz3TMn4gNfntkKCoZwTSSJ_Sbi5WSD8k3X8xcpSj6nr5R6T4GqIUnALW0_6q0vuEqFLG_pWLwE39keg=="
+          }
+        ],
+        "risk_pts": 0,
+        "cause_category": "Pohyb celého trhu",
+        "cause_summary": "Primárnym hýbateľom poklesu je makroekonomický šok spôsobený vyššou septembrovou infláciou v USA, čo viedlo k rastu dlhopisových výnosov a likvidácii prepákovaných long pozícií na celom trhu."
+      },
+      "TAO": {
+        "findings": [
+          {
+            "headline": "Grayscale Bittensor Trust emitoval nové akcie v hodnote 1,45 milióna USD",
+            "summary": "Fond Grayscale Bittensor Trust (GTAO) vydal v rámci súkromného umiestnenia 253 100 akcií krytých 4 778 tokenmi TAO, čo potvrdzuje stabilný inštitucionálny dopyt.",
+            "category": "ETF a toky",
+            "impact": "positive",
+            "severity": 1,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG4cE7s3emlCjoSqiNQFoTQ66EpyYHDKZV8ijPHEgLT9cVqfw4IIlqDy2U7ZbZe6pHORY_6KAWAzeM2kdTn0YR_1WCvEJVYF3ZS0-UoK3JuBgKx6iIJOXTKIhjtFjH60fS5oeBaorK6IixORCSTiBxW0t6XFkhLW1gwGkrMrba6YoCX5CxTBLXUwGwdjzS9h2j6o28OvhPJIP5zaQEJMW1ulVHyMqTPvjeRSu00"
+          }
+        ],
+        "risk_pts": 0,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Pokles TAO je dôsledkom makro výpredaja a korelácie s de-riskingom celého AI odvetvia po prepade AI a čipových akcií na Nasdaqu, pričom nebol zaznamenaný žiadny interný projektový problém."
+      },
+      "FET": {
+        "findings": [
+          {
+            "headline": "Pokles ceny bez projektového incidentu: vplyv výpredaja AI na Nasdaqu",
+            "summary": "FET nezaznamenal žiadne zlyhanie infraštruktúry; pokles je priamou reakciou na zníženie rizikovej expozície investorov voči AI segmentu a likvidácie prepákovaných derivátov.",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF04fUBVlTAXZ-ECfyIKh_wMZvatSgeZa9MPFz6LPaKrFE7Sslf4iACJp4gxReHgcyeW4rrF9QJD8AaUgtR_ZqMlmE7bH1nDaxoKK_KD66W8ap263FT-JIuzgtNGw7Z_Vs3P8KXLVOoMlmSI68B33EX9f7huRo="
+          },
+          {
+            "headline": "Plánovaný token unlock pre FET na 28. októbra 2026",
+            "summary": "Dňa 28. októbra 2026 je naplánované uvoľnenie 2,43 milióna tokenov FET (cca 0,09 % celkovej ponuky), pričom trh naďalej sleduje riešenie septembrového incidentu na moste SingularityNET.",
+            "category": "token unlock",
+            "impact": "neutral",
+            "severity": 1,
+            "date": "2026-10-12",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEXK1c89X1bQFjj7izSfCxJbXeLx8nHpACMR54ZpnV1GMV6bd29SbLWrmHHJYHvkQjQ8CoPokw-ccpa96Tmyw5vfE8uPzdgButd5Nyvgia2hrcB78EytxsGG_UjQLve0rHAgScylyNad0M="
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Prepad ceny bol priamo potvrdený ako reakcia na výpredaj technologických a AI akcií na Nasdaqu v spojení s likvidáciami derivátov a celkovým makro výpredajom."
+      },
+      "SOL": {
+        "findings": [
+          {
+            "headline": "Oznámený dátum upgradu siete Alpenglow na 21. októbra 2026",
+            "summary": "Vývojársky tím Anza oznámil, že významný upgrade Alpenglow príde na mainnet 21. októbra 2026. Nahradí on-chain hlasovací mechanizmus konsenzom založeným na certifikátoch a skráti finalitu transakcií na ~150 milisekúnd.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 3,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHcqd4OeSfjb8TIfkFI6O_aba0Y54z3gSH0bvYhuNgo2rc-5uJxs2g2XW_HILLuT1X_c6P_t7vD63OeaN8yrU0KhbnNP5MHhF1iJvMCfMBMfCytLpidMCk5muzvTOoaORXD7GXJzGamRh0IWuiof3mcneqHDqRSHvRLeiYW8ptcdpi1JwGPnNtBwefq8DeEwPFz-D5bs3yrrsZs_2JFysdX8qSlqTB6v2y5jvLGdNV5rsFNWb7qkfVnKUPHGhlPfn0zYatV9zgZbJK8z1JOIBHRMzKzQ2F1Y0cE-2HUHXTadYq2jV-kGN1GlfqSWSQHAzgTAMA="
+          },
+          {
+            "headline": "Spustenie natívnej integrácie Internet Computer (ICP) so Solanou a ckSOL",
+            "summary": "DFINITY Foundation uviedla ckSOL, čo umožňuje DeFi aplikáciám na sieti ICP natívne čítať a zapisovať do Solany bez nutnosti používania externých mostov.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHtaceX4zOXIL6OkQ0wA92xY6U2no22wxJ7VDv4gA3eKtx4PGOBBpYB7g7GZHRhuziXw4Z7oPV_yeXSwP5fXKnHrvC-aLr_3cgihZk29ykPo5G7XL9isCNXk166BUBKpWmaZE9MnX7x_J-Nb199t9wIi40NF2D_aC6G-qrHRmtnFoksR-cjE_1Yu_9SV0uEgenkm1MzBIBGfen5NtiPBgYYfqfUcc7bhCWu_qmVfVO69e4gLx1Yv9Rbvmw="
+          },
+          {
+            "headline": "Odlivy z amerických spotových Solana ETP fondov v októbri",
+            "summary": "Americké fondy ETP na Solanu zaznamenali odlivy v 8 z 9 októbrových obchodných dní, čím ukončili 14-týždňovú sériu čistých prílevov a tlmia nákupný apetít.",
+            "category": "ETF a toky",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEia6cLLkDe-A5zt1_G3FGxtRpHpmS_UOMb2vbXmU4X6rvLs4r4G9LI5Yg75Y7F2fAqihDFtsNIZgv5MULVDnFpOAxoJk8Ylws43LNKzyiEBnb5brG5z814iVm7"
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Pohyb celého trhu",
+        "cause_summary": "Pokles ceny Solany nastal v rámci celotrhového výpredaja altcoinov po negatívnych makrodátach inflácie v USA a likvidácii pákových pozícií."
+      },
+      "ONDO": {
+        "findings": [
+          {
+            "headline": "Ondo Finance uviedlo „Ondo Intelligent Portfolios“ v spolupráci s BlackRockom",
+            "summary": "Ondo spustilo novú triedu fondov (označovanú za „SPY moment“ pre on-chain financie), ktorá integruje 7 modelových portfólií (tri spravované priamo BlackRockom) do jedného tokenu.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 3,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEAefzPB4u9I8DN1BD3iPraQoQE4e8b1-YKIEMLfmIbXCDykKVmPJCMb2NmojMG_WGLZgKiW7cCzwYs_rDLzcR_MbeEaSlyH817lS4MAakkAXeBbxrg-9Az-InmfGJ9iKFahGztmjgjDw35UZO_1TVlvD1bduyibgw0Vt7u_XwRV3cb"
+          },
+          {
+            "headline": "Predaj veľkých pozícií (veľrýb) vytvára tlak na cenu po predošlom raste",
+            "summary": "Po spustení Ondo Private Markets (6. októbra) čelí token ONDO vyberaniu ziskov a predajným príkazom veľkých držiteľov (napr. zaznamenaný odpredaj 9 miliónov ONDO za 4,4 mil. USD na DEXoch).",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-11",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEu8XIgN7Gdis8kr4Fmjgb-kywMgPzEdSOcf5oftLJHz0awW6fLkde9Y4r4lG7XRttA37Gai0iAk-t9NX_MmBzBvsou8KVE3OZq46jyyFti77I1ycvVCtv_vPUNIaeuHMmIUChn1SG8AljaR8lN9gkGXXx00hc="
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Prepad ceny ONDO bol zapríčinený vyberaním ziskov a potvrdeným odpredajom pozícií veľkými investormi v hodnote 4,4 mil. USD na decentralizovaných burzách."
+      },
+      "RENDER": {
+        "findings": [
+          {
+            "headline": "AI úlohy tvoria už takmer 40 % kapacity siete; softvér Octane 2026 posilňuje dopyt",
+            "summary": "Nové dáta ukazujú, že AI a strojové učenie dosahujú 35 – 40 % celkovej aktivity Render Networku. Vydanie balíka Octane 2026 s podporou Gaussian Splats navyše rozšírilo komerčné nasadenie v produkcii.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFrKcDQj0stRYzkyyEYEaz2rEG_Cy1ioyrle4FsVyit28-SGyaAwUMj5gBeGT_NfJqbMvMTHODhhOOD_gxG4PffIDFPDDQC98zfSSyVcHZ9b4uj68PeW1_Ap28uG935uyCfJD7Dq5ZyF5ZZm0a4HwvmdCJaj1DfxwjEohp5VO2B3Jml6cpwwOzrRf6qEu2bZHzk0Vbuo3TAoUU5tVQe-w=="
+          },
+          {
+            "headline": "Korekcia po prekročení 2 USD a náraste otvoreného záujmu (Open Interest)",
+            "summary": "Po prudkom prekonaní 2,00 USD vzrástol otvorený záujem o 12,5 % na 35 miliónov USD, čo vytvorilo prepákované prostredie. Pri následnom odraze od rezistencie 2,20 – 2,40 USD a makro výpredaji prišlo k prudkému spätnému pohybu.",
+            "category": "trh",
+            "impact": "neutral",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEtO94CXUM42E45LaRdEvigqc6IckIpQr2NR9g5-_tOVdc0UYbGkdLgSGQdLo7BBsW8pOiSUYpphJW8HBS00av0nMIYN8yLNVaVGd3Xi7XuZxF9hQmrnN5D2NIxiBhWyWtju9Za7HllngulD6X_Tan4j02447pA3W4FmUoE0KgJekatfxtW0_w7Z5ySnVMvSRbOVV1EZ3DrQ_G8mytopp34pYRA0DNFJKNRaqz6E25MqVA="
+          }
+        ],
+        "risk_pts": 0,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Výrazný prepad nastal po odraze od silnej technickej rezistencie 2,20–2,40 USD v kombinácii s prepákovaným trhom a kaskádou likvidácií pri makro výpredaji."
+      }
+    }
+  },
+  "last_actions": {
+    "AAVE": {
+      "action": "REDUCE",
+      "ts": "2026-10-14T14:59:48.890969+00:00",
+      "trend_score": 4.5
+    },
+    "TAO": {
+      "action": "SELL",
+      "ts": "2026-10-14T14:59:48.890995+00:00",
+      "trend_score": 1.3
+    },
+    "FET": {
+      "action": "SELL",
+      "ts": "2026-10-14T14:59:48.890997+00:00",
+      "trend_score": 1.3
+    },
+    "SOL": {
+      "action": "SELL",
+      "ts": "2026-10-14T14:59:48.890998+00:00",
+      "trend_score": 2.5
+    },
+    "ONDO": {
+      "action": "SELL",
+      "ts": "2026-10-14T14:59:48.891000+00:00",
+      "trend_score": 1.3
+    },
+    "RENDER": {
+      "action": "REDUCE",
+      "ts": "2026-10-14T14:59:48.891002+00:00",
+      "trend_score": 3.3
+    }
+  },
+  "prev_flags": {
+    "safety": "CRITICAL",
+    "dominance": 59.361224322725505,
+    "BTC": {
+      "above_ema50": false,
+      "above_ema200": false
+    },
+    "AAVE": {
+      "above_ema50": false,
+      "above_ema200": true,
+      "support_broken": false,
+      "action": "REDUCE"
+    },
+    "TAO": {
+      "above_ema50": false,
+      "above_ema200": false,
+      "support_broken": false,
+      "action": "SELL"
+    },
+    "FET": {
+      "above_ema50": false,
+      "above_ema200": false,
+      "support_broken": false,
+      "action": "SELL"
+    },
+    "SOL": {
+      "above_ema50": false,
+      "above_ema200": false,
+      "support_broken": false,
+      "action": "SELL"
+    },
+    "ONDO": {
+      "above_ema50": false,
+      "above_ema200": false,
+      "support_broken": true,
+      "action": "SELL"
+    },
+    "RENDER": {
+      "above_ema50": false,
+      "above_ema200": true,
+      "support_broken": false,
+      "action": "REDUCE"
+    }
+  },
+  "safety": {
+    "state": "CRITICAL",
+    "score": 8,
+    "reasons": [
+      "6 z 6 altcoinov je pod prahom poklesu",
+      "celková trhová kapitalizácia -4.5% za 24h",
+      "Bitcoin pod EMA200",
+      "Bitcoin pod EMA50",
+      "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
+    ],
+    "ts": "2026-10-14T14:59:48.891018+00:00",
+    "last_alert_state": "CRITICAL",
+    "last_alert_score": 8,
+    "last_alert_ts": "2026-10-14T14:59:48.891019+00:00"
   }
 }
