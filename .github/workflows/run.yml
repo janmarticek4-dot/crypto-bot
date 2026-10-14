@@ -1,9 +1,9 @@
-
-name: Crypto AI Bot V8.2
+name: Crypto AI Bot V10.3
 
 on:
   # Bezpecnostna kontrola kazdych 15 minut.
-  # Hlavne analyzy nacasuje main.py podla casu v Bratislave.
+  # Hlavne analyzy (07:00, 15:00, 20:00 Bratislava) nacasuje main.py,
+  # takze letny/zimny cas nie je potrebne riesit v cron-e.
   schedule:
     - cron: "*/15 * * * *"
 
@@ -12,6 +12,11 @@ on:
     inputs:
       manual_analysis:
         description: "Spustit okamzitu hlavnu analyzu?"
+        required: false
+        default: false
+        type: boolean
+      manual_deep_search:
+        description: "Pri rucnej analyze spustit aj hlboke hladanie (Google Search)?"
         required: false
         default: false
         type: boolean
@@ -26,7 +31,8 @@ concurrency:
 jobs:
   crypto-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Hlboke hladanie (vyhladavanie + strukturovanie + vysvetlenie) trva dlhsie
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -50,11 +56,12 @@ jobs:
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
           # Ak je premenna GEMINI_MODEL prazdna,
-          # pouzije sa platny predvoleny model.
+          # pouzije sa predvoleny model.
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.8-flash' }}
 
           # Pri automatickom spusteni je hodnota false.
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
+          MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
 
           PYTHONUNBUFFERED: "1"
 
@@ -71,7 +78,9 @@ jobs:
             git add bot_state.json
 
             if ! git diff --cached --quiet; then
-              git commit -m "Update crypto bot state"
+              git commit -m "Update crypto bot state [skip ci]"
+              # Ochrana pred konfliktom, ak medzitym pribudol iny commit
+              git pull --rebase --autostash || true
               git push
             else
               echo "Stav bota sa nezmenil."
