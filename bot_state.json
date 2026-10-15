@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-15T05:28:15.612579+02:00",
+  "last_run": "2026-10-15T06:04:39.250020+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -1865,8 +1865,8 @@
       "ts": "2026-10-12T04:00:00+00:00"
     },
     "AAVE": {
-      "price": 176.15,
-      "ts": "2026-10-08T00:00:00+00:00"
+      "price": 176.11,
+      "ts": "2026-10-10T04:00:00+00:00"
     },
     "TAO": {
       "price": 302.0,
@@ -1877,8 +1877,8 @@
       "ts": "2026-10-11T16:00:00+00:00"
     },
     "SOL": {
-      "price": 116.81,
-      "ts": "2026-10-08T00:00:00+00:00"
+      "price": 115.86,
+      "ts": "2026-10-08T04:00:00+00:00"
     },
     "ONDO": {
       "price": 0.5325,
@@ -2185,17 +2185,17 @@
     "score": 11,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "celková trhová kapitalizácia -6.0% za 24h",
-      "Bitcoin -3.3% za 24h",
+      "celková trhová kapitalizácia -6.4% za 24h",
+      "Bitcoin -3.4% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "MACD Bitcoinu je záporný",
-      "prelomený support: AAVE, ONDO",
+      "prelomený support: AAVE, ONDO, RENDER",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-15T03:28:15.612543+00:00",
+    "ts": "2026-10-15T04:04:39.250013+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 11,
+    "last_alert_score": 11.0,
     "last_alert_ts": "2026-10-15T03:28:15.612569+00:00"
   },
   "alerts": {
@@ -2231,9 +2231,9 @@
     },
     "RENDER": {
       "level": "DEEP",
-      "drawdown": 14.6,
-      "action": "REDUCE",
-      "ts": "2026-10-14T15:17:07.800350+00:00"
+      "drawdown": 17.42,
+      "action": "SELL",
+      "ts": "2026-10-15T04:04:39.249999+00:00"
     }
   },
   "alert_research": {
@@ -2288,19 +2288,93 @@
       }
     },
     "RENDER": {
-      "ts": "2026-10-14T15:14:49.172174+00:00",
-      "drawdown": 14.6,
+      "ts": "2026-10-15T04:02:24.618047+00:00",
+      "drawdown": 17.42,
       "data": {
-        "findings": [],
-        "risk_pts": 0,
-        "cause_category": "Príčina nezistená",
-        "cause_summary": ""
+        "findings": [
+          {
+            "headline": "Nárast pákových pozícií narazil na silný technický odpor na úrovni 2,20 – 2,40 USD",
+            "summary": "Otvorený záujem (Open Interest) na futures kontraktoch RENDER stúpol o 12,5 % na približne 35 miliónov USD pri pokuse preraziť hranicu 2,20 USD. Neschopnosť preraziť kľúčovú rezistenciu spôsobila zraniteľnosť trhu a následný výpredaj špekulatívnych pozícií.",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGhVywFVeCZYb03YPemenkGwjCfPGI35EGbdCMPGfhFOaiXRjHDD71ccDAALQ0LkHoSVVjsfIbFuXI4Yes_Xmj0N6qZ_I2lihTy8vp7F9RQdf2wffOgffRGF0paesoYzD5iBzXA9z6xbcMzANfHV5HgVqevLIseGMy-XYRBwVK8RcvE6c7ywYMJCGOtkVbSHlDWie92-NNJ1MzQSNrnmNXkY_pY7z5eWvNUkI4_1YCA2M0="
+          },
+          {
+            "headline": "Obavy z riedenia ponuky a poklesu sieťových poplatkov",
+            "summary": "Analýzy poukázali na spomaľujúce sa tempo príjmov z úloh na sieti v porovnaní s plánovanou ročnou emisiou približne 5,9 milióna nových tokenov. Slabšie pálenie tokenov nedokáže plne absorbovať novú ponuku na trhu, čo vytvára štrukturálny predajný tlak.",
+            "category": "projekt",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEsSZHpUG1y82UmOCW_pHe2fZwshYxkYZ6awhaoxwSbocl08tdCO7d7IITJI8zctYSH-MKPV1V51t5Tb-0cyglufOg-FgpItUhj__-NdwHWbip7dfp2irT8-y6Qewwu7nzrNgkihqw1rjHbWMYgDDkkXPFUJewLuZwR6izo87Kr7jYGzuFH25mGXwGxpZ4="
+          },
+          {
+            "headline": "Render Network a Solana oznámili udalosť „BEYOND THE FRAME“ v Londýne (Plánovaná udalosť do 30 dní)",
+            "summary": "Render Network a Solana naplánovali na 16. novembra 2026 v londýnskej galérii FRAMELESS výstavu digitálneho 3D umenia počas konferencie Breakpoint 2026. Podujatie má demonštrovať praktické využitie decentralizovanej GPU infraštruktúry pri spracovaní komplexnej grafiky.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 1,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFPWU_I3D0bh3bBAy7-9SgVfiOiiL2tAQ20Mu30oVRD9_Qx12wO_kQCI2-FWGQFeHPET27tSzbcJ4zWa2jdqEZBi9Qw5YfSp5dtlCbktROMf7rdWaKvu50X4QdBOK-O7k_DFrBxLazdPpeEwRUZ5bWcJN1UkbjvAMtoObuGChVvGeLANHXl4JcAQpMaBO_UICiovayP"
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Prepad ceny RENDER bol spôsobený makroekonomickým inflačným šokom po zverejnení vyššieho amerického CPI za september dosahujúceho 3,7 %. Pokles bol navyše zosilnený odmietnutím ceny na rezistencii a následnou kaskádou likvidácií prepákovaných pozícií."
       }
     }
   },
   "alert_research_market": {
-    "ts": "2026-10-14T15:14:49.172174+00:00",
-    "findings": [],
-    "risk_pts": 0
+    "ts": "2026-10-15T04:02:24.618047+00:00",
+    "findings": [
+      {
+        "headline": "Americká inflácia CPI za september prekonala očakávania a vyvolala obavy z prísnejšej politiky Fedu",
+        "summary": "Medziročná inflácia v USA za september 2026 dosiahla 3,7 % oproti prognózovaným 3,6 %, čo viedlo k zvýšeniu stávok na ďalšie zvyšovanie úrokových sadzieb Fedom. Táto makroekonomická správa spustila výpredaj rizikových aktív, pričom Bitcoin klesol pod úroveň 82 000 USD a stiahol so sebou celý trh.",
+        "category": "makro",
+        "impact": "negative",
+        "severity": 3,
+        "date": "2026-10-15",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFWQvvWeiyK6GgeyqqtxfzWcTh4y0_mHAe_ZHwpCD6qPPvmwJjvbBq47tn4Po6eZRG-14Pe9E6ja33pQSWSZQEFhy-ksD-HR0QyNtKyZdRq4dQAut05CYjXFQ9aNb5yJ8PtkraFi8nuK7yl_WWj62tO58nF0cw="
+      },
+      {
+        "headline": "Masívna vlna likvidácií pákových pozícií presiahla 800 miliónov USD",
+        "summary": "V dôsledku prepadu cien a korekcie v ázijskom technologickom a polovodičovom sektore bolo za 24 hodín zlikvidovaných vyše 800 miliónov USD v pákových dlhých (long) pozíciách. Tento výplach páky výrazne prehĺbil pokles najmä u altcoinov.",
+        "category": "trh",
+        "impact": "negative",
+        "severity": 3,
+        "date": "2026-10-14",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHciHlHO_ufGJU9Y3KF46j8HCTk02IXuFNfnTmbNdpEypgTXaSm7OqV-3CEbTJBc04bGdPHAIIMDrl4jwXs0g9UySiwugTRtXtbm9JmTDk4GifQzqDmDJaycqeMuGQBS1P1JcKR8mjrjYdnOhIoOcDx3PqwIoyirgYSaAJfy0Bbu7pqExai6qkAeDt_Brwl"
+      },
+      {
+        "headline": "Po zablokovaní zákona CLARITY Act navrhuje CFTC vlastné federálne pravidlá pre krypto transakcie",
+        "summary": "Keďže komplexný regulačný zákon CLARITY Act neprešiel Senátom, americká CFTC zverejnila predbežné návrhy pravidiel pre krypto transakcie a dohľad nad retailovými maržovými obchodmi. Regulačná iniciatíva sa tak presúva z legislatívy na individuálne agentúry (SEC a CFTC).",
+        "category": "regulácia",
+        "impact": "neutral",
+        "severity": 2,
+        "date": "2026-10-13",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGKX8kpO0MNiA_9JQIc_40bEc4y3eZFvDmZ0NGRvnv1RdDlsqHu-QpH2zW4jKTtJNg6sUDUXqZBCr6qqRmA4w3LcVLKTzJn5ZN5YbmsBktoLnxQX7AExM9OIsYxXEaEDPOUHTH-qCgodh2oVW7ZN3bCE7gokfGE_bk_bPFgXrvislf_tSAJRNytYllT-dQWfJdmIGdwqJXPi0BxIx-S3SCYtGk7W6wr6OojREkhKoAWBjHGtuCYqCv6chyrM20="
+      },
+      {
+        "headline": "Americké spotové ETF fondy na Bitcoin a Ethereum zaznamenali týždenné odlevy vyše 1,2 miliardy USD",
+        "summary": "Inštitucionálni investori prudko obmedzili rizikovú expozíciu, pričom z amerických spotových krypto ETF odtieklo počas jedného týždňa cez 1,22 miliardy USD. Negatívny sentiment okolo inštitucionálnych produktov znížil likviditu na spotovom trhu.",
+        "category": "ETF a toky",
+        "impact": "negative",
+        "severity": 2,
+        "date": "2026-10-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEGqrPoYOUYHT_PSnWQ8-dssyqBH3UIunSXy88PSDZQt_KFY0ImSqScCOp4HfHc2kHYE8pECpJVahDJntn0CAGEpkBSeuI9EwaNk_qgDMP4zj1WMBrmkPsDRnczte6UAbojgllqO6yEFMRHlcHXUVLNfh4PydQFWcZyxpNFwgzdOtpFMh34ERZZRc3wzU9w792-gkerNckkNiinaTyJB9hU9qUSgUdwmiw5e1Ixs7JDEZu6"
+      },
+      {
+        "headline": "Britská FCA oficiálne otvorila autorizačnú bránu pre krypto firmy",
+        "summary": "Britský Úrad pre finančné správanie (FCA) sprístupnil autorizačný portál pre krypto spoločnosti pred plným spustením nového režimu. Tento krok prináša pre inštitúcie vo Veľkej Británii väčšiu právnu istotu.",
+        "category": "regulácia",
+        "impact": "positive",
+        "severity": 1,
+        "date": "2026-10-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxZwG1mHRq-k7z0Ooicb4H_od7dCq-nctj8Wie9pvbePlId5eXwBpYq1EWyRn_gYnryZ3xf5jFBhN9qppDDH8UXnhd2laHDeOJilWv-3eZNg6FjMFQEmdTDxwMLrk0_5LhxTypSspzHxpC_J8-zXu1ls2Qx6bYGLW_Mv5VpZuOQbV2"
+      }
+    ],
+    "risk_pts": 1
   }
 }
