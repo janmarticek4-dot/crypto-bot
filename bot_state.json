@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-15T07:41:25.102213+02:00",
+  "last_run": "2026-10-15T08:11:59.751562+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2146,19 +2146,20 @@
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 10,
+    "score": 11,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "celková trhová kapitalizácia -5.9% za 24h",
+      "celková trhová kapitalizácia -6.4% za 24h",
+      "Bitcoin -3.3% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "MACD Bitcoinu je záporný",
-      "prelomený support: ONDO, RENDER",
+      "prelomený support: AAVE, TAO, ONDO, RENDER",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-15T05:14:00.126510+00:00",
+    "ts": "2026-10-15T06:11:59.751555+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 10,
+    "last_alert_score": 10.0,
     "last_alert_ts": "2026-10-15T05:14:00.126513+00:00"
   },
   "alerts": {
@@ -2188,9 +2189,9 @@
     },
     "ONDO": {
       "level": "DEEP",
-      "drawdown": 16.34,
+      "drawdown": 19.46,
       "action": "SELL",
-      "ts": "2026-10-14T15:17:07.800348+00:00"
+      "ts": "2026-10-15T06:11:59.751536+00:00"
     },
     "RENDER": {
       "level": "DEEP",
@@ -2241,13 +2242,50 @@
       }
     },
     "ONDO": {
-      "ts": "2026-10-14T15:14:49.172174+00:00",
-      "drawdown": 16.34,
+      "ts": "2026-10-15T06:10:35.620273+00:00",
+      "drawdown": 19.46,
       "data": {
-        "findings": [],
-        "risk_pts": 0,
-        "cause_category": "Príčina nezistená",
-        "cause_summary": ""
+        "findings": [
+          {
+            "headline": "Ondo (ONDO) klesá v dôsledku makroekonomického výpredaja a prepadu sektora RWA",
+            "summary": "Token ONDO oslabil spolu s celým sektorom reálnych aktív (RWA), ktorý viedol poklesy trhu stratou vyše 6 % po zverejnení CPI dát. Podľa trhových analýz sa neobjavil žiadny negatívny fundament špecifický pre protokol Ondo; pokles predstavuje typické správanie vysoko-volatilného (high-beta) aktíva po ",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-15",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGOXo6dkN4Cy36eCvYPuGPDFIYXZqWXXrnxmm_vY__PF-uSq40gbLCcqq9CiI7raEgiakSL642JhCgNVHcn0OilYXBKr9PPb-BHnkf4B5WNnTeq-cNzSrYVlKmRFgA-pu80q25r9EYdcfz3mAaGHsf_OLDQKg=="
+          },
+          {
+            "headline": "Správa MMF označila Ondo Finance za jedného z najväčších emitentov tokenizovaných aktív",
+            "summary": "Medzinárodný menový fond (MMF) vo svojej správe o globálnej finančnej stabilite uviedol, že Ondo Finance spolu s projektom Backed Finance tvoria vyše 70 % trhu tokenizovaných akcií. Uznanie od globálnej inštitúcie potvrdzuje inštitucionálne postavenie protokolu, hoci MMF zároveň poukázal na riziká l",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFYNGELTR6_xXyOYGiNn7tzjrw2Ay9_PDdNZVL5NpL4x3SABEBPOwZLA84Ecg6LjbJ0QwSC9L6RjaFgQLpRzPtbpYNZ2oB8SLj-yBOgIa1E-5FX3dU0deLSYcaj9QW_5eNiuGwQBL_sIczRBGix8KVhuHSm"
+          },
+          {
+            "headline": "Ondo spustilo produkt Private Markets pre obchodovanie s pred-IPO firmami",
+            "summary": "Protokol spustil „Ondo Private Markets“, ktorý umožňuje oprávneným neamerickým investorom nepretržité 24/7 onchain obchodovanie s tokenizovanými zmenkami viazanými na súkromné spoločnosti pred ich vstupom na burzu, pričom prvou ponukou je popredná AI firma.",
+            "category": "projekt",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFYNGELTR6_xXyOYGiNn7tzjrw2Ay9_PDdNZVL5NpL4x3SABEBPOwZLA84Ecg6LjbJ0QwSC9L6RjaFgQLpRzPtbpYNZ2oB8SLj-yBOgIa1E-5FX3dU0deLSYcaj9QW_5eNiuGwQBL_sIczRBGix8KVhuHSm"
+          },
+          {
+            "headline": "Harmonogram odomykania tokenov (Token Unlocks) – najbližších 30 dní",
+            "summary": "V nasledujúcich 30 dňoch nie je naplánované žiadne významné odomykanie tokenov ONDO (cliff unlock). Najbližšia veľká udalosť odomykania (17,1 % celkovej ponuky) pripadá až na 18. január 2027.",
+            "category": "token unlock",
+            "impact": "neutral",
+            "severity": 1,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGa3wMas79pSv87gPNP6U3P61rfEm1WqkqmA1VelPRK9aaXT6qGMAQ3oHO6JYWJzWElKnMubxghILoO6eL8XWA-zv1emjaxXpNLH8pNr8CzHxk9iTGm8Kz8_wRDNoDNlzpIueUaqU56cg=="
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Hlavným spúšťačom prepadu bol makroekonomický šok z horších než očakávaných dát americkej inflácie (CPI), ktorý vyvolal plošné likvidácie a averziu k riziku. Token ONDO navyše reagoval na prepad celého sektora RWA o viac ako 6 % ako volatilné high-beta aktívum."
       }
     },
     "RENDER": {
@@ -2290,52 +2328,25 @@
     }
   },
   "alert_research_market": {
-    "ts": "2026-10-15T04:02:24.618047+00:00",
+    "ts": "2026-10-15T06:10:35.620273+00:00",
     "findings": [
       {
-        "headline": "Americká inflácia CPI za september prekonala očakávania a vyvolala obavy z prísnejšej politiky Fedu",
-        "summary": "Medziročná inflácia v USA za september 2026 dosiahla 3,7 % oproti prognózovaným 3,6 %, čo viedlo k zvýšeniu stávok na ďalšie zvyšovanie úrokových sadzieb Fedom. Táto makroekonomická správa spustila výpredaj rizikových aktív, pričom Bitcoin klesol pod úroveň 82 000 USD a stiahol so sebou celý trh.",
+        "headline": "Vyššia než očakávaná inflácia CPI v USA obnovila obavy zo zvyšovania sadzieb Fedom",
+        "summary": "Septembrové dáta amerického indexu spotrebiteľských cien (CPI) vykázali medziročný rast na úrovni 3,7 % a jadrový rast 2,6 %, čo prekonalo očakávania trhu. Vyššia inflácia vyvolala tlak na rast výnosov dlhopisov a prudký výpredaj naprieč globálnymi akciovými trhmi aj kryptomenami.",
         "category": "makro",
         "impact": "negative",
         "severity": 3,
         "date": "2026-10-15",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFWQvvWeiyK6GgeyqqtxfzWcTh4y0_mHAe_ZHwpCD6qPPvmwJjvbBq47tn4Po6eZRG-14Pe9E6ja33pQSWSZQEFhy-ksD-HR0QyNtKyZdRq4dQAut05CYjXFQ9aNb5yJ8PtkraFi8nuK7yl_WWj62tO58nF0cw="
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGEbx7ll9S1Tt_bRqXnXP9uQNL4y9peipH6rq5RNia9oh9SzMjf0f7XB-roylgS6NtHbBYlr3wkVfGHcHMEXTHqXMfOWMPb0FyTWOXfAM_yJch2jQnoyi_PlON0MbE7PihfdG51jsqeFnMpfW55YWiFDN_s-n2Zx4UrWqJFh0tJmAM98fjacShKjDvx6w-h60SE-egUB70gKJDrdQaTt2CLQiLy2Ysi4PktN8kL"
       },
       {
-        "headline": "Masívna vlna likvidácií pákových pozícií presiahla 800 miliónov USD",
-        "summary": "V dôsledku prepadu cien a korekcie v ázijskom technologickom a polovodičovom sektore bolo za 24 hodín zlikvidovaných vyše 800 miliónov USD v pákových dlhých (long) pozíciách. Tento výplach páky výrazne prehĺbil pokles najmä u altcoinov.",
+        "headline": "Masívny výplach na krypto trhu zlikvidoval pákové pozície v hodnote takmer 1 miliardy USD",
+        "summary": "Za posledných 24 hodín došlo k likvidácii pákových pozícií v objeme vyše 942 miliónov USD, pričom dlhé (long) pozície tvorili takmer 92 % všetkých strát. Celková trhová kapitalizácia kryptomien klesla o takmer 5 % na úroveň 2,76 bilióna USD.",
         "category": "trh",
         "impact": "negative",
         "severity": 3,
-        "date": "2026-10-14",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHciHlHO_ufGJU9Y3KF46j8HCTk02IXuFNfnTmbNdpEypgTXaSm7OqV-3CEbTJBc04bGdPHAIIMDrl4jwXs0g9UySiwugTRtXtbm9JmTDk4GifQzqDmDJaycqeMuGQBS1P1JcKR8mjrjYdnOhIoOcDx3PqwIoyirgYSaAJfy0Bbu7pqExai6qkAeDt_Brwl"
-      },
-      {
-        "headline": "Po zablokovaní zákona CLARITY Act navrhuje CFTC vlastné federálne pravidlá pre krypto transakcie",
-        "summary": "Keďže komplexný regulačný zákon CLARITY Act neprešiel Senátom, americká CFTC zverejnila predbežné návrhy pravidiel pre krypto transakcie a dohľad nad retailovými maržovými obchodmi. Regulačná iniciatíva sa tak presúva z legislatívy na individuálne agentúry (SEC a CFTC).",
-        "category": "regulácia",
-        "impact": "neutral",
-        "severity": 2,
-        "date": "2026-10-13",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGKX8kpO0MNiA_9JQIc_40bEc4y3eZFvDmZ0NGRvnv1RdDlsqHu-QpH2zW4jKTtJNg6sUDUXqZBCr6qqRmA4w3LcVLKTzJn5ZN5YbmsBktoLnxQX7AExM9OIsYxXEaEDPOUHTH-qCgodh2oVW7ZN3bCE7gokfGE_bk_bPFgXrvislf_tSAJRNytYllT-dQWfJdmIGdwqJXPi0BxIx-S3SCYtGk7W6wr6OojREkhKoAWBjHGtuCYqCv6chyrM20="
-      },
-      {
-        "headline": "Americké spotové ETF fondy na Bitcoin a Ethereum zaznamenali týždenné odlevy vyše 1,2 miliardy USD",
-        "summary": "Inštitucionálni investori prudko obmedzili rizikovú expozíciu, pričom z amerických spotových krypto ETF odtieklo počas jedného týždňa cez 1,22 miliardy USD. Negatívny sentiment okolo inštitucionálnych produktov znížil likviditu na spotovom trhu.",
-        "category": "ETF a toky",
-        "impact": "negative",
-        "severity": 2,
-        "date": "2026-10-12",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEGqrPoYOUYHT_PSnWQ8-dssyqBH3UIunSXy88PSDZQt_KFY0ImSqScCOp4HfHc2kHYE8pECpJVahDJntn0CAGEpkBSeuI9EwaNk_qgDMP4zj1WMBrmkPsDRnczte6UAbojgllqO6yEFMRHlcHXUVLNfh4PydQFWcZyxpNFwgzdOtpFMh34ERZZRc3wzU9w792-gkerNckkNiinaTyJB9hU9qUSgUdwmiw5e1Ixs7JDEZu6"
-      },
-      {
-        "headline": "Britská FCA oficiálne otvorila autorizačnú bránu pre krypto firmy",
-        "summary": "Britský Úrad pre finančné správanie (FCA) sprístupnil autorizačný portál pre krypto spoločnosti pred plným spustením nového režimu. Tento krok prináša pre inštitúcie vo Veľkej Británii väčšiu právnu istotu.",
-        "category": "regulácia",
-        "impact": "positive",
-        "severity": 1,
-        "date": "2026-10-12",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxZwG1mHRq-k7z0Ooicb4H_od7dCq-nctj8Wie9pvbePlId5eXwBpYq1EWyRn_gYnryZ3xf5jFBhN9qppDDH8UXnhd2laHDeOJilWv-3eZNg6FjMFQEmdTDxwMLrk0_5LhxTypSspzHxpC_J8-zXu1ls2Qx6bYGLW_Mv5VpZuOQbV2"
+        "date": "2026-10-15",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHKjHcYOy0Lq5xxS10taHBZr2ANVYkGJ362to2bc3UH7lbjxeml6Xw6utrVrAkTznYh-B3VNU88Sf3Ta3stI7cUrgOBTiMQaCFryllmW4RP5bIpDRQS1KGm6MQa-ic5z0vu70zi6zOyj-ykVgD1teeer09H6ImeuAedR1nW5H9cBMM="
       }
     ],
     "risk_pts": 1
