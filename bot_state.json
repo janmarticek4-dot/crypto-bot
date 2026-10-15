@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-15T14:12:45.182999+02:00",
+  "last_run": "2026-10-15T15:00:16.334423+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2146,18 +2146,17 @@
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 11,
+    "score": 10,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "celková trhová kapitalizácia -6.4% za 24h",
-      "Bitcoin -3.3% za 24h",
+      "celková trhová kapitalizácia -6.0% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "MACD Bitcoinu je záporný",
-      "prelomený support: AAVE, TAO, ONDO, RENDER",
+      "rastúci predajný objem pri poklese: AAVE, TAO, FET, SOL",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-15T06:11:59.751555+00:00",
+    "ts": "2026-10-15T13:00:16.334413+00:00",
     "last_alert_state": "CRITICAL",
     "last_alert_score": 10.0,
     "last_alert_ts": "2026-10-15T05:14:00.126513+00:00"
@@ -2171,9 +2170,9 @@
     },
     "TAO": {
       "level": "DEEP",
-      "drawdown": 11.09,
+      "drawdown": 14.14,
       "action": "SELL",
-      "ts": "2026-10-14T15:17:07.800336+00:00"
+      "ts": "2026-10-15T13:00:16.334387+00:00"
     },
     "FET": {
       "level": "DEEP",
@@ -2212,13 +2211,50 @@
       }
     },
     "TAO": {
-      "ts": "2026-10-14T15:14:49.172174+00:00",
-      "drawdown": 11.09,
+      "ts": "2026-10-15T12:58:26.014746+00:00",
+      "drawdown": 14.14,
       "data": {
-        "findings": [],
-        "risk_pts": 0,
-        "cause_category": "Príčina nezistená",
-        "cause_summary": ""
+        "findings": [
+          {
+            "headline": "Prudký nárast registračných nákladov na sieti a koncentrácia v systéme Dynamic TAO",
+            "summary": "Náklady na registráciu nových podsietí vzrástli na 884,4 TAO v dôsledku silnej konkurencie, čo signalizuje záujem vývojárov, no zároveň vytvára vysoké vstupné bariéry a prehlbuje koncentráciu emisií.",
+            "category": "projekt",
+            "impact": "neutral",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF788O2gMbN2chgGW9MiV4otm5QZQQDiR-qslAm-Y71RBw1Z5yJgCuztDQx84f5y1lk45K8OufGq7aKI4EUzYYeeqQENKkZkNVtZ8q6DLH8XmvzVyFRXU47fEovUSyZxrOKV19o8sAM-4pLJOHaG_qQWzl8TB1prEOiHyl7sz_0CoCmP9rOxP9ZUx0RM53FPZi65on10uAA6F_BRGY5X5dE1oIy"
+          },
+          {
+            "headline": "Technický predajný tlak po odraze od rezistencie a testovanie podpory $265",
+            "summary": "Po neúspechu preraziť pásmo 295 – 302 USD TAO skorigoval do kľúčového pásma podpory 265 – 269 USD, pričom strata tejto úrovne môže viesť k poklesu k 215 USD.",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF_yOw7uMKV4jabg3cN-liYu3GN930dR1SlB4RmGKQHcWJKdO9-8Ys9QFgT5qFFc9WZR8VnHgQcp1FCT2T9Rj8TVKOMyMp3zdTt-EDTpbFdQRWMkCL8BO45zQgDoFeo7UuOJaeysUpQHfM6B7eJoCGhRuml87BkPii7p1-dgj-H1EzSn5kBU7N5LC-agHsG-rNALQ="
+          },
+          {
+            "headline": "Plánované odomknutie komunitných tokenov (udalosť do 30 dní)",
+            "summary": "Na 3. novembra 2026 je naplánované uvoľnenie 214,3 tisíc TAO pre komunitu v hodnote približne 68,9 milióna USD, čo predstavuje potenciálny predajný tlak.",
+            "category": "token unlock",
+            "impact": "negative",
+            "severity": 2,
+            "date": "2026-10-14",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG_TVnAZ54OsIEu7OHBAoaOC5mL7evAkxc7Zp24IrCrVZZVV0fs_duB1HEivkYoCZ5D2cAWQNKfmROFgq2ig0rHYWMg6jUONNIcztxIA50iiH-ju2N08x-FwtIUgR2fJ4lm8sUMVeg1mLNraKxa"
+          },
+          {
+            "headline": "Grayscale Bittensor Trust emitoval nové akcie v privátnom úpise (Formulár 8-K)",
+            "summary": "Fond Grayscale Bittensor Trust predložil SEC hlásenie Form 8-K o predaji 253 100 nových akcií akreditovaným investorom za 4 777,99 TAO (cca 1,45 milióna USD).",
+            "category": "ETF a toky",
+            "impact": "positive",
+            "severity": 2,
+            "date": "2026-10-13",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF7ndpX8d_dkAkpsni5lNW02yH9jnot-0CjoIU6rZRsOYUCIjHDNzQmasf7FP15tigCv6s7cANqVyAuSftR4LozF5lg2B0XqqKLOBnbE1nPM4NC3nku56gkuZ4ysQXGyaxv4SSELLJydDzce2MuNbMkHrqRjlR12jnfAU5s2Vu1dmWJHWxBHgeJMHgPjSDGA6Msd4axbX3TX89062hoLyF_EOCnZgdqN-SwlYqcZx9HJPQHkQT3QTpNjj4hFS3yvlSZBt2h"
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Pokles TAO bol spôsobený makroekonomickým šokom z vyššej inflácie CPI v USA a následnou likvidačnou kaskádou pákových pozícií na celom trhu. Tento prepad bol na minci TAO umocnený technickým odrazom od rezistencie nad 302 USD a nedostatkom spotového dopytu."
       }
     },
     "FET": {
@@ -2328,25 +2364,34 @@
     }
   },
   "alert_research_market": {
-    "ts": "2026-10-15T06:10:35.620273+00:00",
+    "ts": "2026-10-15T12:58:26.014746+00:00",
     "findings": [
       {
-        "headline": "Vyššia než očakávaná inflácia CPI v USA obnovila obavy zo zvyšovania sadzieb Fedom",
-        "summary": "Septembrové dáta amerického indexu spotrebiteľských cien (CPI) vykázali medziročný rast na úrovni 3,7 % a jadrový rast 2,6 %, čo prekonalo očakávania trhu. Vyššia inflácia vyvolala tlak na rast výnosov dlhopisov a prudký výpredaj naprieč globálnymi akciovými trhmi aj kryptomenami.",
-        "category": "makro",
-        "impact": "negative",
-        "severity": 3,
-        "date": "2026-10-15",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGEbx7ll9S1Tt_bRqXnXP9uQNL4y9peipH6rq5RNia9oh9SzMjf0f7XB-roylgS6NtHbBYlr3wkVfGHcHMEXTHqXMfOWMPb0FyTWOXfAM_yJch2jQnoyi_PlON0MbE7PihfdG51jsqeFnMpfW55YWiFDN_s-n2Zx4UrWqJFh0tJmAM98fjacShKjDvx6w-h60SE-egUB70gKJDrdQaTt2CLQiLy2Ysi4PktN8kL"
-      },
-      {
-        "headline": "Masívny výplach na krypto trhu zlikvidoval pákové pozície v hodnote takmer 1 miliardy USD",
-        "summary": "Za posledných 24 hodín došlo k likvidácii pákových pozícií v objeme vyše 942 miliónov USD, pričom dlhé (long) pozície tvorili takmer 92 % všetkých strát. Celková trhová kapitalizácia kryptomien klesla o takmer 5 % na úroveň 2,76 bilióna USD.",
+        "headline": "Kryptomenový trh zasiahla likvidačná vlna vo výške takmer 1 miliardy USD",
+        "summary": "V dôsledku prepadu cien po zverejnení CPI došlo k nútenému uzavretiu pákových pozícií za viac ako 870 až 977 miliónov USD v priebehu 24 hodín, pričom celková kapitalizácia trhu klesla o takmer 3 % pod 2,8 bilióna USD.",
         "category": "trh",
         "impact": "negative",
         "severity": 3,
         "date": "2026-10-15",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHKjHcYOy0Lq5xxS10taHBZr2ANVYkGJ362to2bc3UH7lbjxeml6Xw6utrVrAkTznYh-B3VNU88Sf3Ta3stI7cUrgOBTiMQaCFryllmW4RP5bIpDRQS1KGm6MQa-ic5z0vu70zi6zOyj-ykVgD1teeer09H6ImeuAedR1nW5H9cBMM="
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEwfMxqJHc6j-H7ZS-je4qE1o9-tyU3FndxpxM5zfpXscmK4xIycY7X6YvpLnbb8-aJMfEp3QfxqOkOSnloQT3WNCDcpss7bWBYdQEE4oSuA6ha6BNtnbFIZ_XE73grZDAI5fagebAmduAgZym9G3SW4A3geSmc8shYm1m2RY3iqn0Rjan6zUGie-YLkj_ER0dQnNwkrOA="
+      },
+      {
+        "headline": "Vyššia než očakávaná inflácia v USA vyvolala obavy zo zvýšenia sadzieb Fedu a pád trhov",
+        "summary": "Septembrová inflácia CPI v USA vzrástla na 3,7 % medziročne a jadrová inflácia na 2,6 %, čo viedlo k prehodnoteniu očakávaní a zvýšeniu pravdepodobnosti ďalšieho zvýšenia úrokových sadzieb Fedu, posilneniu dolára a výpredajom na trhoch.",
+        "category": "makro",
+        "impact": "negative",
+        "severity": 3,
+        "date": "2026-10-14",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFhRR4gEteoWTsLbehvsn2dySXCY2AzblhsObI6FiVUK6wJblPnqpnSFcl6Gg8eO5EaK6CWRYAnS5YV2K-vF3uT8mnIGOguxmxQxHyw8FSFfPUecpl6hPS2FxYcG6ZqSdLoRKpGDGn56MZjgorrgmE="
+      },
+      {
+        "headline": "Pokles technologických akcií a globálny \"risk-off\" sentiment",
+        "summary": "Zvýšené výnosy amerických štátnych dlhopisov a obavy z financovania infraštruktúry pre AI spôsobili prepad technologického indexu Nasdaq aj ázijských trhov, čo negatívne zasiahlo segment AI kryptomien.",
+        "category": "makro",
+        "impact": "negative",
+        "severity": 2,
+        "date": "2026-10-15",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHc7yXq1YktPy_XVlNJMpQEplxBvQS-Qog1nsqNBjkV_oBStltfGYOHpeKwjHcCLpXahARGVU8peiZnvW6ky9MEK4Naye9EZ_YGGZdaR1tY-yH95fUPNVGF-cHZPFoGZ5hirwVG2Le8pVUGCla2eTg-kwUtPB4zbBarz1WbzvwJZsT0XkwOV8sygbiTDSoT5uOssykKct9NF5fZSL3hkTGBeNGf4wmFNpjVYX-aq2ZBDpMx3EUPO403e_nQ-SHWmDdqvGa4o3aUSBfCitgnuCrCa4MXkwQpeLum"
       }
     ],
     "risk_pts": 1
