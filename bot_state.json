@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-15T16:18:18.763940+02:00",
+  "last_run": "2026-10-15T17:01:52.141338+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
