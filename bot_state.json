@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-15T04:58:56.994039+02:00",
+  "last_run": "2026-10-15T05:28:15.612579+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2182,20 +2182,21 @@
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 10,
+    "score": 11,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "celková trhová kapitalizácia -5.2% za 24h",
+      "celková trhová kapitalizácia -6.0% za 24h",
+      "Bitcoin -3.3% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "MACD Bitcoinu je záporný",
-      "prelomený support: AAVE, TAO, ONDO",
+      "prelomený support: AAVE, ONDO",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-15T02:26:46.426557+00:00",
+    "ts": "2026-10-15T03:28:15.612543+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 9.0,
-    "last_alert_ts": "2026-10-14T18:14:06.174595+00:00"
+    "last_alert_score": 11,
+    "last_alert_ts": "2026-10-15T03:28:15.612569+00:00"
   },
   "alerts": {
     "AAVE": {
