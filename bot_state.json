@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-16T14:52:20.656751+02:00",
+  "last_run": "2026-10-16T15:33:19.204315+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -23,61 +23,61 @@
     "coins": [
       {
         "symbol": "AAVE",
-        "action": "REDUCE",
-        "current_price": 159.41,
-        "market_cap": 2462316146.454013,
-        "volume_24h": 274924541.47351885,
-        "trend_score": 5.4,
+        "action": "WAIT",
+        "current_price": 160.5,
+        "market_cap": 2481203207.9706264,
+        "volume_24h": 263793023.20013025,
+        "trend_score": 6.4,
         "risk_level": "ZVÝŠENÉ"
       },
       {
         "symbol": "TAO",
-        "action": "WAIT",
-        "current_price": 287.4,
-        "market_cap": 3257626276.4263997,
-        "volume_24h": 196981093.12037626,
+        "action": "BUY PULLBACK",
+        "current_price": 286.6,
+        "market_cap": 3240543767.7055855,
+        "volume_24h": 204738411.73093927,
         "trend_score": 9.3,
         "risk_level": "NÍZKE"
       },
       {
         "symbol": "FET",
-        "action": "SELL",
-        "current_price": 0.2041,
-        "market_cap": 471721367.67546165,
-        "volume_24h": 131242351.23997238,
+        "action": "REDUCE",
+        "current_price": 0.2051,
+        "market_cap": 474163129.5848992,
+        "volume_24h": 132802839.96323428,
         "trend_score": 2.5,
         "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "SOL",
         "action": "REDUCE",
-        "current_price": 106.25,
-        "market_cap": 62564260807.73779,
-        "volume_24h": 3382059681.4869375,
-        "trend_score": 3.4,
+        "current_price": 105.39,
+        "market_cap": 62144191224.068726,
+        "volume_24h": 3115932131.4488044,
+        "trend_score": 2.5,
         "risk_level": "VYSOKÉ"
       },
       {
         "symbol": "ONDO",
         "action": "REDUCE",
-        "current_price": 0.4671,
-        "market_cap": 2271685796.350939,
-        "volume_24h": 220387751.3767134,
-        "trend_score": 5.4,
+        "current_price": 0.4668,
+        "market_cap": 2270186374.2270083,
+        "volume_24h": 166646985.26187456,
+        "trend_score": 6.4,
         "risk_level": "VYSOKÉ"
       },
       {
         "symbol": "RENDER",
         "action": "REDUCE",
-        "current_price": 1.935,
-        "market_cap": 1001847398.597028,
-        "volume_24h": 67593775.65650742,
-        "trend_score": 3.3,
-        "risk_level": "VEĽMI VYSOKÉ"
+        "current_price": 1.965,
+        "market_cap": 1019506238.215112,
+        "volume_24h": 65182751.954237856,
+        "trend_score": 7.7,
+        "risk_level": "VYSOKÉ"
       }
     ]
   },
-  "last_full_analysis": "2026-10-16T07:15:59.440032+02:00",
+  "last_full_analysis": "2026-10-16T15:33:19.204323+02:00",
   "last_analysis_reason": "BRATISLAVA_07:00",
   "btc_data": {
     "symbol": "BTC",
@@ -140,7 +140,7 @@
   "last_safety_check": "2026-10-12T08:56:27.020434+02:00",
   "last_safety_alert": "2026-10-11T23:28:20.336343+02:00",
   "last_safety_alert_reason": "STATE_CHANGE",
-  "last_main_slot": "BRATISLAVA_2026-10-16_07:00",
+  "last_main_slot": "BRATISLAVA_2026-10-16_15:00",
   "forecast_history": [
     {
       "timestamp": "2026-10-09T14:51:13.671392+00:00",
@@ -2097,60 +2097,60 @@
   },
   "last_actions": {
     "AAVE": {
-      "action": "REDUCE",
-      "ts": "2026-10-16T05:15:59.439972+00:00",
-      "trend_score": 5.4
+      "action": "WAIT",
+      "ts": "2026-10-16T13:33:19.204249+00:00",
+      "trend_score": 6.4
     },
     "TAO": {
-      "action": "WAIT",
-      "ts": "2026-10-16T05:15:59.439993+00:00",
+      "action": "BUY PULLBACK",
+      "ts": "2026-10-16T13:33:19.204271+00:00",
       "trend_score": 9.3
     },
     "FET": {
-      "action": "SELL",
-      "ts": "2026-10-16T05:15:59.439995+00:00",
+      "action": "REDUCE",
+      "ts": "2026-10-16T13:33:19.204275+00:00",
       "trend_score": 2.5
     },
     "SOL": {
       "action": "REDUCE",
-      "ts": "2026-10-16T05:15:59.439998+00:00",
-      "trend_score": 3.4
+      "ts": "2026-10-16T13:33:19.204278+00:00",
+      "trend_score": 2.5
     },
     "ONDO": {
       "action": "REDUCE",
-      "ts": "2026-10-16T05:15:59.440000+00:00",
-      "trend_score": 5.4
+      "ts": "2026-10-16T13:33:19.204281+00:00",
+      "trend_score": 6.4
     },
     "RENDER": {
       "action": "REDUCE",
-      "ts": "2026-10-16T05:15:59.440001+00:00",
-      "trend_score": 3.3
+      "ts": "2026-10-16T13:33:19.204284+00:00",
+      "trend_score": 7.7
     }
   },
   "prev_flags": {
-    "safety": "CRITICAL",
-    "dominance": 59.276029517006776,
+    "safety": "WARNING",
+    "dominance": 59.213281191881805,
     "BTC": {
       "above_ema50": false,
-      "above_ema200": true
+      "above_ema200": false
     },
     "AAVE": {
       "above_ema50": false,
       "above_ema200": true,
       "support_broken": false,
-      "action": "REDUCE"
+      "action": "WAIT"
     },
     "TAO": {
       "above_ema50": true,
       "above_ema200": true,
       "support_broken": false,
-      "action": "WAIT"
+      "action": "BUY PULLBACK"
     },
     "FET": {
       "above_ema50": false,
       "above_ema200": false,
       "support_broken": false,
-      "action": "SELL"
+      "action": "REDUCE"
     },
     "SOL": {
       "above_ema50": false,
@@ -2173,16 +2173,17 @@
   },
   "safety": {
     "state": "WARNING",
-    "score": 5,
+    "score": 6,
     "reasons": [
       "5 z 6 altcoinov je pod prahom poklesu",
+      "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-16T08:07:34.654135+00:00",
+    "ts": "2026-10-16T13:33:19.204305+00:00",
     "last_alert_state": "WARNING",
-    "last_alert_score": 5,
-    "last_alert_ts": "2026-10-16T08:07:34.654164+00:00"
+    "last_alert_score": 6,
+    "last_alert_ts": "2026-10-16T13:33:19.204307+00:00"
   },
   "alerts": {
     "AAVE": {
