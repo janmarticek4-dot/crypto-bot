@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-17T17:02:42.170063+02:00",
+  "last_run": "2026-10-17T17:39:02.368301+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2164,18 +2164,18 @@
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 9,
+    "score": 8,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "celková trhová kapitalizácia -4.3% za 24h",
+      "trhová kapitalizácia klesla o 3.6% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
       "MACD Bitcoinu je záporný",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-17T13:01:39.058458+00:00",
+    "ts": "2026-10-17T15:39:02.368292+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 9,
+    "last_alert_score": 9.0,
     "last_alert_ts": "2026-10-17T13:01:39.058460+00:00"
   },
   "alerts": {
@@ -2187,9 +2187,9 @@
     },
     "FET": {
       "level": "DEEP",
-      "drawdown": 18.54,
+      "drawdown": 21.61,
       "action": "SELL",
-      "ts": "2026-10-14T19:27:44.789078+00:00"
+      "ts": "2026-10-17T15:39:02.368256+00:00"
     },
     "SOL": {
       "level": "DEEP",
@@ -2266,13 +2266,41 @@
       }
     },
     "FET": {
-      "ts": "2026-10-14T15:14:49.172174+00:00",
-      "drawdown": 15.51,
+      "ts": "2026-10-17T15:37:38.507974+00:00",
+      "drawdown": 21.61,
       "data": {
-        "findings": [],
-        "risk_pts": 0,
-        "cause_category": "Príčina nezistená",
-        "cause_summary": ""
+        "findings": [
+          {
+            "headline": "FET oslabuje v dôsledku plošného výpredaja v technologickom a AI sektore",
+            "summary": "Pokles ceny FET je poháňaný averziou k riziku voči celému sektoru umelej inteligencie, kde investori vyjadrujú pochybnosti o návratnosti vysokých kapitálových výdavkov do AI dátových centier v prostredí pretrvávajúcich vysokých sadzieb. FET funguje ako vysoko volatilné beta aktívum celého AI naratív",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 3,
+            "date": "2026-10-16",
+            "url": "https://coinmarketcap.com/community/articles/67104b281f621379c6d3bc8f/"
+          },
+          {
+            "headline": "Uvedenie platformy ASI:One nedokázalo zastaviť technický predajný tlak",
+            "summary": "Projekt oficiálne spustil platformu ASI:One navrhnutú ako decentralizovaný obchod s AI agentmi pre vývojárov a bežných používateľov. Ani toto zásadné produktové rozšírenie ekosystému však nedokázalo vykompenzovať negatívne trhové momentum, pričom FET prepadol pod 20- a 50-dňový kĺzavý priemer.",
+            "category": "projekt",
+            "impact": "neutral",
+            "severity": 2,
+            "date": "2026-10-17",
+            "url": "https://tradersunion.com/news/crypto-news/fetchai-falls-as-200-day-moving-average-remains-key-support-for-bulls/"
+          },
+          {
+            "headline": "Plánované odomknutie 2,43 milióna tokenov FET koncom októbra",
+            "summary": "Na 28. októbra 2026 je naplánované uvoľnenie 2,43 milióna tokenov FET (hodnota cca 519 000 USD) alokovaných na proces migrácie tokenov AGIX, čo predstavuje 0,090 % z celkovej ponuky. Hoci nejde o objem, ktorý by sám o sebe zrútil trh, v prostredí nízkej likvidity vytvára mierny ponukový tlak.",
+            "category": "token unlock",
+            "impact": "negative",
+            "severity": 1,
+            "date": "2026-10-16",
+            "url": "https://coinstats.app/news/a8ffa432ef971b6a97d162b6d85a821073945b65db403def5b3cd606ee09e5ac_Artificial-Superintelligence-Alliance-FET-News-Today-Why-FET-Is-Up--16-October-2026/"
+          }
+        ],
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Prepad ceny FET je spôsobený makroekonomickým šokom a averziou k riziku voči celému AI sektoru, čo potvrdzujú analytické správy platforiem CoinMarketCap a Traders Union. FET reagoval ako vysoko volatilné beta aktívum celého odvetvia a technicky prepadol pod kľúčové kĺzavé priemery."
       }
     },
     "SOL": {
@@ -2372,34 +2400,43 @@
     }
   },
   "alert_research_market": {
-    "ts": "2026-10-16T21:55:06.960036+00:00",
+    "ts": "2026-10-17T15:37:38.507974+00:00",
     "findings": [
       {
-        "headline": "Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
-        "summary": "Septembrový index spotrebiteľských cien (CPI) v USA ukázal medziročný rast celkovej inflácie na 3,7 % a jadrovej inflácie na 2,6 %, čo prekonalo očakávania a vyvolalo obavy z ďalšieho zvyšovania sadzieb Fedom. Tento makroekonomický tlak stiahol Bitcoin pod 82 000 USD a priniesol výpredaje naprieč ce",
+        "headline": "Americká inflácia (CPI) stúpla na 3,7 %, čo vyvolalo plošný výpredaj trhu a obavy z krokov Fedu",
+        "summary": "Medziročná inflácia v USA v septembri zrýchlila na 3,7 % (jadrová dosiahla 2,6 %), čo prekonalo odhady a obnovilo obavy, že Fed na zasadnutí 27.–28. októbra pristúpi k ďalšiemu zvýšeniu úrokových sadzieb. Táto makroekonomická neistota viedla k okamžitému zníženiu chuti riskovať a celková trhová kapi",
         "category": "makro",
         "impact": "negative",
         "severity": 3,
-        "date": "2026-10-14",
-        "url": "https://www.theblock.co/post/319853/bitcoin-falls-below-82000-as-hotter-core-cpi-revives-fed-hike-concerns"
-      },
-      {
-        "headline": "Bitcoin Holds Near $82,000 as Fed Officials Cool October Hike Bets",
-        "summary": "Vyjadrenia predstaviteľov Fedu Michelle Bowmanovej a Mary Dalyovej pomohli upokojiť trhy konštatovaním, že ďalší zásah do sadzieb nie je bezprostredne nutný, vďaka čomu výnosy 10-ročných dlhopisov klesli na trojtýždňové minimum. Na druhej strane inštitucionálny dopyt zostáva vlažný, keďže americké s",
-        "category": "makro",
-        "impact": "neutral",
-        "severity": 2,
         "date": "2026-10-16",
-        "url": "https://blockhead.co/markets/bitcoin-holds-near-82000-as-fed-officials-cool-october-hike-bets"
+        "url": "https://www.kucoin.com/news/crypto-market-drops-5-amid-rising-us-inflation-and-etf-outflows"
       },
       {
-        "headline": "Has Bitcoin Bottomed? We Asked Claude AI After Its Dip Below $80000",
-        "summary": "Krátky prepad Bitcoinu k úrovni 79 806 USD spôsobil likvidáciu pákových pozícií v celkovom objeme 972 miliónov USD, pričom až 91,7 % z nich tvorili nútene uzatvorené dlhé (long) pozície. Trh po prepláchnutí pákového kapitálu stabilizoval volatilitu v okolí 82 000 USD pred týždennou expiráciou derivá",
+        "headline": "Masívne likvidácie pákových pozícií presiahli 940 miliónov USD",
+        "summary": "Inflačný šok spustil kaskádu nútených likvidácií na derivátových burzách, kde bolo za 24 hodín zlikvidovaných viac než 942 miliónov USD v pákach, pričom až 91,6 % predstavovali dlhé (býčie) pozície. Tento prudký odliv pákového kapitálu zasiahol najmä altcoiny, ktorých hĺbka trhu je výrazne zraniteľn",
         "category": "trh",
+        "impact": "negative",
+        "severity": 3,
+        "date": "2026-10-15",
+        "url": "https://finbold.com/crypto-market-hit-by-nearly-1-billion-in-liquidations-after-inflation-shock/"
+      },
+      {
+        "headline": "Čisté odlevy zo spotových Bitcoin a Ethereum ETF dosiahli takmer 391 miliónov USD",
+        "summary": "Americké spotové ETF fondy na Bitcoin a Ethereum zaznamenali počas prepadu trhu kombinovaný denný čistý odlev vo výške 390,97 milióna USD. Inštitucionálny de-risking tak odobral trhu kľúčovú nákupnú podporu v čase zvýšenej volatility.",
+        "category": "ETF a toky",
         "impact": "negative",
         "severity": 2,
         "date": "2026-10-16",
-        "url": "https://247wallst.com/investing/2026/10/16/has-bitcoin-bottomed-we-asked-claude-ai-after-its-dip-below-80000/"
+        "url": "https://www.kucoin.com/news/crypto-market-drops-5-amid-rising-us-inflation-and-etf-outflows"
+      },
+      {
+        "headline": "Komentáre predstaviteľov Fedu zmiernili stávky na októbrové zvyšovanie sadzieb",
+        "summary": "Guvernérka Fedu Michelle Bowman a prezidentka pobočky v San Franciscu Mary Daly uviedli, že centrálna banka má čas sledovať ekonomické dáta a neponáhľa sa s ďalším sprísňovaním, vďaka čomu trhová pravdepodobnosť októbrového zvýšenia sadzieb klesla z 54 % na 32 %. To pomohlo stabilizovať cenu Bitcoin",
+        "category": "makro",
+        "impact": "positive",
+        "severity": 2,
+        "date": "2026-10-16",
+        "url": "https://blockhead.co/bitcoin-holds-near-82000-as-fed-officials-cool-october-hike-bets/"
       }
     ],
     "risk_pts": 1
