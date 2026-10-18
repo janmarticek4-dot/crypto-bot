@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-18T06:40:29.202480+02:00",
+  "last_run": "2026-10-18T07:12:00.354100+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -13,9 +13,9 @@
     "btc_change_24h": -0.16689353542697472
   },
   "fear_greed": {
-    "value": 55,
-    "classification": "Greed",
-    "timestamp": "1792195200",
+    "value": 53,
+    "classification": "Neutral",
+    "timestamp": "1792281600",
     "source": "Alternative.me"
   },
   "last_analysis": {
@@ -24,60 +24,60 @@
       {
         "symbol": "AAVE",
         "action": "SELL",
-        "current_price": 152.66,
-        "market_cap": 2353670334.154148,
-        "volume_24h": 175726475.39785025,
-        "trend_score": 2.1,
+        "current_price": 152.6,
+        "market_cap": 2355281173.6137457,
+        "volume_24h": 188579794.7048954,
+        "trend_score": 1.3,
         "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "TAO",
         "action": "SELL",
-        "current_price": 270.2,
-        "market_cap": 3058755312.060923,
-        "volume_24h": 117446556.44035707,
+        "current_price": 268.8,
+        "market_cap": 3048555202.181866,
+        "volume_24h": 114921194.24815571,
         "trend_score": 1.3,
         "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "FET",
         "action": "SELL",
-        "current_price": 0.1906,
-        "market_cap": 439283658.9196369,
-        "volume_24h": 89270617.08010617,
-        "trend_score": 0.9,
+        "current_price": 0.191,
+        "market_cap": 443091589.16480565,
+        "volume_24h": 87734024.12905179,
+        "trend_score": 1.3,
         "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "SOL",
         "action": "REDUCE",
-        "current_price": 103.87,
-        "market_cap": 61115991651.92552,
-        "volume_24h": 1689515887.4619489,
+        "current_price": 103.77,
+        "market_cap": 61105438964.40119,
+        "volume_24h": 1819596179.2793746,
         "trend_score": 2.5,
-        "risk_level": "VYSOKÉ"
+        "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "ONDO",
         "action": "SELL",
-        "current_price": 0.4427,
-        "market_cap": 2152273279.3231926,
-        "volume_24h": 72182572.48577456,
-        "trend_score": 0.9,
+        "current_price": 0.439,
+        "market_cap": 2140131520.1667464,
+        "volume_24h": 73120325.07362331,
+        "trend_score": 1.3,
         "risk_level": "VEĽMI VYSOKÉ"
       },
       {
         "symbol": "RENDER",
-        "action": "SELL",
-        "current_price": 1.861,
-        "market_cap": 964275515.9556929,
-        "volume_24h": 41645821.45059886,
-        "trend_score": 2.9,
+        "action": "REDUCE",
+        "current_price": 1.85,
+        "market_cap": 959852234.1754875,
+        "volume_24h": 44202945.81207035,
+        "trend_score": 3.3,
         "risk_level": "VEĽMI VYSOKÉ"
       }
     ]
   },
-  "last_full_analysis": "2026-10-17T20:27:37.297943+02:00",
+  "last_full_analysis": "2026-10-18T07:12:00.354107+02:00",
   "last_analysis_reason": "BRATISLAVA_07:00",
   "btc_data": {
     "symbol": "BTC",
@@ -140,7 +140,7 @@
   "last_safety_check": "2026-10-12T08:56:27.020434+02:00",
   "last_safety_alert": "2026-10-11T23:28:20.336343+02:00",
   "last_safety_alert_reason": "STATE_CHANGE",
-  "last_main_slot": "BRATISLAVA_2026-10-17_20:00",
+  "last_main_slot": "BRATISLAVA_2026-10-18_07:00",
   "forecast_history": [
     {
       "timestamp": "2026-10-09T14:51:13.671392+00:00",
@@ -1890,7 +1890,7 @@
     }
   },
   "fundamentals": {
-    "generated_at": "2026-10-17T05:07:11.186501+00:00",
+    "generated_at": "2026-10-18T05:08:14.068664+00:00",
     "mode": "morning",
     "status": "ok",
     "symbols": [
@@ -1904,31 +1904,40 @@
     "market": {
       "findings": [
         {
-          "headline": "Americká inflácia (CPI) za september prekonala očakávania, rastú obavy z ďalšieho zvýšenia sadzieb Fedu",
-          "summary": "Medziročná miera inflácie v USA vzrástla v septembri na 3,7 % (medzimesačne o 0,6 %), pričom hlavným ťahúňom bol 9,1 % rast cien benzínu a energií. Tento výsledok zvýšil pravdepodobnosť ďalšieho zvýšenia sadzieb Fedom na zasadnutí koncom októbra a spustil averziu voči riziku na globálnych finančných",
+          "headline": "Nečakane vyššia inflácia v USA a tlak na úrokové sadzby Fedu",
+          "summary": "Septembrový index spotrebiteľských cien (CPI) v USA medziročne vzrástol o 3,7 % oproti očakávaným 3,6 %, pričom rast cien energií opäť zvýšil pravdepodobnosť ďalšieho zvýšenia sadzieb na nadchádzajúcom zasadnutí Fedu koncom októbra. Tento inflačný šok spustil vlnu averzie k riziku na globálnych fina",
           "category": "makro",
           "impact": "negative",
           "severity": 3,
-          "date": "2026-10-15",
-          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEQQHfU_vSd9FKvOm9qr5wtie5FQd2UAb_hjcrZ7UlTXcNOD_S591g372GHYkXCs-HTLkBxEdgmjPCAFq1-mdbE0wz-fJnS30pGaLLzm6Wk_P2NecDyt2KGdZmaVYai5Z3nLsrmuzJdekt0C6L2jOds4XThx_FHm1IvgL8_WvLDe9OB2AjC5ja_XAbVHcLJqMAoMnI99gpWcfpgKmLctn4Sf37HM7aGvg=="
+          "date": "2026-10-16",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH7xHm48CmI68aShi6GEonn1N1cyd89Am6OFnLD9-NY2H6vqUhmMz8nZw4Db3OaqF5PufNeYqAu54Mr5WsarukdXO7uQrC2sEBs8CkGRHjXKOL1-kv_xnutw6okXEkmZLS2fdpkcesOToHvR1xqLLicVqoxodKxZhxX7WXuiajmRcPThFcB5DZmWA=="
         },
         {
-          "headline": "Vlna nútených likvidácií na derivátovom trhu po makroekonomickom šoku",
-          "summary": "V nadväznosti na vyššie inflačné čísla a pokles technologických akcií bolo na kryptomenovom trhu v priebehu 24 hodín zlikvidovaných približne 900 miliónov až 1 miliarda USD v pákových pozíciách. Drvivú väčšinu (85 až 90 %) tvorili long pozície, čo viedlo k mechanickému tlaku na pokles cien naprieč a",
+          "headline": "Masívna vlna likvidácií na krypto trhu presahujúca 900 miliónov USD",
+          "summary": "V dôsledku inflačného prekvapenia bolo z trhu nútene vymazaných približne 943 miliónov USD v pákových pozíciách (prevažne longoch) v priebehu 24 hodín. Nútené výpredaje vyvolali dominový efekt a stiahli Bitcoin pod 80 000 USD a oslabili väčšinu altcoinov.",
           "category": "trh",
           "impact": "negative",
           "severity": 3,
-          "date": "2026-10-15",
-          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE-1W4nAEf0_A53J6DLsyluYTEvnkDLwJ_LNbszhKS1skJLeVxHOAfPriL2P8uBdlUQ3S4WrsyeM4SKdvPj2VXmbegs6ctngROKcnB3r4tJxs_O4mNi1WqvQlpGAiIXHoCjpLhvv9i7jShZV13-rT7ql3eqtwY="
+          "date": "2026-10-16",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHQFgaA6X5PDHIIo1o_0HfYgmZcUIOBraOczFetZfwnu1VjQvuLSvoKFy4yN1wj6V1tS3kVRolP36V9uP5exIaa-L4LLruWWJatOp7ofvF-H3xLJ8tEbMXtNSyB6gnyu86vfWeXX3vMIKhY2P3YBxvutziIH6ReOQdt"
         },
         {
-          "headline": "Spotové krypto ETF zaznamenali rozsiahle čisté odlevy kapitálu",
-          "summary": "Americké spotové ETF na Bitcoin a Ethereum zaznamenali počas 14. októbra čisté odlevy vo výške 391 miliónov USD (z toho Bitcoin ETF stratili 261 miliónov USD a Ethereum ETF 130 miliónov USD). Inštitucionálni investori tak pokračovali v znižovaní krypto expozície pod vplyvom neistého makroekonomickéh",
+          "headline": "Odliv inštitucionálneho kapitálu z amerických spotových ETF",
+          "summary": "Za uplynulý obchodný týždeň zaznamenali americké spotové Bitcoin ETF čistý odliv vo výške 228,6 milióna USD a Ethereum ETF stratili približne 320 miliónov USD. Slabnúci inštitucionálny dopyt potvrdzuje opatrnosť veľkých investorov pred makroekonomickými rozhodnutiami.",
           "category": "ETF a toky",
           "impact": "negative",
           "severity": 2,
-          "date": "2026-10-15",
-          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFESj84639xZJRwuR4RwTnS5Te5Y1IvgxMGMmnqCp-dNJNkTgPmqouqYOmCBdbiBuEdkGLBsbIfdVR9_kfM0c9enE9c4_ykchjJ1LzAmC70GWAlO6ApZoAzZcgX9fj5Nb6MZXcrbq9dm6zKE6UxPu5XJ5wgNFIApI53n9niMYEHJH_MzRJKx2dddHJcT205oDqCgqHYTNCpyGdiug=="
+          "date": "2026-10-18",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHgjBOYihgMtpVfcaOxEUMP-jIzW4g5lsHHa52IHFmG7M5AMsiqTQLkmd6IYWx-UcUJaRp_Yt1pQJxVI9MX5QDzDEjJxMxOoPbsHNekPClufjXmh1Y664YIoxgFMybyIm_TwlQ5CD6MikMqJE690blmoByi6f4D6z5ytcjfCSRhuR4bpciZ1q-BjMRjWM52pJDw2SXPTrJrne25A5_RcrjMDTadP4lznjTB"
+        },
+        {
+          "headline": "EBA zaradila USDC pod priamy dohľad v rámci európskeho nariadenia MiCA",
+          "summary": "Európsky orgán pre bankovníctvo (EBA) klasifikoval stablecoin USDC spoločnosti Circle ako prvý významný elektronický peňažný token (EMT) pod MiCA, pričom priamy dohľad nad rezervami a likviditou začne 12. novembra 2026. Krok prináša vyššiu regulačnú istotu pre európsky stablecoinový trh.",
+          "category": "regulácia",
+          "impact": "positive",
+          "severity": 2,
+          "date": "2026-10-16",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGuPF6RG8lQNkIWkRm49C1eFtPdR9qJgS_qN0MUazvfeUQM-NaY9sCWNG5E52BeM2EWULkBGCSsO9uh6NCJdvr18SWGmo8X6xvFe6XqWplmUY4p6CDopkb_CjbKiQMEBK2WKnMisNevsnCHsY4F190wNDUFi-cSo7RItg=="
         }
       ],
       "risk_pts": 1
@@ -1937,190 +1946,190 @@
       "AAVE": {
         "findings": [
           {
-            "headline": "Babylon Labs navrhuje natívny Bitcoin ako kolaterál pre Aave V4",
-            "summary": "Na fóre správy protokolu bol zverejnený návrh ARFC na integráciu natívneho Bitcoinu do Aave V4 prostredníctvom Babylon Trustless Bitcoin Vaults. Súčasťou návrhu je model zdieľania výnosov a mechanizmus buybacku tokenov AAVE a BABY.",
+            "headline": "Babylon navrhuje integráciu natívneho Bitcoinu ako kolaterálu pre Aave V4",
+            "summary": "Babylon Labs predložil na fóre Aave formálny návrh (ARFC) umožňujúci použiť natívny Bitcoin uzamknutý na Bitcoin blockchaine ako kolaterál na Aave V4. Model počíta s mechanizmom zdieľania poplatkov a spätným odkupom tokenov AAVE.",
             "category": "projekt",
             "impact": "positive",
             "severity": 2,
-            "date": "2026-10-14",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEn2qKPhg39V0-80tQddSuV1wQ_x6beJ3HarDFOGB-7EmAqiI6LJfNRyOYcLQZNLWlnIYviYlym9yqMmX9QINm0Szgu5KjvUDjSiipXBMo_QPRzboUS_GcBtLgCw5SiXJJ0VIVutTmNE3p1aON-64q-FCPH9YZRpWac-phhr1sKlJ_WntObCzh8MmBsgZGKyknDIw1visGFl9RqIguuL7cThSRIZWuzkoDYKQrLaaqq1J2nHez5"
+            "date": "2026-10-15",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEYNmvnwJRbzDovzFUxi6BsbI7lE2Ldpg_1DVOrj_YutFT6MHzTujsniVYqaJi1AArE4EXGOrgUUKX-20NRTNK1kD8Yf23D3lHq5ZipzDrt_nJjgu_MXXL6BLkyaqJdEl3pG1SFka8iurGF_o8ZXQ_6GA=="
           },
           {
-            "headline": "Aave DAO schválilo stimuly pre tokenizované akcie na sieti Base",
-            "summary": "Aave DAO schválilo vyplácanie USDC odmien cez platformu Merkl pre používateľov poskytujúcich likviditu v tokenizovaných akciách Coinbase (napr. Apple, Nvidia, Tesla) na sieti Base. Cieľom je posilniť pôsobenie Aave v segmente reálnych aktív (RWA).",
-            "category": "projekt",
-            "impact": "positive",
-            "severity": 2,
-            "date": "2026-10-14",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFtOxBZlXf7UzvdKEpL86v3T_YZFjyvMTUDmRiE3XqfcW9dUpuQ4tVChM6ZgE02tAg18DrKk-guR8Zrt5HYbncFXdTvw2IDQTTjDoP9UrcfSVgbNmTVy21qanZoxJpMrcgqtUpVVDhsGF-4zOazh6ApxoOHbXg="
+            "headline": "Vyberanie ziskov na AAVE po zverejnení návrhu na pozadí prepadu trhu",
+            "summary": "Po predchádzajúcom prudkom raste čelil AAVE v druhej polovici týždňa korekcii, keď obchodníci pristúpili k vyberaniu ziskov (\"sell the news\") súčasne so všeobecným oslabením DeFi sektora.",
+            "category": "trh",
+            "impact": "negative",
+            "severity": 1,
+            "date": "2026-10-17",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG-Hx1XtgidQZDtyjYAT_GzG8jYTXJ4E_VP9ooJRBit9GDSFJH4PWuBnDCtyPGi5_dz8BupoMQIfTTO-AUxtaWgS64Ly0wvLGXOhycJnY6QpoR1NUEh7rl8FPlnEcXSNPsKwwo6Y8Zusg6z9TyH9AiS0lrEh0e1Wig-FPK3Ur1--2LmRIWH9az_GhgeOkciHIFY7uoojsvpy7nFonk_X2fHm2_25o9z8NIKEn3IhrsTTEjV7V25UINHYDbts4ONcCWhBIQ6DILrlB97ym141BM="
           }
         ],
         "risk_pts": 0,
         "cause_category": "Potvrdená správa alebo udalosť",
-        "cause_summary": "Napriek silným fundamentom cenu stiahla celotrhová korekcia, odlevy z DeFi protokolov a dominancia odlevov kapitálu z hlavných kryptomien. Zdroj potvrdzuje, že Aave klesá v súlade s trhom pod vplyvom vyšších výnosov a inflačných dát."
+        "cause_summary": "Pokles ceny spôsobil efekt vyberania ziskov ('sell the news') po podaní návrhu Babylon Bitcoin kolaterálu na fóre správy protokolu, znásobený likvidáciami v DeFi sektore."
       },
       "TAO": {
         "findings": [
           {
-            "headline": "Predstavenie aktualizácie protokolu Null Consensus a voliteľnej PoW registrácie",
-            "summary": "Vývojársky tím Bittensor predstavil aktualizáciu Null Consensus, ktorá zvyšuje kapacitu podsietí z 256 na 2 500 účastníkov a ponúka novú alternatívu k Yuma Consensus. Súčasne zavádza voliteľnú registráciu cez Proof-of-Work, vďaka čomu sa noví ťažiari a AI agenti môžu zapojiť dodaním výpočtového výko",
+            "headline": "Spustenie mechanizmu Null Consensus a vydanie aktualizácie v480 Etao",
+            "summary": "Vývojári Bittensoru nasadili protokolový update Null Consensus, ktorý zväčšuje kapacitu subnetov až na 2 500 účastníkov a zavádza bezpoplatkovú Proof-of-Work registráciu pre AI agentov. Kód v480 Etao publikovaný 16. októbra zároveň optimalizuje prerozdeľovanie odmien medzi ťažiarmi a validátormi.",
             "category": "projekt",
             "impact": "positive",
             "severity": 2,
-            "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGKWKJqlycW_a4MuP3DybralGjx4HzyPOM12ojZo_wcu6V7EhjyVxk_maaUcZ8YJbU7rKsSpzpKSqL_s35kGJxO0jNcEzoOYZXw9gVNLLYKOa8ff-B93bRa-YA0QWHeOiJrdpsZOAhTv0oBgDUDjMw4wfWjHZ6IdlSDWMam_pgL3x2LcH07"
+            "date": "2026-10-17",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHNMZNTE1ISy7vg1g5eMSSvo1rekEQhrzNDa5C1P-V5sEepFWzJSxmQZ9qarNKmVuHVezOr-nHq9H55-BVHHb6qxRPA77iensop6b64_BRaz0VCoOf7lblqutIguSMoY3QuACJl44CdeBrs"
           },
           {
-            "headline": "Zaradenie TAO do fondu Grayscale–Republic Decentralized AI Fund",
-            "summary": "Spoločnosti Grayscale a Republic spustili spoločný fond zameraný na decentralizovanú AI pre akreditovaných investorov, v ktorom je TAO jedným zo štyroch hlavných aktív. Táto integrácia prináša Bittensoru zvýšenú inštitucionálnu expozíciu a legitimizáciu na trhu.",
-            "category": "projekt",
+            "headline": "Zaradenie Bittensoru do fondu Grayscale Decentralized AI a žiadosť o ETF",
+            "summary": "Spoločnosť Grayscale v partnerstve s platformou Republic zaradila TAO do nového investičného fondu pre decentralizovanú AI a formálne podala žiadosť o spotové ETF, čo posilňuje inštitucionálny prístup k aktívu.",
+            "category": "ETF a toky",
             "impact": "positive",
             "severity": 2,
-            "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHkZ7xJKPeIU8P2lg6Sm9-D3DUfTZNh0wk02xf6zNf8qqaFWIcVLEjwTGzWZPk6nuyJSKon_lpxF37b15tWX8PRIVnjO9eXB-G1Dx6r5Lcao_mpkbsOAG_pYUCWUCBNO7Ri6KkswXXBHApMRKtuWv1z3WTveiQ="
+            "date": "2026-10-17",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHNMZNTE1ISy7vg1g5eMSSvo1rekEQhrzNDa5C1P-V5sEepFWzJSxmQZ9qarNKmVuHVezOr-nHq9H55-BVHHb6qxRPA77iensop6b64_BRaz0VCoOf7lblqutIguSMoY3QuACJl44CdeBrs"
           }
         ],
         "risk_pts": 0,
         "cause_category": "Potvrdená správa alebo udalosť",
-        "cause_summary": "Po počiatočnom raste na základe správ podľahlo TAO rozsiahlemu výplachu pákových pozícií a výpredajom v decentralizovanej AI. Zdroje potvrdzujú, že pokles bol vyvolaný makroekonomickým výpredajom a likvidáciami naprieč trhom."
+        "cause_summary": "Relatívne menšiu týždennú stratu udržali silnejšie fundamenty vrátane aktualizácie Null Consensus a zaradenia do nového fondu Grayscale."
       },
       "FET": {
         "findings": [
           {
-            "headline": "Pokles FET v dôsledku celkového výpredaja technologických a AI aktív",
-            "summary": "Token FET zaznamenal oslabenie v súlade s poklesom širšieho AI a technologického sektora vyvolaným makroekonomickými obavami z inflácie. Projekt nezaznamenal žiadne špecifické interné negatívne udalosti ani zlyhania.",
-            "category": "trh",
+            "headline": "Korekcia FET v nadväznosti na výpredaj akcií v technologickom a AI sektore",
+            "summary": "Analýza potvrdzuje, že pokles ceny FET o viac než 10 % za posledný týždeň odzrkadľuje širší výpredaj akcií zameraných na AI hardvér a infraštruktúru na tradičných trhoch, nie interné zlyhanie protokolu.",
+            "category": "makro",
             "impact": "negative",
             "severity": 2,
             "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE4bQM2SP4j73nBmZOhZzVOvyHxUcmPHxtbH9r7E649cavvdbPAAv9Y5y-BOPQdd67NB92Ar1ysskxzlCWyXwsU3ZE8Y1I7UiK6Wj6hJpTy755CcD126WNj0rr10k_I6bPztYpxWW5a7n-Xtc2Ewp4kuyHeYpM="
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQExrjwYnCXc60FRbwcRKWFwCmKHmZbqZHace3X4dKUOT7vQaWTWVXfYjy29GdSYuI9aodVDE6YGWXiuvZU50S_vRFHnvjCxjcAd7bHqUZtD6Ro03nslM5qWXGzYKQwL7w9C2B9kuBIt2ssoc4CrJtQsm_Xo9nE="
           },
           {
-            "headline": "Plánovaný token unlock k 28. októbru 2026 (udalosť do 30 dní)",
-            "summary": "Na 28. októbra 2026 je naplánované uvoľnenie 2,43 milióna tokenov FET (cca 519 000 USD) určených na migráciu AGIX. Ide o zanedbateľný objem predstavujúci len 0,090 % z celkovej ponuky tokenu.",
+            "headline": "Plánované odomykanie tokenov (Unlock) dňa 28. októbra 2026",
+            "summary": "K 28. októbru 2026 je naplánované uvoľnenie 2,43 milióna tokenov FET (cca 518 000 USD, 0,09 % celkovej ponuky) v rámci harmonogramu migrácie AGIX. Vzhľadom na nízky objem ide o minimálne inflačné riziko.",
             "category": "token unlock",
             "impact": "neutral",
             "severity": 1,
-            "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHPA1smpkpNayLsmPCtNFPO5jz_9VjwNxPNhHcxIkWnb4R5QKk7J3AM20zEPtCHUAzITXfg-cvG2dkzG9ijnZkaY5EizwPxEpV_cdg3lryvYnSP2NSktuiXukPkrihJ3tOvb90HQT4ztXg="
+            "date": "2026-10-17",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUrlqvSHynPnXj3e0PahpdEiyhBBOpSTm2920ta2jaHHqYEI-Q02YmPF7soIBLrSTIBtuiPEfu3KCp5mapoZHG2WWpMHjBHvE1o5sISGHG_-b4Zg7R9BWRiAsFOFHNhQnixBt9dHUKjvU="
           }
         ],
         "risk_pts": 1,
         "cause_category": "Potvrdená správa alebo udalosť",
-        "cause_summary": "Výrazný pokles je zapríčinený globálnym odpredajom technologických a AI aktív v dôsledku horších inflačných dát v USA. Analýza zdroja potvrdzuje absenciu interných správ projektu a pripisuje pohyb makroekonomickému tlaku."
+        "cause_summary": "Výrazný prepad ceny FET priamo odzrkadľuje výpredaj v globálnom AI a technologickom sektore po zverejnení vyššej inflácie v USA."
       },
       "SOL": {
         "findings": [
           {
-            "headline": "Príprava na sieťový upgrade Alpenglow na skrátenie finality na 150 ms (udalosť do 30 dní)",
-            "summary": "Sieť Solana pripravuje nasadenie kľúčového upgradu Alpenglow, ktorého cieľom je znížiť čas transakčnej finality zo súčasných 12,8 sekundy na 150 milisekúnd. Trh očakáva jeho aktiváciu okolo 21. októbra 2026, čo by malo výrazne zvýšiť priepustnosť a konkurencieschopnosť siete.",
-            "category": "projekt",
-            "impact": "positive",
+            "headline": "Odliv likvidity zo stablecoinov na sieti Solana pod 16 miliárd USD",
+            "summary": "Zásoba stablecoinov v ekosystéme Solana klesla zo septembrových 17,45 miliardy USD na 15,96 miliardy USD k 17. októbru, z toho o 205 miliónov USD za posledných 24 hodín. Nižšia likvidita v bazénoch DEX znižuje hĺbku trhu a zosilňuje cenové výkyvy.",
+            "category": "trh",
+            "impact": "negative",
             "severity": 2,
-            "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH-lfETmwP4E7V_TRm-U0btDEv6rHqqpzFuhz6LiixKsgpxKEtKf6t6hsUXs-Q2fSzNOPWgAqJI_c1hf-Ir0-EgbZNdO328f3V5kbeLHFD6nBCV030G8gzDdQ6myvC4mQBuzZIYyNMX_bkS1ZaJvvL0uMdWLGnN7Nx9z7feWh2oN0AY_qNzhrZG_tXw_aLu024qd_k-va7-1fJ7RotiozKadosdq7rdlpoP_8Yvp1JUA1L6fHoh0U91ZBZL"
+            "date": "2026-10-17",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG8YgWhUy_SO0pIQW130-3syc6vdJ7L6Gz2bVzTsZxT7oIdvGrWIunbD5aecFI6WIY2atSvhBGH2g-0J3sngf3SM23gIkxEvpXsBi1co9UvtPhHaGxd7o6EJZwlSL5gh-5CrLSNq-NMj9pcTojR91tJpw3yzRFkqJWEkzScNQ=="
           },
           {
-            "headline": "Regulačný rámec SEC pre tokenizované akcie otvára dvere pre Solana ekosystém",
-            "summary": "Regulačné výnimky SEC pre obchodovanie tokenizovaných akcií na blockchaine predstavujú pre Solanu priaznivý katalyzátor v oblasti inštitucionálnych RWA produktov. Analytici však upozorňujú, že prenos optimizmu do reálneho dopytu po SOL bude závisieť od spustenia konkrétnych platforiem a reálnych obj",
-            "category": "regulácia",
-            "impact": "positive",
+            "headline": "Séria čistých odlivov zo Solana investičných fondov",
+            "summary": "Solana fondy a ETP zaznamenali odlivy v 9 z 10 októbrových obchodných dní, pričom len v polovici októbra odišlo takmer 10 miliónov USD denne, čo brzdí zotavenie SOL nad hladinu 110 USD pred očakávanou aktiváciou aktualizácie siete koncom mesiaca.",
+            "category": "ETF a toky",
+            "impact": "negative",
             "severity": 2,
             "date": "2026-10-15",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGg_59NXhSOiXHPo292nvhOGFbYizhjmAQwhlx8gSLX3yuDTr-As4YNdubCE6wHU3UaflRLr7wzo416qdE4ShiOMwiUnjhmFnlwTQqrIIELMF-azlOYkNBUwDhThapg05Qnz1aiQR8hStiys5csP-iDsI_90MAsPaESgUTep4YekOEJJ-Pcxu16x3e29QIiqA=="
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGZURZk4AWvqXtn9QxcQJXtpKPhL7OaUePXGOQkIRNbNEvUH1H-R9edJRfua4t44BTk44PfvR35wdjV4GXu0krCiKAfBi-zzvBAIvGJ3Kt8Zz330geVpKyO49NMwaeeBFc0XqHmOPebPdzFNUFh6KrlNLCV_5Qv_ScKC3iNEclGDkMNoKNmrVb__SCtyBQaJN36rmWeNBbhi6UjLQuY4fEah4PjkCoRzRQ4AFXTCaNa9htH2K5aIMM="
           }
         ],
-        "risk_pts": 0,
-        "cause_category": "Príčina nezistená",
-        "cause_summary": ""
+        "risk_pts": 1,
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Týždenný pokles bol spôsobený pretrvávajúcimi odlivmi zo spotových fondov a odčerpávaním kapitálu zo stablecoinov na sieti."
       },
       "ONDO": {
         "findings": [
           {
-            "headline": "Správa DWF Labs: Segment tokenizovaných akcií vzrástol na 3,8 mld. USD, podiel Onda však klesá",
-            "summary": "Výskumná správa DWF Labs ukázala, že hodnota tokenizovaných akcií vzrástla od januára o 483 % na 3,8 miliardy USD. Hoci Ondo Finance zostáva najväčším emitentom s 1 miliardou USD v aktívach, jeho trhový podiel klesol z pôvodných 56 % na 26 % kvôli nástupu konkurenčných produktov od Binance (bStocks)",
-            "category": "projekt",
-            "impact": "neutral",
+            "headline": "Pokles ONDO kľúčovým supportom v dôsledku celotrhových likvidácií",
+            "summary": "Token ONDO klesol pod hranicu 0,43 USD v dôsledku miliardových likvidácií vyvolaných rastom americkej inflácie. Zdroj zdôrazňuje, že fundamenty protokolu (TVL nad 4 miliardy USD) ostávajú nedotknuté a prepad je čisto makroekonomický.",
+            "category": "trh",
+            "impact": "negative",
             "severity": 2,
-            "date": "2026-10-15",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHkGB-YwlE0rkNzERHmnTx3uOTj7RtcMNktzgsynthdWGecAgewbxRzV_N4vfw6m7Ru3eNIv9l1eHDxg9paCCGsMrPKZ7LYkeovsNL8uKYYMep4q6sh7LD1qxdne_hPo7w3iCUjOH4OwmdTnGoiCnFI34KNsGo8L6klXO7nbzVprToDx_yyqtoYEScut2lpYGYuBSxBl9JbCgPokY6lmRPKXbo="
+            "date": "2026-10-16",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG-CocT9pXLHOQV9I9ItWlv4QrbNm5i5pHvd1pxWcBnWO7oi3viukGMao3nSYT8YHBYoLyLWtCY4sNe77PzFzCISmPZe2Hc1U3sn3-8--GHIqu0D-QugojM-hf-9WmXj3-PS8HrP4FRmsYdhvFAJNLDK-ae1m2J4nD4rKQk_xDU9RT8yW_USM1fHppMCA1bwg=="
           },
           {
-            "headline": "Zaradenie produktov Ondo Intelligent Portfolios so stakingom na burzu Gate.io",
-            "summary": "Burza Gate.io integrovala Ondo Intelligent Portfolios, čo používateľom umožňuje investovať do diverzifikovaných tokenizovaných košov aktív (vrátane stratégií v spolupráci s BlackRock). Súčasťou spustenia je soft staking s odhadovaným výnosom 8 % APR a podpora v programe Launchpool.",
-            "category": "projekt",
+            "headline": "Veľrybí výber 2,455 milióna ONDO z burzy Binance",
+            "summary": "Z burzy Binance bola 16. októbra presunutá do privátnej peňaženky tranža 2,455 milióna ONDO v hodnote približne 1,14 milióna USD. Presun signalizuje akumuláciu veľkého držiteľa a zníženie okamžitej burzovej ponuky.",
+            "category": "iné",
             "impact": "positive",
             "severity": 1,
-            "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE80TCqP6cdU9GbKwM3IxSmru6DSne68R-x2kDGc_zL6iK_AVLksZTAB-pYK53WV4JahEzfETIx5teoEE71l6HcblnlUhgL64UxBCtdSM4vk6ZxFeCZ2BvfvUODYB5S-8uHgizdu-4Lm8od_EOl-JxDamUM"
+            "date": "2026-10-17",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGRUr6_27ZvSw4_a_ZTTdfBVd0HcM_nXLy6RhoirGaNJtraTM9IZHaih8Em4nPvY1F2OYEjA4t7MUxIblTw_B0yjzBR6dNQum8t3ZkAYPytmPk6JmtTp0WsWytBIvvk9P0EWk-CYoN5qS4ix0Xrg0_ZGv1cMYzhc2Myrw5YFD6z9vambbvEkTH11w=="
           }
         ],
-        "risk_pts": 0,
+        "risk_pts": 1,
         "cause_category": "Potvrdená správa alebo udalosť",
-        "cause_summary": "K predajnému tlaku okrem makro poklesu prispela štúdia DWF Labs o silnej konkurencii a poklese trhového podielu Onda z 56 % na 26 %. Zdroje explicitne potvrdzujú dodatočný predajný tlak po zverejnení týchto dát."
+        "cause_summary": "Prepad pod úroveň podpory 0,43 USD vyvolala celotrhová vlna likvidácií dlhých pozícií a obavy z prísnejšej menovej politiky po raste inflácie v USA."
       },
       "RENDER": {
         "findings": [
           {
-            "headline": "Zaradenie RENDER do nového fondu Grayscale Decentralized AI Fund",
-            "summary": "Token RENDER bol zaradený ako kľúčová zložka do nového fondu Grayscale Decentralized AI Fund (vytvoreného v partnerstve s Republic), kde tvorí približne 21,59 % alokácie. Udalosť zabezpečuje prístup k tokenu regulovanou formou pre inštitucionálnych a akreditovaných investorov.",
-            "category": "projekt",
+            "headline": "Zaradenie RENDER do fondu Grayscale Decentralized AI Fund s váhou 21,6 %",
+            "summary": "RENDER sa stal jednou zo štyroch hlavných zložiek nového AI fondu Grayscale a Republic (tvorí 21,59 % fondu). Hoci správa priniesla krátkodobý 3–5 % nárast, následný celotrhový prepad zatlačil token späť do straty.",
+            "category": "ETF a toky",
             "impact": "positive",
             "severity": 2,
             "date": "2026-10-16",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHjtC7m45AeON2SnpLohlBWt6DW9kSYmQbeT_S_NojTFy8oG3d7KhblZK6QCFG0uHcDZAq8wLcebC7VCbozBtJ6gOFy5vj0J16PxDi_qoGWYGtyGQHZbzz8j-GvDL0QD3LPngMtwUpJfSOHh9jVcLdcuNCmlMc="
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEf84VpY6amCbjRBWHVLDPy8p0aW5QKyC7WlgkFIo0jQorDp1Os1Vs05_xJP0XAOouat_JBkuZjhnZq_-6sasyV3J4PkXN7_gr4JK839_nbIGaZUXJW7sSDBf5DB9e8CyT0UTZxkMdtY-FqxQPmO3uItIJKeOE="
           },
           {
-            "headline": "Spoločnosť Digital Commodities kúpila tokeny RENDER za 100 000 CAD",
-            "summary": "Verejne obchodovaná spoločnosť Digital Commodities Inc. oznámila priamy nákup tokenov RENDER v hodnote 100 000 CAD v rámci svojej stratégie zameranej na infraštruktúru decentralizovaných GPU výpočtov po boku sietí Solana a NEAR.",
-            "category": "projekt",
+            "headline": "Firemná alokácia spoločnosti Digital Commodities do tokenu RENDER",
+            "summary": "Kanadská verejne obchodovaná spoločnosť Digital Commodities Inc. oznámila priamy nákup tokenov RENDER v rámci rozširovania treasury expozície voči decentralizovanej GPU infraštruktúre vedľa sietí Solana a NEAR.",
+            "category": "iné",
             "impact": "positive",
             "severity": 1,
             "date": "2026-10-15",
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF8Jc2UqMqCa4uLeqokTWpqO16g_Ro3O8Flh84eYeStUswwu5aPm-CXr1tzbPGVmxuA3ohvwJcEcmjnSfarF5Ooss7a_rbLV5lz5bmE4x15s3Lew19ukf4evpjSqMi_w4FhX3-Zj6fUw4WKGPk6Dy5TVVHEkP3LqsV5F9I4Z1XjMNlQb9ZrkZmkzOzKQ43TF2uHn2ec5zH-_oWVNVAQihTrBtq5hEzGTVjeooe2XJbkJbql6REjDwhDewxwbUr0mAY1VbKudr4kN6yvPKrDyBy5"
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFKGcKjawoPaI9wzDBRsHa5J756HipH-2sSURPTYdApUJL1CkX6kzNY3nqjFHSTNG10kGmgRtjRuyeI-EIRLq3Rj2m4szx284qw2uB4KwWKfpM-JUIC0PevBSIZZtycVw9XjjKMw4YDQkU2QzLn3qzlJTj_BWpEBMgmy1UG6JTwNtpN-0wreMirb4k6XcamS0ieG8djw8z2A1ZmnQrH_RjNJd18UeRNP5H2xwXVKzl26w=="
           }
         ],
         "risk_pts": 0,
-        "cause_category": "Príčina nezistená",
-        "cause_summary": ""
+        "cause_category": "Potvrdená správa alebo udalosť",
+        "cause_summary": "Po vyprchaní nákupného stimulu z fondu Grayscale narazil token na silnú technickú rezistenciu, čo v kombinácii s celotrhom viedlo k vyberaniu ziskov."
       }
     }
   },
   "last_actions": {
     "AAVE": {
       "action": "SELL",
-      "ts": "2026-10-17T18:27:37.297869+00:00",
-      "trend_score": 2.1
+      "ts": "2026-10-18T05:12:00.354045+00:00",
+      "trend_score": 1.3
     },
     "TAO": {
       "action": "SELL",
-      "ts": "2026-10-17T18:27:37.297890+00:00",
+      "ts": "2026-10-18T05:12:00.354065+00:00",
       "trend_score": 1.3
     },
     "FET": {
       "action": "SELL",
-      "ts": "2026-10-17T18:27:37.297895+00:00",
-      "trend_score": 0.9
+      "ts": "2026-10-18T05:12:00.354068+00:00",
+      "trend_score": 1.3
     },
     "SOL": {
       "action": "REDUCE",
-      "ts": "2026-10-17T18:27:37.297898+00:00",
+      "ts": "2026-10-18T05:12:00.354070+00:00",
       "trend_score": 2.5
     },
     "ONDO": {
       "action": "SELL",
-      "ts": "2026-10-17T18:27:37.297901+00:00",
-      "trend_score": 0.9
+      "ts": "2026-10-18T05:12:00.354072+00:00",
+      "trend_score": 1.3
     },
     "RENDER": {
-      "action": "SELL",
-      "ts": "2026-10-17T18:27:37.297903+00:00",
-      "trend_score": 2.9
+      "action": "REDUCE",
+      "ts": "2026-10-18T05:12:00.354074+00:00",
+      "trend_score": 3.3
     }
   },
   "prev_flags": {
     "safety": "CRITICAL",
-    "dominance": 59.42291215828496,
+    "dominance": 59.48720848402033,
     "BTC": {
       "above_ema50": false,
       "above_ema200": false
@@ -2159,24 +2168,23 @@
       "above_ema50": false,
       "above_ema200": true,
       "support_broken": false,
-      "action": "SELL"
+      "action": "REDUCE"
     }
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 8,
+    "score": 7,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "trhová kapitalizácia klesla o 2.5% za 24h",
+      "trhová kapitalizácia klesla o 2.7% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
-      "MACD Bitcoinu je záporný",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-17T18:27:37.297925+00:00",
+    "ts": "2026-10-18T05:12:00.354092+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 8,
-    "last_alert_ts": "2026-10-17T18:27:37.297927+00:00"
+    "last_alert_score": 7,
+    "last_alert_ts": "2026-10-18T05:12:00.354094+00:00"
   },
   "alerts": {
     "AAVE": {
