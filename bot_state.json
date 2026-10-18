@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-18T21:20:18.879511+02:00",
+  "last_run": "2026-10-18T21:47:23.004471+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2173,18 +2173,19 @@
   },
   "safety": {
     "state": "CRITICAL",
-    "score": 7,
+    "score": 9,
     "reasons": [
       "6 z 6 altcoinov je pod prahom poklesu",
-      "trhová kapitalizácia klesla o 3.9% za 24h",
+      "celková trhová kapitalizácia -4.7% za 24h",
       "Bitcoin pod EMA200",
       "Bitcoin pod EMA50",
+      "prelomený support: AAVE, FET, ONDO, RENDER",
       "negatívne fundamentálne správy o trhu (potvrdené zdrojom)"
     ],
-    "ts": "2026-10-18T18:00:26.585102+00:00",
+    "ts": "2026-10-18T19:47:23.004458+00:00",
     "last_alert_state": "CRITICAL",
-    "last_alert_score": 7,
-    "last_alert_ts": "2026-10-18T18:00:26.585104+00:00"
+    "last_alert_score": 9,
+    "last_alert_ts": "2026-10-18T19:47:23.004463+00:00"
   },
   "alerts": {
     "AAVE": {
@@ -2195,9 +2196,9 @@
     },
     "FET": {
       "level": "DEEP",
-      "drawdown": 21.61,
+      "drawdown": 26.52,
       "action": "SELL",
-      "ts": "2026-10-17T15:39:02.368256+00:00"
+      "ts": "2026-10-18T19:47:23.004429+00:00"
     },
     "SOL": {
       "level": "DEEP",
