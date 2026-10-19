@@ -1,13 +1,10 @@
+
 name: Crypto AI Bot V10.3
 
 on:
-  # Bezpecnostna kontrola kazdych 15 minut.
-  # Hlavne analyzy (07:00, 15:00, 20:00 Bratislava) nacasuje main.py,
-  # takze letny/zimny cas nie je potrebne riesit v cron-e.
   schedule:
     - cron: "*/15 * * * *"
 
-  # Moznost spustit analyzu rucne.
   workflow_dispatch:
     inputs:
       manual_analysis:
@@ -16,7 +13,7 @@ on:
         default: false
         type: boolean
       manual_deep_search:
-        description: "Pri rucnej analyze spustit aj hlboke hladanie (Google Search)?"
+        description: "Pri rucnej analyze spustit aj hlboke hladanie?"
         required: false
         default: false
         type: boolean
@@ -31,7 +28,6 @@ concurrency:
 jobs:
   crypto-bot:
     runs-on: ubuntu-latest
-    # Hlboke hladanie (vyhladavanie + strukturovanie + vysvetlenie) trva dlhsie
     timeout-minutes: 25
 
     steps:
@@ -46,25 +42,18 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install google-genai
+          python -m pip install groq
 
       - name: Run Crypto AI Bot
         env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}     GROQ_MODEL: openai/gpt-oss-120b
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-
-          # Ak je premenna GROQ_MODEL prazdna,
-          # pouzije sa predvoleny model.
-          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
-
-          # Pri automatickom spusteni je hodnota false.
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
           MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
-
           PYTHONUNBUFFERED: "1"
-
         run: |
           python main.py
 
@@ -79,7 +68,6 @@ jobs:
 
             if ! git diff --cached --quiet; then
               git commit -m "Update crypto bot state [skip ci]"
-              # Ochrana pred konfliktom, ak medzitym pribudol iny commit
               git pull --rebase --autostash || true
               git push
             else
