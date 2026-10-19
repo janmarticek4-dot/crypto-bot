@@ -14,16 +14,18 @@ from zoneinfo import ZoneInfo
 
 
 # ============================================================
-# CRYPTO AI BOT V10.4
+# CRYPTO AI BOT V10.5
 # Inteligentný analytik kryptomien a ochranca investičného portfólia.
 #
 # Princíp: čísla, signály, bezpečnostné stavy a hladiny počíta KÓD.
-# Groq (1) vyhľadáva fundamentálne podklady (len 07:00 a pri prepade
-# nad 10 %) a (2) vysvetľuje hotové čísla. AI nikdy nemení signál.
+# Hlavné analýzy Telegram: 07:00 a 20:00 Bratislava.
+# Každých 15 minút: tichý monitoring; alert iba pri overenej hrozbe
+# systémového pádu trhu o viac než 10 % od aktuálnej úrovne.
+# Groq vysvetľuje analýzu a overuje iba mimoriadne spúšťače rizika.
 # Bot neobchoduje, iba analyzuje a upozorňuje.
 # ============================================================
 
-VERSION = "10.4"
+VERSION = "10.5"
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -157,10 +159,14 @@ CONFIG = {
     # --- Správy a príčiny pohybov ---
     "news_max_age_hours": 48,
     "significant_move_pct": 5.0,        # 24h pohyb, pri ktorom sa hľadá príčina
+    # Tichý monitor: alert iba pri podloženej hrozbe pádu trhu >10 %
+    "crash_alert_min_drawdown_pct": 10.0,
+    "crash_alert_min_confidence_pct": 80.0,
+    "crash_alert_cooldown_hours": 8,
 }
 
 # Hlavné analýzy: (hodina, minúta, názov). Hlboké hľadanie len pri "07:00".
-MAIN_SLOTS = [(7, 0, "07:00"), (15, 0, "15:00"), (20, 0, "20:00")]
+MAIN_SLOTS = [(7, 0, "07:00"), (20, 0, "20:00")]
 SLOT_GRACE_MINUTES = 90                 # GitHub Actions často mešká
 DEEP_SEARCH_SLOT = "07:00"
 
@@ -1083,7 +1089,11 @@ def get_main_analysis_slot(now=None):
 
 
 def is_main_analysis_time(now=None):
-    if manual_analysis_requested():
+    # Ručné spustenie hlavnej analýzy je povolené iba pri explicitnom
+    # workflow_dispatch; premenná nastavená v Secrets nesmie spúšťať
+    # hlavnú analýzu pri každom 15-minútovom plánovanom behu.
+    if (os.getenv("GITHUB_EVENT_NAME", "").strip() == "workflow_dispatch"
+            and manual_analysis_requested()):
         return True, "MANUAL"
 
     slot = get_main_analysis_slot(now)
@@ -1710,6 +1720,12 @@ def gather_market_data(state):
 
     total_cap = safe_float((gdata.get("total_market_cap") or {}).get("usd"))
     total_volume = safe_float((gdata.get("total_volume") or {}).get("usd"))
+    # Ochrana pred chybnými jednotkami/API hodnotami (napr. stovky biliónov USD).
+    # Celkový objem trhu vyšší než polovica kapitalizácie sa nezobrazuje ako fakt.
+    if total_volume is not None and total_cap is not None:
+        if total_volume < 0 or total_volume > min(5_000_000_000_000, total_cap * 0.5):
+            print(f"Varovanie: podozrivý celkový objem trhu {total_volume}; hodnota sa zahodí.")
+            total_volume = None
     dominance = safe_float((gdata.get("market_cap_percentage") or {}).get("btc"))
     global_change = safe_float(gdata.get("market_cap_change_percentage_24h_usd"))
 
@@ -2583,143 +2599,235 @@ def format_safety_alert(kind, safety, ctx, coin_alerts, pump_alerts, evals, stat
 # BEZPEČNOSTNÝ MONITOR (medzi hlavnými analýzami)
 # ============================================================
 
+def _crisis_news_candidates(news):
+    """Vráti iba titulky s možným systémovým dopadom; bežné trhové správy ignoruje."""
+    phrases = (
+        "exchange hacked", "exchange hack", "major hack", "security breach",
+        "exploit drains", "protocol exploit", "bridge exploit", "stablecoin depeg",
+        "depegged", "loses its peg", "bankruptcy", "insolvency", "insolvent",
+        "withdrawals suspended", "withdrawals halted", "withdrawals paused",
+        "exchange halts", "exchange collapse", "exchange collapses",
+        "stablecoin reserves", "reserve shortfall", "liquidity crisis",
+        "systemic risk", "emergency rate hike", "emergency rate cut",
+        "capital controls", "crypto ban", "ban on crypto", "major lawsuit",
+        "war escalates", "military escalation", "missile attack", "invasion",
+        "sanctions on", "default", "market-wide liquidation", "record liquidations",
+        "mass liquidation", "massive liquidation", "outage", "frozen withdrawals",
+        "hack", "hacked", "exploit", "depeg", "bankruptcy", "insolvency",
+        "pozastavenie výberov", "pozastavili výbery", "hacknutá burza",
+        "hack burzy", "depeg", "strata naviazania", "bankrot", "insolvencia",
+        "vojenská eskalácia", "invázia", "mimoriadne zvýšenie sadzieb",
+    )
+    out, seen = [], set()
+    for item in news or []:
+        title = str(item.get("title") or "").strip()
+        title_l = title.lower()
+        if not title or not any(term in title_l for term in phrases):
+            continue
+        key = re.sub(r"\W+", " ", title_l).strip()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({
+            "source": str(item.get("source") or "Neznámy zdroj"),
+            "title": title[:300],
+            "link": str(item.get("link") or "")[:500],
+            "pub_date": str(item.get("pub_date") or ""),
+        })
+    return out[:12]
+
+
+def _market_stress_trigger(ctx):
+    """Cenový stres len spustí preverenie; nikdy sám o sebe neodošle alert."""
+    btc = safe_float(ctx.get("btc_change_24h"))
+    market = safe_float(ctx.get("global_change"))
+    # Kombinácia výrazného poklesu BTC aj celého trhu, nie jeden technický indikátor.
+    return btc is not None and market is not None and btc <= -5.0 and market <= -4.0
+
+
+def _crash_alert_prompt(candidates, ctx):
+    market_lines = [
+        f"BTC zmena za 24 h: {fmt_pct(ctx.get('btc_change_24h'))}",
+        f"Zmena globálnej kapitalizácie za 24 h: {fmt_pct(ctx.get('global_change'))}",
+        f"Globálna kapitalizácia USD: {fmt_big(ctx.get('total_market_cap'))}",
+    ]
+    headlines = "\n".join(
+        f"- {x['source']} | {x['pub_date']} | {x['title']} | URL: {x['link']}"
+        for x in candidates
+    ) or "Nenašli sa žiadne rizikové titulky; vyhodnoť len uvedený trhový stres."
+    return f"""Vyhodnoť, či práve existuje KONKRÉTNA, dôveryhodne podložená udalosť, ktorá môže spôsobiť ďalší prudký pokles celého kryptotrhu o VIAC AKO 10 % OD JEHO AKTUÁLNEJ ÚROVNE.
+
+Nezamieňaj bežnú volatilitu, cenu pod EMA, slabé RSI, bežné výpredaje ani všeobecné obavy za systémovú hrozbu. Samotný technický pokles nestačí. Neodhaduj katastrofu bez dôkazov. Rozlišuj potvrdenú udalosť od špekulácie. Pri chýbajúcich/nekvalitných zdrojoch nastav alert=false.
+
+Trhový kontext:
+{chr(10).join(market_lines)}
+
+Kandidátske správy z RSS:
+{headlines}
+
+Použi webové vyhľadávanie na overenie udalosti a jej rozsahu, ak existuje kandidátska správa alebo výrazný súbežný stres trhu. Uprednostni primárne zdroje a aspoň dva nezávislé dôveryhodné zdroje, ak nejde o jednoznačne potvrdené oficiálne oznámenie. Nevymýšľaj URL.
+
+Vráť IBA jeden JSON objekt s presnými kľúčmi:
+{{"alert":false,"event":"stručný opis alebo prázdne","expected_drawdown_pct":0,"confidence_pct":0,"evidence":["konkrétny overený dôkaz"],"sources":[{{"name":"zdroj","url":"https://..."}}],"reason":"stručné vysvetlenie po slovensky"}}
+
+alert=true povoľ iba ak: (1) udalosť je dôveryhodne potvrdená, (2) má realistický systémový dopad na kryptotrh, (3) odhad možného ďalšieho poklesu OD AKTUÁLNEJ ÚROVNE je prísne viac než 10 %, (4) confidence_pct je aspoň {CONFIG['crash_alert_min_confidence_pct']:.0f}, (5) sú uvedené konkrétne dôkazy a aspoň jeden použiteľný zdroj URL. Ak čo i len jedna podmienka nie je splnená, alert=false. Nejde o predikciu s istotou ani pokyn na automatický predaj."""
+
+
+def _validated_crash_alert(raw_text):
+    """Fail-closed: neplatný/neurčitý AI výstup nikdy nevytvorí Telegram alert."""
+    try:
+        data = parse_json_output(raw_text)
+    except Exception as exc:
+        print(f"Crash monitor: AI výstup nebol validný JSON: {exc}")
+        return None
+    if not isinstance(data, dict) or data.get("alert") is not True:
+        return None
+    expected = safe_float(data.get("expected_drawdown_pct"), 0)
+    confidence = safe_float(data.get("confidence_pct"), 0)
+    evidence = data.get("evidence")
+    sources = data.get("sources")
+    if expected is None or expected <= CONFIG["crash_alert_min_drawdown_pct"]:
+        return None
+    if confidence is None or confidence < CONFIG["crash_alert_min_confidence_pct"]:
+        return None
+    if not isinstance(evidence, list) or not any(str(x).strip() for x in evidence):
+        return None
+    if not isinstance(sources, list):
+        return None
+    valid_sources = [
+        x for x in sources
+        if isinstance(x, dict) and str(x.get("url", "")).startswith("https://")
+    ]
+    # Dva nezávislé weby znižujú riziko alertu založeného na halucinácii alebo fáme.
+    domains = set()
+    for item in valid_sources:
+        try:
+            domain = urllib.parse.urlparse(item["url"]).netloc.lower().split(":", 1)[0]
+            if domain.startswith("www."):
+                domain = domain[4:]
+            if domain:
+                domains.add(domain)
+        except Exception:
+            pass
+    if len(domains) < 2:
+        return None
+    event = str(data.get("event") or "").strip()
+    reason = str(data.get("reason") or "").strip()
+    if not event or not reason:
+        return None
+    return {
+        "event": event[:500],
+        "expected_drawdown_pct": expected,
+        "confidence_pct": confidence,
+        "evidence": [str(x).strip()[:300] for x in evidence[:4] if str(x).strip()],
+        "sources": valid_sources[:4],
+        "reason": reason[:1000],
+    }
+
+
 def run_safety_monitor():
+    """Tichý 15-minútový monitoring. Telegram len pri overenej hrozbe pádu >10 %."""
     state = load_state()
-    ctx = gather_market_data(state)
-    fund = get_usable_fundamentals(state)
-    metrics_map, safety, evals = evaluate_all(ctx, state, fund)
+    now = datetime.now(timezone.utc)
+    monitor_state = state.setdefault("crash_monitor", {})
 
-    now_utc = datetime.now(timezone.utc)
-    store = state.setdefault("alerts", {})
-    sstate = dict(state.get("safety") or {})
-    last_state = sstate.get("last_alert_state", "NORMAL")
-    last_score = safe_float(sstate.get("last_alert_score"), 0)
+    # Správy aj cenové údaje sa kontrolujú na pozadí. Bežné rizikové/technické signály
+    # sa neodosielajú a nemenia sa na bezpečnostný alert.
+    try:
+        news = get_rss_news()
+    except Exception as exc:
+        print(f"Crash monitor: RSS sa nepodarilo načítať: {exc}")
+        news = []
 
-    # --- 1) bezpečnostný stav ---
-    kind = None
-    if SAFETY_RANK[safety["state"]] > SAFETY_RANK[last_state]:
-        kind = "ESCALATION"
-    elif (
-        safety["state"] != "NORMAL" and safety["state"] == last_state
-        and safety["score"] - last_score >= CONFIG["safety_alert_worsen_pts"]
-    ):
-        kind = "WORSENING"
-    elif SAFETY_RANK[safety["state"]] < SAFETY_RANK[last_state]:
-        kind = "EASING"
+    ctx = None
+    try:
+        ctx = gather_market_data(state)
+    except Exception as exc:
+        print(f"Crash monitor: trhové dáta sa nepodarilo načítať: {exc}")
 
-    # --- 2) alerty mincí ---
-    level_rank = {"RISK": 1, "DEEP": 2}
-    coin_alerts = []
-    for symbol, ev in evals.items():
-        if ev.get("risk_level") == "NEZNÁME":
-            continue
-
-        dd = ev["drawdown_pct"]
-        level = None
-        if dd >= CONFIG["drawdown_deep_pct"]:
-            level = "DEEP"
-        elif (
-            (dd >= ev["review_thr"] and ev["risk_pts"] >= CONFIG["risk_elevated_pts"])
-            or ev["action"] in {"REDUCE", "SELL"}
-        ):
-            level = "RISK"
-
-        last = store.get(symbol) or {}
-
-        if level is None:
-            if dd < ev["review_thr"] * 0.6:
-                store.pop(symbol, None)          # zotavenie -> pamäť alertov sa vynuluje
-            continue
-
-        last_rank = level_rank.get(last.get("level"), 0)
-        last_dd = safe_float(last.get("drawdown"), 0.0)
-        worse_action = (
-            bool(last)
-            and ACTION_SEVERITY.get(ev["action"], 0) > ACTION_SEVERITY.get(last.get("action"), 0)
-        )
-        if (
-            level_rank[level] > last_rank
-            or dd - last_dd >= CONFIG["alert_worsen_pp"]
-            or worse_action
-        ):
-            coin_alerts.append((symbol, ev, level))
-
-    # --- 3) upozornenie na výrazný rast ---
-    pump_store = state.setdefault("coin_change_alerts", {})
-    pump_alerts = []
-    for symbol, data in ctx["portfolio_data"].items():
-        if data.get("error"):
-            continue
-        move = safe_float(data.get("change_since_last"), 0.0)
-        last_move = safe_float(pump_store.get(symbol), 0.0)
-        if move >= CONFIG["pump_alert_pct"] and move - last_move >= CONFIG["pump_alert_step_pct"]:
-            pump_alerts.append({
-                "symbol": symbol, "change_since_last": move, "price": data.get("price_usd"),
-            })
-            pump_store[symbol] = move
-
-    if not (kind or coin_alerts or pump_alerts):
+    candidates = _crisis_news_candidates(news)
+    stress = _market_stress_trigger(ctx or {}) if ctx else False
+    if not candidates and not stress:
         state["last_run"] = iso_now()
+        monitor_state["last_checked_at"] = utc_now_iso()
+        monitor_state["last_result"] = "quiet_no_trigger"
         save_state(state)
-        print("Monitor: žiadny alert.")
+        print("Monitor: ticho, nebol nájdený spúšťač systémovej hrozby; Telegram bez správy.")
         return
 
-    # --- 4) hlboké hľadanie IBA pri prepade nad 10 % ---
-    researched = []
-    deep_symbols = [s for s, _, lvl in coin_alerts if lvl == "DEEP"]
-    if deep_symbols:
-        research_store = state.setdefault("alert_research", {})
-        todo = []
-        for symbol in deep_symbols:
-            last = research_store.get(symbol) or {}
-            ts = parse_timestamp(last.get("ts"))
-            age_h = (now_utc - ts).total_seconds() / 3600 if ts else 1e9
-            worsened = evals[symbol]["drawdown_pct"] - safe_float(last.get("drawdown"), 0.0) >= CONFIG["deep_search_worsen_pp"]
-            if age_h >= CONFIG["deep_search_cooldown_hours"] or worsened:
-                todo.append(symbol)
+    # Cooldown zabráni opakovaniu toho istého upozornenia pri každom 15-min. behu.
+    last_alert_ts = parse_timestamp(monitor_state.get("last_alert_ts"))
+    cooldown_h = CONFIG["crash_alert_cooldown_hours"]
+    if last_alert_ts and (now - last_alert_ts).total_seconds() < cooldown_h * 3600:
+        previous_titles = set(monitor_state.get("last_alert_titles") or [])
+        current_titles = {re.sub(r"\W+", " ", x["title"].lower()).strip() for x in candidates}
+        # Počas cooldownu preskoč iba opakované titulky; nová hrozba sa musí preveriť.
+        if not current_titles or current_titles.issubset(previous_titles):
+            print("Monitor: opakovaný spúšťač počas cooldownu; Telegram bez správy.")
+            monitor_state["last_checked_at"] = utc_now_iso()
+            monitor_state["last_result"] = "quiet_cooldown"
+            save_state(state)
+            return
 
-        if todo:
-            include_market = len(todo) >= 2 or safety["state"] != "NORMAL"
-            result = run_fundamental_research(todo, include_market, ctx, evals, "alert")
-            if result["status"] == "ok":
-                for symbol in todo:
-                    research_store[symbol] = {
-                        "ts": result["generated_at"],
-                        "drawdown": evals[symbol]["drawdown_pct"],
-                        "data": result["coins"].get(symbol),
-                    }
-                if include_market:
-                    state["alert_research_market"] = {
-                        "ts": result["generated_at"],
-                        **(result.get("market") or {}),
-                    }
-                researched = todo
-                # nový fundament môže zmeniť riziko mincí; prepočítame
-                metrics_map, safety, evals = evaluate_all(ctx, state, fund)
-                for idx, (symbol, _, level) in enumerate(coin_alerts):
-                    coin_alerts[idx] = (symbol, evals[symbol], level)
+    # Nepoužívame AI pri každom behu. Groq/web search sa spustí iba pri rizikovom titulku
+    # alebo kombinovanom strese trhu. Chyba/429 znamená ticho, nie špekulatívny alert.
+    try:
+        prompt = _crash_alert_prompt(candidates, ctx or {})
+        raw = groq_call(prompt, search=True, thinking_level="high", timeout=90)
+        verified = _validated_crash_alert(raw)
+    except Exception as exc:
+        print(f"Crash monitor: overenie hrozby zlyhalo; alert sa neposiela: {exc}")
+        monitor_state["last_checked_at"] = utc_now_iso()
+        monitor_state["last_result"] = "quiet_verification_failed"
+        monitor_state["last_error"] = str(exc)[:300]
+        state["last_run"] = iso_now()
+        save_state(state)
+        return
 
-    message = format_safety_alert(kind, safety, ctx, coin_alerts, pump_alerts, evals, state, researched)
-    telegram_send_long(message)
+    if not verified:
+        monitor_state["last_checked_at"] = utc_now_iso()
+        monitor_state["last_result"] = "quiet_not_confirmed"
+        monitor_state.pop("last_error", None)
+        state["last_run"] = iso_now()
+        save_state(state)
+        print("Monitor: potenciálna hrozba neprešla prísnym overením; Telegram bez správy.")
+        return
 
-    # --- 5) uloženie stavu ---
-    for symbol, ev, level in coin_alerts:
-        store[symbol] = {
-            "level": level, "drawdown": ev["drawdown_pct"],
-            "action": ev["action"], "ts": utc_now_iso(),
-        }
+    # Jeden jasný, výnimočný alert; žiadne bežné safety/coin/pump hlásenia.
+    lines = [
+        f"🚨 CRYPTO AI BOT V{VERSION} — VÁŽNA HROZBA PRE TRH",
+        f"🕒 {now_local().strftime('%d.%m.%Y %H:%M')} (Bratislava)",
+        "",
+        "⚠️ Overená udalosť môže spustiť ďalší prudký pokles kryptotrhu.",
+        f"Udalosť: {verified['event']}",
+        f"Odhad možného ďalšieho poklesu od aktuálnej úrovne: viac než 10 % (AI odhad: {verified['expected_drawdown_pct']:.0f} %).",
+        f"Istota vyhodnotenia: {verified['confidence_pct']:.0f} %",
+        "",
+        "Prečo je to nebezpečné:",
+        verified["reason"],
+        "",
+        "Overené dôkazy:",
+    ]
+    lines.extend(f"• {x}" for x in verified["evidence"])
+    lines.extend(["", "Zdroje:"])
+    lines.extend(f"• {str(x.get('name') or 'Zdroj')[:100]} — {x['url']}" for x in verified["sources"])
+    lines.extend([
+        "",
+        "Toto je varovanie pred rizikom, nie istá predpoveď ani automatický pokyn na predaj.",
+    ])
+    telegram_send_long("\n".join(lines))
 
-    state["safety"] = {
-        **sstate,
-        "state": safety["state"], "score": safety["score"],
-        "reasons": safety["reasons"], "ts": utc_now_iso(),
-        "last_alert_state": safety["state"] if kind else last_state,
-        "last_alert_score": safety["score"] if kind else last_score,
-        "last_alert_ts": utc_now_iso() if kind else sstate.get("last_alert_ts"),
-    }
+    monitor_state["last_checked_at"] = utc_now_iso()
+    monitor_state["last_alert_ts"] = utc_now_iso()
+    monitor_state["last_result"] = "alert_sent"
+    monitor_state["last_alert_event"] = verified["event"]
+    monitor_state["last_alert_titles"] = [re.sub(r"\W+", " ", x["title"].lower()).strip() for x in candidates]
+    monitor_state["last_alert_expected_drawdown_pct"] = verified["expected_drawdown_pct"]
+    monitor_state["last_alert_confidence_pct"] = verified["confidence_pct"]
+    monitor_state.pop("last_error", None)
     state["last_run"] = iso_now()
     save_state(state)
-    print("Monitor: alert odoslaný.")
+    print("Monitor: mimoriadny crash alert odoslaný po overení.")
 
 
 # ============================================================
