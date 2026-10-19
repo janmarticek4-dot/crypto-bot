@@ -50,14 +50,14 @@ jobs:
 
       - name: Run Crypto AI Bot
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}     GROQ_MODEL: openai/gpt-oss-120b
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
-          # Ak je premenna GEMINI_MODEL prazdna,
+          # Ak je premenna GROQ_MODEL prazdna,
           # pouzije sa predvoleny model.
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.8-flash' }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
 
           # Pri automatickom spusteni je hodnota false.
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
