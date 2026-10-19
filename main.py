@@ -11,30 +11,29 @@ from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 from zoneinfo import ZoneInfo
 
-from google import genai
 
 
 # ============================================================
-# CRYPTO AI BOT V10.3
+# CRYPTO AI BOT V10.4
 # Inteligentný analytik kryptomien a ochranca investičného portfólia.
 #
 # Princíp: čísla, signály, bezpečnostné stavy a hladiny počíta KÓD.
-# Gemini (1) vyhľadáva fundamentálne podklady (len 07:00 a pri prepade
-# nad 10 %) a (2) vysvetľuje hotové čísla. Gemini nikdy nemení signál.
+# Groq (1) vyhľadáva fundamentálne podklady (len 07:00 a pri prepade
+# nad 10 %) a (2) vysvetľuje hotové čísla. AI nikdy nemení signál.
 # Bot neobchoduje, iba analyzuje a upozorňuje.
 # ============================================================
 
-VERSION = "10.3"
+VERSION = "10.4"
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "").strip()
 
-GEMINI_MODEL = (os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.8-flash")
+GROQ_MODEL = (os.getenv("GROQ_MODEL", "").strip() or "openai/gpt-oss-120b")
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 REQUEST_TIMEOUT = 45
-GEMINI_MAX_WAIT = 600
 POLL_INTERVAL = 5
 STATE_FILE = "bot_state.json"
 
@@ -138,7 +137,7 @@ CONFIG = {
 
     # --- Signály nákupu ---
     "buy_now_min_score": 6.5,
-    "buy_pullback_min_score": 5.0,
+    "buy_pullback_min_score": 5.5,         # prísnejší filter proti nákupu padajúceho noža
     "stabilized_dip_min_drawdown": 4.0,
     "greed_caution_value": 80,          # Fear & Greed >= toto: BUY NOW sa zmení na BUY PULLBACK
 
@@ -148,7 +147,7 @@ CONFIG = {
     "pump_alert_pct": 7.0,              # upozornenie na výrazný rast od poslednej analýzy
     "pump_alert_step_pct": 3.0,
 
-    # --- Hlboké hľadanie (Google Search cez Gemini) ---
+    # --- Hlboké hľadanie (webové vyhľadávanie cez Groq) ---
     "deep_search_cooldown_hours": 12,
     "deep_search_worsen_pp": 5.0,
     "fundamentals_max_age_hours": 72,   # staršie správy sa zahodia
@@ -1013,7 +1012,7 @@ def telegram_send_long(message):
 
 def parse_json_output(text):
     if not text:
-        raise RuntimeError("Gemini neposlal výstup.")
+        raise RuntimeError("AI neposlala výstup.")
 
     text = text.strip()
     text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
@@ -1025,11 +1024,11 @@ def parse_json_output(text):
         start = text.find("{")
         end = text.rfind("}")
         if start < 0 or end <= start:
-            raise RuntimeError("Gemini neposlal validný JSON.")
+            raise RuntimeError("AI neposlala validný JSON.")
         result = json.loads(text[start:end + 1])
 
     if not isinstance(result, dict):
-        raise RuntimeError("Výstup Gemini nie je JSON objekt.")
+        raise RuntimeError("Výstup AI nie je JSON objekt.")
 
     return result
 
@@ -1513,14 +1512,31 @@ def decide_coin(symbol, data, metrics, safety, ctx, state, fund_coin):
     greed = fg is not None and fg >= CONFIG["greed_caution_value"]
 
     stabilized_dip = bool(
-        dd >= CONFIG["stabilized_dip_min_drawdown"] and score >= 4.5 and pts <= 2
+        dd >= CONFIG["stabilized_dip_min_drawdown"] and score >= 5.5 and pts <= 2
         and hist is not None and hist > 0 and not metrics["support_broken"]
         and rsi_v is not None and 35 <= rsi_v <= 60
+        and (ema200 is None or price >= ema200)
     )
     buy_now_ok = bool(
         score >= CONFIG["buy_now_min_score"] and pts <= 1 and not extended
         and rsi_v is not None and 40 <= rsi_v <= 68
         and safety["state"] == "NORMAL" and not greed
+        and hist is not None and hist > 0
+        and not metrics["support_broken"]
+    )
+
+    # BUY PULLBACK nie je automatická odmena za pokles ceny.
+    # Vyžaduje sa zlepšujúce momentum, neporušený support, normálne riziko
+    # trhu a prijateľná technická štruktúra. Pri slabých/neúplných dátach WAIT.
+    pullback_ok = bool(
+        score >= CONFIG["buy_pullback_min_score"]
+        and pts <= 2
+        and safety["state"] == "NORMAL"
+        and rsi_v is not None and 35 <= rsi_v <= 60
+        and hist is not None and hist > 0
+        and not metrics["support_broken"]
+        and tiers
+        and (ema200 is None or price >= ema200)
     )
 
     if pts >= CONFIG["sell_pts"] and score <= 3.5:
@@ -1531,7 +1547,7 @@ def decide_coin(symbol, data, metrics, safety, ctx, state, fund_coin):
         action = "WAIT"
     elif buy_now_ok or (stabilized_dip and safety["state"] == "NORMAL"):
         action = "BUY NOW"
-    elif score >= CONFIG["buy_pullback_min_score"] and pts <= 2 and tiers:
+    elif pullback_ok:
         action = "BUY PULLBACK"
     elif pts >= 3 or score <= 4.0:
         action = "WAIT"
@@ -1539,6 +1555,10 @@ def decide_coin(symbol, data, metrics, safety, ctx, state, fund_coin):
         action = "HOLD"
 
     action, note = smooth_action(previous_action, action, score, pts)
+    # Ochranná poistka: vyhladzovanie signálov nesmie obísť nový nákupný filter.
+    if action == "BUY PULLBACK" and not pullback_ok:
+        action = "WAIT"
+        note = "nákupný plán zablokovaný: technické potvrdenie pullbacku nespĺňa pravidlá"
     ev["action_note"] = note
 
     # ---- hladiny ----
@@ -1566,6 +1586,8 @@ def decide_coin(symbol, data, metrics, safety, ctx, state, fund_coin):
         signals.extend(tscore.get("reasons") or [])
     if stabilized_dip:
         signals.append("pokles sa stabilizuje (MACD histogram kladný, support drží)")
+    if action in {"WAIT", "HOLD"} and (hist is None or hist <= 0 or metrics["support_broken"] or safety["state"] != "NORMAL"):
+        signals.append("nákupný filter nesplnený: momentum, support alebo bezpečnosť trhu nepotvrdzujú vstup")
     if extended:
         signals.append(f"cena je o {above_ema20_pct:.1f}% nad EMA20; nákup môže byť oneskorený")
     if greed:
@@ -1804,55 +1826,82 @@ def get_rss_news():
 
 
 # ============================================================
-# GEMINI (jedno volanie, s vyhľadávaním alebo bez neho)
+# GROQ AI (bez ďalšej knižnice; kompatibilné API)
+# Model a endpoint sú konfigurovateľné cez GitHub Secrets/Variables.
+# Browser search podporuje GPT-OSS model cez Groq chat completions.
 # ============================================================
 
-def gemini_call(prompt, search=False, thinking_level="high", timeout=120):
-    if not GEMINI_API_KEY:
-        raise RuntimeError("GEMINI_API_KEY nie je nastavený.")
+def groq_call(prompt, search=False, thinking_level="medium", timeout=150, json_mode=False):
+    if not GROQ_API_KEY:
+        raise RuntimeError("GROQ_API_KEY nie je nastavený.")
 
-    client = genai.Client(api_key=GEMINI_API_KEY)
-    print(f"Gemini model: {GEMINI_MODEL} | search={search}")
-
-    kwargs = {
-        "model": GEMINI_MODEL,
-        "input": prompt,
-        "background": True,
-        "generation_config": {"thinking_level": thinking_level},
-        "store": True,
-        "timeout": timeout,
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "Si opatrný analytik kryptomien. Nevymýšľaj údaje ani zdroje. "
+                    "Rozlišuj fakty, odhady a chýbajúce informácie. Odpovedaj po slovensky, ak prompt neurčí inak."
+                ),
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 1,
+        "max_completion_tokens": 4096,
+        "stream": False,
+        "reasoning_effort": thinking_level if thinking_level in {"low", "medium", "high"} else "medium",
     }
     if search:
-        kwargs["tools"] = [{"type": "google_search"}]
+        payload["tools"] = [{"type": "browser_search"}]
+        payload["tool_choice"] = "required"
+    if json_mode and not search:
+        payload["response_format"] = {"type": "json_object"}
 
-    interaction = client.interactions.create(**kwargs)
-    interaction_id = interaction.id
-    started = time.time()
+    request = urllib.request.Request(
+        GROQ_API_URL,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": f"CryptoAIBot/{VERSION}",
+        },
+        method="POST",
+    )
+    print(f"Groq model: {GROQ_MODEL} | search={search} | json={json_mode}")
+    try:
+        raw = http_request(request, timeout=timeout, retries=2)
+        result = json.loads(raw.decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = exc.read().decode("utf-8", errors="replace")[:700]
+        except Exception:
+            detail = str(exc)
+        raise RuntimeError(f"Groq API HTTP {exc.code}: {detail}") from exc
 
-    while True:
-        if time.time() - started > GEMINI_MAX_WAIT:
-            raise TimeoutError("Gemini trvá dlhšie ako 10 minút.")
-
-        interaction = client.interactions.get(id=interaction_id)
-        status = interaction.status
-
-        if status == "completed":
-            if not interaction.output_text:
-                raise RuntimeError("Gemini vrátil prázdny výstup.")
-            return interaction.output_text
-
-        if status in {"failed", "cancelled", "expired", "incomplete", "requires_action"}:
-            raise RuntimeError(f"Gemini skončil so stavom: {status}")
-
-        time.sleep(POLL_INTERVAL)
+    choices = result.get("choices") if isinstance(result, dict) else None
+    if not choices:
+        raise RuntimeError(f"Groq vrátil neúplnú odpoveď: {str(result)[:500]}")
+    message = choices[0].get("message") or {}
+    content = message.get("content")
+    if isinstance(content, list):
+        content = "\n".join(
+            str(item.get("text", "")) for item in content if isinstance(item, dict)
+        )
+    if not isinstance(content, str) or not content.strip():
+        raise RuntimeError("Groq vrátil prázdny text.")
+    return content.strip()
 
 
-def gemini_json(prompt, search=False, thinking_level="high"):
-    return parse_json_output(gemini_call(prompt, search=search, thinking_level=thinking_level))
+def groq_json(prompt, search=False, thinking_level="medium"):
+    return parse_json_output(
+        groq_call(prompt, search=search, thinking_level=thinking_level, json_mode=not search)
+    )
 
 
 # ============================================================
-# FUNDAMENTÁLNA ANALÝZA (Google Search cez Gemini)
+# FUNDAMENTÁLNA ANALÝZA (webové vyhľadávanie cez Groq)
 # Spúšťa sa IBA: ranná analýza 07:00 a alert pri prepade nad 10 %.
 # ============================================================
 
@@ -1995,12 +2044,12 @@ def run_fundamental_research(symbols, include_market, ctx, evals, mode):
             )
 
         print(f"Hlboké hľadanie ({mode}): {', '.join(symbols)}")
-        text = gemini_call(
+        text = groq_call(
             research_prompt(symbols, include_market, moves, CONFIG["fundamentals_max_age_hours"]),
             search=True,
             thinking_level="high",
         )
-        structured = gemini_json(
+        structured = groq_json(
             structure_prompt(text, symbols, include_market),
             search=False,
             thinking_level="low",
@@ -2193,7 +2242,7 @@ def compute_changes(state, ctx, evals, safety):
 
 
 # ============================================================
-# VYSVETLENIE OD GEMINI (nemení čísla ani signály)
+# VYSVETLENIE OD AI (nemení čísla ani signály)
 # ============================================================
 
 def build_explain_payload(ctx, safety, evals, news, changes, state, fund, fund_status):
@@ -2707,9 +2756,9 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
 
     payload = build_explain_payload(ctx, safety, evals, news, changes, state, fund, fund_status)
     try:
-        ai = gemini_json(explain_prompt(payload), search=False, thinking_level="high")
+        ai = groq_json(explain_prompt(payload), search=False, thinking_level="high")
     except Exception as exc:
-        print(f"Gemini vysvetlenie zlyhalo: {exc}")
+        print(f"Groq vysvetlenie zlyhalo: {exc}")
         ai = fallback_explanation(evals, safety, exc)
 
     slot_name = slot_label(schedule_slot) or "ručná"
@@ -2762,8 +2811,8 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
 # ============================================================
 
 def main():
-    if not GEMINI_API_KEY:
-        raise RuntimeError("Chýba GEMINI_API_KEY.")
+    if not GROQ_API_KEY:
+        raise RuntimeError("Chýba GROQ_API_KEY. Pridaj ho do GitHub Actions Secrets.")
 
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         raise RuntimeError("Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID.")
