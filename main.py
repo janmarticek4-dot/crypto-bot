@@ -14,18 +14,18 @@ from zoneinfo import ZoneInfo
 
 
 # ============================================================
-# CRYPTO AI BOT V10.5
+# CRYPTO AI BOT V10.6
 # Inteligentný analytik kryptomien a ochranca investičného portfólia.
 #
 # Princíp: čísla, signály, bezpečnostné stavy a hladiny počíta KÓD.
-# Hlavné analýzy Telegram: 07:00 a 20:00 Bratislava.
+# Hlavné analýzy Telegram: 07:00 a 20:00; krátky USA výhľad 15:00 Bratislava.
 # Každých 15 minút: tichý monitoring; alert iba pri overenej hrozbe
 # systémového pádu trhu o viac než 10 % od aktuálnej úrovne.
 # Groq vysvetľuje analýzu a overuje iba mimoriadne spúšťače rizika.
 # Bot neobchoduje, iba analyzuje a upozorňuje.
 # ============================================================
 
-VERSION = "10.5"
+VERSION = "10.6"
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -166,7 +166,7 @@ CONFIG = {
 }
 
 # Hlavné analýzy: (hodina, minúta, názov). Hlboké hľadanie len pri "07:00".
-MAIN_SLOTS = [(7, 0, "07:00"), (20, 0, "20:00")]
+MAIN_SLOTS = [(7, 0, "07:00"), (15, 0, "15:00"), (20, 0, "20:00")]
 SLOT_GRACE_MINUTES = 90                 # GitHub Actions často mešká
 DEEP_SEARCH_SLOT = "07:00"
 
@@ -1864,7 +1864,7 @@ def groq_call(prompt, search=False, thinking_level="medium", timeout=150, json_m
             {"role": "user", "content": prompt},
         ],
         "temperature": 1,
-        "max_completion_tokens": 4096,
+        "max_completion_tokens": 2600 if search else 3200,
         "stream": False,
         "reasoning_effort": thinking_level if thinking_level in {"low", "medium", "high"} else "medium",
     }
@@ -1887,14 +1887,16 @@ def groq_call(prompt, search=False, thinking_level="medium", timeout=150, json_m
     )
     print(f"Groq model: {GROQ_MODEL} | search={search} | json={json_mode}")
     try:
-        raw = http_request(request, timeout=timeout, retries=2)
+        raw = http_request(request, timeout=timeout, retries=1)
         result = json.loads(raw.decode("utf-8"))
     except urllib.error.HTTPError as exc:
         try:
             detail = exc.read().decode("utf-8", errors="replace")[:700]
         except Exception:
             detail = str(exc)
-        raise RuntimeError(f"Groq API HTTP {exc.code}: {detail}") from exc
+        retry_after = exc.headers.get("Retry-After", "") if exc.headers else ""
+        hint = f" | Retry-After: {retry_after}s" if retry_after else ""
+        raise RuntimeError(f"Groq API HTTP {exc.code}{hint}: {detail}") from exc
 
     choices = result.get("choices") if isinstance(result, dict) else None
     if not choices:
@@ -2769,21 +2771,32 @@ def run_safety_monitor():
             save_state(state)
             return
 
+    # Po zlyhaní API necháme pauzu, aby sa opakované spúšťače neprebíjali cez kvótu.
+    failed_at = parse_timestamp(monitor_state.get("verification_failed_at"))
+    if failed_at and (now - failed_at).total_seconds() < 2 * 3600:
+        monitor_state["last_checked_at"] = utc_now_iso()
+        monitor_state["last_result"] = "quiet_api_cooldown"
+        state["last_run"] = iso_now()
+        save_state(state)
+        return
+
     # Nepoužívame AI pri každom behu. Groq/web search sa spustí iba pri rizikovom titulku
     # alebo kombinovanom strese trhu. Chyba/429 znamená ticho, nie špekulatívny alert.
     try:
         prompt = _crash_alert_prompt(candidates, ctx or {})
-        raw = groq_call(prompt, search=True, thinking_level="high", timeout=90)
+        raw = groq_call(prompt, search=True, thinking_level="low", timeout=90)
         verified = _validated_crash_alert(raw)
     except Exception as exc:
         print(f"Crash monitor: overenie hrozby zlyhalo; alert sa neposiela: {exc}")
         monitor_state["last_checked_at"] = utc_now_iso()
         monitor_state["last_result"] = "quiet_verification_failed"
+        monitor_state["verification_failed_at"] = utc_now_iso()
         monitor_state["last_error"] = str(exc)[:300]
         state["last_run"] = iso_now()
         save_state(state)
         return
 
+    monitor_state.pop("verification_failed_at", None)
     if not verified:
         monitor_state["last_checked_at"] = utc_now_iso()
         monitor_state["last_result"] = "quiet_not_confirmed"
@@ -2864,7 +2877,7 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
 
     payload = build_explain_payload(ctx, safety, evals, news, changes, state, fund, fund_status)
     try:
-        ai = groq_json(explain_prompt(payload), search=False, thinking_level="high")
+        ai = groq_json(explain_prompt(payload), search=False, thinking_level="medium")
     except Exception as exc:
         print(f"Groq vysvetlenie zlyhalo: {exc}")
         ai = fallback_explanation(evals, safety, exc)
@@ -2915,6 +2928,81 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
 
 
 # ============================================================
+# KRÁTKY USA VÝHĽAD 15:00 — bez zbytočného hlbokého vyhľadávania
+# ============================================================
+
+def run_us_open_outlook(schedule_slot):
+    """Jedna krátka správa. Nezamieňa predotvárací výhľad s reakciou trhu."""
+    state = load_state()
+    ctx = gather_market_data(state)
+    _, safety, evals = evaluate_all(ctx, state, get_usable_fundamentals(state))
+    news = get_rss_news()
+    ny_now = datetime.now(US_TZ)
+    open_at = ny_now.replace(hour=9, minute=30, second=0, microsecond=0)
+    weekday = ny_now.weekday() < 5
+    after_open = weekday and ny_now >= open_at
+    # Neoverujeme americké burzové sviatky: výrok po otvorení je preto len časový.
+    phase = ("Po plánovanom čase otvorenia USA (09:30 New York)" if after_open
+             else "Pred plánovaným otvorením USA (09:30 New York)")
+    if not weekday:
+        phase = "Americké akciové burzy majú cez víkend zatvorené"
+    btc = ctx.get("btc_data") or {}
+    btc_price = safe_float(btc.get("price_usd"))
+    btc_change = safe_float(ctx.get("btc_change_24h"))
+    cap_change = safe_float(ctx.get("global_change"))
+    rises = sum(1 for e in evals.values() if safe_float(e.get("trend_score"), 0) >= 6)
+    falls = sum(1 for e in evals.values() if safe_float(e.get("trend_score"), 0) <= 3.5)
+    if btc_change is None or cap_change is None:
+        verdict = "NEISTÉ — chýbajú spoľahlivé trhové dáta"
+        reason = "Bez dát nemožno poctivo určiť prevládajúci smer."
+    elif btc_change >= 1 and cap_change >= 1 and rises >= falls:
+        verdict = "SKÔR RAST 📈"
+        reason = "BTC aj širší kryptotrh rastú; technický obraz portfólia nie je prevažne slabý."
+    elif btc_change <= -1 and cap_change <= -1:
+        verdict = "SKÔR POKLES 📉"
+        reason = "BTC aj širší kryptotrh klesajú, čo zvyšuje riziko ďalšieho oslabenia."
+    else:
+        verdict = "NEJASNÝ SMER ↔️"
+        reason = "Trhové signály zatiaľ neukazujú presvedčivý spoločný smer."
+    headlines = [str(n.get("title", "")).strip() for n in news[:5] if n.get("title")]
+    prompt = (
+        "Si opatrný analytik kryptomien. Napíš po slovensky najviac 3 krátke vety. "
+        "Vyhodnoť možný smer krypta počas najbližších 2–5 hodín okolo otvorenia USA. "
+        "Neuvádzaj vymyslené údaje, správy ani presné pravdepodobnosti. "
+        "Nehovor, že americký akciový trh rastie/klesá, pretože nemáme dáta indexov. "
+        "Jasne odlíš predbežný odhad od potvrdeného pohybu. "
+        f"Fáza: {phase}. BTC 24h: {btc_change}; trhová kapitalizácia 24h: {cap_change}; "
+        f"riziko: {safety['state']}; silnejšie mince: {rises}; slabšie mince: {falls}. "
+        f"Technický záver: {verdict}. RSS titulky (neoverené samostatne): {headlines}. "
+        "Povedz hlavný dôvod a čo by zmenilo výhľad."
+    )
+    try:
+        commentary = groq_call(prompt, search=False, thinking_level="low", timeout=65)
+        commentary = commentary.strip()[:850]
+        ai_status = ""
+    except Exception as exc:
+        print(f"15:00: Groq nedostupný, používam výpočet: {exc}")
+        commentary = reason + " Záver je orientačný; reakcia amerických akcií nie je overená."
+        ai_status = "\nℹ️ AI nedostupná — výhľad vypočítal bot z trhových dát."
+    msg = (f"🇺🇸 CRYPTO BOT V{VERSION} | USA výhľad 15:00\n"
+           f"🕒 {now_local().strftime('%d.%m. %H:%M')} Bratislava\n"
+           f"🗽 {phase}\n\n"
+           f"🔮 Najbližšie 2–5 hodín: {verdict}\n"
+           f"BTC: {format_price(btc_price)} ({fmt_pct(btc_change, 2)} za 24h)\n"
+           f"Celý kryptotrh: {fmt_pct(cap_change, 2)} za 24h\n"
+           f"Riziko: {safety['state']}\n\n"
+           f"{commentary}{ai_status}\n\n"
+           "⚠️ Toto je odhad vývoja krypta, nie potvrdený pohyb indexov USA ani záruka rastu.")
+    telegram_send_long(msg)
+    state["last_main_slot"] = schedule_slot
+    state["last_run"] = iso_now()
+    state["last_us_outlook"] = iso_now()
+    state["bot_version"] = VERSION
+    save_state(state)
+    print("Krátky USA výhľad 15:00 bol odoslaný.")
+
+
+# ============================================================
 # SPUSTENIE
 # ============================================================
 
@@ -2934,7 +3022,10 @@ def main():
     )
 
     if run_main:
-        run_full_analysis(reason, slot)
+        if slot_label(slot) == "15:00":
+            run_us_open_outlook(slot)
+        else:
+            run_full_analysis(reason, slot)
     else:
         run_safety_monitor()
 
