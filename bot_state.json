@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-20T15:22:58.269927+02:00",
+  "last_run": "2026-10-20T16:06:24.185505+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2458,8 +2458,7 @@
     "risk_pts": 1
   },
   "crash_monitor": {
-    "last_checked_at": "2026-10-20T13:22:58.269906+00:00",
-    "last_result": "quiet_verification_failed",
-    "last_error": "Groq API HTTP 400: {\"error\":{\"message\":\"Parsing failed. The model generated output that could not be parsed. Please adjust your prompt. See 'failed_generation' for more details.\",\"type\":\"invalid_request_error\",\"code\":\"output_parse_failed\",\"failed_generation\":\"Scrolling near bottom.\\n\\n\"}}\n"
+    "last_checked_at": "2026-10-20T14:06:24.185487+00:00",
+    "last_result": "quiet_not_confirmed"
   }
 }
