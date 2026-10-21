@@ -1,0 +1,16 @@
+[
+  {
+    "window_days": 90,
+    "overlapping_windows": 1644,
+    "windows_at_least_100_pct": 0,
+    "median_return_pct": 0.0,
+    "worst_return_pct": -28.473530957275482
+  },
+  {
+    "window_days": 180,
+    "overlapping_windows": 1554,
+    "windows_at_least_100_pct": 0,
+    "median_return_pct": 0.0,
+    "worst_return_pct": -27.966407953486616
+  }
+]

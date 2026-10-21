@@ -1,0 +1,290 @@
+{
+  "status": "complete",
+  "design": {
+    "version": 1,
+    "symbols": [
+      "SOL",
+      "TAO",
+      "ONDO",
+      "RENDER",
+      "AAVE",
+      "FET"
+    ],
+    "history_start": "2020-01-01",
+    "test_start": "2021-01-01",
+    "test_end_exclusive": "2026-10-21",
+    "final_short_holdout": [
+      "2026-10-01",
+      "2026-10-21"
+    ],
+    "already_seen_in_phase2": [
+      "2024-01-01",
+      "2026-10-01"
+    ],
+    "entry_types": [
+      "pullback",
+      "breakout",
+      "retest",
+      "momentum"
+    ],
+    "exit_types": [
+      "fixed",
+      "atr",
+      "trailing",
+      "regime",
+      "hybrid"
+    ],
+    "buy_fee": 0.01,
+    "sell_fee": 0.01,
+    "spread_per_side": 0.001,
+    "slippage_per_side": 0.001,
+    "initial_cash": 8500,
+    "max_entry_cash_fraction": 0.11764705882352941,
+    "bull_new_exposure_cap": 0.7,
+    "neutral_new_exposure_cap": 0.25,
+    "bear_new_exposure_cap": 0,
+    "fixed_stop_fraction": 0.2,
+    "atr_multiple": 3,
+    "trailing_fraction": 0.2,
+    "manual_delay_hours": 1,
+    "signal_expiry_hours": 24,
+    "reentry_cooldown_hours": 24,
+    "confirmation_days": 3,
+    "minimum_regime_dwell_days": 5,
+    "ema200_band": 0.02,
+    "btc_atr_guard": 0.06,
+    "walk_forward": {
+      "train_months": 6,
+      "test_months": 6,
+      "minimum_training_trades": 5,
+      "maximum_training_drawdown_pct": 20,
+      "minimum_training_profit_factor": 1,
+      "score": "return_pct - 0.5 * max_drawdown_pct",
+      "no_eligible_model": "CASH",
+      "boundary_policy": "planned liquidation at each fold end including costs; next fold capital and stake scale with realized equity"
+    },
+    "no_production_changes": true,
+    "global_cap_dominance_status": "N/A: reliable point-in-time historical data not available with current credentials",
+    "parameter_search_for_100_percent_target": false
+  },
+  "design_sha256": "1dc16ded459c78bb6c367b16072f1e68c667984c02a59bac8ad1317911ccaed5",
+  "source_files": {
+    "SOL_USDT-1h.feather": {
+      "sha256": "019f0d3da67185d0c7e9e1ec7759228fe0d85739453ee242fe4c163df05dd2dd",
+      "rows": 54274,
+      "first": "2020-08-11 06:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 10
+    },
+    "SOL_USDT-4h.feather": {
+      "sha256": "7e9deba123242baccddc03c52e6db8be71dfdaee9a2aa8106ac6e2fbfdf7eb3e",
+      "rows": 13574,
+      "first": "2020-08-11 04:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "SOL_USDT-1d.feather": {
+      "sha256": "b8129dc8aee0a0125483d1264b1a3124a6e72d0c7f28bdcf54b061830b39f330",
+      "rows": 2262,
+      "first": "2020-08-11 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "TAO_USDT-1h.feather": {
+      "sha256": "dda8020de7a772d084bd37de1db7909e0cc3f840cdf3101824db0322d3cab7b1",
+      "rows": 22152,
+      "first": "2024-04-11 12:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "TAO_USDT-4h.feather": {
+      "sha256": "9e1d5e100f5855df84d7d5d5ddb143175116a7d0c73e7debdd15c571c715fc22",
+      "rows": 5538,
+      "first": "2024-04-11 12:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "TAO_USDT-1d.feather": {
+      "sha256": "a8faf443a239b3193bdd50af1320cb1401a60bf7a8be73c541d3e76d9abd862a",
+      "rows": 923,
+      "first": "2024-04-11 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "ONDO_USDT-1h.feather": {
+      "sha256": "b682a2528b23f9e6b3e936f57ddedfb99b1d6811491a3669fed2f6da1d5fe427",
+      "rows": 13390,
+      "first": "2025-04-11 14:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "ONDO_USDT-4h.feather": {
+      "sha256": "af432a92739b3990a4e2a444f494dd76ace8860cb0d8178c181942876604e7d6",
+      "rows": 3348,
+      "first": "2025-04-11 12:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "ONDO_USDT-1d.feather": {
+      "sha256": "9108e2f30379cc89e44e8828aaff1ec4be3e44cdc06d47a19df37e694903ee66",
+      "rows": 558,
+      "first": "2025-04-11 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "RENDER_USDT-1h.feather": {
+      "sha256": "1445a30034d905f48ab65f187044e50a238b562dba26e04c2d0b585d407b5cec",
+      "rows": 19609,
+      "first": "2024-07-26 08:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "RENDER_USDT-4h.feather": {
+      "sha256": "e299b121bfc723dd2c68cb85470c613299cc5ff0b5e2cc2489cbe28917732e73",
+      "rows": 4903,
+      "first": "2024-07-26 08:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "RENDER_USDT-1d.feather": {
+      "sha256": "20bf9003b164a5be4c2cbdc5463aee333056ea9632b69dc1f3195811409a8fda",
+      "rows": 817,
+      "first": "2024-07-26 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "AAVE_USDT-1h.feather": {
+      "sha256": "ffbb26306e6c7ac7d9603c5065b5ec82be1a40f761dd7497b254b23d32b4179f",
+      "rows": 52717,
+      "first": "2020-10-15 03:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 10
+    },
+    "AAVE_USDT-4h.feather": {
+      "sha256": "29d10734878e18f19fe69ccf2e9fd92df9c171a09474a8343f004fbfbc965fe1",
+      "rows": 13185,
+      "first": "2020-10-15 00:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "AAVE_USDT-1d.feather": {
+      "sha256": "d846081e219ee5a1402fa0bfc48b46ea5c9144d07cf11e311e31f74e0f4a8ef0",
+      "rows": 2197,
+      "first": "2020-10-15 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "FET_USDT-1h.feather": {
+      "sha256": "089aa3f7dcb3db02c0052788cfb0ab413c5bb7ef61b3fc0935ee290bc57666da",
+      "rows": 59620,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 15
+    },
+    "FET_USDT-4h.feather": {
+      "sha256": "a283347b6720a1007bb7dbf14d8d5240d4dc2051af6c8e61032a6fa8401b08e4",
+      "rows": 14912,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 1
+    },
+    "FET_USDT-1d.feather": {
+      "sha256": "18233866113fa64d3c68b9e00cf1d4ee7b324b1f7ad518388ff16f82ab76fa3d",
+      "rows": 2485,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "BTC_USDT-1h.feather": {
+      "sha256": "4034446878facc6396a8582a6e34d97bb74fc81376d91d7485da733293c81c2f",
+      "rows": 59620,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 15
+    },
+    "BTC_USDT-4h.feather": {
+      "sha256": "32c97af043a01b4b8d4a55dcd94ce6a9530c39f63461c0664db89255a3b29096",
+      "rows": 14912,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 1
+    },
+    "BTC_USDT-1d.feather": {
+      "sha256": "9178e49394d827ce66bdbf430b59271e9e04f103f5869b98d42fc968434385bd",
+      "rows": 2485,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    },
+    "ETH_USDT-1h.feather": {
+      "sha256": "a5a47f108498a6dbe466cd272819a75f861d4631b6bc0ef1c508faa2bcbc9b3c",
+      "rows": 59620,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-21 11:00:00+00:00",
+      "missing_intervals": 15
+    },
+    "ETH_USDT-4h.feather": {
+      "sha256": "fad7739937028c59aee01b9fc3961135a8f26ce93897131cf35b9c8cdb065495",
+      "rows": 14912,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-21 08:00:00+00:00",
+      "missing_intervals": 1
+    },
+    "ETH_USDT-1d.feather": {
+      "sha256": "1dfe10f807876a16db9744bbc56da15a5c4fd59997b9a946978fb15c6665fb64",
+      "rows": 2485,
+      "first": "2020-01-01 00:00:00+00:00",
+      "last": "2026-10-20 00:00:00+00:00",
+      "missing_intervals": 0
+    }
+  },
+  "code_sha256": {
+    "data.py": "60a6934c93e24a4c72656b08d3cfc258a656b516e4b5558c14b1a4b236674ae5",
+    "diagnose.py": "fbb01bee1f37c6ae5988636379459cad866e2ad9e2ea2edc85b912e57688c326",
+    "plot.py": "e3691451934721f6edb7bd2711b437c91e095273868e726f91361fde66693f59",
+    "regime.py": "2fee3dc1aad7b1af9ed63149d89d0ae4e2977cb05430c71f854ce8f434e2beb4",
+    "report.py": "111075a515bf60bddc64aa848b282baa3c947e32bd4ba379d8c8f87e8ca6979a",
+    "run.py": "e4c1a6376bdd40266862f42b373dc952508c79e156f629e397b4b9c098eb1f35",
+    "sim.py": "08260c14089e22f44c48a262f3e303d0044622032cb592b35b278d22ea4f92c9",
+    "test_phase3.py": "c2ef2e1574287921ee033592f4f591018d3245efdcb8a0a9b0755405ba816419",
+    "verify.py": "c75557b309e29784e74edf2b790e821a29158f531d729c84fc37b560b4bf3a93"
+  },
+  "dependencies": {
+    "freqtrade": "2026.9",
+    "ccxt": "4.5.89",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "TA-Lib": "0.8.2",
+    "matplotlib": "3.11.2"
+  },
+  "artifacts_sha256": {
+    "final_holdout_training.csv": "1386b77730c0c7d020ce1c13eba51050c95de4f3cee45dd5c0d8263e10f14482",
+    "final_policy.json": "e799a8c536e878b8d40c4b52f2adde314bb91d44292f77235bfbc9666a07e98c",
+    "regime_quality.csv": "1950ed3ccbbacec6057230c1473feffc1ded1e165567a3edcddbb43fd47bae1b",
+    "regimes_band0.csv.gz": "11c5205eae55c38958f3e3ac1449201d0b65d88239904fa316eaf8469e892030",
+    "regimes_band4.csv.gz": "f9eb934d3236bb6a4fecc94afa6a687127dabd22ef5bca62364c88f4cdbcc771",
+    "regimes_confirm2.csv.gz": "974cd4ad706ae01e4fe51706aa983328aa20a07783b92821c403f3298954cdf3",
+    "regimes_confirm5.csv.gz": "e1f3c8c0c07db3228eb0167e1f8ee2626f6d9e6776755027fe761ec82d7d1391",
+    "regimes_dwell10.csv.gz": "90986f008e8f668d11fd740472ba55da77b16d0128bb6548460786a521baeb83",
+    "regimes_dwell3.csv.gz": "fc6c44e029aa0a4c3e3f39dfaf4df3d22a66bb79ab76e281df58927269c6ca0e",
+    "regimes_full.csv.gz": "51bc7a0fd831f8ff5f952f9552d2c792dd20d13167c5d38cb082bb0f35d42d85",
+    "regimes_no_adx.csv.gz": "660fe1aa88ecdd221d8c960463f7afa62827b3cc48aaecb425a7376036b3fda0",
+    "regimes_no_momentum.csv.gz": "fbc6e37aebaee52522420542a241e040f7a9a14c9abd612a65bed65c730dcc33",
+    "regimes_no_relative.csv.gz": "aff6d40f8ff847cd1cc41f0ca11727c6ea56cd8eeb842cf89ed076718b6ba3cc",
+    "regimes_no_volatility.csv.gz": "8c7b25f64848070e582f7ffd3484f3f54f13b4fc0cd06fe090358b3fc08944a4",
+    "regimes_no_volume.csv.gz": "8ac68d2b1a21b20a6615ec2c55dbf69983f9d10225f53ffb506aea42f52b4f63",
+    "regimes_raw.csv.gz": "0c951578737ceb85c00c645aecd2d1bb320165c04881ac55931594e9c17bc56d",
+    "regimes_trend_only.csv.gz": "65df2a67b1a8408d385dd5a82404a600f90a9919e4c75f5b0943b8c90cae6361",
+    "regimes_vol4.csv.gz": "0f70472bc6b81a75feed1edbd19b1cbffd0e076f0431a44cb119f828590dcaaf",
+    "regimes_vol8.csv.gz": "6ab4a03dc5306109a7ae862ea9dc3be659707d09caa49c283e8100d549f19842",
+    "results.csv": "5bb7239d107cf113f8a9fc13a06152fbddae41acad412712cfb560e8ef98177c",
+    "results.json": "c94cdac5b034f3634528f61e3c8cadfa4d69859b68fbaac22153adfc23c63ec2",
+    "trades.csv.gz": "4eb9d88615f25d68d094eacd4f9ac3328864965fd71fe584c11aed5e72702e5b",
+    "walk_forward.csv": "b864ed1436eba46c8b1cca6362f0221aad5acbfbec22e8ad41a0b83acd61ace3",
+    "walk_forward_curve.csv.gz": "d0db35812eb5bb99453c43ff6c1544daab767f7409b152dafd43c54a93f4f886",
+    "walk_forward_hold_curve.csv.gz": "14e0de63bd9646f5a6b94932b9b10e9282afe27d69778975d56c69154e0c52e0",
+    "walk_forward_summary.json": "121b4e17e4c042cab7b4e6f6f48d6988acda518a47ad96f4acdf5c85bd9c7a7b",
+    "walk_forward_trades.csv": "806826b5cd185b5704b0117e5eff8aaaacae9134e9028b9f0b9217a9ac525588",
+    "walk_forward_training.csv": "d6f9a56b21536c44d8b26c7a84c4cc61f9521b19977a4910aa81bd9b15285a65"
+  }
+}

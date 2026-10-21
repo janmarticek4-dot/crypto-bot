@@ -1,0 +1,27 @@
+{
+  "source_manifest_sha256": "e3e5b619fc79f40f90adbf9c543f9b76aa2d6bdaae5876c0936122b281f3c414",
+  "code_sha256": {
+    "data.py": "60a6934c93e24a4c72656b08d3cfc258a656b516e4b5558c14b1a4b236674ae5",
+    "diagnose.py": "fbb01bee1f37c6ae5988636379459cad866e2ad9e2ea2edc85b912e57688c326",
+    "plot.py": "e3691451934721f6edb7bd2711b437c91e095273868e726f91361fde66693f59",
+    "regime.py": "2fee3dc1aad7b1af9ed63149d89d0ae4e2977cb05430c71f854ce8f434e2beb4",
+    "report.py": "111075a515bf60bddc64aa848b282baa3c947e32bd4ba379d8c8f87e8ca6979a",
+    "run.py": "e4c1a6376bdd40266862f42b373dc952508c79e156f629e397b4b9c098eb1f35",
+    "sim.py": "08260c14089e22f44c48a262f3e303d0044622032cb592b35b278d22ea4f92c9",
+    "test_phase3.py": "c2ef2e1574287921ee033592f4f591018d3245efdcb8a0a9b0755405ba816419",
+    "verify.py": "c75557b309e29784e74edf2b790e821a29158f531d729c84fc37b560b4bf3a93"
+  },
+  "artifacts_sha256": {
+    "REPORT.md": "17ec844d3066d605df528357e618612527849e2ff3586afccc4bcc908ef72e9c",
+    "strategy_stability.csv": "dedb35392677ebbb0da0f1bcbf9d2e66002578e63ddeb575a37fc8fb756ffb2f",
+    "ablation_pairs.csv": "d67d92a41c1211b064d11b0250d41127cd12b37708b5eaa380bb6772a2dffc7b",
+    "robustness_pairs.csv": "271611b78eeaf3b618b86032294d9d1d8131739cb07c635c82bb9fc10a4669cc",
+    "trade_diagnostics.csv.gz": "486b1d7dcccefe2755d4d741bbfe1ace26a7037c534f3c720d48557b874f1231",
+    "exit_diagnostics.csv": "2d32ec89f1c09c2cb100fa340fbd8bd363239b60bcece7c6f94e3a2f1f0cd005",
+    "coin_contributions.csv": "74dc83e7b341674565496a1183c5e9b3252f9002077e989c5422d3f375a7104b",
+    "bear_transitions.csv": "e0275882731e83a90f3bf821606e2dfd62a941efbf6fb34f72389a14e474116d",
+    "goal_windows.json": "34a1b582bc1729d3a788274fa3e492c0b4223575dc8396923a820aa2aa7c5d65",
+    "walk_forward.png": "a718595e6c98c89e3f5e91f058f02c262610c480c12a65160c7b94a2466e3f36",
+    "walk_forward.svg": "4d7ddb417a2786fd7e6aebe5ed4b4d6bef1513252bca702206231034c21827c9"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "return_pct": -10.270269015197009,
+  "max_drawdown_pct": 40.73966234924084,
+  "profit_factor": 0.6879837891493426,
+  "trades": 21,
+  "fees": 424.35819545086326,
+  "spread_slippage": 84.87018411222098,
+  "folds": 10,
+  "cash_folds": 6,
+  "hold_continuous": {
+    "return_pct": -35.67294772677686,
+    "max_drawdown_pct": 68.87205075658511,
+    "trades": 6,
+    "profit_factor": 0.0,
+    "win_rate": 0.0,
+    "fees": 89.38371274783685,
+    "spread_slippage": 17.865042742361055,
+    "mean_exposure_pct": 38.42906669935184,
+    "average_win": null,
+    "average_loss": -505.36675946267223,
+    "stale_position_hours": 3,
+    "cancelled_entries": 0,
+    "final_equity": 5467.799443223967
+  }
+}
