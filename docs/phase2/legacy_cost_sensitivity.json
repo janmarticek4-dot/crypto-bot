@@ -1,0 +1,62 @@
+[
+  {
+    "period": "20240101-20250101",
+    "fee_per_side": 0.0,
+    "return_pct": 25.30401223529412,
+    "drawdown_pct": 17.6352567892565,
+    "trades": 35,
+    "profit_factor": 1.5473763766992503,
+    "archive": "backtest-result-2026-10-21_11-44-32.zip",
+    "archive_sha256": "e019064c78c57a05d088f4dfe81fe400e6bde623d29e1c19c9756c3647850f1d"
+  },
+  {
+    "period": "20240101-20250101",
+    "fee_per_side": 0.002,
+    "return_pct": 23.60641756847059,
+    "drawdown_pct": 18.24153876954555,
+    "trades": 35,
+    "profit_factor": 1.4994511819455907,
+    "archive": "backtest-result-2026-10-21_11-44-24.zip",
+    "archive_sha256": "0609b0ff54d07b225d7d3707bd785f6af2d56f52c5b71c4937c3ca037bc4296b"
+  },
+  {
+    "period": "20240101-20250101",
+    "fee_per_side": 0.012,
+    "return_pct": 15.118444234352946,
+    "drawdown_pct": 21.360556968612464,
+    "trades": 35,
+    "profit_factor": 1.288249130366974,
+    "archive": "backtest-result-2026-10-21_11-23-16.zip",
+    "archive_sha256": "40accaa18665b862adc662af19a67a60bcc239f693552f534b49f06da59c0634"
+  },
+  {
+    "period": "20250101-20260101",
+    "fee_per_side": 0.0,
+    "return_pct": -31.39880341176471,
+    "drawdown_pct": 31.39880341176471,
+    "trades": 44,
+    "profit_factor": 0.47933594351710035,
+    "archive": "backtest-result-2026-10-21_11-44-47.zip",
+    "archive_sha256": "9a2fe7f71debccdcf0d2987d01395074d403ea92e4d3c8be743d1cd0b233681a"
+  },
+  {
+    "period": "20250101-20260101",
+    "fee_per_side": 0.002,
+    "return_pct": -33.40646940164706,
+    "drawdown_pct": 33.40646940164705,
+    "trades": 44,
+    "profit_factor": 0.45959347639256776,
+    "archive": "backtest-result-2026-10-21_11-44-39.zip",
+    "archive_sha256": "40a6b6db6df8c9da72e2764478194c084f0de24e60472ff123976e6587a3427c"
+  },
+  {
+    "period": "20250101-20260101",
+    "fee_per_side": 0.012,
+    "return_pct": -43.44479935105882,
+    "drawdown_pct": 43.444799351058826,
+    "trades": 44,
+    "profit_factor": 0.37443704082565055,
+    "archive": "backtest-result-2026-10-21_11-23-47.zip",
+    "archive_sha256": "95caf76c8d99b072dfbc80b1bc7fa12186fb2fb4975db35144a24aa4d182b6eb"
+  }
+]

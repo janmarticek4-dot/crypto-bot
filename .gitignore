@@ -4,3 +4,7 @@ __pycache__/
 .pytest_cache/
 backtesting/user_data/
 *.lock
+
+.private-state/
+.env
+research/phase2/__pycache__/

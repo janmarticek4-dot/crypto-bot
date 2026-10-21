@@ -1,0 +1,186 @@
+{
+  "fetched_at": "2026-10-21T12:16:26.905465+00:00",
+  "events": [
+    {
+      "id": "709082369b530ef4c5e9bd78203d0c7790c062fa7e01b0546f3dfde9e6abec72",
+      "title": "Drift exploiter sends $109M in Ether to Tornado Cash in 2 days",
+      "url": "https://cointelegraph.com/news/drift-exploiter-moves-109m-eth-tornado-cash-2-days",
+      "source": "cointelegraph",
+      "kind": "news",
+      "published_at": "2026-10-21T10:13:52+00:00",
+      "event_at": null,
+      "scheduled": false,
+      "categories": [
+        "hack"
+      ],
+      "symbol": null,
+      "confidence": "správa/návrh; vyžaduje samostatné potvrdenie",
+      "mechanisms": [
+        "Incident môže spôsobiť stratu dôvery, likvidity alebo nákazu medzi subjektmi; rozsah vyžaduje preverenie."
+      ],
+      "timestamp_kind": "published"
+    },
+    {
+      "id": "21aac57c0fcf474548b86c90633fce72d5f0e28b05bedd09cc79fa88c5bb0248",
+      "title": "Qubic restarts blockchain, opens recovery claims after $1.4M hack",
+      "url": "https://cointelegraph.com/news/qubic-restarts-blockchain-opens-recovery-claims-after-14m-hack",
+      "source": "cointelegraph",
+      "kind": "news",
+      "published_at": "2026-10-20T23:26:02+00:00",
+      "event_at": null,
+      "scheduled": false,
+      "categories": [
+        "hack"
+      ],
+      "symbol": null,
+      "confidence": "správa/návrh; vyžaduje samostatné potvrdenie",
+      "mechanisms": [
+        "Incident môže spôsobiť stratu dôvery, likvidity alebo nákazu medzi subjektmi; rozsah vyžaduje preverenie."
+      ],
+      "timestamp_kind": "published"
+    },
+    {
+      "id": "d5cd27e86cac3180fee44ac265303afa58dd09996edb2c4bb7020efae51d3933",
+      "title": "Bitwise, Hyperliquid seek SEC rule changes for token trading, airdrops",
+      "url": "https://cointelegraph.com/news/bitwise-hyperliquid-seek-sec-rule-changes-for-token-trading-airdrops",
+      "source": "cointelegraph",
+      "kind": "news",
+      "published_at": "2026-10-20T20:38:00+00:00",
+      "event_at": null,
+      "scheduled": false,
+      "categories": [
+        "regulation"
+      ],
+      "symbol": null,
+      "confidence": "správa/návrh; vyžaduje samostatné potvrdenie",
+      "mechanisms": [
+        "Regulačná udalosť môže zmeniť prístup k obchodovaniu alebo prevádzkové riziko."
+      ],
+      "timestamp_kind": "published"
+    },
+    {
+      "id": "e45501ebb8cf8f602dec3a3f9f9e2188b33af85e7c0e1cda8f4effd9872956b6",
+      "title": "Drift exploiter sends $61M ETH to Tornado Cash, holds $194M",
+      "url": "https://cointelegraph.com/news/drift-exploiter-eth-tornado-cash",
+      "source": "cointelegraph",
+      "kind": "news",
+      "published_at": "2026-10-20T12:38:28+00:00",
+      "event_at": null,
+      "scheduled": false,
+      "categories": [
+        "hack"
+      ],
+      "symbol": null,
+      "confidence": "správa/návrh; vyžaduje samostatné potvrdenie",
+      "mechanisms": [
+        "Incident môže spôsobiť stratu dôvery, likvidity alebo nákazu medzi subjektmi; rozsah vyžaduje preverenie."
+      ],
+      "timestamp_kind": "published"
+    }
+  ],
+  "sources": [
+    {
+      "source": "fed",
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "bls",
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "bls_calendar",
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "bea",
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "sec",
+      "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "aave",
+      "url": "https://governance.aave.com/latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "ondo",
+      "url": "https://blog.ondo.finance/rss/",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "sol_agave",
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "tao_subtensor",
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "fet_fetchd",
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "render_rnp",
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "coindesk",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    },
+    {
+      "source": "cointelegraph",
+      "url": "https://cointelegraph.com/rss",
+      "status": "OK",
+      "events": 4,
+      "checked_at": "2026-10-21T12:16:26.905465+00:00"
+    }
+  ],
+  "unavailable": [
+    "overený projektový token-unlock kalendár",
+    "priame potvrdenie incidentu z primárneho zdroja",
+    "potvrdenie skutočnej aktivácie upgrade na sieti"
+  ]
+}

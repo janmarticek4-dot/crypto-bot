@@ -1,0 +1,170 @@
+{
+  "design": {
+    "version": 1,
+    "frozen_before_holdout_evaluation": true,
+    "training": [
+      "2024-01-01",
+      "2025-01-01"
+    ],
+    "diagnostic_previously_seen": [
+      "2025-01-01",
+      "2026-01-01"
+    ],
+    "untouched_holdout": [
+      "2026-01-01",
+      "2026-10-01"
+    ],
+    "symbols": [
+      "SOL",
+      "TAO",
+      "ONDO",
+      "RENDER",
+      "AAVE",
+      "FET"
+    ],
+    "initial_portfolio_cash": 8500,
+    "initial_single_cash": 1000,
+    "cash_debit_per_entry": 1000,
+    "buy_fee": 0.01,
+    "sell_fee": 0.01,
+    "spread_per_side": 0.001,
+    "slippage_per_side": 0.001,
+    "min_net_edge": 0.03,
+    "min_net_rr": 1.5,
+    "execution": "next 4H open; intra-hour protective stop using 1H low and adverse gap fill",
+    "hard_stop": 0.2,
+    "strategies": [
+      "A_hold",
+      "B_trend",
+      "C_pullback",
+      "D_breakout",
+      "E_protective",
+      "F_combined_reentry"
+    ],
+    "no_hyperparameter_search": true
+  },
+  "files": {
+    "SOL_USDT-1h.feather": {
+      "sha256": "8f7945625c1440b22fcd67b08876e519b8b32a0460207116b736b672c5c17980",
+      "rows": 32995,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-06 19:00:00+00:00"
+    },
+    "SOL_USDT-4h.feather": {
+      "sha256": "5f308a8758b6743cb7578d48199a3713a3ecb4b763920a80ffd89bc86ed26c76",
+      "rows": 8336,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-21 04:00:00+00:00"
+    },
+    "SOL_USDT-1d.feather": {
+      "sha256": "d01b2b1418f73802f9998ac3c68a3ee96f675a720198aa2af02640a1df5ec68d",
+      "rows": 1388,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-19 00:00:00+00:00"
+    },
+    "TAO_USDT-1h.feather": {
+      "sha256": "a3a2d975aaa68b1154377e8b936491791dd37d31677306148d3502d8506927e7",
+      "rows": 21996,
+      "first": "2024-04-11 12:00:00+00:00",
+      "last": "2026-10-14 23:00:00+00:00"
+    },
+    "TAO_USDT-4h.feather": {
+      "sha256": "4923c8fe402880b20aba11c0d103a39e65a3ffc2760dca80557e5739ac1f1de6",
+      "rows": 5537,
+      "first": "2024-04-11 12:00:00+00:00",
+      "last": "2026-10-21 04:00:00+00:00"
+    },
+    "TAO_USDT-1d.feather": {
+      "sha256": "e25727f5318f0e8ad45b85ad2e723c2c3535397d0f97a3e8ecbe9cfc0ba0e0af",
+      "rows": 922,
+      "first": "2024-04-11 00:00:00+00:00",
+      "last": "2026-10-19 00:00:00+00:00"
+    },
+    "ONDO_USDT-1h.feather": {
+      "sha256": "6f5e109576ffe3b58899142e7880b6423160448b03c96e37f4765439a21a5c4e",
+      "rows": 12996,
+      "first": "2025-04-11 14:00:00+00:00",
+      "last": "2026-10-05 01:00:00+00:00"
+    },
+    "ONDO_USDT-4h.feather": {
+      "sha256": "fa0d8461669c2e2f8ea0d1ee5212a8f3e7726ec7e32019e94a9d847f1f889816",
+      "rows": 3347,
+      "first": "2025-04-11 12:00:00+00:00",
+      "last": "2026-10-21 04:00:00+00:00"
+    },
+    "ONDO_USDT-1d.feather": {
+      "sha256": "cea063e712fc0c66ce5f300f830235b0925e5479522d38b52851c45b8a0c6c1a",
+      "rows": 557,
+      "first": "2025-04-11 00:00:00+00:00",
+      "last": "2026-10-19 00:00:00+00:00"
+    },
+    "RENDER_USDT-1h.feather": {
+      "sha256": "a1fff9223e177d4d108c780625455480207a40919c218a7aca2742fb8eca7eca",
+      "rows": 19611,
+      "first": "2024-07-26 08:00:00+00:00",
+      "last": "2026-10-21 10:00:00+00:00"
+    },
+    "RENDER_USDT-4h.feather": {
+      "sha256": "72cd05902b09758274b093bcda615560f8ea54f1b038ffa5b71b8f9629b87483",
+      "rows": 4902,
+      "first": "2024-07-26 08:00:00+00:00",
+      "last": "2026-10-21 04:00:00+00:00"
+    },
+    "RENDER_USDT-1d.feather": {
+      "sha256": "870057ffae034908179c8c5d3d6fb2f4ddee3e11b620490ca9970c9b20e525ce",
+      "rows": 816,
+      "first": "2024-07-26 00:00:00+00:00",
+      "last": "2026-10-19 00:00:00+00:00"
+    },
+    "AAVE_USDT-1h.feather": {
+      "sha256": "53da65cc04a78a80e2e6eb093507084cd0dee97b73d70e8f371d95a3408a5408",
+      "rows": 32995,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-06 19:00:00+00:00"
+    },
+    "AAVE_USDT-4h.feather": {
+      "sha256": "23f4cd1ad0ba84337ba85c834809f3017c038fbe8628aebeaf16bebaf041c498",
+      "rows": 8336,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-21 04:00:00+00:00"
+    },
+    "AAVE_USDT-1d.feather": {
+      "sha256": "b1085b87d6993691c772a4cd76808c4f88bc6c2538786ad918cb80295b6199af",
+      "rows": 1388,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-19 00:00:00+00:00"
+    },
+    "FET_USDT-1h.feather": {
+      "sha256": "c0477a1b439353ad878dd9c2a60cab8c0d8a181ada5481e5ef78c233d15de08c",
+      "rows": 32995,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-06 19:00:00+00:00"
+    },
+    "FET_USDT-4h.feather": {
+      "sha256": "d2ba4d022e5c265598086b92d9fc46a5fe8341a1655812b43c8a650f1b8dca0f",
+      "rows": 8336,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-21 04:00:00+00:00"
+    },
+    "FET_USDT-1d.feather": {
+      "sha256": "8515fc632676d88bbe6b31462935aa7357fa8022d99d9cb7f6be1d4dc7b6624b",
+      "rows": 1388,
+      "first": "2023-01-01 00:00:00+00:00",
+      "last": "2026-10-19 00:00:00+00:00"
+    }
+  },
+  "code_sha256": "151a6228d1ddeaaa174777f77d2c059ecb9ba1ef0ee23be391674816d9684d12",
+  "dependencies": {
+    "freqtrade": "2026.9",
+    "ccxt": "4.5.89",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4",
+    "TA-Lib": "0.8.2"
+  },
+  "status": "complete",
+  "artifacts_sha256": {
+    "comparisons.json": "d798ed24dcded986059140ce9d47a5c5d350c688f762b000941572f082d710a6",
+    "research_trades.csv.gz": "f2cc57f1d5462d5313f44468ceb0c6d460956ab7e1f00b9fae9aa32dfaf00378",
+    "combined_candidates.csv.gz": "5c6b6b32deb21a1fc8bd594066c0a81f2227c2da57dd5ef7071ec5fb44444ef9"
+  }
+}

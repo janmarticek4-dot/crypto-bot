@@ -40,6 +40,7 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 REQUEST_TIMEOUT = 45
 POLL_INTERVAL = 5
 STATE_FILE = os.getenv("STATE_FILE", "bot_state.json")
+STATE_STORE = None
 
 TZ = ZoneInfo("Europe/Bratislava")
 US_TZ = ZoneInfo("America/New_York")
@@ -259,9 +260,20 @@ def load_state():
 
 
 def save_state(state):
+    from pathlib import Path
+    # Any ledger inside the public checkout must live in ignored private storage.
+    target = Path(STATE_FILE).resolve()
+    checkout = Path(__file__).resolve().parent
+    in_checkout = target.is_relative_to(checkout)
+    private_local = in_checkout and target.relative_to(checkout).parts[0] == '.private-state'
+    if state.get('portfolio_v11') is not None and in_checkout and not private_local:
+        raise RuntimeError('Portfolio persistence requires private storage; public checkout is protected')
+    if STATE_STORE is not None:
+        STATE_STORE.commit(state)  # Durable before Telegram acknowledgement.
     temp = STATE_FILE + ".tmp"
 
-    with open(temp, "w", encoding="utf-8") as f:
+    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
         f.flush()
@@ -3030,8 +3042,13 @@ def main():
 
 
 if __name__ == '__main__':
-    # Entire read/modify/send/save operation is serialized; Actions additionally
-    # serializes all jobs and persists the state before another job checks out.
-    with open(STATE_FILE + '.lock', 'a') as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        main()
+    if os.getenv('STATE_BACKEND') == 'github-private':
+        from v11.secure_state import session
+        with session() as (STATE_STORE, STATE_FILE):
+            main()
+    else:
+        if os.getenv('GITHUB_ACTIONS') == 'true':
+            raise RuntimeError('GitHub Actions requires STATE_BACKEND=github-private; refusing public ledger storage')
+        with open(STATE_FILE + '.lock', 'a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            main()

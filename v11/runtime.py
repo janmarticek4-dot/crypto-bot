@@ -143,6 +143,8 @@ def run_analysis(api, reason, slot=None):
             lines.append(f"Relatívna sila vs BTC 7d {d['relative_strength_btc_7d']:.1%}; korelácia 4H {d['btc_correlation'] if d['btc_correlation'] is not None else 'N/A'}.")
         if s in previous and e['data_complete'] and previous[s]['action']!=e['action']:
             changes.append(f"{s}: {previous[s]['action']} → {e['action']}")
+    from .fundamentals import collect as collect_fundamentals, lines as fundamental_lines
+    lines.extend(['', *fundamental_lines(collect_fundamentals(state))])
     # News is displayed verbatim with source/date; AI cannot add events.
     news=api.get_rss_news()
     lines.extend(['','UDALOSTI (RSS titulky, samostatne nepotvrdené):'])

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "frozen_before_holdout_evaluation": true,
+  "training": ["2024-01-01", "2025-01-01"],
+  "diagnostic_previously_seen": ["2025-01-01", "2026-01-01"],
+  "untouched_holdout": ["2026-01-01", "2026-10-01"],
+  "symbols": ["SOL", "TAO", "ONDO", "RENDER", "AAVE", "FET"],
+  "initial_portfolio_cash": 8500,
+  "initial_single_cash": 1000,
+  "cash_debit_per_entry": 1000,
+  "buy_fee": 0.01,
+  "sell_fee": 0.01,
+  "spread_per_side": 0.001,
+  "slippage_per_side": 0.001,
+  "min_net_edge": 0.03,
+  "min_net_rr": 1.5,
+  "execution": "next 4H open; intra-hour protective stop using 1H low and adverse gap fill",
+  "hard_stop": 0.20,
+  "strategies": ["A_hold", "B_trend", "C_pullback", "D_breakout", "E_protective", "F_combined_reentry"],
+  "no_hyperparameter_search": true
+}

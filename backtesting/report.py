@@ -39,10 +39,13 @@ def build():
     results={}
     for file in sorted(RESULTS.glob('*.zip')):
         with zipfile.ZipFile(file) as archive:
+            config_name=next((n for n in archive.namelist() if n.endswith('_config.json')),None)
+            if not config_name or abs(json.loads(archive.read(config_name)).get('fee',-1)-.012)>1e-9:continue
             for name in archive.namelist():
                 if not name.endswith('.json') or name.endswith('_config.json'):continue
                 raw=json.loads(archive.read(name))
                 for strat,r in raw.get('strategy',{}).items():
+                    if strat not in ('TrendComponent','PullbackComponent','CombinedStrategy'):continue
                     if r.get('timeframe_detail') != '1h':continue
                     if r.get('timerange') not in ('20240101-20250101','20250101-20260101'):continue
                     key=(r['timerange'],strat)

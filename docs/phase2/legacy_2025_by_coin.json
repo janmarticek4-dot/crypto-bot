@@ -1,0 +1,110 @@
+[
+  {
+    "pair": "SOL/USDT",
+    "trades": 7,
+    "net_pnl_usd": -181.1440414,
+    "wins": 2,
+    "losses": 5,
+    "avg_win_usd": 214.70197116,
+    "avg_loss_usd": -122.10959674400002,
+    "fees_including_proxy_spread_usd": 167.8291914,
+    "profit_factor": 0.7033090826108215,
+    "hold_return_pct": -35.717144621104765,
+    "recorded_fill_compounded_return_pct": -24.642468036404985,
+    "recorded_fill_marked_max_dd_pct": 48.22491576902802,
+    "exits": {
+      "protective_breakdown": 6,
+      "stop_loss": 1
+    }
+  },
+  {
+    "pair": "TAO/USDT",
+    "trades": 10,
+    "net_pnl_usd": -921.3585445599999,
+    "wins": 2,
+    "losses": 8,
+    "avg_win_usd": 216.65596238,
+    "avg_loss_usd": -169.333808665,
+    "fees_including_proxy_spread_usd": 231.72030456000002,
+    "profit_factor": 0.31986518830480476,
+    "hold_return_pct": -51.47356439281905,
+    "recorded_fill_compounded_return_pct": -66.86936816264392,
+    "recorded_fill_marked_max_dd_pct": 70.10185589572335,
+    "exits": {
+      "protective_breakdown": 7,
+      "stop_loss": 3
+    }
+  },
+  {
+    "pair": "ONDO/USDT",
+    "trades": 5,
+    "net_pnl_usd": -485.41197520000003,
+    "wins": 1,
+    "losses": 4,
+    "avg_win_usd": 158.8883708,
+    "avg_loss_usd": -161.0750865,
+    "fees_including_proxy_spread_usd": 115.55681520000002,
+    "profit_factor": 0.24660606157737497,
+    "hold_return_pct": -50.31408808582722,
+    "recorded_fill_compounded_return_pct": -42.45265609488553,
+    "recorded_fill_marked_max_dd_pct": 43.404320191132605,
+    "exits": {
+      "protective_breakdown": 4,
+      "stop_loss": 1
+    }
+  },
+  {
+    "pair": "RENDER/USDT",
+    "trades": 7,
+    "net_pnl_usd": -793.8534769600001,
+    "wins": 2,
+    "losses": 5,
+    "avg_win_usd": 84.33305906,
+    "avg_loss_usd": -192.503919016,
+    "fees_including_proxy_spread_usd": 160.39431695999997,
+    "profit_factor": 0.1752339578146264,
+    "hold_return_pct": -81.49516552474867,
+    "recorded_fill_compounded_return_pct": -59.36445897990437,
+    "recorded_fill_marked_max_dd_pct": 62.240358751219695,
+    "exits": {
+      "protective_breakdown": 4,
+      "stop_loss": 3
+    }
+  },
+  {
+    "pair": "AAVE/USDT",
+    "trades": 7,
+    "net_pnl_usd": -357.03946696,
+    "wins": 1,
+    "losses": 6,
+    "avg_win_usd": 650.432912,
+    "avg_loss_usd": -167.91206315999997,
+    "fees_including_proxy_spread_usd": 165.67326696,
+    "profit_factor": 0.6456086792884913,
+    "hold_return_pct": -53.838133832389666,
+    "recorded_fill_compounded_return_pct": -45.98861355814227,
+    "recorded_fill_marked_max_dd_pct": 58.5457502527249,
+    "exits": {
+      "stop_loss": 4,
+      "protective_breakdown": 3
+    }
+  },
+  {
+    "pair": "FET/USDT",
+    "trades": 8,
+    "net_pnl_usd": -954.0004397599998,
+    "wins": 1,
+    "losses": 7,
+    "avg_win_usd": 369.664304,
+    "avg_loss_usd": -189.0949633942857,
+    "fees_including_proxy_spread_usd": 182.73575976,
+    "profit_factor": 0.27927336264160985,
+    "hold_return_pct": -84.75706614960102,
+    "recorded_fill_compounded_return_pct": -68.14913732352292,
+    "recorded_fill_marked_max_dd_pct": 77.03647671538539,
+    "exits": {
+      "stop_loss": 4,
+      "protective_breakdown": 4
+    }
+  }
+]

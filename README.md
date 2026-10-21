@@ -1,6 +1,13 @@
 # CRYPTO AI BOT V11.0 — ACTIVE BULLRUN STRATEGY
 
 Slovenský analytický bot, ručné obchody na eToro, bez obchodných API kľúčov.
+
+**Fáza 2 je pripravená na samostatnej vetve, zatiaľ nenasadená.**
+[Diagnostika a porovnanie stratégií](docs/phase2/REPORT.md),
+[súkromný stav](docs/phase2/PRIVATE_STORAGE.md),
+[fundamentálna vrstva a jej limity](docs/phase2/FUNDAMENTALS.md).
+Nový workflow vyžaduje súkromný šifrovaný backend; pred jeho konfiguráciou sa
+produkčný beh odmietne. Starý verejný bot_state.json nesmie obsahovať reálne portfólio.
 Cieľ +100 % je ambícia používateľa, nie predikcia. Nová aktívna stratégia je
 **experimentálna a zatiaľ nezvalidovaná**. Predvolene negeneruje nové BUY signály;
 reporty, sledovanie trhu, ochranné upozornenia a evidencia ručných obchodov fungujú.
@@ -14,7 +21,7 @@ zero-trade backtest neznamenajú, že stratégia zarába.
 Python 3.12; `python -m pip install -r requirements.txt`;
 `python -m unittest discover -s tests -v`.
 
-GitHub Actions už spúšťa `python main.py` každých 15 minút. Nepotrebuje lokálny
+Návrh GitHub Actions spúšťa `python main.py` každých 15 minút, až po konfigurácii súkromného stavu. Nepotrebuje lokálny
 počítač, server ani druhý scheduler. Secrets na GitHub Actions:
 `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`, voliteľne `GROQ_API_KEY` a
 `COINGECKO_API_KEY`. Groq nie je nutný pre výpočty. Cloudové secrets a GitHub
@@ -34,11 +41,11 @@ Zmena poplatkov nemení historické transakcie pri oprave. Žiadne odporúčanie
 neaktivuje dodatočných $10 000. V11_RULES_VALIDATED musí zostať false do úspešnej
 nezávislej validácie; aktuálne backtesty aktiváciu neodôvodňujú.
 
-Ručná analýza: Actions → Run workflow → manual_analysis=true. Lokálny ekvivalent:
+Ručná analýza: Actions → Run workflow → manual_analysis=true. Lokálny ekvivalent (len s bezpečne nakonfigurovaným stavom):
 `GITHUB_EVENT_NAME=workflow_dispatch MANUAL_ANALYSIS=true python main.py`.
 Tento príkaz **odosiela Telegram správy**. Na vývoj použite kópiu stavu:
-`STATE_FILE=/tmp/crypto-state.json`; prvýkrát do nej skopírujte bot_state.json,
-nepracujte paralelne s produkčným Telegram getUpdates. Vývojové testy neodosielajú správy.
+`STATE_FILE=/tmp/crypto-state.json`; prvýkrát do nej skopírujte iba testovací stav bez reálnych údajov; nesmie sa commitnúť.
+Nepracujte paralelne s produkčným Telegram getUpdates. Vývojové testy neodosielajú správy.
 
 ## Účtovná kniha a Telegram
 
@@ -62,11 +69,9 @@ Stav sa zapisuje atomicky pod procesným lockom; workflow serializuje behy.
 Offset Telegram update a transakcia sa uložia spolu pred potvrdením. Telegram
 nemá idempotency key pre sendMessage: pri páde medzi odoslaním a uložením slotu
 môže byť správa zopakovaná; žiadny kód nesmie tvrdiť zaručené exactly-once doručenie.
-Pri Git konflikte workflow zlyhá a uloží recovery artifact; nesmie ignorovať konflikt.
+Pri konflikte súkromného checkpointu workflow zlyhá; šifrovaná záloha a commit história zostávajú v private repo. Verejný plaintext recovery artifact sa nevytvára.
 
-**Ukladanie v tomto verejnom repozitári zverejní evidované transakcie a zostatky
-v bot_state.json.** Pred použitím skutočnej osobnej evidencie zvoľte súkromné
-úložisko/repozitár. Secrets sa do stavu neukladajú.
+**Verejný zápis reálneho portfólia je zablokovaný.** Použite výhradne šifrovaný private backend podľa docs/phase2/PRIVATE_STORAGE.md. Secrets sa do stavu neukladajú.
 
 ## Analytika a obmedzenia
 

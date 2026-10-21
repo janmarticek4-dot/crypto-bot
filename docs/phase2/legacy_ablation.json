@@ -1,0 +1,56 @@
+[
+  {
+    "strategy": "TrendComponent",
+    "period": "20240101-20250101",
+    "return_pct": 15.118444234352946,
+    "trade_dd": 21.360556968612464,
+    "wallet_dd": 40.705668611119584,
+    "trades": 35,
+    "archive": "backtest-result-2026-10-21_11-23-16.zip"
+  },
+  {
+    "strategy": "TrendComponent",
+    "period": "20250101-20260101",
+    "return_pct": -43.44479935105882,
+    "trade_dd": 43.444799351058826,
+    "wallet_dd": 50.38600183053647,
+    "trades": 44,
+    "archive": "backtest-result-2026-10-21_11-23-47.zip"
+  },
+  {
+    "strategy": "LegacyNoProtectiveExit",
+    "period": "20240101-20250101",
+    "return_pct": 30.09494677129412,
+    "trade_dd": 31.268080568000006,
+    "wallet_dd": 50.1407709904805,
+    "trades": 17,
+    "archive": "backtest-result-2026-10-21_11-52-59.zip"
+  },
+  {
+    "strategy": "LegacyNoProtectiveExit",
+    "period": "20250101-20260101",
+    "return_pct": -60.72884087623529,
+    "trade_dd": 60.72884087623529,
+    "wallet_dd": 63.344603025383876,
+    "trades": 24,
+    "archive": "backtest-result-2026-10-21_11-53-07.zip"
+  },
+  {
+    "strategy": "LegacyNoProtectiveExit",
+    "period": "20260101-20261001",
+    "return_pct": 11.804965970823531,
+    "trade_dd": 26.05173933317646,
+    "wallet_dd": 33.486247553396495,
+    "trades": 15,
+    "archive": "backtest-result-2026-10-21_11-53-16.zip"
+  },
+  {
+    "strategy": "TrendComponent",
+    "period": "20260101-20261001",
+    "return_pct": 19.091665115294116,
+    "trade_dd": 14.509118648742344,
+    "wallet_dd": 25.795635993346572,
+    "trades": 31,
+    "archive": "backtest-result-2026-10-21_11-53-23.zip"
+  }
+]

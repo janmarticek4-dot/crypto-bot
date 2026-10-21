@@ -15,7 +15,7 @@ on:
         default: false
         type: boolean
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: crypto-ai-bot
   cancel-in-progress: false
@@ -47,24 +47,14 @@ jobs:
           MIN_NET_EDGE: ${{ vars.MIN_NET_EDGE || '0.03' }}
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
           MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
+          STATE_BACKEND: github-private
+          STATE_ENV: prod
+          PRIVATE_STATE_REPO: ${{ vars.PRIVATE_STATE_REPO }}
+          STATE_REPO_TOKEN: ${{ secrets.STATE_REPO_TOKEN }}
+          STATE_ENCRYPTION_KEY: ${{ secrets.STATE_ENCRYPTION_KEY }}
           PYTHONUNBUFFERED: '1'
         run: python main.py
-      - name: Persist state (fail on conflict, never discard a ledger)
-        if: always() && !cancelled()
+      - name: Remove local plaintext
+        if: always()
         run: |
-          set -euo pipefail
-          git config user.name crypto-ai-bot
-          git config user.email crypto-ai-bot@users.noreply.github.com
-          git add bot_state.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Update crypto bot state [skip ci]'
-            git pull --rebase
-            git push origin HEAD:main
-          fi
-      - name: Recoverable state on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-state-${{ github.run_id }}
-          path: bot_state.json
-          retention-days: 14
+          rm -rf .private-state
