@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-21T14:50:58.698671+02:00",
+  "last_run": "2026-10-21T15:33:10.590097+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -140,7 +140,7 @@
   "last_safety_check": "2026-10-12T08:56:27.020434+02:00",
   "last_safety_alert": "2026-10-11T23:28:20.336343+02:00",
   "last_safety_alert_reason": "STATE_CHANGE",
-  "last_main_slot": "BRATISLAVA_2026-10-21_07:00",
+  "last_main_slot": "BRATISLAVA_2026-10-21_15:00",
   "forecast_history": [
     {
       "timestamp": "2026-10-09T14:51:13.671392+00:00",
@@ -1861,8 +1861,8 @@
   "coin_change_alerts": {},
   "peaks": {
     "BTC": {
-      "price": 84146.72,
-      "ts": "2026-10-14T08:00:00+00:00"
+      "price": 83933.0,
+      "ts": "2026-10-14T12:00:00+00:00"
     },
     "AAVE": {
       "price": 165.98,
@@ -1873,20 +1873,20 @@
       "ts": "2026-10-16T04:00:00+00:00"
     },
     "FET": {
-      "price": 0.2203,
-      "ts": "2026-10-14T08:00:00+00:00"
+      "price": 0.2185,
+      "ts": "2026-10-14T12:00:00+00:00"
     },
     "SOL": {
-      "price": 108.67,
-      "ts": "2026-10-14T08:00:00+00:00"
+      "price": 108.25,
+      "ts": "2026-10-20T12:00:00+00:00"
     },
     "ONDO": {
       "price": 0.4767,
       "ts": "2026-10-16T08:00:00+00:00"
     },
     "RENDER": {
-      "price": 2.061,
-      "ts": "2026-10-14T04:00:00+00:00"
+      "price": 2.01,
+      "ts": "2026-10-14T12:00:00+00:00"
     }
   },
   "fundamentals": {
@@ -2457,5 +2457,6 @@
   "crash_monitor": {
     "last_checked_at": "2026-10-21T12:50:58.698654+00:00",
     "last_result": "quiet_not_confirmed"
-  }
+  },
+  "last_us_outlook": "2026-10-21T15:33:10.590128+02:00"
 }
