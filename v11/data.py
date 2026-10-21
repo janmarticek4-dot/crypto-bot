@@ -10,7 +10,7 @@ INTERVAL_MS = {'1h':3600000,'4h':14400000,'1d':86400000,'1w':604800000}
 
 
 def candles(api, symbol, interval):
-    query = urllib.parse.urlencode(dict(symbol=symbol+'USDT',interval=interval,limit=300))
+    query = urllib.parse.urlencode(dict(symbol=symbol+'USDT',interval=interval,limit=1000 if interval=="1h" else 300))
     rows = api.http_json('https://data-api.binance.vision/api/v3/klines?'+query,retries=2,timeout=15)
     now = time.time()*1000
     out = []
@@ -52,19 +52,35 @@ def collect(api, full=True):
         tickers={r['symbol']:r for r in rows}
     except Exception as exc:
         errors.append('Binance tickers: '+type(exc).__name__)
+    global_data={}
+    try:
+        raw=api.http_json('https://api.coingecko.com/api/v3/global',timeout=8,retries=1)['data']
+        stamp=api.safe_float(raw.get('updated_at'))
+        if stamp and -60<=time.time()-stamp<=900:
+            global_data=dict(at=stamp,cap=api.safe_float(raw.get('total_market_cap',{}).get('usd')),
+                volume=api.safe_float(raw.get('total_volume',{}).get('usd')),
+                dominance=api.safe_float(raw.get('market_cap_percentage',{}).get('btc')),
+                change=api.safe_float(raw.get('market_cap_change_percentage_24h_usd')),source='CoinGecko')
+    except Exception as exc:errors.append('Global: '+type(exc).__name__)
     result={}
     for symbol, coin_id in symbols.items():
         meta=metadata.get(coin_id,{})
         ticker=tickers.get(symbol+'USDT',{})
-        price=api.safe_float(ticker.get('lastPrice')) or api.safe_float(meta.get('current_price'))
-        stamp=api.safe_float(ticker.get('closeTime'))
-        meta_stamp=api.parse_timestamp(meta.get('last_updated'))
+        ticker_price=api.safe_float(ticker.get('lastPrice'))
+        use_ticker=ticker_price is not None and ticker_price>0
+        price=ticker_price if use_ticker else api.safe_float(meta.get('current_price'))
+        if price is not None and price<=0:price=None
+        stamp=api.safe_float(ticker.get('closeTime')) if use_ticker else None
+        meta_stamp=api.parse_timestamp(meta.get('last_updated')) if meta.get('last_updated') else None
         age=time.time()-stamp/1000 if stamp else time.time()-meta_stamp.timestamp() if meta_stamp else None
         data=dict(price=price,frames={},raw={},market_cap=meta.get('market_cap'),volume_24h=meta.get('total_volume'),
                   market_cap_change_24h=meta.get('market_cap_change_percentage_24h'),
-                  circulating_supply=meta.get('circulating_supply'),change_24h=api.safe_float(ticker.get('priceChangePercent')) if ticker else meta.get('price_change_percentage_24h'),
+                  circulating_supply=meta.get('circulating_supply'),change_24h=api.safe_float(ticker.get('priceChangePercent')) if use_ticker else meta.get('price_change_percentage_24h'),
                   stale=age is None or age>900 or age < -60,price_source='Binance' if stamp else 'CoinGecko',age_seconds=age,
                   metadata_at=meta.get('last_updated'),errors=[])
+        if not meta_stamp or not -60<=time.time()-meta_stamp.timestamp()<=900:
+            for key in ('market_cap','volume_24h','market_cap_change_24h','circulating_supply'):
+                data[key]=None
         intervals=('1h','4h','1d','1w') if full else ('4h',)
         for interval in intervals:
             try:
@@ -85,5 +101,9 @@ def collect(api, full=True):
         else:
             data['btc_correlation']=None
             data['relative_strength_btc_7d']=None
+    alt_values=[d['relative_strength_btc_7d'] for s,d in result.items() if s in PRIMARY and d['relative_strength_btc_7d'] is not None]
+    center=__import__('statistics').median(alt_values) if alt_values else None
+    for d in result.values():
+        d['relative_strength_alt_median_7d']=d['relative_strength_btc_7d']-center if center is not None and d['relative_strength_btc_7d'] is not None else None
     complete=all(result[s]['price'] and not result[s]['stale'] and result[s]['frames'].get('4h',{}).get('ema200') is not None for s in (*PRIMARY,'BTC','ETH'))
-    return dict(coins=result,complete=complete,errors=errors,at=time.time())
+    return dict(coins=result,complete=complete,errors=errors,global_data=global_data,at=time.time())

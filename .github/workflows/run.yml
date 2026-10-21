@@ -1,7 +1,8 @@
-name: Crypto AI Bot V11.0
+name: Crypto AI Bot V11.1
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '7,22,37,52 * * * *'
+    - cron: '0 5,6,13,14,18,19 * * *'
   workflow_dispatch:
     inputs:
       manual_analysis:
@@ -24,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
+      - name: Record first runner step
+        run: echo "BOT_JOB_STARTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
           ref: main
@@ -34,7 +37,7 @@ jobs:
       - name: Install
         run: python -m pip install -r requirements.txt
       - name: Tests
-        run: python -m unittest discover -s tests -v
+        run: python scripts/test_offline.py
       - name: Run
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -43,6 +46,8 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
           ETORO_VERIFIED_SYMBOLS: ${{ vars.ETORO_VERIFIED_SYMBOLS }}
+          BUY_FEE: ${{ vars.BUY_FEE || '0.01' }}
+          SELL_FEE: ${{ vars.SELL_FEE || '0.01' }}
           SPREAD_ESTIMATE: ${{ vars.SPREAD_ESTIMATE }}
           MIN_NET_EDGE: ${{ vars.MIN_NET_EDGE || '0.03' }}
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}

@@ -1,6 +1,8 @@
 """Dated, attributed public-source events. No AI-created news or probabilities."""
 import concurrent.futures
 import hashlib
+import json
+from html import unescape
 import re
 import urllib.request
 import urllib.error
@@ -11,10 +13,13 @@ from email.utils import parsedate_to_datetime
 from zoneinfo import ZoneInfo
 
 SOURCES=[
+    dict(id='fomc_calendar',url='https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm',official=True,coverage=['Fed'],format='fomc_html'),
     dict(id='fed',url='https://www.federalreserve.gov/feeds/press_all.xml',official=True,coverage=['Fed']),
     dict(id='bls',url='https://www.bls.gov/feed/bls_latest.rss',official=True,coverage=['CPI','employment']),
     dict(id='bls_calendar',url='https://www.bls.gov/schedule/news_release/bls.ics',official=True,coverage=['CPI','employment'],format='ics'),
     dict(id='bea',url='https://apps.bea.gov/rss/rss.xml',publisher_host='bea.gov',official=True,coverage=['PCE']),
+    dict(id='ecb',url='https://www.ecb.europa.eu/rss/press.html',official=True,coverage=['Fed','regulation']),
+    dict(id='cftc',url='https://www.cftc.gov/RSS/RSSGP/rssgp.xml',official=True,coverage=['regulation']),
     dict(id='sec',url='https://www.sec.gov/newsroom/press-releases/rss.xml',official=True,coverage=['regulation']),
     dict(id='aave',url='https://governance.aave.com/latest.rss',official=False,coverage=['project'],symbol='AAVE'),
     dict(id='ondo',url='https://blog.ondo.finance/rss/',official=True,coverage=['project'],symbol='ONDO'),
@@ -26,8 +31,8 @@ SOURCES=[
     dict(id='cointelegraph',url='https://cointelegraph.com/rss',official=False,coverage=['regulation','hack','project']),
 ]
 PATTERNS={
- 'Fed':r'\bfomc\b|federal reserve|monetary policy|interest rate',
- 'CPI':r'consumer price|\bcpi\b',
+ 'Fed':r'\becb\b|monetary policy decisions|\bfomc\b|federal reserve|monetary policy|interest rate',
+ 'CPI':r'consumer price|producer price|\bppi\b|\bcpi\b',
  'PCE':r'personal consumption|personal income and outlays|\bpce\b',
  'employment':r'employment situation|nonfarm|unemployment|payroll',
  'regulation':r'\bsec\b|regulat|lawsuit|securities and exchange|enforcement',
@@ -133,6 +138,30 @@ def parse_calendar(raw,source,now=None):
     return out
 
 
+def parse_fomc(raw,source,now=None):
+    """Official meeting dates; NEVER assume a decision time from convention."""
+    now=now or datetime.now(timezone.utc)
+    text=raw.decode('utf-8')
+    headings=list(re.finditer(r'(20\d{2})\s+FOMC Meetings',text))
+    months={name:i for i,name in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),1)}
+    out=[]
+    for index,heading in enumerate(headings):
+        year=int(heading.group(1));section=text[heading.end():headings[index+1].start() if index+1<len(headings) else len(text)]
+        pairs=re.findall(r'class=["\'][^"\']*fomc-meeting__month[^"\']*["\'][^>]*>(.*?)</div>.*?class=["\'][^"\']*fomc-meeting__date[^"\']*["\'][^>]*>(.*?)</div>',section,re.S)
+        for month_html,date_html in pairs:
+            month=unescape(re.sub('<[^>]+>','',month_html)).strip()
+            days=unescape(re.sub('<[^>]+>','',date_html)).strip()
+            if month not in months or not re.fullmatch(r'\d{1,2}(?:[-–]\d{1,2})?\*?',days):continue
+            end_day=int(re.findall(r'\d+',days)[-1])
+            try:date=datetime(year,months[month],end_day,tzinfo=timezone.utc).date()
+            except ValueError:continue
+            if not now.date()<=date<=(now+timedelta(days=30)).date():continue
+            item=event('FOMC zasadnutie – '+month+' '+days,source['url'],None,source,None,True)
+            item.update(event_date=date.isoformat(),date_precision='date_only',time_status='N/A – presný čas rozhodnutia neoverený')
+            out.append(item)
+    return out
+
+
 def fetch(source):
     req=urllib.request.Request(source['url'],headers={'User-Agent':'CryptoBotResearch/11.0 (public-source calendar reader)'})
     with urllib.request.urlopen(req,timeout=8) as r:
@@ -149,12 +178,13 @@ def collect(state,now=None,fetcher=fetch):
     now=now or datetime.now(timezone.utc)
     old=state.get('fundamentals_v11',{})
     cached_at=timestamp(old.get('fetched_at'))
-    if cached_at and 0<=(now-cached_at).total_seconds()<6*3600:return old
+    if cached_at and 0<=(now-cached_at).total_seconds()<15*60:return old
     events=[];statuses=[]
     def one(source):
         try:
             raw=fetcher(source)
-            items=(parse_calendar if source.get('format')=='ics' else parse_feed)(raw,source,now)
+            parser={'ics':parse_calendar,'fomc_html':parse_fomc}.get(source.get('format'),parse_feed)
+            items=parser(raw,source,now)
             return items,dict(source=source['id'],url=source['url'],status='OK',events=len(items),checked_at=now.isoformat())
         except Exception as exc:
             # Exceptions can contain request data. Record only a type/code.
@@ -166,9 +196,22 @@ def collect(state,now=None,fetcher=fetch):
     unique={}
     for item in events:
         # Scheduled monthly releases sharing a calendar URL remain distinct.
-        key=item['id']+str(item['event_at'])
+        key=item['id']+str(item['event_at'])+str(item.get('event_date'))
         unique[key]=item
-    result=dict(fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:x['event_at'] or x['published_at'],reverse=True)[:200],sources=statuses,
+    metrics={}
+    metric_sources=[('AAVE','https://api.llama.fi/protocol/aave'),('SOL','https://api.llama.fi/v2/historicalChainTvl/Solana')]
+    for symbol,url in metric_sources:
+        try:
+            data=json.loads(fetcher(dict(url=url)))
+            rows=data.get('tvl',[]) if isinstance(data,dict) else data
+            latest=max(rows,key=lambda x:x['date'])
+            value=latest.get('totalLiquidityUSD',latest.get('tvl'))
+            at=datetime.fromtimestamp(latest['date'],timezone.utc)
+            if isinstance(value,(int,float)) and 0<=value<float('inf') and timedelta(minutes=-5)<=now-at<=timedelta(hours=48):
+                metrics[symbol]=dict(value=value,at=at.isoformat(),observed_at=now.isoformat(),url=url)
+        except Exception:
+            pass  # Missing metrics remain N/A, never synthetic zeroes.
+    result=dict(metrics=metrics,fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:(not x['scheduled'],x['event_at'] or x.get('event_date') or x['published_at'] or ''))[:200],sources=statuses,
                 unavailable=['overený projektový token-unlock kalendár','priame potvrdenie incidentu z primárneho zdroja','potvrdenie skutočnej aktivácie upgrade na sieti'])
     state['fundamentals_v11']=result
     return result

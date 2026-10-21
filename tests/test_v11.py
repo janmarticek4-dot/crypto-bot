@@ -197,7 +197,7 @@ class ReportIntegration(unittest.TestCase):
             t=indicators.summary(bars())
             coin=dict(price=400,frames={'4h':t,'1d':t},raw={'1h':[]},market_cap=None,volume_24h=None,market_cap_change_24h=None,circulating_supply=None,volume_to_cap=None,stale=False,price_source='fixture',age_seconds=1,change_24h=1,relative_strength_btc_7d=None)
             snap=dict(at=1000000,complete=True,coins={s:copy.deepcopy(coin) for s in {**data.COINS,**data.MARKET}})
-            with patch.object(main,'STATE_FILE',path),patch('v11.runtime.collect',return_value=snap),patch('v11.ai.explain',return_value={'available':False,'selections':{}}),patch.object(main,'telegram_send_long') as send,patch.object(main,'get_rss_news',return_value=[]),patch('v11.fundamentals.collect',return_value={'events':[],'sources':[],'unavailable':[]}):
+            with patch.object(main,'STATE_FILE',path),patch('v11.runtime.collect',return_value=snap),patch('v11.ai.explain',return_value={'available':False,'selections':{}}),patch.object(main,'telegram_send_long') as send,patch.object(main,'get_rss_news',return_value=[]),patch('v11.macro_context.collect',return_value={}),patch('v11.fundamentals.collect',return_value={'events':[],'sources':[],'unavailable':[]}):
                 runtime.run_analysis(main,'scheduled','2026-10-21_07:00')
                 report=send.call_args.args[0]
                 self.assertIn('kapitalizácia N/A',report)
@@ -212,7 +212,7 @@ class ReportIntegration(unittest.TestCase):
             t=indicators.summary(bars())
             coin=dict(price=400,frames={'4h':t,'1d':t},raw={'1h':[]},market_cap=None,volume_24h=None,market_cap_change_24h=None,circulating_supply=None,volume_to_cap=None,stale=False,price_source='fixture',age_seconds=1,change_24h=1,relative_strength_btc_7d=None)
             snap=dict(at=1000000,complete=True,coins={s:copy.deepcopy(coin) for s in {**data.COINS,**data.MARKET}})
-            with patch.object(main,'STATE_FILE',path),patch('v11.runtime.collect',return_value=snap),patch('v11.ai.explain',return_value={'available':False,'selections':{}}),patch.object(main,'telegram_send_long',side_effect=RuntimeError('failed')),patch.object(main,'get_rss_news',return_value=[]),patch('v11.fundamentals.collect',return_value={'events':[],'sources':[],'unavailable':[]}):
+            with patch.object(main,'STATE_FILE',path),patch('v11.runtime.collect',return_value=snap),patch('v11.ai.explain',return_value={'available':False,'selections':{}}),patch.object(main,'telegram_send_long',side_effect=RuntimeError('failed')),patch.object(main,'get_rss_news',return_value=[]),patch('v11.macro_context.collect',return_value={}),patch('v11.fundamentals.collect',return_value={'events':[],'sources':[],'unavailable':[]}):
                 with self.assertRaises(RuntimeError):runtime.run_analysis(main,'scheduled','test-slot')
                 self.assertNotIn('last_main_slot',main.load_state())
 

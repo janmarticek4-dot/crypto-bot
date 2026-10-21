@@ -3,3 +3,5 @@ requests
 google-generativeai
 gunicorn
 cryptography>=43,<51
+
+-r requirements-us.txt

@@ -27,7 +27,7 @@ from zoneinfo import ZoneInfo
 # Bot neobchoduje, iba analyzuje a upozorňuje.
 # ============================================================
 
-VERSION = "11.0"
+VERSION = "11.1"
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -980,6 +980,8 @@ def get_fear_greed():
 # ============================================================
 
 def telegram_send(message):
+    from v11.reporting import allow_telegram
+    allow_telegram()
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         raise RuntimeError("Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID.")
 
@@ -997,42 +999,19 @@ def telegram_send(message):
         method="POST",
     )
 
-    raw = http_request(request, timeout=30, retries=3)
+    raw = http_request(request, timeout=30, retries=1)
     result = json.loads(raw.decode("utf-8"))
 
     if not result.get("ok"):
-        raise RuntimeError(f"Telegram odmietol správu: {result}")
+        raise RuntimeError("Telegram odmietol správu; odpoveď nie je logovaná.")
 
     print("Telegram message sent.")
     return True
 
 
 def telegram_send_long(message):
-    max_chars = 3800
-    chunks = []
-    current = ""
-
-    for line in message.splitlines():
-        while len(line) > max_chars:
-            if current:
-                chunks.append(current)
-                current = ""
-            chunks.append(line[:max_chars])
-            line = line[max_chars:]
-
-        addition = ("\n" if current else "") + line
-
-        if len(current) + len(addition) > max_chars:
-            if current:
-                chunks.append(current)
-            current = line
-        else:
-            current += addition
-
-    if current:
-        chunks.append(current)
-
-    for chunk in chunks:
+    from v11.reporting import chunks
+    for chunk in chunks(message):
         telegram_send(chunk)
         time.sleep(1)
 
@@ -1100,6 +1079,10 @@ def slot_label(slot):
 
 def get_main_analysis_slot(now=None):
     now = now or now_local()
+
+    if now.tzinfo is None:
+        raise ValueError('Scheduler requires an aware datetime')
+    now = now.astimezone(TZ)
 
     for hour, minute, label in MAIN_SLOTS:
         start = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
@@ -2949,81 +2932,13 @@ def run_full_analysis(schedule_reason, schedule_slot=None):
 # ============================================================
 
 def run_us_open_outlook(schedule_slot):
-    """Jedna krátka správa. Nezamieňa predotvárací výhľad s reakciou trhu."""
-    state = load_state()
-    ctx = gather_market_data(state)
-    _, safety, evals = evaluate_all(ctx, state, get_usable_fundamentals(state))
-    news = get_rss_news()
-    ny_now = datetime.now(US_TZ)
-    open_at = ny_now.replace(hour=9, minute=30, second=0, microsecond=0)
-    weekday = ny_now.weekday() < 5
-    after_open = weekday and ny_now >= open_at
-    # Neoverujeme americké burzové sviatky: výrok po otvorení je preto len časový.
-    phase = ("Po plánovanom čase otvorenia USA (09:30 New York)" if after_open
-             else "Pred plánovaným otvorením USA (09:30 New York)")
-    if not weekday:
-        phase = "Americké akciové burzy majú cez víkend zatvorené"
-    btc = ctx.get("btc_data") or {}
-    btc_price = safe_float(btc.get("price_usd"))
-    btc_change = safe_float(ctx.get("btc_change_24h"))
-    cap_change = safe_float(ctx.get("global_change"))
-    rises = sum(1 for e in evals.values() if safe_float(e.get("trend_score"), 0) >= 6)
-    falls = sum(1 for e in evals.values() if safe_float(e.get("trend_score"), 0) <= 3.5)
-    if btc_change is None or cap_change is None:
-        verdict = "NEISTÉ — chýbajú spoľahlivé trhové dáta"
-        reason = "Bez dát nemožno poctivo určiť prevládajúci smer."
-    elif btc_change >= 1 and cap_change >= 1 and rises >= falls:
-        verdict = "SKÔR RAST 📈"
-        reason = "BTC aj širší kryptotrh rastú; technický obraz portfólia nie je prevažne slabý."
-    elif btc_change <= -1 and cap_change <= -1:
-        verdict = "SKÔR POKLES 📉"
-        reason = "BTC aj širší kryptotrh klesajú, čo zvyšuje riziko ďalšieho oslabenia."
-    else:
-        verdict = "NEJASNÝ SMER ↔️"
-        reason = "Trhové signály zatiaľ neukazujú presvedčivý spoločný smer."
-    headlines = [str(n.get("title", "")).strip() for n in news[:5] if n.get("title")]
-    prompt = (
-        "Si opatrný analytik kryptomien. Napíš po slovensky najviac 3 krátke vety. "
-        "Vyhodnoť možný smer krypta počas najbližších 2–5 hodín okolo otvorenia USA. "
-        "Neuvádzaj vymyslené údaje, správy ani presné pravdepodobnosti. "
-        "Nehovor, že americký akciový trh rastie/klesá, pretože nemáme dáta indexov. "
-        "Jasne odlíš predbežný odhad od potvrdeného pohybu. "
-        f"Fáza: {phase}. BTC 24h: {btc_change}; trhová kapitalizácia 24h: {cap_change}; "
-        f"riziko: {safety['state']}; silnejšie mince: {rises}; slabšie mince: {falls}. "
-        f"Technický záver: {verdict}. RSS titulky (neoverené samostatne): {headlines}. "
-        "Povedz hlavný dôvod a čo by zmenilo výhľad."
-    )
-    try:
-        commentary = groq_call(prompt, search=False, thinking_level="low", timeout=65)
-        commentary = commentary.strip()[:850]
-        ai_status = ""
-    except Exception as exc:
-        print(f"15:00: Groq nedostupný, používam výpočet: {exc}")
-        commentary = reason + " Záver je orientačný; reakcia amerických akcií nie je overená."
-        ai_status = "\nℹ️ AI nedostupná — výhľad vypočítal bot z trhových dát."
-    msg = (f"🇺🇸 CRYPTO BOT V{VERSION} | USA výhľad 15:00\n"
-           f"🕒 {now_local().strftime('%d.%m. %H:%M')} Bratislava\n"
-           f"🗽 {phase}\n\n"
-           f"🔮 Najbližšie 2–5 hodín: {verdict}\n"
-           f"BTC: {format_price(btc_price)} ({fmt_pct(btc_change, 2)} za 24h)\n"
-           f"Celý kryptotrh: {fmt_pct(cap_change, 2)} za 24h\n"
-           f"Riziko: {safety['state']}\n\n"
-           f"{commentary}{ai_status}\n\n"
-           "⚠️ Toto je odhad vývoja krypta, nie potvrdený pohyb indexov USA ani záruka rastu.")
-    telegram_send_long(msg)
-    state["last_main_slot"] = schedule_slot
-    state["last_run"] = iso_now()
-    state["last_us_outlook"] = iso_now()
-    state["bot_version"] = VERSION
-    save_state(state)
-    print("Krátky USA výhľad 15:00 bol odoslaný.")
+    from us_context.report import run
+    return run(sys.modules[__name__],schedule_slot)
 
-
-# ============================================================
-# SPUSTENIE
-# ============================================================
 
 def main():
+    if os.getenv('BOT_DATA_MODE','live')!='live':
+        raise RuntimeError('Preview data must use the offline example generator')
     from v11.portfolio import initialize
     from v11.runtime import telegram_updates, run_analysis, run_outlook, run_monitor
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
