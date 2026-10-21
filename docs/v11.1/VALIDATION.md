@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-- 126 bot unit/integration tests passed via `python scripts/test_offline.py`.
+- 127 bot unit/integration tests passed via `python scripts/test_offline.py`.
   Unmocked socket connections are blocked and Telegram disabled. Includes
   source failure, stale/invalid fallback provenance, fees/R:R, Groq cache/failure
   and Retry-After, silent monitoring/cooldowns, DST/holidays, synthetic isolation,

@@ -15,7 +15,7 @@ USA-calendar/report hotfix, so review runtime/workflow migration separately.
 
 ## Validation
 
-126 offline bot tests, 22 phase-3 tests and 11 phase-2 tests passed. 33 real
+127 offline bot tests, 22 phase-3 tests and 11 phase-2 tests passed. 33 real
 single-asset Freqtrade runs completed; 3 ONDO-2024 targets are NO_DATA. All
 asset-period strategies are insufficiently evidenced; combined has zero trades.
 See docs/v11.1/SINGLE_COIN.md, VALIDATION.md and BACKTEST_MANIFEST.json.

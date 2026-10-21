@@ -151,12 +151,16 @@ def run_monitor(api):
     This is a conservative risk scenario, never a calibrated crash probability.
     Unknown data and isolated technical weakness cannot generate an alert.
     """
+    from .reporting import require_live_snapshot
+    require_live_snapshot({})
+    from .delivery import send_once
     import hashlib
     import re
     from urllib.parse import urlparse
     state=api.load_state()
     monitor=state.setdefault('crash_monitor_v11',{})
     snap=collect(api,full=False)
+    require_live_snapshot(snap)
     news=api._crisis_news_candidates(api.get_rss_news())
     btc=snap['coins']['BTC']['change_24h'];eth=snap['coins']['ETH']['change_24h']
     stress=snap['complete'] and btc is not None and eth is not None and btc<=-5 and eth<=-5
@@ -175,15 +179,18 @@ def run_monitor(api):
     sent=monitor.setdefault('sent',{})
     monitor['checked_at']=now;monitor['result']='quiet'
     if stress and matched and now-sent.get(fingerprint,0)>=8*3600:
-        lines=['🚨 CRYPTO BOT V11.0 — systémové riziko',api.now_local().strftime('%d.%m.%Y %H:%M Bratislava'),
-               'Dva nezávislé RSS zdroje uvádzajú rovnaký typ incidentu pri významnom subjekte a BTC aj ETH klesajú najmenej o 5 % za 24h.',
+        lines=['🚨 CRYPTO BOT V11.1 — systémové riziko',api.now_local().strftime('%d.%m.%Y %H:%M Bratislava'),
+               'Dve RSS domény uvádzajú rovnaký typ incidentu (nezávislosť pôvodných správ neoverená) pri významnom subjekte a BTC aj ETH klesajú najmenej o 5 % za 24h.',
                'Scenár: možný ďalší pokles trhu nad 10 %. Rozsah ani pravdepodobnosť nie sú kalibrované; nejde o pokyn na automatický predaj.',
                f'BTC {pct(btc)}; ETH {pct(eth)}.']
         lines += [f"{n['pub_date']} | {n['source']}: {n['title']} — {n['link']}" for n in matched[:4]]
-        api.telegram_send_long('\n'.join(lines))
-        sent[fingerprint]=now;monitor['result']='alert_sent'
-        monitor['sources']=[n['link'] for n in matched]
-        monitor['reason']='independent_matching_incident_and_btc_eth_stress'
+        incident_id=hashlib.sha256(json.dumps(sorted((n['link'],n.get('pub_date','')) for n in matched)).encode()).hexdigest()
+        if send_once(api,state,'\n'.join(lines),'alert:'+incident_id):
+            sent[fingerprint]=now;monitor['result']='alert_sent'
+            monitor['sources']=[n['link'] for n in matched]
+            monitor['reason']='independent_matching_incident_and_btc_eth_stress'
+        else:
+            monitor['result']='delivery_attempt_already_recorded'
     monitor['sent']={k:v for k,v in sent.items() if now-v<30*86400}
     state['last_run']=api.iso_now()
     api.save_state(state)

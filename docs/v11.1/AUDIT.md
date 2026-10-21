@@ -16,7 +16,7 @@ morning/evening/USA report work. It is not a replacement bot.
 | Fundamentals | Official project notices, BLS/Fed/BEA/SEC, candidate ECB/CFTC feeds, TVL | Project notices remain distinct from adoption/revenue; incomplete coverage is explicit |
 | Macro | BLS timed events, FOMC meeting dates | Add official Treasury daily yields with freshness bounds; never call them live, DXY or consensus |
 | Event review | Separate expected/result/observations | Numeric consensus and macro release extraction remain N/A; no unsupported surprise score |
-| Monitor | Two matching incident sources + market stress + cooldown; no routine AI | Safety criteria unchanged. Two domains may share an original report; independent-origin verification remains a limitation |
+| Monitor | Two matching incident sources + market stress + cooldown; no routine AI | Safety criteria unchanged; delivery journal also protects alerts against ambiguous-send replay. Two domains may share an original report; independent-origin verification remains a limitation |
 | Freqtrade | 2026.9 installed, real historical archives, pinned research requirement | Manual research workflow; independent single-asset runs, archive hashes, per-period hold comparisons; no trading command |
 | State | Corrupt state fails closed, private repo encryption/CAS/local locking | Keys retained; no public portfolio copy. No real state is used by generated examples |
 | Review CI | Existing unit tests | Offline runner rejects unmocked socket connections and disables Telegram; PR workflow receives no secrets |

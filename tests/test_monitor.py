@@ -39,3 +39,10 @@ class MonitorTests(unittest.TestCase):
         message=self.api.telegram_send_long.call_args.args[0]
         self.assertIn('nie sú kalibrované',message)
         self.assertEqual(self.state['crash_monitor_v11']['result'],'quiet')
+    def test_uncertain_alert_is_not_replayed(self):
+        self.api.telegram_send_long.side_effect=TimeoutError('ambiguous')
+        with self.assertRaises(TimeoutError):self.run_monitor()
+        self.api.telegram_send_long.side_effect=None
+        self.run_monitor()
+        self.assertEqual(self.api.telegram_send_long.call_count,1)
+        self.assertEqual(self.state['crash_monitor_v11']['result'],'delivery_attempt_already_recorded')
