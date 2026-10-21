@@ -1,64 +1,70 @@
-name: Crypto AI Bot V10.6
-
+name: Crypto AI Bot V11.0
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       manual_analysis:
-        description: "Spustiť okamžitú hlavnú analýzu?"
+        description: Spustiť okamžitú hlavnú analýzu?
         required: false
         default: false
         type: boolean
       manual_deep_search:
-        description: "Pri ručnej analýze spustiť aj hlboké vyhľadávanie?"
+        description: Rezervované; výskum musí mať podporovaný model a overiteľné zdroje.
         required: false
         default: false
         type: boolean
-
 permissions:
   contents: write
-
 concurrency:
   group: crypto-ai-bot
   cancel-in-progress: false
-
 jobs:
   crypto-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
         with:
-          python-version: "3.12"
-      - name: Run Crypto AI Bot
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: python -m pip install -r requirements.txt
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+      - name: Run
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          ETORO_VERIFIED_SYMBOLS: ${{ vars.ETORO_VERIFIED_SYMBOLS }}
+          SPREAD_ESTIMATE: ${{ vars.SPREAD_ESTIMATE }}
+          MIN_NET_EDGE: ${{ vars.MIN_NET_EDGE || '0.03' }}
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
           MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
-          PYTHONUNBUFFERED: "1"
+          PYTHONUNBUFFERED: '1'
         run: python main.py
-      - name: Save bot state
+      - name: Persist state (fail on conflict, never discard a ledger)
         if: always() && !cancelled()
         run: |
-          if [ -f bot_state.json ]; then
-            git config user.name "crypto-ai-bot"
-            git config user.email "crypto-ai-bot@users.noreply.github.com"
-            git add bot_state.json
-            if ! git diff --cached --quiet; then
-              git commit -m "Update crypto bot state [skip ci]"
-              git pull --rebase --autostash || true
-              git push
-            else
-              echo "Stav bota sa nezmenil."
-            fi
-          else
-            echo "bot_state.json neexistuje - nič sa neukladá."
+          set -euo pipefail
+          git config user.name crypto-ai-bot
+          git config user.email crypto-ai-bot@users.noreply.github.com
+          git add bot_state.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update crypto bot state [skip ci]'
+            git pull --rebase
+            git push origin HEAD:main
           fi
+      - name: Recoverable state on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-state-${{ github.run_id }}
+          path: bot_state.json
+          retention-days: 14

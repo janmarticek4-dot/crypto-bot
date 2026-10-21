@@ -1,4 +1,6 @@
 import os
+import sys
+import fcntl
 import json
 import time
 import re
@@ -14,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 
 # ============================================================
-# CRYPTO AI BOT V10.6
+# CRYPTO AI BOT V11.0
 # Inteligentný analytik kryptomien a ochranca investičného portfólia.
 #
 # Princíp: čísla, signály, bezpečnostné stavy a hladiny počíta KÓD.
@@ -25,7 +27,7 @@ from zoneinfo import ZoneInfo
 # Bot neobchoduje, iba analyzuje a upozorňuje.
 # ============================================================
 
-VERSION = "10.6"
+VERSION = "11.0"
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
@@ -37,7 +39,7 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 REQUEST_TIMEOUT = 45
 POLL_INTERVAL = 5
-STATE_FILE = "bot_state.json"
+STATE_FILE = os.getenv("STATE_FILE", "bot_state.json")
 
 TZ = ZoneInfo("Europe/Bratislava")
 US_TZ = ZoneInfo("America/New_York")
@@ -248,11 +250,12 @@ def load_state():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        return data if isinstance(data, dict) else {}
+        if not isinstance(data, dict):
+            raise RuntimeError("State root must be an object")
+        return data
 
     except Exception as exc:
-        print(f"State read error: {exc}")
-        return {}
+        raise RuntimeError("State is unreadable; refusing to reset the ledger") from exc
 
 
 def save_state(state):
@@ -261,6 +264,8 @@ def save_state(state):
     with open(temp, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
+        f.flush()
+        os.fsync(f.fileno())
     os.replace(temp, STATE_FILE)
 
 
@@ -287,31 +292,35 @@ def parse_timestamp(value):
 # ============================================================
 
 def http_request(req, timeout=REQUEST_TIMEOUT, retries=3):
+    """Bounded Retry-After support. Never log credential-bearing URLs."""
     last_error = None
-
     for attempt in range(retries):
+        delay = min(2 ** attempt, 8)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
                 return response.read()
-
         except urllib.error.HTTPError as exc:
             last_error = exc
-
-            if exc.code in {400, 401, 403, 404}:
+            if exc.code not in {429, 500, 502, 503, 504}:
                 raise
-
-        except (
-            urllib.error.URLError,
-            TimeoutError,
-            ConnectionError,
-            OSError,
-        ) as exc:
+            retry_after = exc.headers.get('Retry-After') if exc.headers else None
+            if retry_after:
+                try:
+                    delay = max(0, float(retry_after))
+                except ValueError:
+                    try:
+                        delay = max(0, (parsedate_to_datetime(retry_after)-datetime.now(timezone.utc)).total_seconds())
+                    except (TypeError, ValueError):
+                        pass
+                # A long server quota reset must not be shortened into an early retry.
+                if delay > 30:
+                    raise
+            print(f'HTTP {exc.code}; attempt {attempt+1}/{retries}')
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as exc:
             last_error = exc
-
-        if attempt < retries - 1:
-            time.sleep(2 ** attempt)
-
-    raise last_error or RuntimeError("HTTP požiadavka zlyhala.")
+        if attempt < retries-1:
+            time.sleep(delay)
+    raise last_error or RuntimeError('HTTP request failed')
 
 
 def http_json(url, headers=None, timeout=REQUEST_TIMEOUT, retries=3):
@@ -1714,7 +1723,10 @@ def previous_coin_map(state):
 
 
 def gather_market_data(state):
-    market_global = coingecko_get("global")
+    try:
+        market_global = coingecko_get("global")
+    except Exception:
+        market_global = {}
     fear = get_fear_greed()
     gdata = market_global.get("data", {}) if isinstance(market_global, dict) else {}
 
@@ -1729,38 +1741,18 @@ def gather_market_data(state):
     dominance = safe_float((gdata.get("market_cap_percentage") or {}).get("btc"))
     global_change = safe_float(gdata.get("market_cap_change_percentage_24h_usd"))
 
-    btc_data = collect_coin_data("BTC", "bitcoin")
-    previous = previous_coin_map(state)
-
-    portfolio_data = {}
-    for symbol, coin_id in PORTFOLIO.items():
-        try:
-            data = collect_coin_data(symbol, coin_id)
-            cap = safe_float(data.get("market_cap"), 0)
-            data["market_share_pct"] = (
-                cap / total_cap * 100 if total_cap else 0.0
-            )
-
-            prev = previous.get(symbol, {})
-            data["change_since_last"] = (
-                pct_change(prev.get("price"), data["price_usd"]) if prev.get("price") else 0.0
-            )
-            data["mcap_change_since_last"] = (
-                pct_change(prev.get("market_cap"), cap) if prev.get("market_cap") else 0.0
-            )
-            data["vol_change_since_last"] = (
-                pct_change(prev.get("volume_24h"), data.get("volume_24h"))
-                if prev.get("volume_24h") else 0.0
-            )
-            portfolio_data[symbol] = data
-
-        except Exception as exc:
-            print(f"Portfolio data error {symbol}: {exc}")
-            portfolio_data[symbol] = {
-                "symbol": symbol, "error": str(exc), "market_cap": 0,
-                "market_share_pct": 0, "change_since_last": 0.0,
-                "mcap_change_since_last": 0.0, "vol_change_since_last": 0.0,
-            }
+    from v11.data import collect
+    snapshot = collect(sys.modules[__name__], full=False)
+    def legacy(symbol):
+        d = snapshot['coins'][symbol]
+        t = d['frames'].get('4h', {})
+        return dict(symbol=symbol, price_usd=d['price'], change_24h=d['change_24h'],
+                    market_cap=d['market_cap'], volume_24h=d['volume_24h'],
+                    technical_4h={**t, 'macd': {'histogram': t.get('macd_hist')}, 'atr14':t.get('atr')},
+                    technical_score_calc={'score': None, 'label':'V11 monitor'},
+                    structure={}, data_warnings=d['errors'])
+    btc_data = legacy('BTC')
+    portfolio_data = {s:legacy(s) for s in PORTFOLIO}
 
     return {
         "market_global": market_global,
@@ -1822,7 +1814,7 @@ def get_rss_news():
 
                 if not entry["title"]:
                     continue
-                if published is not None and now_utc - published > max_age:
+                if published is None or published > now_utc + timedelta(minutes=5) or now_utc - published > max_age:
                     continue
 
                 title_l = entry["title"].lower() + " "
@@ -1887,7 +1879,7 @@ def groq_call(prompt, search=False, thinking_level="medium", timeout=150, json_m
     )
     print(f"Groq model: {GROQ_MODEL} | search={search} | json={json_mode}")
     try:
-        raw = http_request(request, timeout=timeout, retries=1)
+        raw = http_request(request, timeout=timeout, retries=3)
         result = json.loads(raw.decode("utf-8"))
     except urllib.error.HTTPError as exc:
         try:
@@ -2675,7 +2667,7 @@ Vráť IBA jeden JSON objekt s presnými kľúčmi:
 alert=true povoľ iba ak: (1) udalosť je dôveryhodne potvrdená, (2) má realistický systémový dopad na kryptotrh, (3) odhad možného ďalšieho poklesu OD AKTUÁLNEJ ÚROVNE je prísne viac než 10 %, (4) confidence_pct je aspoň {CONFIG['crash_alert_min_confidence_pct']:.0f}, (5) sú uvedené konkrétne dôkazy a aspoň jeden použiteľný zdroj URL. Ak čo i len jedna podmienka nie je splnená, alert=false. Nejde o predikciu s istotou ani pokyn na automatický predaj."""
 
 
-def _validated_crash_alert(raw_text):
+def _legacy_validated_crash_alert(raw_text):
     """Fail-closed: neplatný/neurčitý AI výstup nikdy nevytvorí Telegram alert."""
     try:
         data = parse_json_output(raw_text)
@@ -2725,6 +2717,19 @@ def _validated_crash_alert(raw_text):
         "sources": valid_sources[:4],
         "reason": reason[:1000],
     }
+
+
+def _validated_crash_alert(raw_text):
+    value = _legacy_validated_crash_alert(raw_text)
+    if not value:
+        return None
+    known = {n['link'] for n in get_rss_news() if n.get('link') and n.get('pub_date')}
+    sources = [x for x in value['sources'] if x['url'] in known]
+    domains = {urllib.parse.urlparse(x['url']).hostname.removeprefix('www.') for x in sources}
+    if len(domains) < 2:
+        return None
+    value['sources'] = sources
+    return value
 
 
 def run_safety_monitor():
@@ -2813,8 +2818,8 @@ def run_safety_monitor():
         "",
         "⚠️ Overená udalosť môže spustiť ďalší prudký pokles kryptotrhu.",
         f"Udalosť: {verified['event']}",
-        f"Odhad možného ďalšieho poklesu od aktuálnej úrovne: viac než 10 % (AI odhad: {verified['expected_drawdown_pct']:.0f} %).",
-        f"Istota vyhodnotenia: {verified['confidence_pct']:.0f} %",
+        "Scenár: riziko ďalšieho poklesu nad 10 %; rozsah nie je kalibrovaná predpoveď.",
+        "Dôveryhodnosť: zvýšená, kvalitatívna; AI percentá nie sú kalibrovaná pravdepodobnosť.",
         "",
         "Prečo je to nebezpečné:",
         verified["reason"],
@@ -3007,28 +3012,26 @@ def run_us_open_outlook(schedule_slot):
 # ============================================================
 
 def main():
-    if not GROQ_API_KEY:
-        raise RuntimeError("Chýba GROQ_API_KEY. Pridaj ho do GitHub Actions Secrets.")
-
+    from v11.portfolio import initialize
+    from v11.runtime import telegram_updates, run_analysis, run_outlook, run_monitor
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        raise RuntimeError("Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID.")
-
+        raise RuntimeError('Chýba TELEGRAM_TOKEN alebo TELEGRAM_CHAT_ID.')
+    state = load_state()
+    initialize(state)
+    telegram_updates(sys.modules[__name__], state)
     run_main, reason = is_main_analysis_time()
-
-    slot = (
-        get_main_analysis_slot()
-        if run_main and reason != "MANUAL"
-        else None
-    )
-
-    if run_main:
-        if slot_label(slot) == "15:00":
-            run_us_open_outlook(slot)
-        else:
-            run_full_analysis(reason, slot)
+    slot = get_main_analysis_slot() if run_main and reason != 'MANUAL' else None
+    if run_main and slot_label(slot) != '15:00':
+        run_analysis(sys.modules[__name__], reason, slot)
+    elif run_main:
+        run_outlook(sys.modules[__name__], slot)
     else:
-        run_safety_monitor()
+        run_monitor(sys.modules[__name__])
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    # Entire read/modify/send/save operation is serialized; Actions additionally
+    # serializes all jobs and persists the state before another job checks out.
+    with open(STATE_FILE + '.lock', 'a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        main()

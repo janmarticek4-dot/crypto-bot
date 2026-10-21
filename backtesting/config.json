@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schema.freqtrade.io/schema.json",
+  "dry_run": true,
+  "dry_run_wallet": 8500,
+  "trading_mode": "spot",
+  "margin_mode": "",
+  "stake_currency": "USDT",
+  "stake_amount": 1000,
+  "tradable_balance_ratio": 0.95,
+  "max_open_trades": 6,
+  "fiat_display_currency": "USD",
+  "fee": 0.012,
+  "timeframe": "4h",
+  "dataformat_ohlcv": "feather",
+  "cancel_open_orders_on_exit": false,
+  "entry_pricing": {
+    "price_side": "other",
+    "use_order_book": false,
+    "price_last_balance": 0.0
+  },
+  "exit_pricing": {
+    "price_side": "other",
+    "use_order_book": false
+  },
+  "exchange": {
+    "name": "binance",
+    "key": "",
+    "secret": "",
+    "ccxt_config": {
+      "enableRateLimit": true,
+      "options": {
+        "fetchMarkets": {
+          "types": [
+            "spot"
+          ]
+        },
+        "fetchCurrencies": false,
+        "include_OS_certificates": true
+      },
+      "urls": {
+        "api": {
+          "public": "https://data-api.binance.vision/api/v3"
+        }
+      },
+      "aiohttp_trust_env": true
+    },
+    "ccxt_async_config": {
+      "enableRateLimit": true,
+      "urls": {
+        "api": {
+          "public": "https://data-api.binance.vision/api/v3"
+        }
+      },
+      "options": {
+        "fetchMarkets": {
+          "types": [
+            "spot"
+          ]
+        },
+        "fetchCurrencies": false,
+        "include_OS_certificates": true
+      },
+      "aiohttp_trust_env": true
+    },
+    "pair_whitelist": [
+      "SOL/USDT",
+      "TAO/USDT",
+      "ONDO/USDT",
+      "RENDER/USDT",
+      "AAVE/USDT",
+      "FET/USDT"
+    ],
+    "pair_blacklist": []
+  },
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "bot_name": "research-only-v11",
+  "initial_state": "stopped"
+}

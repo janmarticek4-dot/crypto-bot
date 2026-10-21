@@ -1,0 +1,161 @@
+[
+  {
+    "period": "20240101-20250101",
+    "strategy": "TrendComponent",
+    "archive": "backtest-result-2026-10-21_11-23-16.zip",
+    "profit_total": 0.15118444234352946,
+    "max_drawdown_account": 0.21360556968612465,
+    "total_trades": 35,
+    "winrate": 0.3142857142857143,
+    "profit_factor": 1.288249130366974,
+    "sharpe": 0.13502595074156937,
+    "sortino": 1.1773349619660818,
+    "baseline": {
+      "profit_total": 0.3952490627010312,
+      "max_drawdown_account": 0.45377133724371466,
+      "total_trades": 5,
+      "sharpe": 0.8525682523158872,
+      "sortino": 0.925638214141744,
+      "pairs": [
+        "SOL/USDT",
+        "TAO/USDT",
+        "RENDER/USDT",
+        "AAVE/USDT",
+        "FET/USDT"
+      ]
+    }
+  },
+  {
+    "period": "20240101-20250101",
+    "strategy": "PullbackComponent",
+    "archive": "backtest-result-2026-10-21_11-23-36.zip",
+    "profit_total": 0.035384945496470595,
+    "max_drawdown_account": 0.1437921232135835,
+    "total_trades": 13,
+    "winrate": 0.38461538461538464,
+    "profit_factor": 1.2012792370980285,
+    "sharpe": 0.039961862061367905,
+    "sortino": 0.3269013941872657,
+    "baseline": {
+      "profit_total": 0.3952490627010312,
+      "max_drawdown_account": 0.45377133724371466,
+      "total_trades": 5,
+      "sharpe": 0.8525682523158872,
+      "sortino": 0.925638214141744,
+      "pairs": [
+        "SOL/USDT",
+        "TAO/USDT",
+        "RENDER/USDT",
+        "AAVE/USDT",
+        "FET/USDT"
+      ]
+    }
+  },
+  {
+    "period": "20240101-20250101",
+    "strategy": "CombinedStrategy",
+    "archive": "backtest-result-2026-10-21_11-23-40.zip",
+    "profit_total": 0.0,
+    "max_drawdown_account": 0.0,
+    "total_trades": 0,
+    "winrate": 0,
+    "profit_factor": 0.0,
+    "sharpe": 0,
+    "sortino": 0,
+    "baseline": {
+      "profit_total": 0.3952490627010312,
+      "max_drawdown_account": 0.45377133724371466,
+      "total_trades": 5,
+      "sharpe": 0.8525682523158872,
+      "sortino": 0.925638214141744,
+      "pairs": [
+        "SOL/USDT",
+        "TAO/USDT",
+        "RENDER/USDT",
+        "AAVE/USDT",
+        "FET/USDT"
+      ]
+    }
+  },
+  {
+    "period": "20250101-20260101",
+    "strategy": "TrendComponent",
+    "archive": "backtest-result-2026-10-21_11-23-47.zip",
+    "profit_total": -0.4344479935105882,
+    "max_drawdown_account": 0.43444799351058827,
+    "total_trades": 44,
+    "winrate": 0.20454545454545456,
+    "profit_factor": 0.37443704082565055,
+    "sharpe": -0.9940931747653159,
+    "sortino": -3.3170551769004373,
+    "baseline": {
+      "profit_total": -0.4207001913017533,
+      "max_drawdown_account": 0.4861961871929663,
+      "total_trades": 6,
+      "sharpe": -0.8559833407943142,
+      "sortino": -0.8489422809446433,
+      "pairs": [
+        "SOL/USDT",
+        "TAO/USDT",
+        "ONDO/USDT",
+        "RENDER/USDT",
+        "AAVE/USDT",
+        "FET/USDT"
+      ]
+    }
+  },
+  {
+    "period": "20250101-20260101",
+    "strategy": "PullbackComponent",
+    "archive": "backtest-result-2026-10-21_11-23-52.zip",
+    "profit_total": -0.10496068696941177,
+    "max_drawdown_account": 0.10895977551158247,
+    "total_trades": 10,
+    "winrate": 0.3,
+    "profit_factor": 0.2394398683249226,
+    "sharpe": -0.31645016193157904,
+    "sortino": -0.5469091604596209,
+    "baseline": {
+      "profit_total": -0.4207001913017533,
+      "max_drawdown_account": 0.4861961871929663,
+      "total_trades": 6,
+      "sharpe": -0.8559833407943142,
+      "sortino": -0.8489422809446433,
+      "pairs": [
+        "SOL/USDT",
+        "TAO/USDT",
+        "ONDO/USDT",
+        "RENDER/USDT",
+        "AAVE/USDT",
+        "FET/USDT"
+      ]
+    }
+  },
+  {
+    "period": "20250101-20260101",
+    "strategy": "CombinedStrategy",
+    "archive": "backtest-result-2026-10-21_11-23-56.zip",
+    "profit_total": 0.0,
+    "max_drawdown_account": 0.0,
+    "total_trades": 0,
+    "winrate": 0,
+    "profit_factor": 0.0,
+    "sharpe": 0,
+    "sortino": 0,
+    "baseline": {
+      "profit_total": -0.4207001913017533,
+      "max_drawdown_account": 0.4861961871929663,
+      "total_trades": 6,
+      "sharpe": -0.8559833407943142,
+      "sortino": -0.8489422809446433,
+      "pairs": [
+        "SOL/USDT",
+        "TAO/USDT",
+        "ONDO/USDT",
+        "RENDER/USDT",
+        "AAVE/USDT",
+        "FET/USDT"
+      ]
+    }
+  }
+]
