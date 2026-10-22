@@ -144,7 +144,7 @@ def render(snapshot, fundamental, ai_api, now, phase='preview', morning=None):
                   'Čas zberu: ' + now.astimezone(BL).isoformat() + '\n'
                   'Ide o náhľad šablóny ' + hour + ', nie historickú analýzu v tomto čase.\n'
                   'Oba náhľady používajú rovnaký aktuálny snapshot. Reálne ranné/večerné porovnanie N/A.\n'
-                  'Skutočné pozície a zostatky nie sú načítané; BEZ POZÍCIE znamená iba prázdny shadow kontext.\n')
+                  'Skutočné pozície a zostatky nie sú načítané; držba je N/A v izolovanom shadow kontexte.\n')
         state={'shadow_mode':True}
         if phase!='preview':
             header=header.replace('Oba náhľady používajú rovnaký aktuálny snapshot. Reálne ranné/večerné porovnanie N/A.','Časovo oddelené SHADOW pozorovanie; referencia sa overuje kontrolným súčtom, časom a zdrojovými dátami.')

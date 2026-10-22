@@ -714,10 +714,11 @@
   "sha256": {
     "v11/fundamentals.py": "d568d6c11b37b90857c8f0a9080cd807f01bdc577c4df53784dae3df579449a4",
     "v11/briefing.py": "4db4ef831b978abc8452b1e158b8c7668d258294ceb435a1f1b7c410b5d7264c",
-    "v11/diagnostics.py": "27e8590d3daff249b99efff89417ea4abdb8a0f46154a434d112bde141033242",
+    "v11/diagnostics.py": "d2f6663222578389471b23738f3e9d1fbb7e6548f70b7b84eae2b82a84ba8f01",
     "v11/shadow_pair.py": "31c0c73cbc35dc300a11e5a0120027c56c553be79b2b2ad11b2e2bc9ab63807f",
-    "scripts/v111_shadow.py": "341ac68725b720e2084b589775e03e196b60c1cdfa0bee47b31c8993d1961c54",
+    "scripts/v111_shadow.py": "2bf0e05ecee4732887bcfe3152f9650b3b7c37db7dd83bdac308bd39453ced84",
     "tests/test_shadow_pair.py": "b19093e08f4f93fd2de19ef594f36caa4400978def62c378bc7acd4c7fc2e1de",
     ".github/workflows/v11-1-shadow-test.yml": "7253a1c75bb3662aad5c5c5f2ea5067fb39558085b2c00c1fa8321cc28b24963"
-  }
+  },
+  "report_rendering": "Deterministic formatting regenerated from the same12:41 observed data; not a new collection or independent time point"
 }

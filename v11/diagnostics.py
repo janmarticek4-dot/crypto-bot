@@ -60,8 +60,9 @@ def action_summary(snap,evals,safety,fund,state):
         current=snap['coins'].get(s,{})
         if prior.get('price') and current.get('price') and not prior.get('stale') and not current.get('stale'):
             changes.append(f"{s} {(current['price']/prior['price']-1)*100:+.2f}% {prior.get('action','N/A')}→{evals.get(s,{}).get('action','N/A')}")
+    cap_text='N/A' if r['cap_change_24h'] is None else f"{r['cap_change_24h']:+.2f}%"
     return ['AKČNÝ SÚHRN',
-        f"Trh: technická podmienka {safety['state']}; {r['price_context']}. Kapitalizácia24h {r['cap_change_24h'] if r['cap_change_24h'] is not None else 'N/A'}%.",
+        f"Trh: technická podmienka {safety['state']}; {r['price_context']}. Kapitalizácia24h {cap_text}.",
         'Overená príčina pohybu: N/A — súbeh správ a ceny nedokazuje príčinu.',
         'Technické príležitosti na preverenie: '+(', '.join(candidates[:3]) or 'žiadna s aspoň3/6 podmienkami')+'. Nie je to povolený BUY.',
         'Riziká: neúplné udalostné pokrytie; nové vstupy majú samostatné bezpečnostné blokovania.',
