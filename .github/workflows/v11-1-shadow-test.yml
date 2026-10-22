@@ -1,0 +1,62 @@
+name: V11.1 Shadow Test
+on:
+  workflow_dispatch:
+    inputs:
+      use_groq:
+        description: Voliteľne overiť Groq (bez kľúča sa použije deterministický fallback)
+        required: false
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: v111-shadow-test
+  cancel-in-progress: false
+jobs:
+  shadow:
+    if: github.ref == 'refs/heads/feature/v11-1-review'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      BOT_DATA_MODE: shadow
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      V11_RULES_VALIDATED: 'false'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Offline regression and shadow safety tests
+        run: python scripts/test_offline.py
+      - name: Live shadow previews and source availability
+        env:
+          GROQ_API_KEY: ${{ inputs.use_groq && secrets.GROQ_API_KEY || '' }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
+        run: |
+          if [ '${{ inputs.use_groq }}' = 'true' ]; then
+            python scripts/v111_shadow.py --use-groq
+          else
+            python scripts/v111_shadow.py
+          fi
+      - name: Publish isolated shadow artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v11-1-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: shadow-output/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Summary
+        if: always()
+        run: |
+          echo '## V11.1 Shadow Test' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Download v11-1-shadow artifacts: morning.txt, evening.txt, source_availability.json, summary.json.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No production state, portfolio, Telegram or trading. Both templates use the same collection snapshot.' >> "$GITHUB_STEP_SUMMARY"

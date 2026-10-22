@@ -8,3 +8,6 @@ backtesting/user_data/
 .private-state/
 .env
 research/phase2/__pycache__/
+
+# Isolated live shadow output (public market data only)
+shadow-output/

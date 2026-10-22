@@ -1,0 +1,200 @@
+{
+  "branch": "feature/v11-1-review",
+  "baseline_commit": "b7a55df",
+  "tests": {
+    "offline_bot": 138,
+    "includes_new_shadow_tests": 11,
+    "phase3": 22,
+    "phase2": 11,
+    "all_passed": true
+  },
+  "live_local": {
+    "status": "CURRENT_MARKET_DATA",
+    "collected_at": "2026-10-22T10:07:31.827351+00:00",
+    "timezone": "Europe/Bratislava",
+    "symbols": [
+      "AAVE",
+      "TAO",
+      "FET",
+      "SOL",
+      "ONDO",
+      "RENDER"
+    ],
+    "current_market_data": {
+      "AAVE": true,
+      "TAO": true,
+      "FET": true,
+      "SOL": true,
+      "ONDO": true,
+      "RENDER": true
+    },
+    "complete": true,
+    "same_snapshot_templates": true,
+    "real_morning_evening_comparison": false,
+    "fundamentals_available": 6,
+    "fundamentals_total": 16,
+    "groq": {
+      "requested": false,
+      "available": false,
+      "calls": 0,
+      "fallback": true
+    },
+    "protected_files_unchanged": true,
+    "telegram_enabled": false,
+    "production_state_loaded": false,
+    "real_positions_loaded": false,
+    "state_written": false,
+    "orders_enabled": false,
+    "faults": {
+      "passed": true,
+      "injected": true,
+      "groq_unavailable_fallback": true,
+      "sources_unavailable_na": true,
+      "no_ai_authored_facts": true,
+      "deterministic_decisions_unchanged": true
+    },
+    "commit": null,
+    "branch": null
+  },
+  "feed_checks": [
+    {
+      "source": "fomc_calendar",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "fed",
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "bls",
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "bls_calendar",
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "bea",
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "ecb",
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "cftc",
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "sec",
+      "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "aave",
+      "url": "https://governance.aave.com/latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "ondo",
+      "url": "https://blog.ondo.finance/rss/",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "sol_agave",
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "tao_subtensor",
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "fet_fetchd",
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "render_rnp",
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "coindesk",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    },
+    {
+      "source": "cointelegraph",
+      "url": "https://cointelegraph.com/rss",
+      "status": "OK",
+      "events": 4,
+      "checked_at": "2026-10-22T10:07:31.827351+00:00"
+    }
+  ],
+  "checks": {
+    "workflow_yaml_valid": true,
+    "production_and_rules_unchanged": true,
+    "github_actions_run_executed": false,
+    "groq_live_request_executed": false,
+    "groq_missing_and_unavailable_tested": true,
+    "original_workflows_unchanged": true,
+    "telegram_messages_sent": false,
+    "trading_orders_sent": false
+  },
+  "github_actions_api": "Forbidden from this environment; no run or remote artifact claimed",
+  "artifacts_retention_days": 7,
+  "code_sha256": {
+    "scripts/v111_shadow.py": "a7678876fe89387c240f8676c9e5333938ed9632cba5c6e8653a2a1353ddb7c3",
+    "tests/test_shadow.py": "6b0f3002bfa19769f18cb6fb8ea9b9288dfdef9b93e3805696131d31f1ffb3c9",
+    ".github/workflows/v11-1-shadow-test.yml": "f73837f0f0e0ac7f01d494625d78f750c067464ed82b82b12735f9ea68b6a6d6"
+  }
+}
