@@ -1,0 +1,112 @@
+[
+  {
+    "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.ecb.europa.eu/rss/press.html",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.sec.gov/news/pressreleases.rss",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://governance.aave.com/latest.rss",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://github.com/aave/aip/commits/main.atom",
+    "status": 200,
+    "final_url": "https://github.com/aave/aip/commits/main.atom",
+    "content_type": "application/atom+xml; charset=utf-8",
+    "bytes": 17067,
+    "title": "Recent Commits to aip:main"
+  },
+  {
+    "url": "https://github.com/aave/aip/commits/master.atom",
+    "error": "HTTPError",
+    "http_status": 404,
+    "transport_reason": "Not Found"
+  },
+  {
+    "url": "https://blog.ondo.finance/rss/",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://ondo.finance/blog/rss.xml",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://github.com/ondoprotocol/ondo-finance/commits/main.atom",
+    "error": "HTTPError",
+    "http_status": 404,
+    "transport_reason": "Not Found"
+  },
+  {
+    "url": "https://github.com/ondoprotocol/ondo-finance/commits/master.atom",
+    "error": "HTTPError",
+    "http_status": 404,
+    "transport_reason": "Not Found"
+  },
+  {
+    "url": "https://nfs.faireconomy.media/ff_calendar_thisweek.xml",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://nfs.faireconomy.media/ff_calendar_nextweek.xml",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  },
+  {
+    "url": "https://www.clevelandfed.org/indicators-and-data/inflation-nowcasting",
+    "error": "URLError",
+    "http_status": null,
+    "transport_reason": "Tunnel connection failed: 403 Forbidden"
+  }
+]

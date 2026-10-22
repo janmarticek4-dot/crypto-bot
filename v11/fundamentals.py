@@ -30,6 +30,17 @@ SOURCES=[
     dict(id='coindesk',url='https://www.coindesk.com/arc/outboundfeeds/rss/',official=False,coverage=['regulation','hack','project']),
     dict(id='cointelegraph',url='https://cointelegraph.com/rss',official=False,coverage=['regulation','hack','project']),
 ]
+# Optional endpoint/feed alternatives. Fallback provenance never inherits a primary's trust.
+FALLBACKS={
+ 'fed':[dict(id='fed_monetary',url='https://www.federalreserve.gov/feeds/press_monetary.xml',official=True,coverage=['Fed'])],
+ 'bls_calendar':[dict(id='bls_year_calendar',url='https://www.bls.gov/schedule/news_release/current_year.ics',official=True,coverage=['CPI','employment'],format='ics')],
+ 'ecb':[dict(id='ecb_blog',url='https://www.ecb.europa.eu/rss/blog.html',official=True,coverage=['Fed'],kind='central_bank_blog_not_decision')],
+ 'sec':[dict(id='sec_legacy',url='https://www.sec.gov/news/pressreleases.rss',official=True,coverage=['regulation'])],
+ 'aave':[dict(id='aave_aip',url='https://github.com/aave/aip/commits/main.atom',official=False,publisher_path='/aave/aip/',coverage=['project'],symbol='AAVE',kind='governance_repository_change')],
+ 'ondo':[dict(id='ondo_secondary',url='https://www.coindesk.com/arc/outboundfeeds/rss/',official=False,coverage=['project','regulation'],symbol='ONDO',title_filter=r'\bondo\b',kind='secondary_project_report')],
+}
+FUNDAMENTAL_TITLE=r'govern|proposal|tokeniz|unlock|emission|upgrade|launch|partner|regulat|enforcement|lawsuit|hack|exploit|treasury|treasuries|adoption'
+
 PATTERNS={
  'Fed':r'\becb\b|monetary policy decisions|\bfomc\b|federal reserve|monetary policy|interest rate',
  'CPI':r'consumer price|producer price|\bppi\b|\bcpi\b',
@@ -94,14 +105,19 @@ def parse_feed(raw,source,now=None):
         url=canonical_url(url or '')
         published=timestamp(values.get('pubDate') or values.get('published') or values.get('updated'))
         title=values.get('title','')
+        if source.get('title_filter') and (not re.search(source['title_filter'],title,re.I) or not re.search(FUNDAMENTAL_TITLE,title,re.I)):continue
         if not url or not title or published is None or not now-timedelta(hours=72)<=published<=now+timedelta(minutes=5):continue
         # Official trust is attached only to links hosted on that publisher's domain.
         if source['official']:
             host=source.get('publisher_host') or urllib.parse.urlsplit(source['url']).hostname.removeprefix('www.')
             target=urllib.parse.urlsplit(url).hostname.removeprefix('www.')
             if target!=host and not target.endswith('.'+host):continue
-        if source.get('publisher_path') and not urllib.parse.urlsplit(url).path.startswith(source['publisher_path']):continue
-        item=event(title,url,published,source)
+        if source.get('publisher_path') and (urllib.parse.urlsplit(url).hostname!=urllib.parse.urlsplit(source['url']).hostname or not urllib.parse.urlsplit(url).path.startswith(source['publisher_path'])):continue
+        attributed=dict(source)
+        if not source.get('symbol') and re.search(FUNDAMENTAL_TITLE,title,re.I):
+            symbols=[symbol for symbol in ('AAVE','ONDO') if re.search(r'\b'+symbol+r'\b',title,re.I)]
+            if len(symbols)==1:attributed['symbol']=symbols[0]
+        item=event(title,url,published,attributed)
         if item:
             item['timestamp_kind']='published' if values.get('pubDate') or values.get('published') else 'updated'
             out.append(item)
@@ -120,21 +136,30 @@ def parse_calendar(raw,source,now=None):
         dt_key=next((k for k in values if k.startswith('DTSTART')),None)
         if not dt_key:continue
         date=values[dt_key]
+        date_only=None
         try:
-            if date.endswith('Z'):dt=datetime.strptime(date,'%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
+            if 'VALUE=DATE' in dt_key or re.fullmatch(r'\d{8}',date):
+                date_only=datetime.strptime(date,'%Y%m%d').date()
+                dt=None
+            elif date.endswith('Z'):dt=datetime.strptime(date,'%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
             elif 'TZID=' in dt_key:
                 tz=ZoneInfo(dt_key.split('TZID=',1)[1].split(';')[0])
                 dt=datetime.strptime(date,'%Y%m%dT%H%M%S').replace(tzinfo=tz).astimezone(timezone.utc)
-            else:continue  # Floating or date-only event has no proven precise time.
+            else:
+                # Preserve a source date but do not assume a timezone for floating times.
+                date_only=datetime.strptime(date[:8],'%Y%m%d').date();dt=None
         except (ValueError,KeyError):continue
-        if not now<=dt<=now+timedelta(days=30):continue
+        if dt is not None and not now<=dt<=now+timedelta(days=30):continue
+        if date_only is not None and not now.date()<=date_only<=(now+timedelta(days=30)).date():continue
         url=canonical_url(values.get('URL',source['url']))
         if not url:continue
         host=source.get('publisher_host') or urllib.parse.urlsplit(source['url']).hostname.removeprefix('www.')
         target=urllib.parse.urlsplit(url).hostname.removeprefix('www.')
         if source['official'] and target!=host and not target.endswith('.'+host):continue
         item=event(values.get('SUMMARY',''),url,None,source,dt,True)
-        if item:out.append(item)
+        if item:
+            if date_only is not None:item.update(event_date=date_only.isoformat(),date_precision='date_only',time_status='N/A – časové pásmo alebo presný čas neoverený')
+            out.append(item)
     return out
 
 
@@ -181,16 +206,28 @@ def collect(state,now=None,fetcher=fetch):
     if cached_at and 0<=(now-cached_at).total_seconds()<15*60:return old
     events=[];statuses=[]
     def one(source):
-        try:
-            raw=fetcher(source)
-            parser={'ics':parse_calendar,'fomc_html':parse_fomc}.get(source.get('format'),parse_feed)
-            items=parser(raw,source,now)
-            return items,dict(source=source['id'],url=source['url'],status='OK',events=len(items),checked_at=now.isoformat())
-        except Exception as exc:
-            # Exceptions can contain request data. Record only a type/code.
-            code=getattr(exc,'code',None)
-            if code is None and 'Tunnel connection failed: 403' in str(getattr(exc,'reason','')):code=403
-            return [],dict(source=source['id'],url=source['url'],status='N/A',error_type=type(exc).__name__,http_status=code,checked_at=now.isoformat())
+        attempts=[]
+        for candidate in [source,*FALLBACKS.get(source['id'],[])]:
+            try:
+                raw=fetcher(candidate)
+                fmt=candidate.get('format')
+                if fmt=='ics' and b'BEGIN:VCALENDAR' not in raw and b'BEGIN:VEVENT' not in raw:raise ValueError('Unrecognized calendar schema')
+                if fmt=='fomc_html' and not re.search(rb'20\d{2}\s+FOMC Meetings',raw):raise ValueError('Unrecognized FOMC calendar schema')
+                parser={'ics':parse_calendar,'fomc_html':parse_fomc}.get(fmt,parse_feed)
+                items=parser(raw,candidate,now)
+                attempts.append(dict(source=candidate['id'],url=candidate['url'],status='OK',events=len(items)))
+                for item in items:item['retrieved_at']=now.isoformat()
+                return items,dict(source=source['id'],url=candidate['url'],selected_source=candidate['id'],
+                    official=candidate['official'],symbol=source.get('symbol'),coverage=candidate.get('coverage',[]),kind=candidate.get('kind','news'),fallback=candidate is not source,
+                    status='OK',events=len(items),checked_at=now.isoformat(),attempts=attempts)
+            except Exception as exc:
+                code=getattr(exc,'code',None)
+                tunnel='Tunnel connection failed: 403' in str(getattr(exc,'reason',''))
+                attempts.append(dict(source=candidate['id'],url=candidate['url'],status='N/A',error_type=type(exc).__name__,
+                    http_status=403 if tunnel else code,error_layer='network_tunnel' if tunnel else 'http_origin_or_gateway' if code else 'transport_or_parse'))
+        last=attempts[-1]
+        return [],dict(source=source['id'],symbol=source.get('symbol'),coverage=source.get('coverage',[]),url=source['url'],status='N/A',error_type=last['error_type'],
+            http_status=last['http_status'],error_layer=last['error_layer'],attempts=attempts,checked_at=now.isoformat())
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
         for items,status in pool.map(one,SOURCES):events.extend(items);statuses.append(status)
     unique={}

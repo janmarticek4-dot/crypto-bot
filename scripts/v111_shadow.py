@@ -21,6 +21,8 @@ from v11.briefing import build
 from v11.reporting import chunks
 from v11.runtime import market_status
 from v11.strategy import decide
+from v11 import shadow_pair
+from v11.diagnostics import entry_diagnostic, risk_evidence
 
 SYMBOLS = ('AAVE', 'TAO', 'FET', 'SOL', 'ONDO', 'RENDER')
 BL = ZoneInfo('Europe/Bratislava')
@@ -123,10 +125,12 @@ def protected_hashes():
             ('main.py', 'bot_state.json', 'v11/portfolio.py', 'v11/strategy.py', '.github/workflows/run.yml')}
 
 
-def render(snapshot, fundamental, ai_api, now):
+def render(snapshot, fundamental, ai_api, now, phase='preview', morning=None):
     safety = market_status(snapshot, {})
     evals = {s: decide(snapshot['coins'][s], held=False, approved=False,
                       market_complete=snapshot['complete'], risk_normal=safety['state'] == 'NORMAL') for s in SYMBOLS}
+    for symbol,e in evals.items():
+        e['entry_diagnostic']=entry_diagnostic(snapshot['coins'][symbol],e,approved=False,market_complete=snapshot['complete'],risk_normal=safety['state']=='NORMAL')
     ai = explain(ai_api, {}, evals)
     if not any(ai.get('selections', {}).values()):
         ai = dict(available=False, selections={})
@@ -135,14 +139,21 @@ def render(snapshot, fundamental, ai_api, now):
             evals[symbol]['display_reasons'] = reasons
     reports = {}
     for name, hour in (('morning', '07:00'), ('evening', '20:00')):
+        if phase!='preview' and name!=phase:continue
         header = ('SHADOW TEST — ŽIVÉ DÁTA, ŽIADNE ODOSLANIE ANI OBCHODY\n'
                   'Čas zberu: ' + now.astimezone(BL).isoformat() + '\n'
                   'Ide o náhľad šablóny ' + hour + ', nie historickú analýzu v tomto čase.\n'
                   'Oba náhľady používajú rovnaký aktuálny snapshot. Reálne ranné/večerné porovnanie N/A.\n'
                   'Skutočné pozície a zostatky nie sú načítané; BEZ POZÍCIE znamená iba prázdny shadow kontext.\n')
-        # Independent empty state: no fabricated morning record for the evening report.
+        state={'shadow_mode':True}
+        if phase!='preview':
+            header=header.replace('Oba náhľady používajú rovnaký aktuálny snapshot. Reálne ranné/večerné porovnanie N/A.','Časovo oddelené SHADOW pozorovanie; referencia sa overuje kontrolným súčtom, časom a zdrojovými dátami.')
+            header=header.replace('Ide o náhľad šablóny '+hour+', nie historickú analýzu v tomto čase.','Skutočný čas zberu je uvedený vyššie; cieľový slot '+hour+'.')
+        if phase=='evening' and morning is not None:
+            old=morning['snapshot']
+            state=dict(shadow_mode=True,morning_plan_v11=dict(date=morning['date'],at=old['at'],coins={s:dict(d,action=morning['evaluations'].get(s,{}).get('action')) for s,d in old['coins'].items()}),snapshots_v11=old['coins'],global_previous_v11=old.get('global_data',{}))
         lines = build(copy.deepcopy(snapshot), copy.deepcopy(evals), {}, safety, fundamental,
-                      {}, 'SHADOW_' + now.astimezone(BL).date().isoformat() + '_' + hour, now.astimezone(BL))
+                      state, 'SHADOW_' + now.astimezone(BL).date().isoformat() + '_' + hour, now.astimezone(BL))
         reports[name] = header + '\n'.join(lines) + '\n'
     return reports, evals, ai
 
@@ -177,13 +188,26 @@ def outage_checks(snapshot, now):
                 deterministic_decisions_unchanged=True), reports
 
 
-def run(out, use_groq=False):
+def run(out, use_groq=False, phase='preview', checkpoint_path=None):
     out = Path(out).resolve()
     # Never allow artifacts to overwrite repository sources/state or an arbitrary private directory.
     allowed = (ROOT / 'shadow-output').resolve()
     if not out.is_relative_to(allowed):
         raise ValueError('Output must be inside shadow-output/')
     out.mkdir(parents=True, exist_ok=True)
+    if phase not in ('preview','morning','evening'):raise ValueError('Unknown shadow phase')
+    checkpoint_path=Path(checkpoint_path).resolve() if checkpoint_path else out/'checkpoints'/'morning.json'
+    if not checkpoint_path.is_relative_to(allowed):raise ValueError('Checkpoint must remain in shadow-output')
+    morning=None
+    if phase!='preview':
+        try:
+            shadow_pair.slot(datetime.now(timezone.utc),phase)
+            if phase=='evening':
+                if checkpoint_path.stat().st_size>20_000_000:raise ValueError('Checkpoint too large')
+                morning=json.loads(checkpoint_path.read_text())
+        except (ValueError,OSError) as exc:
+            write_json(out/'phase_validation.json',dict(phase=phase,status='REFUSED',reason=str(exc)))
+            return 2
     before = protected_hashes()
     api = ShadowAPI(use_groq)
     names = ('BOT_DISABLE_TELEGRAM', 'BOT_DATA_MODE', 'V11_RULES_VALIDATED')
@@ -215,12 +239,36 @@ def run(out, use_groq=False):
                 source_requests.append(item)
         fund = fundamentals.collect({}, now, fetcher=fetch)
         fund['macro_context'] = macro_context.collect({}, now, fetcher=fetch)
-        reports, evaluations, ai = render(snap, fund, api, now)
+        reports, evaluations, ai = render(snap, fund, api, now,phase=phase,morning=morning)
+        temporal=None
+        if phase=='morning':
+            try:
+                saved=shadow_pair.checkpoint(snap,evaluations,now)
+                saved['report']=reports['morning'];saved['sha256']=shadow_pair.digest({k:v for k,v in saved.items() if k!='sha256'})
+                shadow_pair.save_once(checkpoint_path,saved)
+            except ValueError as exc:
+                write_json(out/'phase_validation.json',dict(phase=phase,status='REFUSED',reason=str(exc)))
+                return 2
+        elif phase=='evening':
+            try:
+                temporal=shadow_pair.compare(morning,snap,evaluations,now)
+            except ValueError as exc:
+                write_json(out/'phase_validation.json',dict(phase=phase,status='REFUSED',reason=str(exc)))
+                return 2
+            write_json(out/'comparison.json',temporal)
+            (out/'comparison.txt').write_text(shadow_pair.report(temporal)+'\n')
+            if morning.get('report'):(out/'morning_reference.txt').write_text(morning['report'])
+        write_json(out/'entry_diagnostics.json',{s:entry_diagnostic(snap['coins'][s],e,approved=False,market_complete=snap['complete'],risk_normal=market_status(snap,{})['state']=='NORMAL') for s,e in evaluations.items()})
+        write_json(out/'risk_evidence.json',risk_evidence(snap,market_status(snap,{})))
         for name, report in reports.items():
             (out / (name + '.txt')).write_text(report)
             write_json(out / (name + '_parts.json'), chunks(report))
         write_json(out / 'market_snapshot.json', snap)
         write_json(out / 'fundamentals.json', fund)
+        write_json(out/'calendar_coverage.json',dict(scheduled_events=[e for e in fund['events'] if e.get('scheduled')],
+            horizons_hours=[24,168,336],date_only_time='N/A; never assume midnight or decision time',
+            source_statuses=[s for s in fund['sources'] if s['source'] in ('fomc_calendar','bls_calendar','ecb')],
+            completeness='N/A; zero events is not proof of no upcoming releases'))
         write_json(out / 'source_availability.json', dict(feed_parsing=fund['sources'], fetches=source_requests,
                                                        market_and_ai=api.requests))
         faults, fault_reports = outage_checks(snap, now)
@@ -232,7 +280,7 @@ def run(out, use_groq=False):
         ok = all(usable.values())
         summary = dict(status='CURRENT_MARKET_DATA' if ok else 'INCOMPLETE_MARKET_DATA',
             collected_at=now.isoformat(), timezone='Europe/Bratislava', symbols=list(SYMBOLS), current_market_data=usable,
-            complete=snap['complete'], same_snapshot_templates=True, real_morning_evening_comparison=False,
+            complete=snap['complete'], phase=phase, same_snapshot_templates=phase=='preview', real_morning_evening_comparison=temporal is not None,
             fundamentals_available=sum(s['status'] == 'OK' for s in fund['sources']), fundamentals_total=len(fund['sources']),
             groq=dict(requested=use_groq, available=ai['available'], calls=api.groq_attempts,
                       fallback=not ai['available']), protected_files_unchanged=before == protected_hashes(),
@@ -240,7 +288,7 @@ def run(out, use_groq=False):
             state_written=False, orders_enabled=False, faults=faults,
             commit=os.getenv('GITHUB_SHA'), branch=os.getenv('GITHUB_REF_NAME'))
         write_json(out / 'summary.json', summary)
-        (out / 'README.txt').write_text('V11.1 Shadow Test\nLive market snapshot, preview templates only.\n'
+        (out / 'README.txt').write_text('V11.1 Shadow Test: '+phase+'\nLive market snapshot; temporal verification status in summary.json.\n'
             'morning.txt / evening.txt: actual collected data.\n'
             '*_injected_outage.txt: deliberate source/Groq failures, NOT actual source status.\n'
             'source_availability.json: fetch/parse results; HTTP success does not prove complete/current fundamentals.\n'
@@ -262,9 +310,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', default='shadow-output')
     parser.add_argument('--use-groq', action='store_true')
+    parser.add_argument('--phase',choices=('preview','morning','evening'),default='preview')
+    parser.add_argument('--checkpoint',default=None)
     args = parser.parse_args()
     try:
-        raise SystemExit(run(args.output, args.use_groq))
+        raise SystemExit(run(args.output, args.use_groq,args.phase,args.checkpoint))
     except Exception as exc:
         # Never print request headers, keys, private state or provider response bodies.
         print('Shadow runner failed: ' + type(exc).__name__, file=sys.stderr)

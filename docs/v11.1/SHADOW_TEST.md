@@ -1,5 +1,7 @@
 # V11.1 Shadow Test
 
+**Update22.10:** See [SHADOW_FOLLOWUP.md](SHADOW_FOLLOWUP.md) for repaired source attribution, explanations and actual separate morning/evening phases. The single-snapshot instructions below describe `phase=preview` only.
+
 Manual-only workflow: `.github/workflows/v11-1-shadow-test.yml`. Intended branch: **feature/v11-1-review**, job guard refuses any other branch. Production `main`, existing workflows, analytical decision rules and tracked positions are unchanged.
 
 ## What runs

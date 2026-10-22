@@ -1,0 +1,723 @@
+{
+  "baseline": "993e4f6",
+  "branch": "feature/v11-1-review",
+  "tests": {
+    "offline_bot": {
+      "count": 156,
+      "passed": true
+    },
+    "phase3": {
+      "count": 22,
+      "passed": true
+    },
+    "phase2": {
+      "count": 11,
+      "passed": true
+    }
+  },
+  "live": {
+    "status": "CURRENT_MARKET_DATA",
+    "collected_at": "2026-10-22T10:41:32.119097+00:00",
+    "timezone": "Europe/Bratislava",
+    "symbols": [
+      "AAVE",
+      "TAO",
+      "FET",
+      "SOL",
+      "ONDO",
+      "RENDER"
+    ],
+    "current_market_data": {
+      "AAVE": true,
+      "TAO": true,
+      "FET": true,
+      "SOL": true,
+      "ONDO": true,
+      "RENDER": true
+    },
+    "complete": true,
+    "phase": "preview",
+    "same_snapshot_templates": true,
+    "real_morning_evening_comparison": false,
+    "fundamentals_available": 8,
+    "fundamentals_total": 16,
+    "groq": {
+      "requested": false,
+      "available": false,
+      "calls": 0,
+      "fallback": true
+    },
+    "protected_files_unchanged": true,
+    "telegram_enabled": false,
+    "production_state_loaded": false,
+    "real_positions_loaded": false,
+    "state_written": false,
+    "orders_enabled": false,
+    "faults": {
+      "passed": true,
+      "injected": true,
+      "groq_unavailable_fallback": true,
+      "sources_unavailable_na": true,
+      "no_ai_authored_facts": true,
+      "deterministic_decisions_unchanged": true
+    },
+    "commit": null,
+    "branch": null
+  },
+  "source_results": [
+    {
+      "source": "fomc_calendar",
+      "symbol": null,
+      "coverage": [
+        "Fed"
+      ],
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "fomc_calendar",
+          "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "fed",
+      "symbol": null,
+      "coverage": [
+        "Fed"
+      ],
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "fed",
+          "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "fed_monetary",
+          "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "bls",
+      "symbol": null,
+      "coverage": [
+        "CPI",
+        "employment"
+      ],
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bls",
+          "url": "https://www.bls.gov/feed/bls_latest.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "bls_calendar",
+      "symbol": null,
+      "coverage": [
+        "CPI",
+        "employment"
+      ],
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bls_calendar",
+          "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "bls_year_calendar",
+          "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "bea",
+      "symbol": null,
+      "coverage": [
+        "PCE"
+      ],
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bea",
+          "url": "https://apps.bea.gov/rss/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "ecb",
+      "symbol": null,
+      "coverage": [
+        "Fed",
+        "regulation"
+      ],
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "ecb",
+          "url": "https://www.ecb.europa.eu/rss/press.html",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "ecb_blog",
+          "url": "https://www.ecb.europa.eu/rss/blog.html",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "cftc",
+      "symbol": null,
+      "coverage": [
+        "regulation"
+      ],
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "cftc",
+          "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "sec",
+      "symbol": null,
+      "coverage": [
+        "regulation"
+      ],
+      "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "sec",
+          "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "sec_legacy",
+          "url": "https://www.sec.gov/news/pressreleases.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-22T10:41:32.119097+00:00"
+    },
+    {
+      "source": "aave",
+      "url": "https://github.com/aave/aip/commits/main.atom",
+      "selected_source": "aave_aip",
+      "official": false,
+      "symbol": "AAVE",
+      "coverage": [
+        "project"
+      ],
+      "kind": "governance_repository_change",
+      "fallback": true,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "aave",
+          "url": "https://governance.aave.com/latest.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "aave_aip",
+          "url": "https://github.com/aave/aip/commits/main.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "ondo",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "selected_source": "ondo_secondary",
+      "official": false,
+      "symbol": "ONDO",
+      "coverage": [
+        "project",
+        "regulation"
+      ],
+      "kind": "secondary_project_report",
+      "fallback": true,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "ondo",
+          "url": "https://blog.ondo.finance/rss/",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "ondo_secondary",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "sol_agave",
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "selected_source": "sol_agave",
+      "official": true,
+      "symbol": "SOL",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "sol_agave",
+          "url": "https://github.com/anza-xyz/agave/releases.atom",
+          "status": "OK",
+          "events": 1
+        }
+      ]
+    },
+    {
+      "source": "tao_subtensor",
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "selected_source": "tao_subtensor",
+      "official": true,
+      "symbol": "TAO",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "tao_subtensor",
+          "url": "https://github.com/opentensor/subtensor/releases.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "fet_fetchd",
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "selected_source": "fet_fetchd",
+      "official": true,
+      "symbol": "FET",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "fet_fetchd",
+          "url": "https://github.com/fetchai/fetchd/releases.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "render_rnp",
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "selected_source": "render_rnp",
+      "official": false,
+      "symbol": "RENDER",
+      "coverage": [
+        "project"
+      ],
+      "kind": "governance_repository_change",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "render_rnp",
+          "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "coindesk",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "selected_source": "coindesk",
+      "official": false,
+      "symbol": null,
+      "coverage": [
+        "regulation",
+        "hack",
+        "project"
+      ],
+      "kind": "news",
+      "fallback": false,
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "coindesk",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "status": "OK",
+          "events": 1
+        }
+      ]
+    },
+    {
+      "source": "cointelegraph",
+      "url": "https://cointelegraph.com/rss",
+      "selected_source": "cointelegraph",
+      "official": false,
+      "symbol": null,
+      "coverage": [
+        "regulation",
+        "hack",
+        "project"
+      ],
+      "kind": "news",
+      "fallback": false,
+      "status": "OK",
+      "events": 3,
+      "checked_at": "2026-10-22T10:41:32.119097+00:00",
+      "attempts": [
+        {
+          "source": "cointelegraph",
+          "url": "https://cointelegraph.com/rss",
+          "status": "OK",
+          "events": 3
+        }
+      ]
+    }
+  ],
+  "actual_upcoming_calendar_verified": false,
+  "calendar_fixture_tests": "24h/7d/14d bounds,exact14d,US/EU DST mismatch,source date-only time N/A",
+  "real_temporal_pair_observed": false,
+  "synthetic_temporal_pair_verified": true,
+  "real_wrong_time_attempt": {
+    "phase": "morning",
+    "status": "REFUSED",
+    "reason": "Outside real morning observation window (Bratislava)"
+  },
+  "protected_files_unchanged": [
+    "main.py",
+    "bot_state.json",
+    "v11/strategy.py",
+    "v11/runtime.py",
+    "v11/portfolio.py",
+    ".github/workflows/run.yml"
+  ],
+  "original_1207_audit": {
+    "note": "Reconstructed explanations of actual12:07 snapshot using unchanged decision rules; NOT new observations",
+    "at": 1792663651.8273232,
+    "risk": {
+      "technical_state": "NORMAL",
+      "price_context": "výrazné cenové oslabenie",
+      "cap_change_24h": -5.116676834953658,
+      "btc_change_24h": -1.613,
+      "eth_change_24h": -1.704,
+      "btc_support_broken": false,
+      "eth_support_broken": false,
+      "alt_support_breaks": 0,
+      "alt_drops_over5": 0,
+      "rule": "WARNING vyžaduje súčasný support breakdown BTC aj ETH a najmenej4 zo6 altcoinov; neúplné dáta UNKNOWN",
+      "interpretation": "NORMAL znamená iba nesplnený kombinovaný technický breakdown; nie nízke celkové riziko ani potvrdenie absencie incidentov.",
+      "crash_probability": null,
+      "alerts_generated": false
+    },
+    "coins": {
+      "AAVE": {
+        "technical": {
+          "available": true,
+          "score": 3,
+          "checks": {
+            "trend": false,
+            "broad": true,
+            "momentum": true,
+            "volume": false,
+            "structure": false,
+            "strength": true
+          },
+          "failed": [
+            "trend",
+            "volume",
+            "structure"
+          ],
+          "quality": "čiastočný technický podklad"
+        },
+        "entry_blockers": [
+          "dostupnosť na eToro neoverená",
+          "spread neznámy",
+          "V11 pravidlá nie sú schválené na aktiváciu",
+          "nedostatočná nákladová výhoda alebo čisté R:R"
+        ],
+        "actual_action": "WAIT",
+        "ownership": "not_held_or_shadow_unknown"
+      },
+      "TAO": {
+        "technical": {
+          "available": true,
+          "score": 2,
+          "checks": {
+            "trend": false,
+            "broad": true,
+            "momentum": false,
+            "volume": true,
+            "structure": false,
+            "strength": false
+          },
+          "failed": [
+            "trend",
+            "momentum",
+            "structure",
+            "strength"
+          ],
+          "quality": "slabý technický podklad"
+        },
+        "entry_blockers": [
+          "dostupnosť na eToro neoverená",
+          "spread neznámy",
+          "V11 pravidlá nie sú schválené na aktiváciu",
+          "nedostatočná nákladová výhoda alebo čisté R:R"
+        ],
+        "actual_action": "WAIT",
+        "ownership": "not_held_or_shadow_unknown"
+      },
+      "FET": {
+        "technical": {
+          "available": true,
+          "score": 2,
+          "checks": {
+            "trend": false,
+            "broad": false,
+            "momentum": true,
+            "volume": false,
+            "structure": false,
+            "strength": true
+          },
+          "failed": [
+            "trend",
+            "broad",
+            "volume",
+            "structure"
+          ],
+          "quality": "slabý technický podklad"
+        },
+        "entry_blockers": [
+          "dostupnosť na eToro neoverená",
+          "spread neznámy",
+          "V11 pravidlá nie sú schválené na aktiváciu",
+          "nedostatočná nákladová výhoda alebo čisté R:R"
+        ],
+        "actual_action": "WAIT",
+        "ownership": "not_held_or_shadow_unknown"
+      },
+      "SOL": {
+        "technical": {
+          "available": true,
+          "score": 3,
+          "checks": {
+            "trend": false,
+            "broad": true,
+            "momentum": false,
+            "volume": true,
+            "structure": false,
+            "strength": true
+          },
+          "failed": [
+            "trend",
+            "momentum",
+            "structure"
+          ],
+          "quality": "čiastočný technický podklad"
+        },
+        "entry_blockers": [
+          "dostupnosť na eToro neoverená",
+          "spread neznámy",
+          "V11 pravidlá nie sú schválené na aktiváciu",
+          "nedostatočná nákladová výhoda alebo čisté R:R"
+        ],
+        "actual_action": "WAIT",
+        "ownership": "not_held_or_shadow_unknown"
+      },
+      "ONDO": {
+        "technical": {
+          "available": true,
+          "score": 3,
+          "checks": {
+            "trend": false,
+            "broad": true,
+            "momentum": true,
+            "volume": false,
+            "structure": false,
+            "strength": true
+          },
+          "failed": [
+            "trend",
+            "volume",
+            "structure"
+          ],
+          "quality": "čiastočný technický podklad"
+        },
+        "entry_blockers": [
+          "dostupnosť na eToro neoverená",
+          "spread neznámy",
+          "V11 pravidlá nie sú schválené na aktiváciu",
+          "nedostatočná nákladová výhoda alebo čisté R:R"
+        ],
+        "actual_action": "WAIT",
+        "ownership": "not_held_or_shadow_unknown"
+      },
+      "RENDER": {
+        "technical": {
+          "available": true,
+          "score": 3,
+          "checks": {
+            "trend": false,
+            "broad": true,
+            "momentum": true,
+            "volume": false,
+            "structure": false,
+            "strength": true
+          },
+          "failed": [
+            "trend",
+            "volume",
+            "structure"
+          ],
+          "quality": "čiastočný technický podklad"
+        },
+        "entry_blockers": [
+          "dostupnosť na eToro neoverená",
+          "spread neznámy",
+          "V11 pravidlá nie sú schválené na aktiváciu",
+          "nedostatočná nákladová výhoda alebo čisté R:R"
+        ],
+        "actual_action": "WAIT",
+        "ownership": "not_held_or_shadow_unknown"
+      }
+    }
+  },
+  "pending": [
+    "Real same-day morning07–08:30/evening20–21:30 observation on an unchanged commit",
+    "Verify official calendars and issuer sources from a GitHub-hosted runner with source access",
+    "No verified economic impact,consensus,full unlock/revenue/adoption coverage",
+    "No live Groq call; unavailable/invalid selection cases tested"
+  ],
+  "safety": {
+    "telegram_sent": false,
+    "real_portfolio_loaded": false,
+    "orders": false,
+    "main_changed": false,
+    "AdaptiveHoldV2_activated": false
+  },
+  "sha256": {
+    "v11/fundamentals.py": "d568d6c11b37b90857c8f0a9080cd807f01bdc577c4df53784dae3df579449a4",
+    "v11/briefing.py": "4db4ef831b978abc8452b1e158b8c7668d258294ceb435a1f1b7c410b5d7264c",
+    "v11/diagnostics.py": "27e8590d3daff249b99efff89417ea4abdb8a0f46154a434d112bde141033242",
+    "v11/shadow_pair.py": "31c0c73cbc35dc300a11e5a0120027c56c553be79b2b2ad11b2e2bc9ab63807f",
+    "scripts/v111_shadow.py": "341ac68725b720e2084b589775e03e196b60c1cdfa0bee47b31c8993d1961c54",
+    "tests/test_shadow_pair.py": "b19093e08f4f93fd2de19ef594f36caa4400978def62c378bc7acd4c7fc2e1de",
+    ".github/workflows/v11-1-shadow-test.yml": "7253a1c75bb3662aad5c5c5f2ea5067fb39558085b2c00c1fa8321cc28b24963"
+  }
+}
