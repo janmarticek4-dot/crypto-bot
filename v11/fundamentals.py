@@ -32,6 +32,7 @@ SOURCES=[
 ]
 # Optional endpoint/feed alternatives. Fallback provenance never inherits a primary's trust.
 FALLBACKS={
+ 'bea':[dict(id='bea_www',url='https://www.bea.gov/rss/rss.xml',official=True,publisher_host='bea.gov',coverage=['PCE'])],
  'fed':[dict(id='fed_monetary',url='https://www.federalreserve.gov/feeds/press_monetary.xml',official=True,coverage=['Fed'])],
  'bls_calendar':[dict(id='bls_year_calendar',url='https://www.bls.gov/schedule/news_release/current_year.ics',official=True,coverage=['CPI','employment'],format='ics')],
  'ecb':[dict(id='ecb_blog',url='https://www.ecb.europa.eu/rss/blog.html',official=True,coverage=['Fed'],kind='central_bank_blog_not_decision')],
@@ -92,6 +93,8 @@ def event(title,url,published,source,event_at=None,scheduled=False):
 def parse_feed(raw,source,now=None):
     now=now or datetime.now(timezone.utc)
     root=ET.fromstring(raw)
+    if root.tag.rsplit('}',1)[-1] not in ('rss','feed'):
+        raise ValueError('Expected RSS/Atom, not an HTML challenge or error document')
     out=[]
     for node in root.iter():
         if node.tag.rsplit('}',1)[-1] not in ('item','entry'):continue

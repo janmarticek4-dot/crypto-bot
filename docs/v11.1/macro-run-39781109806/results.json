@@ -1,0 +1,231 @@
+{
+  "context": {
+    "started_at": "2026-10-22T12:46:28.460028+00:00",
+    "bratislava_at": "2026-10-22T14:46:28.460028+02:00",
+    "runner_environment": "github-hosted",
+    "commit": "f6c40dd6684672d39b1a50fe1c117740771e4009",
+    "branch": "feature/v11-1-review",
+    "proxy_environment_present": false,
+    "tls_verification": true,
+    "no_bot_imports": true,
+    "no_secrets_required": true,
+    "no_orders": true
+  },
+  "counts": {
+    "HTTP_ERROR": 2,
+    "NETWORK_ERROR": 1,
+    "SUCCESS": 6
+  },
+  "sources": [
+    {
+      "provider": "Fed",
+      "id": "fed_rss",
+      "format": "rss",
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "checked_at": "2026-10-22T12:46:28.460691+00:00",
+      "http_status": 200,
+      "final_url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "content_type": "text/xml",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:28 GMT",
+        "Server": "cloudflare"
+      },
+      "bytes": 14813,
+      "body_sha256": "529e889a916423a3979c1bebdd94c2b8d402889700d8c85cc4d125b7f538d327",
+      "validation": {
+        "format": "RSS",
+        "records": 20,
+        "latest_published_or_updated": "2026-10-16T15:00:00+00:00",
+        "note": "Publication/update time is not event time. Zero entries does not prove no events; success is not coverage/freshness certification."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.086
+    },
+    {
+      "provider": "Fed",
+      "id": "fomc_calendar",
+      "format": "fomc_html",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "checked_at": "2026-10-22T12:46:28.546345+00:00",
+      "http_status": 200,
+      "final_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "content_type": "text/html",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:28 GMT",
+        "Server": "cloudflare"
+      },
+      "bytes": 167856,
+      "body_sha256": "9ea948fd30ce9eb5e4cee3d35705902e1b663618833d3ea450c5ac60bd115545",
+      "validation": {
+        "format": "FOMC HTML",
+        "years": [
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025",
+          "2026",
+          "2027"
+        ],
+        "records": 57,
+        "note": "Meeting dates do not prove a decision time; no assumed Fed hour."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.185
+    },
+    {
+      "provider": "BLS",
+      "id": "bls_rss",
+      "format": "rss",
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "checked_at": "2026-10-22T12:46:28.731531+00:00",
+      "http_status": 200,
+      "final_url": "https://www.bls.gov/feed/bls_latest.rss",
+      "content_type": "application/rss+xml",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:28 GMT"
+      },
+      "bytes": 5330,
+      "body_sha256": "271c7f60834e086ad943d30718933dd1af4cc86d0d2a45684cdf3b926c1c5d77",
+      "validation": {
+        "format": "RSS",
+        "records": 1,
+        "latest_published_or_updated": "2026-10-20T14:02:35+00:00",
+        "note": "Publication/update time is not event time. Zero entries does not prove no events; success is not coverage/freshness certification."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.174
+    },
+    {
+      "provider": "BLS",
+      "id": "bls_calendar",
+      "format": "ics",
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "checked_at": "2026-10-22T12:46:28.905417+00:00",
+      "http_status": 200,
+      "final_url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "content_type": "text/calendar",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:28 GMT"
+      },
+      "bytes": 80672,
+      "body_sha256": "92a350111ace106deaab5584e4084366bd367b594a0d0bad116008d82d63e501",
+      "validation": {
+        "format": "iCalendar",
+        "records": 313,
+        "structurally_valid_records": 313,
+        "note": "Format/reachability only; dates, timezone precision and future coverage require calendar-level validation."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.057
+    },
+    {
+      "provider": "BEA",
+      "id": "bea_rss",
+      "format": "rss",
+      "publisher": "bea.gov",
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "checked_at": "2026-10-22T12:46:28.961954+00:00",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:29 GMT"
+      },
+      "status": "HTTP_ERROR",
+      "layer": "http_response",
+      "http_status": 406,
+      "origin_http_status": null,
+      "origin_attribution": "HTTPS endpoint or CDN/gateway responded; application origin not independently proven",
+      "error": "HTTP non-success response; no response body/credentials exported",
+      "retry_after": null,
+      "error_type": "HTTPError",
+      "seconds": 0.337
+    },
+    {
+      "provider": "ECB",
+      "id": "ecb_rss",
+      "format": "rss",
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "checked_at": "2026-10-22T12:46:29.299047+00:00",
+      "http_status": 200,
+      "final_url": "https://www.ecb.europa.eu/rss/press.html",
+      "content_type": "application/rss+xml",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:30 GMT",
+        "Server": "myracloud"
+      },
+      "bytes": 5765,
+      "body_sha256": "14b78fe5e1ade5a2513ab028b8944144bb8ee9f592cba0a71cec007e3d31e44d",
+      "validation": {
+        "format": "RSS",
+        "records": 15,
+        "latest_published_or_updated": "2026-10-21T08:00:00+00:00",
+        "note": "Publication/update time is not event time. Zero entries does not prove no events; success is not coverage/freshness certification."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.887
+    },
+    {
+      "provider": "SEC",
+      "id": "sec_rss",
+      "format": "rss",
+      "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+      "checked_at": "2026-10-22T12:46:30.186175+00:00",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:30 GMT",
+        "Server": "nginx"
+      },
+      "status": "HTTP_ERROR",
+      "layer": "http_response",
+      "http_status": 404,
+      "origin_http_status": null,
+      "origin_attribution": "HTTPS endpoint or CDN/gateway responded; application origin not independently proven",
+      "error": "HTTP non-success response; no response body/credentials exported",
+      "retry_after": null,
+      "error_type": "HTTPError",
+      "seconds": 0.537
+    },
+    {
+      "provider": "CFTC",
+      "id": "cftc_rss",
+      "format": "rss",
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "checked_at": "2026-10-22T12:46:30.723131+00:00",
+      "http_status": 200,
+      "final_url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "content_type": "application/rss+xml; charset=utf-8",
+      "response_headers": {
+        "Date": "Thu, 22 Oct 2026 12:46:30 GMT",
+        "Server": "cloudflare",
+        "Via": "varnish"
+      },
+      "bytes": 4781,
+      "body_sha256": "eb9cfc1965e233f6c8297954a5876df93dce22fe17b2caa950a3ddd892c72a0f",
+      "validation": {
+        "format": "RSS",
+        "records": 10,
+        "latest_published_or_updated": "2026-10-20T18:00:00+00:00",
+        "note": "Publication/update time is not event time. Zero entries does not prove no events; success is not coverage/freshness certification."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.09
+    },
+    {
+      "provider": "Treasury",
+      "id": "treasury_yields",
+      "format": "treasury_xml",
+      "url": "https://home.treasury.gov/resource-center-data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
+      "checked_at": "2026-10-22T12:46:30.812730+00:00",
+      "status": "NETWORK_ERROR",
+      "layer": "timeout",
+      "origin_http_status": null,
+      "error": "Connection/read timeout",
+      "error_type": "TimeoutError",
+      "seconds": 12.058
+    }
+  ]
+}

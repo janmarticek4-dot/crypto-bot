@@ -33,6 +33,8 @@ def sources(year):
         dict(provider='BLS', id='bls_rss', format='rss', url='https://www.bls.gov/feed/bls_latest.rss'),
         dict(provider='BLS', id='bls_calendar', format='ics', url='https://www.bls.gov/schedule/news_release/bls.ics'),
         dict(provider='BEA', id='bea_rss', format='rss', publisher='bea.gov', url='https://apps.bea.gov/rss/rss.xml'),
+        dict(provider='BEA', id='bea_rss_alternative', format='rss', publisher='bea.gov', url='https://www.bea.gov/rss/rss.xml'),
+        dict(provider='SEC', id='sec_legacy_rss', format='rss', url='https://www.sec.gov/news/pressreleases.rss'),
         dict(provider='ECB', id='ecb_rss', format='rss', url='https://www.ecb.europa.eu/rss/press.html'),
         dict(provider='SEC', id='sec_rss', format='rss', url='https://www.sec.gov/newsroom/press-releases/rss.xml'),
         dict(provider='CFTC', id='cftc_rss', format='rss', url='https://www.cftc.gov/RSS/RSSGP/rssgp.xml'),
@@ -77,7 +79,7 @@ def fetch(source):
         'User-Agent': 'CryptoAIBotMacroDiagnostics/1.0 (public source availability check)',
         'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/calendar, text/html;q=0.5',
     })
-    with opener.open(request, timeout=TIMEOUT) as response:
+    with opener.open(request, timeout=source.get('timeout', TIMEOUT)) as response:
         if not redirect_allowed(source, response.geturl()):
             raise UnsafeRedirect('Unexpected final publisher')
         raw = response.read(MAX_BYTES + 1)
@@ -214,6 +216,19 @@ def probe(source, fetcher=fetch, now=None):
     return row
 
 
+def probe_with_retry(source, fetcher=fetch):
+    """One retry only for timeout/HTTP5xx, never for policy blocks or 4xx."""
+    first = probe(source, fetcher)
+    retry = first.get('layer') == 'timeout' or (
+        first['status'] == 'HTTP_ERROR' and first.get('http_status', 0) in (500, 502, 503, 504)
+        and not first.get('retry_after'))
+    if not retry:
+        return first
+    second = probe(dict(source, timeout=25), fetcher)
+    second['attempts'] = [first, dict(second)]
+    return second
+
+
 def report(rows, context):
     lines = ['# Macro Sources Diagnostics', '', f"UTC: {context['started_at']}; prostredie: {context['runner_environment']}.",
         '', '| Zdroj | Endpoint | Výsledok | Vrstva | HTTP/proxy | Záznamy |', '|---|---|---|---|---|---:|']
@@ -244,8 +259,8 @@ def run(output):
         commit=os.getenv('GITHUB_SHA'), branch=os.getenv('GITHUB_REF_NAME'),
         proxy_environment_present=bool(urllib.request.getproxies()), tls_verification=True,
         no_bot_imports=True, no_secrets_required=True, no_orders=True)
-    # Sequential, one bounded GET/endpoint, no retries or quota pressure.
-    rows = [probe(source) for source in sources(now.year)]
+    # Sequential bounded diagnostics; one retry for transient failures only.
+    rows = [probe_with_retry(source) for source in sources(now.year)]
     counts = {status: sum(r['status'] == status for r in rows) for status in sorted({r['status'] for r in rows})}
     payload = dict(context=context, counts=counts, sources=rows)
     (output / 'results.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False) + '\n')

@@ -24,7 +24,9 @@ jobs:
       - name: Check standalone script syntax (no bot/dependency install)
         run: python -m py_compile scripts/macro_source_diagnostics.py
       - name: Public HTTPS and data-format diagnostics
-        run: python scripts/macro_source_diagnostics.py
+        run: |
+          python scripts/macro_source_diagnostics.py
+          python scripts/macro_calendar_diagnostics.py
       - name: Upload diagnostic report
         if: always()
         uses: actions/upload-artifact@v4

@@ -120,12 +120,12 @@ class MacroDiagnosticsTests(unittest.TestCase):
 
     def test_complete_report_writes_results_without_source_success_requirement(self):
         out=m.ROOT/'macro-diagnostics-output'/'unit-test'
-        def blocked(source):
+        def blocked(source, fetcher=None):
             return dict(source,status='NETWORK_BLOCKED',layer='proxy_connect',proxy_status=403)
         try:
             with patch.object(m,'probe',side_effect=blocked):self.assertEqual(m.run(out),0)
             data=json.loads((out/'results.json').read_text())
-            self.assertEqual(data['counts'],{'NETWORK_BLOCKED':9})
+            self.assertEqual(data['counts'],{'NETWORK_BLOCKED':len(m.sources(2026))})
             self.assertTrue((out/'REPORT.md').exists())
             self.assertNotIn('HTTPS_PROXY',json.dumps(data))
         finally:
