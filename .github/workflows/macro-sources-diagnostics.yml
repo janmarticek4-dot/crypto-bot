@@ -1,0 +1,43 @@
+name: Macro Sources Diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: macro-sources-diagnostics-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  diagnostics:
+    # Original repo: research branch only. A clean diagnostics-only research repo
+    # can use its own default branch, without changing original main at all.
+    if: github.repository != 'janmarticek4-dot/crypto-bot' || github.ref == 'refs/heads/feature/v11-1-review'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check standalone script syntax (no bot/dependency install)
+        run: python -m py_compile scripts/macro_source_diagnostics.py
+      - name: Public HTTPS and data-format diagnostics
+        run: python scripts/macro_source_diagnostics.py
+      - name: Upload diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macro-sources-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: macro-diagnostics-output/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Publish run summary
+        if: always()
+        run: |
+          if [ -f macro-diagnostics-output/REPORT.md ]; then
+            cat macro-diagnostics-output/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Diagnostics did not produce a report; inspect job logs.' >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -11,3 +11,6 @@ research/phase2/__pycache__/
 
 # Isolated live shadow output (public market data only)
 shadow-output/
+
+# Standalone macro-network diagnostic artifacts
+macro-diagnostics-output/
