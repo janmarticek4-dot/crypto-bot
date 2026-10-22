@@ -1,65 +1,45 @@
-name: Crypto AI Bot V11.1
+# Research-branch override of the already-registered run.yml path.
+# Original main remains untouched; this branch NEVER runs production or Telegram.
+name: Macro Sources Diagnostics — development branch entrypoint
 on:
-  schedule:
-    - cron: '7,22,37,52 * * * *'
-    - cron: '0 5,6,13,14,18,19 * * *'
   workflow_dispatch:
-    inputs:
-      manual_analysis:
-        description: Spustiť okamžitú hlavnú analýzu?
-        required: false
-        default: false
-        type: boolean
-      manual_deep_search:
-        description: Rezervované; výskum musí mať podporovaný model a overiteľné zdroje.
-        required: false
-        default: false
-        type: boolean
 permissions:
   contents: read
 concurrency:
-  group: crypto-ai-bot
+  group: macro-sources-diagnostics-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: false
 jobs:
-  crypto-bot:
+  diagnostics:
+    # Original repo: research branch only. A clean diagnostics-only research repo
+    # can use its own default branch, without changing original main at all.
+    if: github.ref == 'refs/heads/feature/v11-1-review'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 8
     steps:
-      - name: Record first runner step
-        run: echo "BOT_JOB_STARTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
-          ref: main
-          fetch-depth: 1
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install
-        run: python -m pip install -r requirements.txt
-      - name: Tests
-        run: python scripts/test_offline.py
-      - name: Run
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-          ETORO_VERIFIED_SYMBOLS: ${{ vars.ETORO_VERIFIED_SYMBOLS }}
-          BUY_FEE: ${{ vars.BUY_FEE || '0.01' }}
-          SELL_FEE: ${{ vars.SELL_FEE || '0.01' }}
-          SPREAD_ESTIMATE: ${{ vars.SPREAD_ESTIMATE }}
-          MIN_NET_EDGE: ${{ vars.MIN_NET_EDGE || '0.03' }}
-          MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
-          MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
-          STATE_BACKEND: github-private
-          STATE_ENV: prod
-          PRIVATE_STATE_REPO: ${{ vars.PRIVATE_STATE_REPO }}
-          STATE_REPO_TOKEN: ${{ secrets.STATE_REPO_TOKEN }}
-          STATE_ENCRYPTION_KEY: ${{ secrets.STATE_ENCRYPTION_KEY }}
-          PYTHONUNBUFFERED: '1'
-        run: python main.py
-      - name: Remove local plaintext
+      - name: Check standalone script syntax (no bot/dependency install)
+        run: python -m py_compile scripts/macro_source_diagnostics.py
+      - name: Public HTTPS and data-format diagnostics
+        run: python scripts/macro_source_diagnostics.py
+      - name: Upload diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macro-sources-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: macro-diagnostics-output/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Publish run summary
         if: always()
         run: |
-          rm -rf .private-state
+          if [ -f macro-diagnostics-output/REPORT.md ]; then
+            cat macro-diagnostics-output/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Diagnostics did not produce a report; inspect job logs.' >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -131,3 +131,11 @@ class MacroDiagnosticsTests(unittest.TestCase):
         finally:
             import shutil
             if out.exists():shutil.rmtree(out)
+
+    def test_registered_workflow_path_is_safe_on_development_branch(self):
+        text=(m.ROOT/'.github/workflows/run.yml').read_text()
+        for forbidden in ('secrets.','ref: main','test_offline.py','python main.py','STATE_BACKEND','  schedule:'):
+            self.assertNotIn(forbidden,text)
+        self.assertIn("if: github.ref == 'refs/heads/feature/v11-1-review'",text)
+        self.assertIn('ref: ${{ github.sha }}',text)
+        self.assertIn('python scripts/macro_source_diagnostics.py',text)
