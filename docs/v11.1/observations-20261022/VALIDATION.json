@@ -1,0 +1,51 @@
+{
+  "test": "real archived12:07 + new LIVE13:03",
+  "passed": true,
+  "synthetic": false,
+  "temporal_observations": 2,
+  "elapsed_seconds": 3369.059133,
+  "real_07_to20_test": false,
+  "first_source": "Original stored22.10.2026 live shadow snapshot and report; original recommendation text extracted, not recalculated",
+  "second_source": "New network collection from public Binance/CoinGecko, independently recorded",
+  "actual_actions_preserved": true,
+  "changed_hourly_closed_candles": 6,
+  "unchanged_strategy_sha256": "2a60efc90a4f90bf3735f920463b32dc6b1489c2e6587d49744f2695e6fbc40f",
+  "original_protected_files_unchanged": [
+    "main.py",
+    "bot_state.json",
+    "v11/strategy.py",
+    "v11/runtime.py",
+    "v11/portfolio.py",
+    ".github/workflows/run.yml",
+    "v11/shadow_pair.py"
+  ],
+  "tests": {
+    "offline_bot": 164,
+    "phase3": 22,
+    "phase2": 11,
+    "all_passed": true
+  },
+  "immutable_first_checkpoint": "shadow-output/two-observations-20261022/verified-result/first_checkpoint.json",
+  "archives_replayed_exactly": true,
+  "scheduled_followup_needed": false,
+  "reason_no_schedule": "Second observation obtained immediately from live sources; no waiting/production schedule change needed",
+  "macro": "8 direct probes show URLError with proxy CONNECT/tunnel403, origin HTTP status unknown; see macro-probes.json",
+  "safety": {
+    "telegram": false,
+    "private_state_loaded": false,
+    "real_positions_changed": false,
+    "orders": false,
+    "main_changed": false
+  },
+  "files": {
+    "comparison.json": "c24af397262ec77398a90ec631675b53bb041a95307758b025e1fdf1806d89bc",
+    "macro-probes.json": "473e0e9484436f7aba71356acbcc0c4d541386c611f95f383e00659893c4ecc7",
+    "REPORT.md": "10df0be776121784bcad6611780c1dc0e4c7e1664aba7f543f2085a6db8702a7",
+    "first.json.gz": "7daa3c2d82cfd1d723a2cac4b41ba3766f7d40faedc2e99961b5de3213d358d0",
+    "second.json.gz": "5271ad71d10f0e8f55739cd37122e00a8aa1d0d574dc703b6118666b8d21e61c"
+  },
+  "code_sha256": {
+    "scripts/v111_compare_observations.py": "590338cc74b8ad4d81a0addfbd43712b7565baf5d398528b35b62424e75bfd2d",
+    "tests/test_shadow_observations.py": "8e6ab67d23294b857dce2f22c764d58cf4bc00ab53391d34be381cdb30020dd9"
+  }
+}

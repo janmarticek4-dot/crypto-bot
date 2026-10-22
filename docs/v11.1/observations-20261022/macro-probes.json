@@ -1,0 +1,82 @@
+[
+  {
+    "source": "fomc_calendar",
+    "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+    "checked_at": "2026-10-22T11:09:21.554813+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "fed",
+    "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "checked_at": "2026-10-22T11:09:21.555824+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "bls",
+    "url": "https://www.bls.gov/feed/bls_latest.rss",
+    "checked_at": "2026-10-22T11:09:21.556411+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "bls_calendar",
+    "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+    "checked_at": "2026-10-22T11:09:21.556861+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "bea",
+    "url": "https://apps.bea.gov/rss/rss.xml",
+    "checked_at": "2026-10-22T11:09:21.557478+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "ecb",
+    "url": "https://www.ecb.europa.eu/rss/press.html",
+    "checked_at": "2026-10-22T11:09:21.571931+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "cftc",
+    "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+    "checked_at": "2026-10-22T11:09:21.574110+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  },
+  {
+    "source": "sec",
+    "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+    "checked_at": "2026-10-22T11:09:21.576384+00:00",
+    "status": "N/A",
+    "error_type": "URLError",
+    "origin_http_status": null,
+    "transport_error": "Tunnel connection failed: 403 Forbidden",
+    "layer": "network_tunnel"
+  }
+]

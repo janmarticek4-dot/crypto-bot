@@ -1,0 +1,263 @@
+{
+  "test": "two_real_observations",
+  "verified": true,
+  "morning_evening_slot_test": false,
+  "first_at": "2026-10-22T10:07:31.827351+00:00",
+  "second_at": "2026-10-22T11:03:40.886484+00:00",
+  "elapsed_seconds": 3369.059133,
+  "first_fingerprint": "ed84d598bc77b11b17f75bc1e1ebea9ae944e30bdc97e54fc653e5fd167cc33f",
+  "second_fingerprint": "d5300320de40a8e04a88baf37ee7e028fc08e9eedb8e24a84b7f74f6d730499e",
+  "market": {
+    "first": {
+      "at": 1792663239.0,
+      "cap": 2736986587601.7373,
+      "volume": 89663031188.12538,
+      "dominance": 60.012410783787914,
+      "change": -5.116676834953658,
+      "source": "CoinGecko"
+    },
+    "second": {
+      "at": 1792666848.0,
+      "cap": 2737613615007.806,
+      "volume": 90178068434.85608,
+      "dominance": 60.04127626577536,
+      "change": -4.977894923734583,
+      "source": "CoinGecko"
+    },
+    "cap_pct": 0.02290940733540303,
+    "volume_pct": 0.5744142707489797,
+    "btc_dominance_pp": 0.028865481987445207
+  },
+  "rows": [
+    {
+      "symbol": "AAVE",
+      "price_first": 148.29,
+      "price_second": 147.39,
+      "price_pct": -0.6069188751770205,
+      "market_cap_pct": -0.5383981833432139,
+      "volume24h_pct": -1.5388965357078677,
+      "action_first": "WAIT",
+      "action_second": "WAIT",
+      "trend_first": {
+        "ema20": 153.1654875842084,
+        "ema50": 155.21286568479334,
+        "ema200": 153.28747903845758,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 23.403199580534352
+      },
+      "trend_second": {
+        "ema20": 153.1654875842084,
+        "ema50": 155.21286568479334,
+        "ema200": 153.28747903845758,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 23.403199580534352
+      },
+      "trend_changed": false,
+      "source_proof": {
+        "first_closed_1h": 1792663200.0,
+        "second_closed_1h": 1792666800.0,
+        "metadata_advanced": true,
+        "first_metadata_at": "2026-10-22T10:05:53.000Z",
+        "second_metadata_at": "2026-10-22T11:01:53.000Z",
+        "first_closed_4h": 1792656000.0,
+        "second_closed_4h": 1792656000.0
+      }
+    },
+    {
+      "symbol": "TAO",
+      "price_first": 259.9,
+      "price_second": 260.2,
+      "price_pct": 0.1154290111581524,
+      "market_cap_pct": 0.07218690784851489,
+      "volume24h_pct": 11.143018372917513,
+      "action_first": "WAIT",
+      "action_second": "WAIT",
+      "trend_first": {
+        "ema20": 270.204647273152,
+        "ema50": 272.91241609824925,
+        "ema200": 273.7861337639026,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 17.658173101031565
+      },
+      "trend_second": {
+        "ema20": 270.204647273152,
+        "ema50": 272.91241609824925,
+        "ema200": 273.7861337639026,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 17.658173101031565
+      },
+      "trend_changed": false,
+      "source_proof": {
+        "first_closed_1h": 1792663200.0,
+        "second_closed_1h": 1792666800.0,
+        "metadata_advanced": true,
+        "first_metadata_at": "2026-10-22T10:05:53.000Z",
+        "second_metadata_at": "2026-10-22T11:01:53.000Z",
+        "first_closed_4h": 1792656000.0,
+        "second_closed_4h": 1792656000.0
+      }
+    },
+    {
+      "symbol": "FET",
+      "price_first": 0.1869,
+      "price_second": 0.1871,
+      "price_pct": 0.10700909577312512,
+      "market_cap_pct": -0.08426828332880332,
+      "volume24h_pct": -0.2539067516308058,
+      "action_first": "WAIT",
+      "action_second": "WAIT",
+      "trend_first": {
+        "ema20": 0.19378188190892448,
+        "ema50": 0.198576183582668,
+        "ema200": 0.20219685882722235,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 25.42312358481259
+      },
+      "trend_second": {
+        "ema20": 0.19378188190892448,
+        "ema50": 0.198576183582668,
+        "ema200": 0.20219685882722235,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 25.42312358481259
+      },
+      "trend_changed": false,
+      "source_proof": {
+        "first_closed_1h": 1792663200.0,
+        "second_closed_1h": 1792666800.0,
+        "metadata_advanced": true,
+        "first_metadata_at": "2026-10-22T10:05:53.000Z",
+        "second_metadata_at": "2026-10-22T11:01:53.000Z",
+        "first_closed_4h": 1792656000.0,
+        "second_closed_4h": 1792656000.0
+      }
+    },
+    {
+      "symbol": "SOL",
+      "price_first": 104.44,
+      "price_second": 104.45,
+      "price_pct": 0.009574875526618953,
+      "market_cap_pct": 0.04797134902532196,
+      "volume24h_pct": 0.13704824765647938,
+      "action_first": "WAIT",
+      "action_second": "WAIT",
+      "trend_first": {
+        "ema20": 105.80189017324768,
+        "ema50": 106.15242184125174,
+        "ema200": 108.53972534035533,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 22.22853662386518
+      },
+      "trend_second": {
+        "ema20": 105.80189017324768,
+        "ema50": 106.15242184125174,
+        "ema200": 108.53972534035533,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 22.22853662386518
+      },
+      "trend_changed": false,
+      "source_proof": {
+        "first_closed_1h": 1792663200.0,
+        "second_closed_1h": 1792666800.0,
+        "metadata_advanced": true,
+        "first_metadata_at": "2026-10-22T10:05:53.000Z",
+        "second_metadata_at": "2026-10-22T11:01:53.000Z",
+        "first_closed_4h": 1792656000.0,
+        "second_closed_4h": 1792656000.0
+      }
+    },
+    {
+      "symbol": "ONDO",
+      "price_first": 0.4395,
+      "price_second": 0.4368,
+      "price_pct": -0.6143344709897525,
+      "market_cap_pct": -0.4338378296841583,
+      "volume24h_pct": 2.28719547756171,
+      "action_first": "WAIT",
+      "action_second": "WAIT",
+      "trend_first": {
+        "ema20": 0.44941195991409705,
+        "ema50": 0.45281193491365695,
+        "ema200": 0.4478313418508545,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 24.486129410993364
+      },
+      "trend_second": {
+        "ema20": 0.44941195991409705,
+        "ema50": 0.45281193491365695,
+        "ema200": 0.4478313418508545,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 24.486129410993364
+      },
+      "trend_changed": false,
+      "source_proof": {
+        "first_closed_1h": 1792663200.0,
+        "second_closed_1h": 1792666800.0,
+        "metadata_advanced": true,
+        "first_metadata_at": "2026-10-22T10:05:53.000Z",
+        "second_metadata_at": "2026-10-22T11:01:53.000Z",
+        "first_closed_4h": 1792656000.0,
+        "second_closed_4h": 1792656000.0
+      }
+    },
+    {
+      "symbol": "RENDER",
+      "price_first": 1.84,
+      "price_second": 1.84,
+      "price_pct": 0.0,
+      "market_cap_pct": 0.2772414202610207,
+      "volume24h_pct": -0.3412706846835256,
+      "action_first": "WAIT",
+      "action_second": "WAIT",
+      "trend_first": {
+        "ema20": 1.8614376923666998,
+        "ema50": 1.879922134019035,
+        "ema200": 1.8218956059784213,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 21.751635899903125
+      },
+      "trend_second": {
+        "ema20": 1.8614376923666998,
+        "ema50": 1.879922134019035,
+        "ema200": 1.8218956059784213,
+        "higher_structure": false,
+        "support_broken": false,
+        "adx": 21.751635899903125
+      },
+      "trend_changed": false,
+      "source_proof": {
+        "first_closed_1h": 1792663200.0,
+        "second_closed_1h": 1792666800.0,
+        "metadata_advanced": true,
+        "first_metadata_at": "2026-10-22T10:05:53.000Z",
+        "second_metadata_at": "2026-10-22T11:01:53.000Z",
+        "first_closed_4h": 1792656000.0,
+        "second_closed_4h": 1792656000.0
+      }
+    }
+  ],
+  "interpretation": "Real separate collection times, not synthetic07/20. Marketcap is not net capital flow; volume compares rolling24h windows. Same4h candle may legitimately imply unchanged4h trend/actions. No forecast accuracy or trading profitability claim.",
+  "unchanged_strategy_sha256": "2a60efc90a4f90bf3735f920463b32dc6b1489c2e6587d49744f2695e6fbc40f",
+  "source_hashes": {
+    "first": {
+      "market_snapshot.json": "b3c6b4a6d40b4d015fdfdc039a9b3b9907c124321450bd81ba5acf3b03df9719",
+      "summary.json": "6da67737031e420038073e64391b5ca1363ab8b2281b6be1133675b3808482f1",
+      "morning.txt": "c575ce5b40c1b2f15e11f93f0f0982d18954420326835d6794ddfc721bb03d4b"
+    },
+    "second": {
+      "market_snapshot.json": "87ddc7968984cb0144ce552688df8b386b4cad9af1d1bf348b685c98e971b0b5",
+      "summary.json": "ce1711316443e94c997bed73f788142c1640fbdc926b65861b85337e90603a2c",
+      "morning.txt": "eae5d9773a0e07b0abf86300dda9b9f25cf3351b4e10691a0716cba3f280dbfd"
+    }
+  }
+}
