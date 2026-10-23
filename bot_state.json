@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-23T22:19:01.730889+02:00",
+  "last_run": "2026-10-23T22:57:46.006094+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2458,7 +2458,7 @@
     "risk_pts": 1
   },
   "crash_monitor": {
-    "last_checked_at": "2026-10-23T20:19:01.730871+00:00",
+    "last_checked_at": "2026-10-23T20:57:46.006075+00:00",
     "last_result": "quiet_not_confirmed"
   },
   "last_us_outlook": "2026-10-23T15:13:31.962315+02:00"
