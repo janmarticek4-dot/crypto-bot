@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-24T21:35:18.848910+02:00",
+  "last_run": "2026-10-24T22:00:17.404896+02:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2460,8 +2460,8 @@
     "risk_pts": 1
   },
   "crash_monitor": {
-    "last_checked_at": "2026-10-24T19:35:18.848887+00:00",
-    "last_result": "quiet_verification_failed",
+    "last_checked_at": "2026-10-24T20:00:17.404885+00:00",
+    "last_result": "quiet_api_cooldown",
     "verification_failed_at": "2026-10-24T19:35:18.848904+00:00",
     "last_error": "Groq API HTTP 429 | Retry-After: 179s: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m5a4rycfeexr3j38v85hmzk6` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 196582, Requested 3831. Please try again in 2m58.416s. Need more tokens"
   },
