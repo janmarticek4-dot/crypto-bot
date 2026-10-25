@@ -1,0 +1,70 @@
+name: Private Encrypted State Integration Test
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_synthetic_writes:
+        description: Potvrdzujem zápis a poškodenie IBA syntetického stavu v testovacom PRIVATE repozitári
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      confirm_synthetic_writes:
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: private-state-integration-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  authorize:
+    if: github.ref == 'refs/heads/feature/v11-1-review'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require explicit synthetic-only confirmation before accessing secrets
+        env:
+          CONFIRM: ${{ inputs.confirm_synthetic_writes }}
+        run: |
+          if [ "$CONFIRM" != 'true' ]; then
+            echo 'Synthetic-only test not confirmed. No private credentials accessed.'
+            exit 1
+          fi
+  integration:
+    needs: authorize
+    if: github.ref == 'refs/heads/feature/v11-1-review'
+    environment: state-storage-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install minimal pinned integration dependency (no secrets)
+        run: python -m pip install -r requirements-state-integration.txt
+      - name: Offline integration harness regression (no secrets)
+        run: python -m unittest tests.test_private_state_integration -v
+      - name: Synthetic private storage integration (credentials scoped to this step)
+        env:
+          STATE_TEST_CONFIRMED: ${{ inputs.confirm_synthetic_writes }}
+          TEST_STATE_REPOSITORY: ${{ vars.TEST_STATE_REPOSITORY }}
+          TEST_STATE_TOKEN: ${{ secrets.TEST_STATE_TOKEN }}
+          TEST_STATE_ENCRYPTION_KEY: ${{ secrets.TEST_STATE_ENCRYPTION_KEY }}
+        run: python scripts/private_state_integration.py
+      - name: Upload aggregate checks only (no state, ciphertext or raw logs)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-state-integration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: state-integration-output/report.json
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Public summary
+        if: always()
+        run: echo 'Only aggregate check statuses are in the private-state-integration artifact. No production migration or Telegram.' >> "$GITHUB_STEP_SUMMARY"

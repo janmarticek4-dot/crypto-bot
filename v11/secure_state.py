@@ -47,14 +47,18 @@ def stable_state(state):
 
 
 class GitHubState:
-    def __init__(self,repo,token,key,environment='prod',transport=None):
+    def __init__(self,repo,token,key,environment='prod',transport=None,namespace=None):
         if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*',repo):raise StateError('Invalid private repository name')
         if environment not in ('prod','test'):raise StateError('State environment must be prod or test')
         if len(key)!=32 or not token:raise StateError('Missing state token or 32-byte encryption key')
+        if namespace is not None and (environment!='test' or not re.fullmatch(r'run-[0-9]+-[0-9]+',namespace)):
+            raise StateError('Integration namespace requires test environment and numeric run identity')
         self.repo=repo;self.token=token;self.key=key;self.environment=environment
-        self.path=f'{environment}/state.enc';self.sha=None;self.previous=None;self.digest=None
+        self.prefix=f'{environment}/integration/{namespace}' if namespace else environment
+        self.path=f'{self.prefix}/state.enc';self.sha=None;self.previous=None;self.digest=None
         self.transport=transport or self.request
         self.aad=f'crypto-bot:v1:{repo}:{environment}'.encode()
+        if namespace:self.aad+=f':{namespace}'.encode()
 
     @classmethod
     def from_env(cls):
@@ -136,7 +140,7 @@ class GitHubState:
         payload=self.encrypt(stable)
         # Backups are immutable, encrypted, content-addressed. A racing writer
         # cannot overwrite another writer's backup or current ledger.
-        backup=f'/contents/{self.environment}/backups/{self.sha}.enc'
+        backup=f'/contents/{self.prefix}/backups/{self.sha}.enc'
         existing=self.transport('GET',backup)
         if existing.get('_not_found'):
             self.transport('PUT',backup,dict(message='Backup encrypted state',content=base64.b64encode(self.previous).decode()))
@@ -164,7 +168,7 @@ class GitHubState:
         """Authenticate an immutable encrypted backup without changing current state."""
         if not re.fullmatch('[0-9a-f]{40}',sha):raise StateError('Backup requires an exact SHA')
         self.verify_private()
-        response=self.transport('GET',f'/contents/{self.environment}/backups/{sha}.enc')
+        response=self.transport('GET',f'/contents/{self.prefix}/backups/{sha}.enc')
         try:payload=decode_content(response)
         except Exception:raise StateError('Backup missing or invalid; current state unchanged') from None
         return self.decrypt(payload)

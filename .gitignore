@@ -17,3 +17,6 @@ macro-diagnostics-output/
 
 # Validated public-only shadow upload staging
 shadow-public-artifacts/
+
+# Aggregate private-state integration test results (no state payload)
+state-integration-output/

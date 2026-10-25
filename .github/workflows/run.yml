@@ -7,8 +7,12 @@ on:
       task:
         description: Izolovaná diagnostika alebo V11.1 shadow test
         type: choice
-        options: [macro, shadow]
+        options: [macro, shadow, private-state]
         default: macro
+      confirm_private_state_test:
+        description: Potvrdzujem iba syntetické zápisy do osobitného testovacieho PRIVATE repozitára
+        type: boolean
+        default: false
       phase:
         description: Shadow fáza; morning 07:00–08:30, evening 20:00–21:30 Bratislava
         type: choice
@@ -28,7 +32,7 @@ jobs:
   diagnostics:
     # Original repo: research branch only. A clean diagnostics-only research repo
     # can use its own default branch, without changing original main at all.
-    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow'
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow' && inputs.task != 'private-state'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -72,3 +76,9 @@ jobs:
       phase: ${{ inputs.phase || 'preview' }}
       morning_run_id: ${{ inputs.morning_run_id || '' }}
       use_groq: false
+
+  private-state:
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'private-state'
+    uses: ./.github/workflows/private-state-integration.yml
+    with:
+      confirm_synthetic_writes: ${{ inputs.confirm_private_state_test || false }}

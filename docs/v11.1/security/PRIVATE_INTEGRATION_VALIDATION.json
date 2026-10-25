@@ -1,0 +1,18 @@
+{
+  "scope": "prepared_only_no_private_repository_created",
+  "offline_tests": {
+    "total": 228,
+    "passed": true,
+    "network": "unmocked socket connections blocked"
+  },
+  "integration_harness_regression_tests": 9,
+  "live_private_github_run_executed": false,
+  "real_keys_generated": false,
+  "production_migration_executed": false,
+  "main_py_changed": false,
+  "production_state_changed": false,
+  "telegram_sent": false,
+  "workflow": "Private Encrypted State Integration Test",
+  "test_repository_required": "owner/crypto-bot-state-integration-test",
+  "authorization_required_before_live_run": true
+}
