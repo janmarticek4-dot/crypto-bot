@@ -54,3 +54,20 @@ unchanged; no portfolio/state loaded or written, Telegram and orders disabled.
 Saved actual reports are in observations-20261025/. Both are explicitly labeled
 same-snapshot PREVIEW and must not be scored as independent predictions.
 193 offline tests passed including BLS→report integration and workflow safety.
+
+## CI failure 40233027569 and fix
+
+The offline test subprocess inherited BOT_DATA_MODE=shadow from the job.
+This correctly triggered require_live_snapshot/production-entrypoint protections
+in tests designed to invoke those entrypoints with mocked data and mocked I/O.
+Reproduced locally under the same environment: 193 tests, 11 errors.
+The harness now explicitly sets BOT_DATA_MODE=live for that subprocess only,
+keeps BOT_DISABLE_TELEGRAM=1, clears Telegram/Groq credentials and blocks every
+unmocked socket connection. Tests for synthetic/shadow rejection continue to set
+those modes explicitly. No production snapshot guard was changed or disabled.
+The next independent Actions step still inherits BOT_DATA_MODE=shadow from the
+job and the live shadow runner explicitly sets it again.
+Regression: 194 tests passed under inherited BOT_DATA_MODE=shadow.
+The failed run created no live reports, so it is not evidence of data-provider
+failure or a completed shadow test. Start a NEW workflow run on the latest branch
+commit; re-running old jobs reuses the old failing commit.
