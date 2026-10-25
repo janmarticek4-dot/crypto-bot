@@ -1,0 +1,18 @@
+{
+  "offline_tests": {
+    "count": 219,
+    "passed": true,
+    "inherited_mode": "shadow",
+    "network": "unmocked socket connections blocked"
+  },
+  "synthetic_only_crypto_and_remote_tests": true,
+  "real_github_state_restore_executed": false,
+  "real_keys_created": false,
+  "migration_executed": false,
+  "production_state_changed_by_task": false,
+  "public_shadow_archive_replay": {
+    "status": "PASSED",
+    "files": 17,
+    "scope": "allowlist, private fields, credential patterns and known environment values; not complete semantic DLP"
+  }
+}

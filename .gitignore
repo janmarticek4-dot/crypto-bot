@@ -14,3 +14,6 @@ shadow-output/
 
 # Standalone macro-network diagnostic artifacts
 macro-diagnostics-output/
+
+# Validated public-only shadow upload staging
+shadow-public-artifacts/

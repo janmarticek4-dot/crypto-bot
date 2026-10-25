@@ -1,0 +1,18 @@
+{
+  "source": "read-only checkout + origin/main",
+  "scanned_current_files_only": true,
+  "git_history_not_exhaustive": true,
+  "development": {
+    "private_field_markers": 0,
+    "credential_pattern_detected": false,
+    "sha256": "b6a15bfb1a1572fd1f32928cd395a6830ace67241fd468c948fea677a969fc4c"
+  },
+  "production": {
+    "private_field_markers": 0,
+    "credential_pattern_detected": false,
+    "sha256": "0f4df2f636ac2669b95e36efee89d8706e59a08163b82312978cecaa0fe67781"
+  },
+  "tracked_credential_pattern_candidate_files": [],
+  "production_commit": "da12eaa7d908002a6a553386050bea58d0bd1038",
+  "checkout_state_unchanged": true
+}

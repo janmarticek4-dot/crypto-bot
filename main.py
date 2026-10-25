@@ -245,6 +245,8 @@ def manual_analysis_requested():
 
 def load_state():
     if not os.path.exists(STATE_FILE):
+        if STATE_STORE is not None:
+            raise RuntimeError('Private checkpoint missing; refusing to initialize an empty ledger')
         return {}
 
     try:
@@ -268,17 +270,15 @@ def save_state(state):
     private_local = in_checkout and target.relative_to(checkout).parts[0] == '.private-state'
     if state.get('portfolio_v11') is not None and in_checkout and not private_local:
         raise RuntimeError('Portfolio persistence requires private storage; public checkout is protected')
+    if in_checkout and not private_local:
+        from v11.state_policy import require_public_data, PublicDataError
+        try:require_public_data(state)
+        except PublicDataError:
+            raise RuntimeError('Private data refused in public checkout state') from None
     if STATE_STORE is not None:
         STATE_STORE.commit(state)  # Durable before Telegram acknowledgement.
-    temp = STATE_FILE + ".tmp"
-
-    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
-
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(temp, STATE_FILE)
+    from v11.secure_state import atomic_local
+    atomic_local(STATE_FILE,state)
 
 
 def parse_timestamp(value):

@@ -17,6 +17,7 @@ import secrets
 import urllib.request
 import urllib.error
 import zlib
+import tempfile
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 
@@ -26,6 +27,15 @@ class StateError(RuntimeError):
 
 def canonical(value):
     return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
+
+
+def decode_content(response):
+    """GitHub Contents base64 may contain line breaks, never arbitrary junk."""
+    try:
+        encoded=response['content']
+        if not isinstance(encoded,str) or len(encoded)>1_300_000:raise ValueError()
+        return base64.b64decode(''.join(encoded.split()),validate=True)
+    except Exception:raise StateError('Encrypted content missing, oversized or invalid') from None
 
 
 def stable_state(state):
@@ -50,7 +60,7 @@ class GitHubState:
     def from_env(cls):
         try:key=base64.b64decode(os.environ['STATE_ENCRYPTION_KEY'],validate=True)
         except (KeyError,ValueError):raise StateError('Set STATE_ENCRYPTION_KEY securely; base64 of 32 random bytes') from None
-        return cls(os.environ.get('PRIVATE_STATE_REPO',''),os.environ.get('STATE_REPO_TOKEN',''),key,os.environ.get('STATE_ENV','prod'))
+        return cls(os.environ.get('PRIVATE_STATE_REPO',''),os.environ.get('STATE_REPO_TOKEN',''),key,os.environ.get('STATE_ENV',''))
 
     def request(self,method,path,body=None):
         req=urllib.request.Request('https://api.github.com/repos/'+self.repo+path,
@@ -79,15 +89,18 @@ class GitHubState:
 
     def decrypt(self,payload):
         try:
+            if not isinstance(payload,(str,bytes)) or len(payload)>900_000:raise ValueError()
             blob=json.loads(payload)
-            if blob['version']!=1:raise ValueError()
+            if type(blob['version']) is not int or blob['version']!=1:raise ValueError()
             nonce=base64.b64decode(blob['nonce'],validate=True)
+            if len(nonce)!=12:raise ValueError()
             cipher=base64.b64decode(blob['ciphertext'],validate=True)
             data=AESGCM(self.key).decrypt(nonce,cipher,self.aad)
             decompressor=zlib.decompressobj()
             raw=decompressor.decompress(data,5_000_001)
-            if len(raw)>5_000_000 or not decompressor.eof:raise ValueError()
-            out=json.loads(raw)
+            if len(raw)>5_000_000 or not decompressor.eof or decompressor.unused_data:raise ValueError()
+            def invalid_constant(value):raise ValueError()
+            out=json.loads(raw,parse_constant=invalid_constant)
             if not isinstance(out,dict):raise ValueError()
             return out
         except Exception:raise StateError('Encrypted state failed authentication or decoding; refusing reset') from None
@@ -100,7 +113,7 @@ class GitHubState:
             suffix='?ref='+commit
         response=self.transport('GET','/contents/'+self.path+suffix)
         if response.get('_not_found'):raise StateError('Private state missing; explicit initialization/restore is required')
-        try:payload=base64.b64decode(response['content'])
+        try:payload=decode_content(response)
         except Exception:raise StateError('Private state content invalid') from None
         state=self.decrypt(payload)
         if not commit:
@@ -127,6 +140,13 @@ class GitHubState:
         existing=self.transport('GET',backup)
         if existing.get('_not_found'):
             self.transport('PUT',backup,dict(message='Backup encrypted state',content=base64.b64encode(self.previous).decode()))
+        else:
+            # Never trust a pre-existing backup merely because its name exists.
+            try:archived=decode_content(existing)
+            except Exception:raise StateError('Backup content invalid; current state unchanged') from None
+            if archived!=self.previous:
+                raise StateError('Backup does not match previous checkpoint; current state unchanged')
+            self.decrypt(archived)
         try:
             reply=self.transport('PUT','/contents/'+self.path,dict(message='Checkpoint encrypted bot state',content=base64.b64encode(payload).decode(),sha=self.sha))
         except StateError:
@@ -134,28 +154,63 @@ class GitHubState:
             # do not retry an update against a stale SHA or overwrite a competitor.
             current=self.transport('GET','/contents/'+self.path)
             if not current.get('content'):raise
-            plain=self.decrypt(base64.b64decode(current['content']))
+            plain=self.decrypt(decode_content(current))
             if hashlib.sha256(canonical(stable_state(plain))).hexdigest()!=digest:raise
             reply={'content':{'sha':current['sha']}}
         self.sha=reply['content']['sha'];self.previous=payload;self.digest=digest
 
 
+    def read_backup(self, sha):
+        """Authenticate an immutable encrypted backup without changing current state."""
+        if not re.fullmatch('[0-9a-f]{40}',sha):raise StateError('Backup requires an exact SHA')
+        self.verify_private()
+        response=self.transport('GET',f'/contents/{self.environment}/backups/{sha}.enc')
+        try:payload=decode_content(response)
+        except Exception:raise StateError('Backup missing or invalid; current state unchanged') from None
+        return self.decrypt(payload)
+
+    def restore_backup(self, backup_sha, expected_current_sha):
+        """Explicit recovery even if current ciphertext is corrupt. Never called by runtime."""
+        if not re.fullmatch('[0-9a-f]{40}',expected_current_sha):raise StateError('Recovery requires an exact current SHA')
+        recovered=self.read_backup(backup_sha)
+        current=self.transport('GET','/contents/'+self.path)
+        if current.get('sha')!=expected_current_sha:
+            raise StateError('Recovery conflict; refusing to overwrite current state')
+        payload=self.encrypt(stable_state(recovered))
+        reply=self.transport('PUT','/contents/'+self.path,dict(message='Explicit recovery from authenticated encrypted backup',
+            content=base64.b64encode(payload).decode(),sha=expected_current_sha))
+        self.sha=reply['content']['sha'];self.previous=payload
+        self.digest=hashlib.sha256(canonical(stable_state(recovered))).hexdigest()
+        return recovered
+
+
 def atomic_local(path,state):
-    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
-    temp=path.with_suffix('.tmp')
-    fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_TRUNC,0o600)
-    with os.fdopen(fd,'w') as f:
-        json.dump(state,f,allow_nan=False);f.flush();os.fsync(f.fileno())
-    os.replace(temp,path)
+    path=Path(path)
+    # Do not follow a caller-provided symlink into a public checkout/state file.
+    if path.is_symlink():raise StateError('Local state target must not be a symlink')
+    if any(parent.is_symlink() for parent in path.absolute().parents):
+        raise StateError('Local state parent must not be a symlink')
+    path.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
+    fd,temp=tempfile.mkstemp(prefix='.state-',suffix='.tmp',dir=path.parent)
+    try:
+        with os.fdopen(fd,'w') as f:
+            json.dump(state,f,allow_nan=False);f.flush();os.fsync(f.fileno())
+        os.replace(temp,path)
+    finally:
+        if os.path.exists(temp):os.unlink(temp)
 
 
 def state_path():
-    environment=os.environ.get('STATE_ENV','prod')
+    environment=os.environ.get('STATE_ENV','')
     if environment not in ('test','prod'):raise StateError('Invalid state environment')
     base=Path.cwd()/'.private-state'
+    if base.is_symlink():raise StateError('Private state directory must not be a symlink')
     base.mkdir(exist_ok=True,mode=0o700)
+    base.chmod(0o700)
     parent=base/environment
+    if parent.is_symlink():raise StateError('Private environment directory must not be a symlink')
     parent.mkdir(exist_ok=True,mode=0o700)
+    parent.chmod(0o700)
     return parent/'state.json'
 
 
@@ -188,8 +243,10 @@ def cli():
         store.commit(historical)
         print('Historical encrypted state restored remotely. Reconcile transactions before restarting the scheduler.')
     else:
-        target=Path(args.output).resolve()
-        if '.private-state' not in target.parts:raise StateError('Restore output must be in an ignored .private-state directory')
+        target=Path(args.output).absolute()
+        if not target.is_relative_to(Path.cwd()/'.private-state') or '..' in target.parts:
+            raise StateError('Restore output must be inside checkout .private-state')
+        if target.exists():raise StateError('Restore output already exists; refusing plaintext overwrite')
         atomic_local(target,store.read(args.commit))
         print('Encrypted historical state restored to private local storage. Remote current state unchanged.')
 

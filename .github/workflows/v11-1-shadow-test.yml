@@ -123,12 +123,17 @@ jobs:
             args+=(--use-groq)
           fi
           python scripts/v111_shadow.py "${args[@]}"
+      - name: Validate and stage public artifacts only
+        if: always()
+        env:
+          GROQ_API_KEY: ${{ inputs.use_groq && secrets.GROQ_API_KEY || '' }}
+        run: python scripts/stage_shadow_artifacts.py
       - name: Publish discoverable morning checkpoint
         if: success() && inputs.phase == 'morning'
         uses: actions/upload-artifact@v4
         with:
           name: v111-morning-${{ github.run_id }}-${{ github.run_attempt }}
-          path: shadow-output/
+          path: shadow-public-artifacts/
           if-no-files-found: error
           retention-days: 7
       - name: Publish isolated shadow artifacts
@@ -136,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: v11-1-shadow-${{ github.run_id }}-${{ github.run_attempt }}
-          path: shadow-output/
+          path: shadow-public-artifacts/
           if-no-files-found: warn
           retention-days: 7
       - name: Summary
@@ -144,10 +149,10 @@ jobs:
         run: |
           echo '## V11.1 Shadow Test' >> "$GITHUB_STEP_SUMMARY"
           echo 'Download v11-1-shadow artifacts: morning.txt, evening.txt, source_availability.json, summary.json.' >> "$GITHUB_STEP_SUMMARY"
-          if [ -f shadow-output/summary.json ]; then
-            cat shadow-output/summary.json >> "$GITHUB_STEP_SUMMARY"
+          if [ -f shadow-public-artifacts/summary.json ]; then
+            cat shadow-public-artifacts/summary.json >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ -f shadow-output/comparison.txt ]; then
-            cat shadow-output/comparison.txt >> "$GITHUB_STEP_SUMMARY"
+          if [ -f shadow-public-artifacts/comparison.txt ]; then
+            cat shadow-public-artifacts/comparison.txt >> "$GITHUB_STEP_SUMMARY"
           fi
           echo 'No production state, portfolio, Telegram or trading. Preview uses one snapshot; morning/evening requires a validated independent morning artifact.' >> "$GITHUB_STEP_SUMMARY"
