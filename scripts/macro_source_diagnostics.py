@@ -4,6 +4,8 @@ Copy this file and its manual workflow into an empty research repository to run
 without registering any workflow on the original production default branch.
 """
 import argparse
+import csv
+import io
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 import hashlib
@@ -38,6 +40,9 @@ def sources(year):
         dict(provider='ECB', id='ecb_rss', format='rss', url='https://www.ecb.europa.eu/rss/press.html'),
         dict(provider='SEC', id='sec_rss', format='rss', url='https://www.sec.gov/newsroom/press-releases/rss.xml'),
         dict(provider='CFTC', id='cftc_rss', format='rss', url='https://www.cftc.gov/RSS/RSSGP/rssgp.xml'),
+        dict(provider='BEA', id='bea_calendar_candidate', format='ics', url='https://www.bea.gov/news/schedule/ics/online-calendar-subscription'),
+        dict(provider='BLS', id='bls_year_calendar', format='ics', url='https://www.bls.gov/schedule/news_release/current_year.ics'),
+        dict(provider='Treasury', id='treasury_csv_candidate', format='treasury_csv', url=f'https://home.treasury.gov/resource-center-data-chart-center/interest-rates/daily-treasury-rates.csv/{year}/all?type=daily_treasury_yield_curve&field_tdr_date_value={year}&page&_format=csv'),
         dict(provider='Treasury', id='treasury_yields', format='treasury_xml', url=f'https://home.treasury.gov/resource-center-data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value={year}'),
     ]
 
@@ -127,6 +132,18 @@ def validate(raw, kind):
             raise InvalidFormat('FOMC calendar markers missing: changed HTML, challenge page or wrong endpoint')
         return dict(format='FOMC HTML', years=sorted(set(years)),
                     records=text.count('fomc-meeting__date'), note='Meeting dates do not prove a decision time; no assumed Fed hour.')
+    if kind == 'treasury_csv':
+        reader = csv.DictReader(io.StringIO(raw.decode('utf-8-sig')))
+        rows=[]
+        for row in reader:
+            try:
+                day=datetime.strptime(row['Date'], '%m/%d/%Y').date()
+                values=[float(row[key]) for key in ('2 YR','10 YR')]
+                if all(math.isfinite(v) and -5<=v<=30 for v in values):rows.append(day)
+            except (ValueError,TypeError,KeyError):continue
+        if not rows:raise InvalidFormat('Treasury CSV Date/2 YR/10 YR missing or invalid')
+        return dict(format='Treasury CSV', records=len(rows), latest_observation_date=max(rows).isoformat(),
+                    note='Daily observations only; availability and freshness require separate checks.')
     try:
         root = ET.fromstring(raw)
     except ET.ParseError as exc:

@@ -20,7 +20,7 @@ SOURCES=[
     dict(id='bea',url='https://apps.bea.gov/rss/rss.xml',publisher_host='bea.gov',official=True,coverage=['PCE']),
     dict(id='ecb',url='https://www.ecb.europa.eu/rss/press.html',official=True,coverage=['Fed','regulation']),
     dict(id='cftc',url='https://www.cftc.gov/RSS/RSSGP/rssgp.xml',official=True,coverage=['regulation']),
-    dict(id='sec',url='https://www.sec.gov/newsroom/press-releases/rss.xml',official=True,coverage=['regulation']),
+    dict(id='sec',url='https://www.sec.gov/news/pressreleases.rss',official=True,coverage=['regulation']),
     dict(id='aave',url='https://governance.aave.com/latest.rss',official=False,coverage=['project'],symbol='AAVE'),
     dict(id='ondo',url='https://blog.ondo.finance/rss/',official=True,coverage=['project'],symbol='ONDO'),
     dict(id='sol_agave',url='https://github.com/anza-xyz/agave/releases.atom',official=True,publisher_path='/anza-xyz/agave/',coverage=['project'],symbol='SOL',kind='software_release_notice'),
@@ -36,7 +36,7 @@ FALLBACKS={
  'fed':[dict(id='fed_monetary',url='https://www.federalreserve.gov/feeds/press_monetary.xml',official=True,coverage=['Fed'])],
  'bls_calendar':[dict(id='bls_year_calendar',url='https://www.bls.gov/schedule/news_release/current_year.ics',official=True,coverage=['CPI','employment'],format='ics')],
  'ecb':[dict(id='ecb_blog',url='https://www.ecb.europa.eu/rss/blog.html',official=True,coverage=['Fed'],kind='central_bank_blog_not_decision')],
- 'sec':[dict(id='sec_legacy',url='https://www.sec.gov/news/pressreleases.rss',official=True,coverage=['regulation'])],
+ 'sec':[dict(id='sec_new_path',url='https://www.sec.gov/newsroom/press-releases/rss.xml',official=True,coverage=['regulation'])],
  'aave':[dict(id='aave_aip',url='https://github.com/aave/aip/commits/main.atom',official=False,publisher_path='/aave/aip/',coverage=['project'],symbol='AAVE',kind='governance_repository_change')],
  'ondo':[dict(id='ondo_secondary',url='https://www.coindesk.com/arc/outboundfeeds/rss/',official=False,coverage=['project','regulation'],symbol='ONDO',title_filter=r'\bondo\b',kind='secondary_project_report')],
 }
@@ -127,18 +127,28 @@ def parse_feed(raw,source,now=None):
     return out
 
 
-def parse_calendar(raw,source,now=None):
+def parse_calendar(raw,source,now=None,audit=None):
     now=now or datetime.now(timezone.utc)
     text=re.sub(r'\r?\n[ \t]','',raw.decode('utf-8'))
     out=[]
+    audit = audit if audit is not None else {}
+    audit.update(total=0, accepted=0, rejected={}, earliest_date=None, latest_date=None, timezone_identifiers={})
+    def reject(reason):
+        audit['rejected'][reason]=audit['rejected'].get(reason,0)+1
     for block in text.split('BEGIN:VEVENT')[1:]:
+        audit['total']+=1
         values={}
         for line in block.split('END:VEVENT')[0].splitlines():
             if ':' in line:
                 key,value=line.split(':',1);values[key]=value
         dt_key=next((k for k in values if k.startswith('DTSTART')),None)
-        if not dt_key:continue
-        date=values[dt_key]
+        if not dt_key:
+            reject('missing_dtstart');continue
+        date=values[dt_key].strip()
+        if re.match(r'^\d{8}',date):
+            day=date[:8]
+            audit['earliest_date']=min(audit['earliest_date'] or day,day)
+            audit['latest_date']=max(audit['latest_date'] or day,day)
         date_only=None
         try:
             if 'VALUE=DATE' in dt_key or re.fullmatch(r'\d{8}',date):
@@ -146,23 +156,34 @@ def parse_calendar(raw,source,now=None):
                 dt=None
             elif date.endswith('Z'):dt=datetime.strptime(date,'%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
             elif 'TZID=' in dt_key:
-                tz=ZoneInfo(dt_key.split('TZID=',1)[1].split(';')[0])
+                name=dt_key.split('TZID=',1)[1].split(';')[0].strip(chr(34))
+                audit['timezone_identifiers'][name]=audit['timezone_identifiers'].get(name,0)+1
+                # Explicit Windows calendar identifier; observes US daylight saving.
+                if name=='Eastern Standard Time':name='America/New_York'
+                tz=ZoneInfo(name)
                 dt=datetime.strptime(date,'%Y%m%dT%H%M%S').replace(tzinfo=tz).astimezone(timezone.utc)
             else:
                 # Preserve a source date but do not assume a timezone for floating times.
                 date_only=datetime.strptime(date[:8],'%Y%m%d').date();dt=None
-        except (ValueError,KeyError):continue
-        if dt is not None and not now<=dt<=now+timedelta(days=30):continue
-        if date_only is not None and not now.date()<=date_only<=(now+timedelta(days=30)).date():continue
+        except (ValueError,KeyError):
+            reject('invalid_datetime_or_unknown_timezone');continue
+        if dt is not None and not now<=dt<=now+timedelta(days=30):
+            reject('past' if dt<now else 'beyond_30_days');continue
+        if date_only is not None and not now.date()<=date_only<=(now+timedelta(days=30)).date():
+            reject('past' if date_only<now.date() else 'beyond_30_days');continue
         url=canonical_url(values.get('URL',source['url']))
-        if not url:continue
+        if not url:
+            reject('invalid_url');continue
         host=source.get('publisher_host') or urllib.parse.urlsplit(source['url']).hostname.removeprefix('www.')
         target=urllib.parse.urlsplit(url).hostname.removeprefix('www.')
-        if source['official'] and target!=host and not target.endswith('.'+host):continue
+        if source['official'] and target!=host and not target.endswith('.'+host):
+            reject('untrusted_publisher');continue
         item=event(values.get('SUMMARY',''),url,None,source,dt,True)
         if item:
             if date_only is not None:item.update(event_date=date_only.isoformat(),date_precision='date_only',time_status='N/A – časové pásmo alebo presný čas neoverený')
             out.append(item)
+            audit['accepted']+=1
+        else:reject('irrelevant_title')
     return out
 
 

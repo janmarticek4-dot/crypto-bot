@@ -45,20 +45,27 @@ def run(fetcher=fetch):
             attributed = dict(source, official=True)
             parser = parse_calendar if source['format'] == 'ics' else parse_fomc
             try:
-                parsed = parser(bodies[-1], attributed, now)
+                if source['format']=='ics':
+                    audit={}
+                    parsed=parser(bodies[-1], attributed, now, audit=audit)
+                    status['calendar_audit']=audit
+                else:
+                    parsed=parser(bodies[-1], attributed, now)
                 events.extend(parsed)
                 status['future_relevant_events'] = len(parsed)
             except Exception as exc:
                 status.update(status='INVALID_FORMAT', error_type=type(exc).__name__)
         statuses.append(status)
     payload = dict(checked_at=now.isoformat(), sources=statuses, windows=windows(events, now),
-                   coverage='Fed meeting dates and BLS calendar only; BEA/ECB and unscheduled events not covered. Missing entries do not prove absence of events.')
+                   coverage='Fed, BLS and candidate BEA calendar endpoints; ECB and unscheduled events not covered. Candidate availability is unverified until this run succeeds. Missing entries do not prove absence of events.')
     output = ROOT / 'macro-diagnostics-output'
     output.mkdir(exist_ok=True)
     (output / 'calendar-results.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n')
     lines = ['# Calendar validation', '', payload['coverage'], '', 'Consensus, actual result and confirmed price direction: N/A unless separately verified.']
     for status in statuses:
         lines.append(f"Source {status['id']}: {status['status']}; future relevant events: {status.get('future_relevant_events', 'N/A')}")
+        if status.get('calendar_audit'):
+            lines.append('Calendar audit: ' + json.dumps(status['calendar_audit'], ensure_ascii=False))
     for name, rows in payload['windows'].items():
         lines += ['', '## ' + name]
         if not rows:

@@ -40,6 +40,9 @@ jobs:
         run: |
           if [ -f macro-diagnostics-output/REPORT.md ]; then
             cat macro-diagnostics-output/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+            if [ -f macro-diagnostics-output/CALENDAR.md ]; then
+              cat macro-diagnostics-output/CALENDAR.md >> "$GITHUB_STEP_SUMMARY"
+            fi
           else
             echo 'Diagnostics did not produce a report; inspect job logs.' >> "$GITHUB_STEP_SUMMARY"
           fi

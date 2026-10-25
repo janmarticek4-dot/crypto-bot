@@ -54,3 +54,26 @@ class RecoveryTests(unittest.TestCase):
         row=windows(events,datetime(2026,10,22,12,tzinfo=timezone.utc))['24h'][0]
         self.assertIsNone(row['bratislava_at'])
         self.assertEqual(row['window_precision'],'date_only_candidate')
+
+    def test_bls_windows_timezone_and_quoted_tzid(self):
+        now=datetime(2026,10,26,tzinfo=timezone.utc)
+        raw=b'BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART;TZID="Eastern Standard Time":20261026T083000\nSUMMARY:Consumer Price Index\nEND:VEVENT\nEND:VCALENDAR'
+        audit={}
+        rows=f.parse_calendar(raw,dict(id='bls',url='https://www.bls.gov/x',official=True),now,audit)
+        self.assertEqual(rows[0]['event_at'],'2026-10-26T12:30:00+00:00')
+        self.assertEqual(audit['accepted'],1)
+
+    def test_calendar_audit_distinguishes_stale_invalid_and_irrelevant(self):
+        raw=b'BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART:20251022T123000Z\nSUMMARY:Consumer Price Index\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=Unknown/Zone:20261026T083000\nSUMMARY:CPI\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART:20261026T123000Z\nSUMMARY:Unrelated item\nEND:VEVENT\nEND:VCALENDAR'
+        audit={}
+        rows=f.parse_calendar(raw,dict(id='bls',url='https://www.bls.gov/x',official=True),datetime(2026,10,25,tzinfo=timezone.utc),audit)
+        self.assertEqual(rows,[])
+        self.assertEqual(audit['rejected'],dict(past=1,invalid_datetime_or_unknown_timezone=1,irrelevant_title=1))
+        self.assertEqual(audit['total'],sum(audit['rejected'].values()))
+        self.assertEqual(audit['earliest_date'],'20251022')
+
+    def test_csv_yields_require_actual_fields_and_finite_values(self):
+        raw=b'Date,2 YR,10 YR\n10/22/2026,4.1,4.2\n'
+        self.assertEqual(m.validate(raw,'treasury_csv')['latest_observation_date'],'2026-10-22')
+        for invalid in (b'<html>denied</html>',raw.replace(b'4.1',b'NaN')):
+            with self.assertRaises(m.InvalidFormat):m.validate(invalid,'treasury_csv')
