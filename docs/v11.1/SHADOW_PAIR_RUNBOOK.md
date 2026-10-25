@@ -71,3 +71,17 @@ Regression: 194 tests passed under inherited BOT_DATA_MODE=shadow.
 The failed run created no live reports, so it is not evidence of data-provider
 failure or a completed shadow test. Start a NEW workflow run on the latest branch
 commit; re-running old jobs reuses the old failing commit.
+
+## Second CI failure 40233303240
+
+Public annotations identify Offline regression as the failed step; authenticated
+full logs were not accessible here. Inspection found the added integration test
+imported PyYAML, absent from declared requirements but installed locally.
+Reproduced with inherited shadow mode and yaml import deliberately unavailable:
+193 tests, one discovery error (ModuleNotFoundError: yaml). After removing this
+unnecessary test-only dependency, the SAME constrained run passes194 tests.
+This is a confirmed reproducible defect; exact runner traceback still requires
+its full log. No production dependencies or production code changed.
+The workflow now captures offline-tests.log under shadow-output before running
+any tests, publishes it even on failure, and preserves the actual test exit code.
+Future runs therefore provide failure evidence even if no live snapshot exists.

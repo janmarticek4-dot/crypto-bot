@@ -2,7 +2,6 @@
 from datetime import datetime,timezone
 from pathlib import Path
 import unittest
-import yaml
 from v11.fundamentals import parse_calendar, SOURCES
 from v11.briefing import event_lines
 
@@ -21,12 +20,11 @@ class ShadowCalendarIntegration(unittest.TestCase):
     def test_registered_entrypoint_calls_same_commit_shadow_without_secrets(self):
         root=Path(__file__).resolve().parents[1]
         text=(root/'.github/workflows/run.yml').read_text()
-        config=yaml.safe_load(text)
-        job=config['jobs']['shadow']
-        self.assertEqual(job['uses'],'./.github/workflows/v11-1-shadow-test.yml')
-        self.assertFalse(job['with']['use_groq'])
+        job=text.split('\n  shadow:\n',1)[1]
+        self.assertIn('uses: ./.github/workflows/v11-1-shadow-test.yml',job)
+        self.assertIn('use_groq: false',job)
         self.assertNotIn('secrets:',text)
-        self.assertIn("inputs.task == 'shadow'",job['if'])
+        self.assertIn("inputs.task == 'shadow'",job)
         reused=(root/'.github/workflows/v11-1-shadow-test.yml').read_text()
         for constraint in ('run.head_sha !== context.sha', 'run.conclusion', 'dedicated',
                            'No successful morning checkpoint', 'actions/download-artifact@v4'):

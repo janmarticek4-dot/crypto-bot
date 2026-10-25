@@ -56,7 +56,15 @@ jobs:
       - name: Install existing dependencies
         run: python -m pip install -r requirements.txt
       - name: Offline regression and shadow safety tests
-        run: python scripts/test_offline.py
+        run: |
+          mkdir -p shadow-output
+          if python scripts/test_offline.py > shadow-output/offline-tests.log 2>&1; then
+            result=0
+          else
+            result=$?
+          fi
+          tail -n 100 shadow-output/offline-tests.log
+          exit "$result"
       - name: Validate morning artifact provenance
         if: inputs.phase == 'evening'
         id: morning
