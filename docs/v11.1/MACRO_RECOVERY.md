@@ -56,3 +56,21 @@ Changes:
 proxy403; no evidence about new candidates' availability on GitHub-hosted runners.
 No production main.py, trading rules, portfolio/state or Telegram changes.
 Next diagnostic run must establish actual rejection counts and alternate status.
+
+## Confirmed BLS defect — run 40231020052
+
+GitHub-hosted run at 2026-10-25 21:29 Bratislava, commit ac85655:
+all 313 official BLS calendar entries rejected as invalid datetime/unknown zone.
+Audit identifies the exact source TZID: US-Eastern (313 occurrences), date range
+2025-01-03 through 2026-12-30. This is not missing historical coverage.
+Fix: map publisher-specific US-Eastern to America/New_York only for bls.gov URLs,
+using US DST, not a fixed offset or Europe DST. Other unknown zones stay rejected.
+Regression tests: Oct26 08:30 New York =12:30UTC and Nov3 =13:30UTC, plus refusal
+of the same nonstandard alias on another publisher. 191 offline tests passed.
+No raw ICS exists in the uploaded artifact, so exact post-fix live event counts
+and titles require a fresh GitHub run; synthetic tests are not live evidence.
+
+Other evidence: SEC legacy works (25 items); BEA RSS406 on both hosts; BEA calendar
+candidate HTTP200 HTML rejected as invalid format; BLS current_year.ics HTTP404;
+Treasury XML AND CSV timed out. These failures remain unresolved, not successful
+fallbacks. All original diagnostic artifacts preserved in macro-run-40231020052/.

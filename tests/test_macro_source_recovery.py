@@ -77,3 +77,17 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(m.validate(raw,'treasury_csv')['latest_observation_date'],'2026-10-22')
         for invalid in (b'<html>denied</html>',raw.replace(b'4.1',b'NaN')):
             with self.assertRaises(m.InvalidFormat):m.validate(invalid,'treasury_csv')
+
+    def test_observed_bls_us_eastern_alias_handles_us_dst(self):
+        source=dict(id='bls_calendar',url='https://www.bls.gov/schedule/news_release/bls.ics',official=True)
+        for day, expected in [('20261026','2026-10-26T12:30:00+00:00'),('20261103','2026-11-03T13:30:00+00:00')]:
+            raw=('BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART;TZID=US-Eastern:'+day+'T083000\nSUMMARY:Consumer Price Index\nEND:VEVENT\nEND:VCALENDAR').encode()
+            audit={}
+            rows=f.parse_calendar(raw,source,datetime(2026,10,25,tzinfo=timezone.utc),audit)
+            self.assertEqual(rows[0]['event_at'],expected)
+            self.assertEqual(audit['accepted'],1)
+            self.assertEqual(audit['timezone_identifiers'],{'US-Eastern':1})
+        other=dict(source,url='https://unknown.invalid/calendar')
+        audit={}
+        self.assertEqual(f.parse_calendar(raw,other,datetime(2026,10,25,tzinfo=timezone.utc),audit),[])
+        self.assertEqual(audit['rejected'],{'invalid_datetime_or_unknown_timezone':1})

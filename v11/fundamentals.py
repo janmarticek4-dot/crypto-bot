@@ -160,6 +160,11 @@ def parse_calendar(raw,source,now=None,audit=None):
                 audit['timezone_identifiers'][name]=audit['timezone_identifiers'].get(name,0)+1
                 # Explicit Windows calendar identifier; observes US daylight saving.
                 if name=='Eastern Standard Time':name='America/New_York'
+                # BLS uses a non-IANA US-Eastern identifier in its official ICS.
+                # Restrict this publisher-specific alias; unknown zones still fail closed.
+                publisher=urllib.parse.urlsplit(source['url']).hostname
+                if name=='US-Eastern' and publisher in ('www.bls.gov','bls.gov'):
+                    name='America/New_York'
                 tz=ZoneInfo(name)
                 dt=datetime.strptime(date,'%Y%m%dT%H%M%S').replace(tzinfo=tz).astimezone(timezone.utc)
             else:

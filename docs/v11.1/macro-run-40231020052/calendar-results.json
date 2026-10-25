@@ -1,0 +1,176 @@
+{
+  "checked_at": "2026-10-25T20:31:03.337093+00:00",
+  "sources": [
+    {
+      "provider": "Fed",
+      "id": "fomc_calendar",
+      "format": "fomc_html",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "checked_at": "2026-10-25T20:31:03.337110+00:00",
+      "http_status": 200,
+      "final_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "content_type": "text/html",
+      "response_headers": {
+        "Date": "Sun, 25 Oct 2026 20:31:03 GMT",
+        "Server": "cloudflare"
+      },
+      "bytes": 167856,
+      "body_sha256": "0538048e102bb0b0006109dcee2e162c6752f22f85bbdfe64ec282e4bfe0cc5d",
+      "validation": {
+        "format": "FOMC HTML",
+        "years": [
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025",
+          "2026",
+          "2027"
+        ],
+        "records": 57,
+        "note": "Meeting dates do not prove a decision time; no assumed Fed hour."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.088,
+      "future_relevant_events": 1
+    },
+    {
+      "provider": "BLS",
+      "id": "bls_calendar",
+      "format": "ics",
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "checked_at": "2026-10-25T20:31:03.427339+00:00",
+      "http_status": 200,
+      "final_url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "content_type": "text/calendar",
+      "response_headers": {
+        "Date": "Sun, 25 Oct 2026 20:31:03 GMT"
+      },
+      "bytes": 80672,
+      "body_sha256": "92a350111ace106deaab5584e4084366bd367b594a0d0bad116008d82d63e501",
+      "validation": {
+        "format": "iCalendar",
+        "records": 313,
+        "structurally_valid_records": 313,
+        "note": "Format/reachability only; dates, timezone precision and future coverage require calendar-level validation."
+      },
+      "status": "SUCCESS",
+      "layer": "parsed_data",
+      "seconds": 0.073,
+      "calendar_audit": {
+        "total": 313,
+        "accepted": 0,
+        "rejected": {
+          "invalid_datetime_or_unknown_timezone": 313
+        },
+        "earliest_date": "20250103",
+        "latest_date": "20261230",
+        "timezone_identifiers": {
+          "US-Eastern": 313
+        }
+      },
+      "future_relevant_events": 0
+    },
+    {
+      "provider": "BEA",
+      "id": "bea_calendar_candidate",
+      "format": "ics",
+      "url": "https://www.bea.gov/news/schedule/ics/online-calendar-subscription",
+      "checked_at": "2026-10-25T20:31:03.553516+00:00",
+      "http_status": 200,
+      "final_url": "https://www.bea.gov/news/schedule/ics/online-calendar-subscription",
+      "content_type": "text/html; charset=UTF-8",
+      "response_headers": {
+        "Date": "Sun, 25 Oct 2026 20:31:03 GMT",
+        "Via": "1.1 varnish (Varnish/6.0)"
+      },
+      "bytes": 61801,
+      "body_sha256": "cce032b27fa39748a476c0223c0c345010e5ec46c3dc8731788857d5443fb37b",
+      "status": "INVALID_FORMAT",
+      "layer": "body_validation",
+      "error_type": "InvalidFormat",
+      "error": "Expected iCalendar; HTML/error page is not a calendar",
+      "seconds": 0.087
+    },
+    {
+      "provider": "BLS",
+      "id": "bls_year_calendar",
+      "format": "ics",
+      "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+      "checked_at": "2026-10-25T20:31:03.640478+00:00",
+      "response_headers": {
+        "Date": "Sun, 25 Oct 2026 20:31:03 GMT"
+      },
+      "status": "HTTP_ERROR",
+      "layer": "http_response",
+      "http_status": 404,
+      "origin_http_status": null,
+      "origin_attribution": "HTTPS endpoint or CDN/gateway responded; application origin not independently proven",
+      "error": "HTTP non-success response; no response body/credentials exported",
+      "retry_after": null,
+      "error_type": "HTTPError",
+      "seconds": 0.091
+    }
+  ],
+  "windows": {
+    "24h": [],
+    "7d": [
+      {
+        "id": "040df63919e9c966879e9cd5be6152efe3c16b3a53a8cbc5090e3c2bab3a3c97",
+        "title": "FOMC zasadnutie – October 27-28",
+        "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+        "source": "fomc_calendar",
+        "kind": "news",
+        "published_at": null,
+        "event_at": null,
+        "scheduled": true,
+        "categories": [
+          "Fed"
+        ],
+        "symbol": null,
+        "confidence": "oficiálny zdroj, dopad neoverený",
+        "mechanisms": [
+          "Zmena sadzieb alebo likvidity môže ovplyvniť diskontovanie a ochotu podstupovať riziko; smer bez údajov nie je potvrdený."
+        ],
+        "event_date": "2026-10-28",
+        "date_precision": "date_only",
+        "time_status": "N/A – presný čas rozhodnutia neoverený",
+        "bratislava_at": null,
+        "window_precision": "date_only_candidate",
+        "consensus": null,
+        "actual": null,
+        "confirmed_direction": null
+      }
+    ],
+    "14d": [
+      {
+        "id": "040df63919e9c966879e9cd5be6152efe3c16b3a53a8cbc5090e3c2bab3a3c97",
+        "title": "FOMC zasadnutie – October 27-28",
+        "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+        "source": "fomc_calendar",
+        "kind": "news",
+        "published_at": null,
+        "event_at": null,
+        "scheduled": true,
+        "categories": [
+          "Fed"
+        ],
+        "symbol": null,
+        "confidence": "oficiálny zdroj, dopad neoverený",
+        "mechanisms": [
+          "Zmena sadzieb alebo likvidity môže ovplyvniť diskontovanie a ochotu podstupovať riziko; smer bez údajov nie je potvrdený."
+        ],
+        "event_date": "2026-10-28",
+        "date_precision": "date_only",
+        "time_status": "N/A – presný čas rozhodnutia neoverený",
+        "bratislava_at": null,
+        "window_precision": "date_only_candidate",
+        "consensus": null,
+        "actual": null,
+        "confirmed_direction": null
+      }
+    ]
+  },
+  "coverage": "Fed, BLS and candidate BEA calendar endpoints; ECB and unscheduled events not covered. Candidate availability is unverified until this run succeeds. Missing entries do not prove absence of events."
+}
