@@ -1,0 +1,49 @@
+{
+  "status": "CURRENT_MARKET_DATA",
+  "collected_at": "2026-10-25T20:43:19.885335+00:00",
+  "timezone": "Europe/Bratislava",
+  "symbols": [
+    "AAVE",
+    "TAO",
+    "FET",
+    "SOL",
+    "ONDO",
+    "RENDER"
+  ],
+  "current_market_data": {
+    "AAVE": true,
+    "TAO": true,
+    "FET": true,
+    "SOL": true,
+    "ONDO": true,
+    "RENDER": true
+  },
+  "complete": true,
+  "phase": "preview",
+  "same_snapshot_templates": true,
+  "real_morning_evening_comparison": false,
+  "fundamentals_available": 8,
+  "fundamentals_total": 16,
+  "groq": {
+    "requested": false,
+    "available": false,
+    "calls": 0,
+    "fallback": true
+  },
+  "protected_files_unchanged": true,
+  "telegram_enabled": false,
+  "production_state_loaded": false,
+  "real_positions_loaded": false,
+  "state_written": false,
+  "orders_enabled": false,
+  "faults": {
+    "passed": true,
+    "injected": true,
+    "groq_unavailable_fallback": true,
+    "sources_unavailable_na": true,
+    "no_ai_authored_facts": true,
+    "deterministic_decisions_unchanged": true
+  },
+  "commit": null,
+  "branch": null
+}

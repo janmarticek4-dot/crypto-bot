@@ -1,0 +1,9 @@
+SHADOW — na základe uložených zdrojov pôvodného zberu
+NAJBLIŽŠÍCH 24 HODÍN
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+NAJBLIŽŠÍCH 7 DNÍ (ďalšie dni, bez opakovania)
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+RIZIKOVÉ UDALOSTI DO 14 DNÍ (ďalšie dni, bez opakovania)
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+Nedostupné zdroje: fomc_calendar, fed, bls, bls_calendar, bea, ecb, cftc, sec
+Konsenzus, FedWatch, ETF toky, unlock kalendár a geopolitické pokrytie: N/A, ak nie sú doložené konkrétnym zdrojom.

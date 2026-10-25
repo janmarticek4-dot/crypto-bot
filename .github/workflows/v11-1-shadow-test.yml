@@ -1,5 +1,16 @@
 name: V11.1 Shadow Test
 on:
+  workflow_call:
+    inputs:
+      phase:
+        type: string
+        default: preview
+      morning_run_id:
+        type: string
+        default: ''
+      use_groq:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       phase:
@@ -8,7 +19,7 @@ on:
         options: [preview, morning, evening]
         default: preview
       morning_run_id:
-        description: Pri evening zadaj ID úspešného morning behu rovnakého dňa a commitu
+        description: Voliteľné ID morning behu; prázdne = automatické vyhľadanie na rovnakom commite
         type: string
         default: ''
       use_groq:
@@ -54,21 +65,40 @@ jobs:
           MORNING_RUN_ID: ${{ inputs.morning_run_id }}
         with:
           script: |
-            const raw = process.env.MORNING_RUN_ID || '';
+            let raw = process.env.MORNING_RUN_ID || '';
+            let dedicated = false;
+            if (!raw) {
+              const {data: listing} = await github.rest.actions.listWorkflowRunsForRepo({
+                ...context.repo, branch: 'feature/v11-1-review', event: 'workflow_dispatch',
+                status: 'success', head_sha: context.sha, per_page: 100
+              });
+              const candidates = listing.workflow_runs.filter(r =>
+                String(r.id) !== String(context.runId) && r.head_sha === context.sha &&
+                ['.github/workflows/run.yml','.github/workflows/v11-1-shadow-test.yml'].includes(r.path));
+              for (const candidate of candidates) {
+                const {data} = await github.rest.actions.listWorkflowRunArtifacts({...context.repo, run_id: candidate.id});
+                const name = `v111-morning-${candidate.id}-${candidate.run_attempt}`;
+                if (data.artifacts.some(a => a.name === name && !a.expired)) {
+                  raw = String(candidate.id); dedicated = true; break;
+                }
+              }
+              if (!raw) throw new Error('No successful morning checkpoint found on this commit. Run morning first.');
+            }
             if (!/^[0-9]+$/.test(raw)) throw new Error('A numeric morning run ID is required');
             const {data: run} = await github.rest.actions.getWorkflowRun({...context.repo, run_id: raw});
             if (run.head_branch !== 'feature/v11-1-review' || run.head_sha !== context.sha ||
                 run.event !== 'workflow_dispatch' || run.conclusion !== 'success' ||
-                run.path !== '.github/workflows/v11-1-shadow-test.yml' || String(run.id) === String(context.runId)) {
+                !['.github/workflows/v11-1-shadow-test.yml','.github/workflows/run.yml'].includes(run.path) || String(run.id) === String(context.runId)) {
               throw new Error('Morning run must be a successful independent run of this workflow on the same branch and commit');
             }
-            core.setOutput('artifact', `v11-1-shadow-${run.id}-${run.run_attempt}`);
+            core.setOutput('artifact', dedicated ? `v111-morning-${run.id}-${run.run_attempt}` : `v11-1-shadow-${run.id}-${run.run_attempt}`);
+            core.setOutput('run_id', String(run.id));
       - name: Restore only the public morning checkpoint
         if: inputs.phase == 'evening'
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.morning.outputs.artifact }}
-          run-id: ${{ inputs.morning_run_id }}
+          run-id: ${{ steps.morning.outputs.run_id }}
           github-token: ${{ github.token }}
           path: shadow-output/reference
       - name: Live shadow previews and source availability
@@ -85,6 +115,14 @@ jobs:
             args+=(--use-groq)
           fi
           python scripts/v111_shadow.py "${args[@]}"
+      - name: Publish discoverable morning checkpoint
+        if: success() && inputs.phase == 'morning'
+        uses: actions/upload-artifact@v4
+        with:
+          name: v111-morning-${{ github.run_id }}-${{ github.run_attempt }}
+          path: shadow-output/
+          if-no-files-found: error
+          retention-days: 7
       - name: Publish isolated shadow artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -98,4 +136,10 @@ jobs:
         run: |
           echo '## V11.1 Shadow Test' >> "$GITHUB_STEP_SUMMARY"
           echo 'Download v11-1-shadow artifacts: morning.txt, evening.txt, source_availability.json, summary.json.' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f shadow-output/summary.json ]; then
+            cat shadow-output/summary.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f shadow-output/comparison.txt ]; then
+            cat shadow-output/comparison.txt >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo 'No production state, portfolio, Telegram or trading. Preview uses one snapshot; morning/evening requires a validated independent morning artifact.' >> "$GITHUB_STEP_SUMMARY"

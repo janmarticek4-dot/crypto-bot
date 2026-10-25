@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from v11 import data, fundamentals, macro_context
 from v11.ai import explain
-from v11.briefing import build
+from v11.briefing import build, event_lines
 from v11.reporting import chunks
 from v11.runtime import market_status
 from v11.strategy import decide
@@ -265,9 +265,10 @@ def run(out, use_groq=False, phase='preview', checkpoint_path=None):
             write_json(out / (name + '_parts.json'), chunks(report))
         write_json(out / 'market_snapshot.json', snap)
         write_json(out / 'fundamentals.json', fund)
+        (out/'calendar.txt').write_text('SHADOW — SKUTOČNE NAČÍTANÉ ZDROJE\n'+'\n'.join(event_lines(fund,now.timestamp()))+'\n')
         write_json(out/'calendar_coverage.json',dict(scheduled_events=[e for e in fund['events'] if e.get('scheduled')],
             horizons_hours=[24,168,336],date_only_time='N/A; never assume midnight or decision time',
-            source_statuses=[s for s in fund['sources'] if s['source'] in ('fomc_calendar','bls_calendar','ecb')],
+            source_statuses=[s for s in fund['sources'] if s['source'] in ('fomc_calendar','fed','bls_calendar','bls','ecb','sec','cftc','bea')],
             completeness='N/A; zero events is not proof of no upcoming releases'))
         write_json(out / 'source_availability.json', dict(feed_parsing=fund['sources'], fetches=source_requests,
                                                        market_and_ai=api.requests))

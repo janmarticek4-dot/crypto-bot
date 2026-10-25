@@ -1,0 +1,920 @@
+{
+  "feed_parsing": [
+    {
+      "source": "fomc_calendar",
+      "symbol": null,
+      "coverage": [
+        "Fed"
+      ],
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "fomc_calendar",
+          "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "fed",
+      "symbol": null,
+      "coverage": [
+        "Fed"
+      ],
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "fed",
+          "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "fed_monetary",
+          "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "bls",
+      "symbol": null,
+      "coverage": [
+        "CPI",
+        "employment"
+      ],
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bls",
+          "url": "https://www.bls.gov/feed/bls_latest.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "bls_calendar",
+      "symbol": null,
+      "coverage": [
+        "CPI",
+        "employment"
+      ],
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bls_calendar",
+          "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "bls_year_calendar",
+          "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "bea",
+      "symbol": null,
+      "coverage": [
+        "PCE"
+      ],
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bea",
+          "url": "https://apps.bea.gov/rss/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "bea_www",
+          "url": "https://www.bea.gov/rss/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "ecb",
+      "symbol": null,
+      "coverage": [
+        "Fed",
+        "regulation"
+      ],
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "ecb",
+          "url": "https://www.ecb.europa.eu/rss/press.html",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "ecb_blog",
+          "url": "https://www.ecb.europa.eu/rss/blog.html",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "cftc",
+      "symbol": null,
+      "coverage": [
+        "regulation"
+      ],
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "cftc",
+          "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "sec",
+      "symbol": null,
+      "coverage": [
+        "regulation"
+      ],
+      "url": "https://www.sec.gov/news/pressreleases.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "sec",
+          "url": "https://www.sec.gov/news/pressreleases.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "sec_new_path",
+          "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-25T20:43:19.885335+00:00"
+    },
+    {
+      "source": "aave",
+      "url": "https://github.com/aave/aip/commits/main.atom",
+      "selected_source": "aave_aip",
+      "official": false,
+      "symbol": "AAVE",
+      "coverage": [
+        "project"
+      ],
+      "kind": "governance_repository_change",
+      "fallback": true,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "aave",
+          "url": "https://governance.aave.com/latest.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "aave_aip",
+          "url": "https://github.com/aave/aip/commits/main.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "ondo",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "selected_source": "ondo_secondary",
+      "official": false,
+      "symbol": "ONDO",
+      "coverage": [
+        "project",
+        "regulation"
+      ],
+      "kind": "secondary_project_report",
+      "fallback": true,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "ondo",
+          "url": "https://blog.ondo.finance/rss/",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "ondo_secondary",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "sol_agave",
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "selected_source": "sol_agave",
+      "official": true,
+      "symbol": "SOL",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "sol_agave",
+          "url": "https://github.com/anza-xyz/agave/releases.atom",
+          "status": "OK",
+          "events": 1
+        }
+      ]
+    },
+    {
+      "source": "tao_subtensor",
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "selected_source": "tao_subtensor",
+      "official": true,
+      "symbol": "TAO",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "tao_subtensor",
+          "url": "https://github.com/opentensor/subtensor/releases.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "fet_fetchd",
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "selected_source": "fet_fetchd",
+      "official": true,
+      "symbol": "FET",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "fet_fetchd",
+          "url": "https://github.com/fetchai/fetchd/releases.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "render_rnp",
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "selected_source": "render_rnp",
+      "official": false,
+      "symbol": "RENDER",
+      "coverage": [
+        "project"
+      ],
+      "kind": "governance_repository_change",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "render_rnp",
+          "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "coindesk",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "selected_source": "coindesk",
+      "official": false,
+      "symbol": null,
+      "coverage": [
+        "regulation",
+        "hack",
+        "project"
+      ],
+      "kind": "news",
+      "fallback": false,
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "coindesk",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "status": "OK",
+          "events": 1
+        }
+      ]
+    },
+    {
+      "source": "cointelegraph",
+      "url": "https://cointelegraph.com/rss",
+      "selected_source": "cointelegraph",
+      "official": false,
+      "symbol": null,
+      "coverage": [
+        "regulation",
+        "hack",
+        "project"
+      ],
+      "kind": "news",
+      "fallback": false,
+      "status": "OK",
+      "events": 4,
+      "checked_at": "2026-10-25T20:43:19.885335+00:00",
+      "attempts": [
+        {
+          "source": "cointelegraph",
+          "url": "https://cointelegraph.com/rss",
+          "status": "OK",
+          "events": 4
+        }
+      ]
+    }
+  ],
+  "fetches": [
+    {
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "checked_at": "2026-10-25T20:43:19.887148+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.014
+    },
+    {
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "checked_at": "2026-10-25T20:43:19.889320+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.014
+    },
+    {
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "checked_at": "2026-10-25T20:43:19.888488+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.017
+    },
+    {
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "checked_at": "2026-10-25T20:43:19.887857+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.021
+    },
+    {
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "checked_at": "2026-10-25T20:43:19.888899+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.022
+    },
+    {
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "checked_at": "2026-10-25T20:43:19.900866+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.013
+    },
+    {
+      "url": "https://www.bea.gov/rss/rss.xml",
+      "checked_at": "2026-10-25T20:43:19.903144+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.013
+    },
+    {
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "checked_at": "2026-10-25T20:43:19.905487+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.013
+    },
+    {
+      "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+      "checked_at": "2026-10-25T20:43:19.908658+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.012
+    },
+    {
+      "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+      "checked_at": "2026-10-25T20:43:19.911160+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.012
+    },
+    {
+      "url": "https://www.ecb.europa.eu/rss/blog.html",
+      "checked_at": "2026-10-25T20:43:19.913574+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.012
+    },
+    {
+      "url": "https://www.sec.gov/news/pressreleases.rss",
+      "checked_at": "2026-10-25T20:43:19.915929+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.012
+    },
+    {
+      "url": "https://governance.aave.com/latest.rss",
+      "checked_at": "2026-10-25T20:43:19.918268+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.012
+    },
+    {
+      "url": "https://blog.ondo.finance/rss/",
+      "checked_at": "2026-10-25T20:43:19.920673+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.012
+    },
+    {
+      "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+      "checked_at": "2026-10-25T20:43:19.927873+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.009
+    },
+    {
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "checked_at": "2026-10-25T20:43:19.932571+00:00",
+      "status": "FETCHED",
+      "bytes": 30462,
+      "seconds": 1.265
+    },
+    {
+      "url": "https://github.com/aave/aip/commits/main.atom",
+      "checked_at": "2026-10-25T20:43:19.930165+00:00",
+      "status": "FETCHED",
+      "bytes": 17067,
+      "seconds": 1.286
+    },
+    {
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "checked_at": "2026-10-25T20:43:19.937246+00:00",
+      "status": "FETCHED",
+      "bytes": 15900,
+      "seconds": 1.398
+    },
+    {
+      "url": "https://cointelegraph.com/rss",
+      "checked_at": "2026-10-25T20:43:21.335784+00:00",
+      "status": "FETCHED",
+      "bytes": 53404,
+      "seconds": 0.164
+    },
+    {
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "checked_at": "2026-10-25T20:43:19.925661+00:00",
+      "status": "FETCHED",
+      "bytes": 51974,
+      "seconds": 1.888
+    },
+    {
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "checked_at": "2026-10-25T20:43:19.923321+00:00",
+      "status": "FETCHED",
+      "bytes": 359002,
+      "seconds": 2.166
+    },
+    {
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "checked_at": "2026-10-25T20:43:21.198486+00:00",
+      "status": "FETCHED",
+      "bytes": 15621,
+      "seconds": 1.126
+    },
+    {
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "checked_at": "2026-10-25T20:43:21.216935+00:00",
+      "status": "FETCHED",
+      "bytes": 30462,
+      "seconds": 1.155
+    },
+    {
+      "url": "https://api.llama.fi/protocol/aave",
+      "checked_at": "2026-10-25T20:43:22.374663+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.004
+    },
+    {
+      "url": "https://api.llama.fi/v2/historicalChainTvl/Solana",
+      "checked_at": "2026-10-25T20:43:22.378801+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.003
+    },
+    {
+      "url": "https://home.treasury.gov/resource-center-data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
+      "checked_at": "2026-10-25T20:43:22.382148+00:00",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": null,
+      "seconds": 0.003
+    }
+  ],
+  "market_and_ai": [
+    {
+      "host": "api.coingecko.com",
+      "path": "/api/v3/coins/markets",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:37.944839+00:00",
+      "http_status": 200,
+      "seconds": 0.414
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/ticker/24hr",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:38.360054+00:00",
+      "http_status": 200,
+      "seconds": 1.48
+    },
+    {
+      "host": "api.coingecko.com",
+      "path": "/api/v3/global",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:39.841651+00:00",
+      "http_status": 200,
+      "seconds": 0.281
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:40.123988+00:00",
+      "http_status": 200,
+      "seconds": 1.448
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:41.639950+00:00",
+      "http_status": 200,
+      "seconds": 1.302
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:42.948306+00:00",
+      "http_status": 200,
+      "seconds": 1.318
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:44.272449+00:00",
+      "http_status": 200,
+      "seconds": 1.273
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:45.551737+00:00",
+      "http_status": 200,
+      "seconds": 1.616
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:47.219026+00:00",
+      "http_status": 200,
+      "seconds": 1.275
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:48.500150+00:00",
+      "http_status": 200,
+      "seconds": 0.348
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:48.854043+00:00",
+      "http_status": 200,
+      "seconds": 1.361
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:50.223157+00:00",
+      "http_status": 200,
+      "seconds": 1.164
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:51.440131+00:00",
+      "http_status": 200,
+      "seconds": 1.377
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:52.823453+00:00",
+      "http_status": 200,
+      "seconds": 1.314
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:54.144166+00:00",
+      "http_status": 200,
+      "seconds": 1.349
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:55.499720+00:00",
+      "http_status": 200,
+      "seconds": 1.376
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:56.923894+00:00",
+      "http_status": 200,
+      "seconds": 1.269
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:58.199532+00:00",
+      "http_status": 200,
+      "seconds": 1.215
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:42:59.421418+00:00",
+      "http_status": 200,
+      "seconds": 1.206
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:00.630561+00:00",
+      "http_status": 200,
+      "seconds": 1.431
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:02.109265+00:00",
+      "http_status": 200,
+      "seconds": 1.361
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:03.475788+00:00",
+      "http_status": 200,
+      "seconds": 1.323
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:04.805300+00:00",
+      "http_status": 200,
+      "seconds": 1.337
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:06.148621+00:00",
+      "http_status": 200,
+      "seconds": 1.49
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:07.714749+00:00",
+      "http_status": 200,
+      "seconds": 0.378
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:08.098888+00:00",
+      "http_status": 200,
+      "seconds": 1.294
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:09.398955+00:00",
+      "http_status": 200,
+      "seconds": 1.562
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:10.968631+00:00",
+      "http_status": 200,
+      "seconds": 1.373
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:12.395385+00:00",
+      "http_status": 200,
+      "seconds": 0.391
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:12.791909+00:00",
+      "http_status": 200,
+      "seconds": 1.333
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:14.131043+00:00",
+      "http_status": 200,
+      "seconds": 1.187
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:15.320427+00:00",
+      "http_status": 200,
+      "seconds": 1.458
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:16.826500+00:00",
+      "http_status": 200,
+      "seconds": 1.517
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:18.349515+00:00",
+      "http_status": 200,
+      "seconds": 0.356
+    },
+    {
+      "host": "data-api.binance.vision",
+      "path": "/api/v3/klines",
+      "method": "GET",
+      "checked_at": "2026-10-25T20:43:18.711295+00:00",
+      "http_status": 200,
+      "seconds": 1.171
+    }
+  ]
+}

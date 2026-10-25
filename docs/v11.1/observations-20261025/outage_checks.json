@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "injected": true,
+  "groq_unavailable_fallback": true,
+  "sources_unavailable_na": true,
+  "no_ai_authored_facts": true,
+  "deterministic_decisions_unchanged": true
+}

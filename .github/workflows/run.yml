@@ -3,8 +3,24 @@
 name: Macro Sources Diagnostics — development branch entrypoint
 on:
   workflow_dispatch:
+    inputs:
+      task:
+        description: Izolovaná diagnostika alebo V11.1 shadow test
+        type: choice
+        options: [macro, shadow]
+        default: macro
+      phase:
+        description: Shadow fáza; morning 07:00–08:30, evening 20:00–21:30 Bratislava
+        type: choice
+        options: [preview, morning, evening]
+        default: preview
+      morning_run_id:
+        description: ID ranného behu; prázdne = bezpečné automatické vyhľadanie
+        type: string
+        default: ''
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: macro-sources-diagnostics-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: false
@@ -12,7 +28,7 @@ jobs:
   diagnostics:
     # Original repo: research branch only. A clean diagnostics-only research repo
     # can use its own default branch, without changing original main at all.
-    if: github.ref == 'refs/heads/feature/v11-1-review'
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -48,3 +64,11 @@ jobs:
           else
             echo 'Diagnostics did not produce a report; inspect job logs.' >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  shadow:
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'shadow'
+    uses: ./.github/workflows/v11-1-shadow-test.yml
+    with:
+      phase: ${{ inputs.phase || 'preview' }}
+      morning_run_id: ${{ inputs.morning_run_id || '' }}
+      use_groq: false
