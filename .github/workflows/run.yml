@@ -7,7 +7,7 @@ on:
       task:
         description: Izolovaná diagnostika alebo V11.1 shadow test
         type: choice
-        options: [macro, shadow, fundamental-sources, temporal-shadow, private-state]
+        options: [macro, shadow, fundamental-sources, temporal-shadow, integration-shadow, private-state]
         default: macro
       use_groq:
         description: Voliteľné AI pre fundamental-sources; bez kľúča deterministický fallback
@@ -36,7 +36,7 @@ jobs:
   diagnostics:
     # Original repo: research branch only. A clean diagnostics-only research repo
     # can use its own default branch, without changing original main at all.
-    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow' && inputs.task != 'fundamental-sources' && inputs.task != 'temporal-shadow' && inputs.task != 'private-state'
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow' && inputs.task != 'fundamental-sources' && inputs.task != 'temporal-shadow' && inputs.task != 'integration-shadow' && inputs.task != 'private-state'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -95,6 +95,14 @@ jobs:
     with:
       source_sha: ${{ github.sha }}
       observation_workflow: run.yml
+
+  integration-shadow:
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'integration-shadow'
+    uses: janmarticek4-dot/crypto-bot/.github/workflows/v111-integration-shadow.yml@9aadf86cc93c020585e744f184453c46c4d48ffe
+    with:
+      source_sha: 9aadf86cc93c020585e744f184453c46c4d48ffe
+      phase: ${{ inputs.phase || 'preview' }}
+      morning_run_id: ${{ inputs.morning_run_id || '' }}
 
   private-state-authorization:
     if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'private-state'
