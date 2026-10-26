@@ -205,3 +205,27 @@ nevypisuje. Rovnaký kód sa môže bezpečne skopírovať z Actions logu bez ZI
 
 Najprv spustiť nový beh na aktuálnom commite. Nemeníme všetky Secrets naslepo;
 konkrétna oprava sa určí podľa kódu. Starý Re-run použije starší kód.
+
+## Priamy job registrovaného workflow — po behu40328446377
+
+TOKEN_SECRET_MISSING pretrval aj po aktualizácii testovacieho tokenu. Tento kód
+znamená prázdny vstup do procesu, NIE odmietnutie tokenu GitHub API alebo jeho
+nedostatočné Contents oprávnenia. Názov prostredia bol potvrdený snímkou.
+Presná príčina neprístupnosti Secretu zostáva nepotvrdená; ďalšie tokeny ani AES
+kľúče sa nemajú meniť naslepo.
+
+Registrovaný run.yml teraz pre task=private-state vykonáva authorize aj integration
+priamo vo vlastných joboch. Integračný job má explicitné environment
+state-storage-integration, contents:read a tie isté dve testovacie Secrets iba
+v testovacom kroku. Odstránené je vnorené workflow volanie z tejto spúšťacej cesty;
+nejde o tvrdenie, že reusable workflows všeobecne nepodporujú environment Secrets.
+Samostatný private-state-integration.yml ostáva alternatívou pre priame spustenie.
+
+Na chybe konfigurácie pribudne configuration_presence s tromi booleanmi:
+token_available, encryption_key_available, repository_variable_available.
+Žiadne hodnoty, dĺžky, hash kľúča alebo kompletný secrets/env context sa nezverejňujú.
+Rovnaké áno/nie údaje sú v bezpečnom riadku Config availability v Actions logu.
+
+Spustiť nový Run workflow na feature/v11-1-review, task=private-state,
+confirm_private_state_test=true. Main, produkčný stav a existujúce Secrets sa týmto
+vývojovým commitom nemenia. Živé overenie tejto novej spúšťacej cesty ešte neprebehlo.

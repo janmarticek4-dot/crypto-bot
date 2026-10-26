@@ -134,7 +134,9 @@ class MacroDiagnosticsTests(unittest.TestCase):
 
     def test_registered_workflow_path_is_safe_on_development_branch(self):
         text=(m.ROOT/'.github/workflows/run.yml').read_text()
-        for forbidden in ('secrets.','ref: main','test_offline.py','python main.py','STATE_BACKEND','  schedule:'):
+        diagnostic_job=text.split('  diagnostics:',1)[1].split('  shadow:',1)[0]
+        self.assertNotIn('secrets.',diagnostic_job)
+        for forbidden in ('ref: main','test_offline.py','python main.py','STATE_BACKEND','  schedule:'):
             self.assertNotIn(forbidden,text)
         self.assertIn("if: github.ref == 'refs/heads/feature/v11-1-review'",text)
         self.assertIn('ref: ${{ github.sha }}',text)

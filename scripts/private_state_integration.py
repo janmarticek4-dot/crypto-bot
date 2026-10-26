@@ -210,10 +210,12 @@ def exercise(config, client_factory=GitHubState, checks=None):
 
 
 def safe_report(report):
-    allowed={'schema','status','synthetic_only','api_requested','checks','production_migration','failure','failure_stage','failure_code'}
+    allowed={'schema','status','synthetic_only','api_requested','checks','production_migration','failure','failure_stage','failure_code','configuration_presence'}
     if set(report)-allowed:return False
     if report.get('schema')!='state-integration-v1' or report.get('synthetic_only') is not True:return False
     if report.get('production_migration') is not False or type(report.get('api_requested')) is not bool:return False
+    presence=report.get('configuration_presence')
+    if presence is not None and (not isinstance(presence,dict) or set(presence)!={'token_available','encryption_key_available','repository_variable_available'} or any(type(v) is not bool for v in presence.values())):return False
     checks=report.get('checks')
     if not isinstance(checks,dict) or set(checks)-set(CHECK_IDS) or any(v is not True for v in checks.values()):return False
     if report.get('status')=='PASSED':return set(checks)==set(CHECK_IDS) and 'failure' not in report
@@ -230,10 +232,12 @@ def run(output, env=None, client_factory=GitHubState, live_api=True):
     # Never print errors, tracebacks, API responses, ciphertext or captured output.
     captured=io.StringIO();report={'schema':'state-integration-v1','status':'FAILED',
         'synthetic_only':True,'api_requested':live_api,'checks':{},'production_migration':False}
+    source_env=env if env is not None else os.environ
+    report['configuration_presence']={label:bool(source_env.get(name,'')) for label,name in (('token_available','TEST_STATE_TOKEN'),('encryption_key_available','TEST_STATE_ENCRYPTION_KEY'),('repository_variable_available','TEST_STATE_REPOSITORY'))}
     config=None
     try:
         with contextlib.redirect_stdout(captured),contextlib.redirect_stderr(captured):
-            config=configuration(env if env is not None else os.environ)
+            config=configuration(source_env)
             exercise(config,client_factory,report['checks'])
         require(not captured.getvalue())
         report['status']='PASSED'
@@ -258,6 +262,8 @@ def run(output, env=None, client_factory=GitHubState, live_api=True):
     print('Private state integration: '+report['status'])
     if report.get('failure_code') in CONFIG_CODES:
         print('Configuration check: '+report['failure_code'])
+        if report.get('configuration_presence'):
+            print('Config availability: '+', '.join(name+'='+('available' if value else 'missing') for name,value in report['configuration_presence'].items()))
     return 0 if report['status']=='PASSED' else 1
 
 

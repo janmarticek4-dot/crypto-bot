@@ -132,7 +132,12 @@ class PrivateStateIntegration(unittest.TestCase):
         self.assertIn('needs: authorize',text)
         entry=(root/'.github/workflows/run.yml').read_text()
         self.assertIn("inputs.task == 'private-state'",entry)
-        self.assertIn('uses: ./.github/workflows/private-state-integration.yml',entry)
+        job=entry.split('\n  private-state:\n',1)[1]
+        self.assertIn('environment: state-storage-integration',job)
+        self.assertIn('needs: private-state-authorization',job)
+        self.assertIn('TEST_STATE_TOKEN: ${{ secrets.TEST_STATE_TOKEN }}',job)
+        self.assertNotIn('uses: ./.github/workflows/private-state-integration.yml',entry)
+        self.assertNotIn('secrets.STATE_REPO_TOKEN',entry)
 
     def test_unexpected_private_report_fields_are_refused_before_serialization(self):
         def poisoned(config,factory,checks):
@@ -157,3 +162,13 @@ class PrivateStateIntegration(unittest.TestCase):
             self.assertEqual(result,1);self.assertEqual(report['failure_code'],expected)
             if value:self.assertNotIn(value,json.dumps(report)+output)
             self.assertEqual(self.remote.attempts,[])
+
+    def test_missing_token_reports_presence_only_and_never_secret_values(self):
+        env=environment();env['TEST_STATE_TOKEN']=''
+        result,report,output=self.run_harness(env)
+        self.assertEqual(result,1)
+        self.assertEqual(report['configuration_presence'],{
+            'token_available':False,'encryption_key_available':True,'repository_variable_available':True})
+        self.assertIn('token_available=missing',output)
+        self.assertNotIn(env['TEST_STATE_ENCRYPTION_KEY'],output+json.dumps(report))
+        self.assertEqual(self.remote.attempts,[])
