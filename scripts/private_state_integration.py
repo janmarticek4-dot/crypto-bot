@@ -39,17 +39,34 @@ def require(condition):
     if not condition:raise Refused('Integration check refused')
 
 
+CONFIG_CODES=frozenset({
+ 'CONFIRMATION_REQUIRED','REPOSITORY_VARIABLE_MISSING','REPOSITORY_VARIABLE_INVALID',
+ 'PUBLIC_CODE_REPOSITORY_REFUSED','TOKEN_SECRET_MISSING','TOKEN_SECRET_TOO_SHORT',
+ 'ENCRYPTION_SECRET_MISSING','ENCRYPTION_SECRET_INVALID_BASE64',
+ 'ENCRYPTION_SECRET_NOT_32_BYTES','DEMO_ENCRYPTION_KEY_REFUSED','RUN_IDENTITY_INVALID',
+})
+
+def config_require(condition,code):
+    if not condition:raise Refused(code)
+
+
 def configuration(env):
-    require(env.get('STATE_TEST_CONFIRMED')=='true')
+    config_require(env.get('STATE_TEST_CONFIRMED')=='true','CONFIRMATION_REQUIRED')
     repo=env.get('TEST_STATE_REPOSITORY','')
-    require(bool(re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*/crypto-bot-state-integration-test',repo)))
-    require(repo.lower()!=env.get('GITHUB_REPOSITORY','').lower())
+    config_require(bool(repo),'REPOSITORY_VARIABLE_MISSING')
+    config_require(bool(re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*/crypto-bot-state-integration-test',repo)),'REPOSITORY_VARIABLE_INVALID')
+    config_require(repo.lower()!=env.get('GITHUB_REPOSITORY','').lower(),'PUBLIC_CODE_REPOSITORY_REFUSED')
     token=env.get('TEST_STATE_TOKEN','')
-    require(len(token)>=20)
-    key=base64.b64decode(env.get('TEST_STATE_ENCRYPTION_KEY',''),validate=True)
-    require(len(key)==32 and key not in (bytes(range(32)),bytes(32)))
+    config_require(bool(token),'TOKEN_SECRET_MISSING')
+    config_require(len(token)>=20,'TOKEN_SECRET_TOO_SHORT')
+    encoded=env.get('TEST_STATE_ENCRYPTION_KEY','')
+    config_require(bool(encoded),'ENCRYPTION_SECRET_MISSING')
+    try:key=base64.b64decode(encoded,validate=True)
+    except (ValueError,TypeError):raise Refused('ENCRYPTION_SECRET_INVALID_BASE64') from None
+    config_require(len(key)==32,'ENCRYPTION_SECRET_NOT_32_BYTES')
+    config_require(key not in (bytes(range(32)),bytes(32)),'DEMO_ENCRYPTION_KEY_REFUSED')
     run_id=env.get('GITHUB_RUN_ID','');attempt=env.get('GITHUB_RUN_ATTEMPT','')
-    require(bool(re.fullmatch('[0-9]+',run_id)) and bool(re.fullmatch('[0-9]+',attempt)))
+    config_require(bool(re.fullmatch('[0-9]+',run_id)) and bool(re.fullmatch('[0-9]+',attempt)),'RUN_IDENTITY_INVALID')
     return dict(repo=repo,token=token,key=key,namespace=f'run-{run_id}-{attempt}')
 
 
@@ -193,7 +210,7 @@ def exercise(config, client_factory=GitHubState, checks=None):
 
 
 def safe_report(report):
-    allowed={'schema','status','synthetic_only','api_requested','checks','production_migration','failure','failure_stage'}
+    allowed={'schema','status','synthetic_only','api_requested','checks','production_migration','failure','failure_stage','failure_code'}
     if set(report)-allowed:return False
     if report.get('schema')!='state-integration-v1' or report.get('synthetic_only') is not True:return False
     if report.get('production_migration') is not False or type(report.get('api_requested')) is not bool:return False
@@ -202,7 +219,8 @@ def safe_report(report):
     if report.get('status')=='PASSED':return set(checks)==set(CHECK_IDS) and 'failure' not in report
     return (report.get('status')=='FAILED' and
             report.get('failure')=='Configuration or integration check failed; private details suppressed' and
-            report.get('failure_stage') in (*CHECK_IDS,'configuration','output_validation'))
+            report.get('failure_stage') in (*CHECK_IDS,'configuration','output_validation') and
+            report.get('failure_code') in (*CONFIG_CODES,'INTEGRATION_CHECK_FAILED'))
 
 
 def run(output, env=None, client_factory=GitHubState, live_api=True):
@@ -220,9 +238,10 @@ def run(output, env=None, client_factory=GitHubState, live_api=True):
         require(not captured.getvalue())
         report['status']='PASSED'
         report['checks']['no_library_output_or_plaintext_files']=True
-    except Exception:
+    except Exception as exc:
         report['status']='FAILED'
         report['failure']='Configuration or integration check failed; private details suppressed'
+        report['failure_code']=str(exc) if isinstance(exc,Refused) and str(exc) in CONFIG_CODES else 'INTEGRATION_CHECK_FAILED'
         report['failure_stage']='configuration' if config is None else next((name for name in CHECK_IDS if name not in report['checks']),'output_validation')
     if not safe_report(report):
         report={'schema':'state-integration-v1','status':'REFUSED','synthetic_only':True}
@@ -237,6 +256,8 @@ def run(output, env=None, client_factory=GitHubState, live_api=True):
     require(not path.is_symlink())
     path.write_text(raw)
     print('Private state integration: '+report['status'])
+    if report.get('failure_code') in CONFIG_CODES:
+        print('Configuration check: '+report['failure_code'])
     return 0 if report['status']=='PASSED' else 1
 
 

@@ -142,3 +142,18 @@ class PrivateStateIntegration(unittest.TestCase):
         self.assertEqual(result,1);self.assertEqual(report['status'],'REFUSED')
         self.assertNotIn('SYNTHETIC-PRIVATE-CANARY',json.dumps(report)+output)
         self.assertNotIn('accidental_ledger',json.dumps(report))
+
+    def test_configuration_error_codes_do_not_reveal_values_or_make_requests(self):
+        cases=[('TEST_STATE_REPOSITORY','','REPOSITORY_VARIABLE_MISSING'),
+               ('TEST_STATE_REPOSITORY','https://example.invalid/private','REPOSITORY_VARIABLE_INVALID'),
+               ('TEST_STATE_TOKEN','','TOKEN_SECRET_MISSING'),
+               ('TEST_STATE_TOKEN','SHORT-TEST','TOKEN_SECRET_TOO_SHORT'),
+               ('TEST_STATE_ENCRYPTION_KEY','','ENCRYPTION_SECRET_MISSING'),
+               ('TEST_STATE_ENCRYPTION_KEY','NOT-BASE64-CANARY','ENCRYPTION_SECRET_INVALID_BASE64'),
+               ('TEST_STATE_ENCRYPTION_KEY',base64.b64encode(b'fake').decode(),'ENCRYPTION_SECRET_NOT_32_BYTES')]
+        for name,value,expected in cases:
+            env=environment();env[name]=value
+            result,report,output=self.run_harness(env)
+            self.assertEqual(result,1);self.assertEqual(report['failure_code'],expected)
+            if value:self.assertNotIn(value,json.dumps(report)+output)
+            self.assertEqual(self.remote.attempts,[])

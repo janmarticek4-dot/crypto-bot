@@ -178,3 +178,30 @@ Nepoužívaj Re-run starého kódu; nový beh spusti na poslednom schválenom co
   rotácia kľúčov sú ďalšie prevádzkové kroky, nie výsledok tohto testu.
 - GitHub rate-limit/výpadok môže test ukončiť. Chyba sa neprezentuje ako úspech
   a výnimka/API telo sa nevypisujú. V report.json je iba bezpečný názov fázy.
+
+## Diagnostika konfigurácie — beh40324871428
+
+Dodaný report: FAILED, checks={}, failure_stage=configuration. Predchádzajúca
+verzia neuvádzala, ktorá podmienka konfigurácie zlyhala. K privátnemu API sa v tejto
+fáze kód ešte nepripája a do úložiska sa nezapisuje. api_requested=true označuje
+zvolený živý režim, nie dôkaz uskutočneného API volania.
+
+Nová verzia dopĺňa iba bezpečný pevný failure_code; hodnoty ani dĺžky secretov
+nevypisuje. Rovnaký kód sa môže bezpečne skopírovať z Actions logu bez ZIP-u.
+
+| Kód | Čo skontrolovať v Environment state-storage-integration |
+|---|---|
+| REPOSITORY_VARIABLE_MISSING | Chýba variable TEST_STATE_REPOSITORY alebo je v nesprávnom prostredí |
+| REPOSITORY_VARIABLE_INVALID | Má byť owner/crypto-bot-state-integration-test, bez https:// a medzier |
+| TOKEN_SECRET_MISSING | Chýba Environment secret TEST_STATE_TOKEN |
+| TOKEN_SECRET_TOO_SHORT | Do Secretu sa zrejme nevložila celá hodnota tokenu; nič neposielať do chatu |
+| ENCRYPTION_SECRET_MISSING | Chýba Environment secret TEST_STATE_ENCRYPTION_KEY |
+| ENCRYPTION_SECRET_INVALID_BASE64 | Hodnota nie je striktné base64, napr. bol vložený názov alebo text príkazu |
+| ENCRYPTION_SECRET_NOT_32_BYTES | Base64 dekódovanie nevracia32 bajtov; skontrolovať schválený postup C |
+| DEMO_ENCRYPTION_KEY_REFUSED | Nemožno použiť verejný testovací vektor alebo nulový kľúč |
+| CONFIRMATION_REQUIRED | Potvrdiť výlučne syntetický test vo workflow |
+| PUBLIC_CODE_REPOSITORY_REFUSED | Cieľ nesmie byť repozitár s verejným kódom |
+| RUN_IDENTITY_INVALID | Použiť riadny Actions beh, nie ručné nastavenie ID |
+
+Najprv spustiť nový beh na aktuálnom commite. Nemeníme všetky Secrets naslepo;
+konkrétna oprava sa určí podľa kódu. Starý Re-run použije starší kód.
