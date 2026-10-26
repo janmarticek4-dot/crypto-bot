@@ -40,8 +40,8 @@ def delta(a,b):return (a/b-1)*100 if isinstance(a,(int,float)) and isinstance(b,
 
 
 def observation(snap):
-    return {s:dict(price=snap['coins'][s].get('price'),market_cap=snap['coins'][s].get('market_cap'),
-                   volume_24h=snap['coins'][s].get('volume_24h'),technical_score=technical(snap['coins'][s]).get('score'),
+    return {s:dict(price=None if snap['coins'][s].get('stale') else snap['coins'][s].get('price'),market_cap=None if snap['coins'][s].get('stale') else snap['coins'][s].get('market_cap'),
+                   volume_24h=None if snap['coins'][s].get('stale') else snap['coins'][s].get('volume_24h'),technical_score=technical(snap['coins'][s]).get('score'),
                    action='WAIT') for s in SYMBOLS}
 
 
@@ -50,7 +50,7 @@ def render(snap,fund,now,kind,previous=None):
     lines=['📊 V11.1 — SKÚŠOBNÁ ANALÝZA '+('RÁNO' if kind=='morning' else 'VEČER'),
         now.astimezone(BL).strftime('%d.%m.%Y %H:%M Bratislava'),
         'Analytický pilot: žiadny nový potvrdený BUY/SELL. Držba N/A — skutočné pozície sa nenačítavajú.',
-        f"Trh24h {pct(g.get('change'))}; BTC {price(btc.get('price'))} ({pct(btc.get('change_24h'))}); dominancia {g.get('dominance','N/A')}%.",
+        f"Trh24h {pct(g.get('change'))}; BTC {price(btc.get('price'))} ({pct(btc.get('change_24h'))}); dominancia {format(g['dominance'],'.2f')+'%' if g.get('dominance') is not None else 'N/A'}.",
         'Príčina pohybu N/A bez potvrdenia. Riziko: neúplné udalostné pokrytie; menšia korekcia sama neodôvodňuje predaj.',
         'Ceny Binance, kapitalizácia/objemy CoinGecko; nejde o eToro realizačné ceny.']
     current=observation(snap)
@@ -58,6 +58,7 @@ def render(snap,fund,now,kind,previous=None):
         coin=snap['coins'][symbol];t=coin.get('frames',{}).get('4h',{});diagnostic=technical(coin)
         lines+=['',f"{symbol} — WAIT | {price(coin.get('price'))},24h {pct(coin.get('change_24h'))}",
           f"Technika {diagnostic.get('score','N/A')}/6; RSI {round(t['rsi14'],1) if t.get('rsi14') is not None else 'N/A'}; ADX {round(t['adx'],1) if t.get('adx') is not None else 'N/A'}; support {price(t.get('support'))}, rezistencia {price(t.get('resistance'))}.",
+          f"EMA20/50/100/200: {' / '.join(price(t.get('ema'+str(n))) for n in (20,50,100,200))}; MACD hist. {format(t['macd_hist'],'.4g') if t.get('macd_hist') is not None else 'N/A'}; ATR {price(t.get('atr'))}.",
           f"Kap. {price(coin.get('market_cap'))}; objem24h {price(coin.get('volume_24h'))}."]
         if coin.get('stale'):lines.append('Dáta neúplné/zastarané — nové úrovne a výhľad N/A.')
         else:
