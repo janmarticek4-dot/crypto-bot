@@ -8,6 +8,10 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
+      advisory_import:
+        description: Inicializovať iba používateľom zadanú súkromnú evidenciu z Environment Secretu?
+        type: boolean
+        default: false
       manual_analysis:
         description: "Spustiť okamžitú hlavnú analýzu?"
         required: false
@@ -28,7 +32,7 @@ concurrency:
 
 jobs:
   crypto-bot:
-    if: github.event_name != 'push'
+    if: github.event_name != 'push' && inputs.advisory_import != true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -87,7 +91,8 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('phase=' + phase + '\n')
   v111-analytical-pilot:
-    needs: [crypto-bot, pilot-slot]
+    environment: production-advisory
+    needs: [crypto-bot, pilot-slot, private-advisory-updates]
     if: always() && needs.pilot-slot.outputs.phase != '' && needs.crypto-bot.result != 'cancelled' && vars.V111_TRIAL_ENABLED != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -97,7 +102,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: 0209de98779a9d3e10a177dc70c66cc38ddab371
+          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -106,12 +111,16 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Offline regression with delivery disabled
         run: python scripts/test_offline.py
-      - name: Send public-data07/15/20 analysis (no real portfolio)
+      - name: Send analytical advice (private inventory only when configured)
         env:
           GH_TOKEN: ${{ github.token }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           V11_RULES_VALIDATED: 'false'
+          PRIVATE_ADVISORY_ENABLED: ${{ vars.PROD_STATE_REPOSITORY != '' && secrets.PROD_STATE_TOKEN != '' && secrets.PROD_STATE_ENCRYPTION_KEY != '' }}
+          PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
+          PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
+          PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
         run: python scripts/v111_trial.py
 
   us-source-validation:
@@ -123,7 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 0209de98779a9d3e10a177dc70c66cc38ddab371
+          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -138,3 +147,73 @@ jobs:
           path: us-source-diagnostics/report.json
           retention-days: 7
           if-no-files-found: warn
+
+  private-advisory-updates:
+    if: github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
+    environment: production-advisory
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-state-integration.txt
+      - name: Record owner-declared inventory only (no market orders)
+        env:
+          PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
+          PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
+          PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ADVISORY_TELEGRAM_USER_ID: ${{ secrets.ADVISORY_TELEGRAM_USER_ID }}
+        run: python scripts/private_advisory_updates.py
+
+  initialize-private-advisory:
+    if: github.event_name == 'workflow_dispatch' && inputs.advisory_import == true
+    environment: production-advisory
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-state-integration.txt
+      - name: Initialize declared inventory, refuse existing state
+        env:
+          CONFIRM_PRIVATE_IMPORT: 'true'
+          PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
+          PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
+          PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
+          INITIAL_ADVISORY_PORTFOLIO: ${{ secrets.INITIAL_ADVISORY_PORTFOLIO }}
+        run: python scripts/initialize_private_advisory.py
+
+  analysis-delivery-health:
+    if: github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check sent/uncertain/missing without Telegram or private secrets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/check_analysis_delivery.py
