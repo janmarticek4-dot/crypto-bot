@@ -73,3 +73,5 @@ Zdrojové výpadky samy nezastavia zostavenie N/A reportu. Neúplné trhové dá
 - Verejné lokálne dôkazy sú `LOCAL_REPORT.md`, `LOCAL_SOURCES.json`, `LOCAL_AI.json`, `LOCAL_SUMMARY.json`, `EVENING_PREVIEW.txt`. Neoznačujú sa ako výsledok GitHub-hosted runnera.
 
 Nové DeFiLlama adaptéry majú offline overenie správnosti formátu/typu a dostupnosť sa testuje naživo, ale lokálny proxy ich blokuje. **Úspešné načítanie ekonomických metrík z GitHub runnera ešte treba potvrdiť.** Ani úspešný runner neposkytne automaticky chýbajúce aktívne používateľské metriky TAO/FET/RENDER alebo celý unlock kalendár.
+
+Pokus o spustenie z pracovného prostredia cez `gh workflow run run.yml --ref feature/v11-1-review -f task=fundamental-sources -f use_groq=true` bol odmietnutý pri prístupe na GitHub API odpoveďou **Forbidden**. GitHub-hosted beh teda z tohto prostredia nebol spustený a žiadne jeho ID ani Actions Artifact sa nepredstiera. Vývojová vetva bola úspešne pushnutá; manuálne spustenie cez váš GitHub účet zostáva dostupným ďalším krokom podľa postupu vyššie.
