@@ -11,6 +11,9 @@ on:
       source_sha:
         type: string
         required: true
+      observation_workflow:
+        type: string
+        default: v11-temporal-shadow.yml
 permissions:
   contents: read
   actions: read
@@ -53,7 +56,7 @@ jobs:
         env:
           DAY: ${{ steps.slot.outputs.day }}
           PHASE: ${{ steps.slot.outputs.phase }}
-          CALLER_WORKFLOW_REF: ${{ github.workflow_ref }}
+          OBSERVATION_WORKFLOW: ${{ inputs.observation_workflow || 'v11-temporal-shadow.yml' }}
         with:
           script: |
             const prefix = `v111-temporal-`;
@@ -61,7 +64,7 @@ jobs:
             const phaseName = prefix + process.env.PHASE + suffix;
             const morningName = prefix + 'morning' + suffix;
             let prior = false, morning = null;
-            const workflow = process.env.CALLER_WORKFLOW_REF.split('/.github/workflows/')[1]?.split('@')[0];
+            const workflow = process.env.OBSERVATION_WORKFLOW;
             if (!['run.yml','v11-temporal-shadow.yml','shadow-temporal.yml'].includes(workflow)) throw new Error('Unknown caller workflow; provenance lookup refused');
             const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
               ...context.repo, workflow_id: workflow, branch: context.ref.replace('refs/heads/',''),

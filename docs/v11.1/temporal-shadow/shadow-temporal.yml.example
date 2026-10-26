@@ -17,3 +17,4 @@ jobs:
     uses: janmarticek4-dot/crypto-bot/.github/workflows/v11-temporal-shadow.yml@PIN_REVIEW_COMMIT
     with:
       source_sha: PIN_REVIEW_COMMIT
+      observation_workflow: shadow-temporal.yml
