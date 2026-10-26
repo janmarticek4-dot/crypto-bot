@@ -44,6 +44,7 @@ jobs:
           MANUAL_ANALYSIS: ${{ inputs.manual_analysis || false }}
           MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
           PYTHONUNBUFFERED: "1"
+          V111_TRIAL_ENABLED: ${{ vars.V111_TRIAL_ENABLED || 'true' }}
         run: python main.py
       - name: Save bot state
         if: always() && !cancelled()
@@ -62,3 +63,49 @@ jobs:
           else
             echo "bot_state.json neexistuje - nič sa neukladá."
           fi
+
+  pilot-slot:
+    if: github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      phase: ${{ steps.slot.outputs.phase }}
+    steps:
+      - id: slot
+        shell: python
+        run: |
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          now = datetime.now(ZoneInfo('Europe/Bratislava'))
+          minute = now.hour * 60 + now.minute
+          phase = 'morning' if 420 <= minute <= 510 else 'evening' if 1200 <= minute <= 1290 else ''
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('phase=' + phase + '\n')
+  v111-analytical-pilot:
+    needs: [crypto-bot, pilot-slot]
+    if: always() && needs.pilot-slot.outputs.phase != '' && needs.crypto-bot.result != 'cancelled' && vars.V111_TRIAL_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout reviewed immutable analytical pilot source
+        uses: actions/checkout@v4
+        with:
+          ref: 90464629be7b1e61a263de23d52455029dcba1f9
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing analytical dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Offline regression with delivery disabled
+        run: python scripts/test_offline.py
+      - name: Send public-data07 or20 pilot (no real portfolio)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          V11_RULES_VALIDATED: 'false'
+        run: python scripts/v111_trial.py

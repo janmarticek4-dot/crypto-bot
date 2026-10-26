@@ -3022,6 +3022,11 @@ def main():
     )
 
     if run_main:
+        # Approved public-data V11.1 pilot replaces only scheduled07/20 reports.
+        # Manual V10.6 analysis,15:00 outlook and safety rules are unchanged.
+        if os.getenv("V111_TRIAL_ENABLED", "false").lower() == "true" and slot_label(slot) in {"07:00", "20:00"}:
+            run_safety_monitor()
+            return
         if slot_label(slot) == "15:00":
             run_us_open_outlook(slot)
         else:
