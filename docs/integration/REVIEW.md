@@ -86,4 +86,4 @@ No merge/deployment performed. No real two-time pair yet. Provider coverage is s
 
 ## Frozen source pin
 
-Candidate implementation: `9aadf86cc93c020585e744f184453c46c4d48ffe`. `PRODUCTION_CANDIDATE.patch` pins that exact implementation; later documentation-only commits need not change it. The patch is present for review only and was not applied to the production workflow.
+Candidate implementation: `718f7504ac641007cbb814361bd7aa48600d8d9c`. `PRODUCTION_CANDIDATE.patch` pins that exact implementation; later documentation-only commits need not change it. The patch is present for review only and was not applied to the production workflow.
