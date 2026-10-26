@@ -53,13 +53,16 @@ def render(snap,fund,now,kind,previous=None):
         f"Trh24h {pct(g.get('change'))}; BTC {price(btc.get('price'))} ({pct(btc.get('change_24h'))}); dominancia {format(g['dominance'],'.2f')+'%' if g.get('dominance') is not None else 'N/A'}.",
         'Príčina pohybu N/A bez potvrdenia. Riziko: neúplné udalostné pokrytie; menšia korekcia sama neodôvodňuje predaj.',
         'Ceny Binance, kapitalizácia/objemy CoinGecko; nejde o eToro realizačné ceny.']
+    from v11.fundamental_analysis import overview,coin_lines
+    lines += overview(fund,now)
+    technical_appendix=[]
     current=observation(snap)
     for symbol in SYMBOLS:
         coin=snap['coins'][symbol];t=coin.get('frames',{}).get('4h',{});diagnostic=technical(coin)
         lines+=['',f"{symbol} — WAIT | {price(coin.get('price'))},24h {pct(coin.get('change_24h'))}",
           f"Technika {diagnostic.get('score','N/A')}/6; RSI {round(t['rsi14'],1) if t.get('rsi14') is not None else 'N/A'}; ADX {round(t['adx'],1) if t.get('adx') is not None else 'N/A'}; support {price(t.get('support'))}, rezistencia {price(t.get('resistance'))}.",
-          f"EMA20/50/100/200: {' / '.join(price(t.get('ema'+str(n))) for n in (20,50,100,200))}; MACD hist. {format(t['macd_hist'],'.4g') if t.get('macd_hist') is not None else 'N/A'}; ATR {price(t.get('atr'))}.",
           f"Kap. {price(coin.get('market_cap'))}; objem24h {price(coin.get('volume_24h'))}; obeh tokenov {coin.get('circulating_supply') if coin.get('circulating_supply') is not None else 'N/A'}. Unlocky/emisie N/A bez kalendára."]
+        technical_appendix.append(symbol+': EMA20/50/100/200 '+ ' / '.join(price(t.get('ema'+str(n))) for n in (20,50,100,200)))
         if coin.get('stale'):lines.append('Dáta neúplné/zastarané — nové úrovne a výhľad N/A.')
         else:
             for label,tf in [('24–72h','4h'),('7–14d','1d')]:
@@ -67,8 +70,7 @@ def render(snap,fund,now,kind,previous=None):
                 if lo and hi and p and lo<p<hi:
                     lines.append(f"{label}: základ pásmo {price(lo)}–{price(hi)}; rast až po uzavretí {tf} nad {price(hi)}, pokles pod {price(lo)}. Uzavretie mimo pásma ruší základ. Neistota vysoká.")
                 else:lines.append(label+': N/A — hranice nepotvrdené.')
-        events=[e for e in fund.get('events',[]) if e.get('symbol')==symbol and not e.get('scheduled')]
-        lines.append('Fundament: '+(events[0]['title'][:110]+' — '+events[0]['url']+'; ekonomický dopad N/A.' if events else 'N/A — bez aktuálneho overeného projektového podkladu.'))
+        lines += coin_lines(symbol,fund,now)
         if previous and symbol in previous:
             old=previous[symbol]
             lines.append(f"Od rána: cena {pct(delta(current[symbol]['price'],old.get('price')))}, kap. {pct(delta(current[symbol]['market_cap'],old.get('market_cap')))}, objem {pct(delta(current[symbol]['volume_24h'],old.get('volume_24h')))}; technika {old.get('technical_score')}→{current[symbol]['technical_score']}/6; WAIT→WAIT.")
@@ -87,6 +89,7 @@ def render(snap,fund,now,kind,previous=None):
     if kind=='evening' and not previous:lines.append('Porovnanie rána N/A — chýba úspešne odoslaný ranný zber.')
     lines+=['','ZÁVER: nový nákup WAIT; HOLD/REDUCE/SELL pre tvoje pozície N/A. Vstup, stop, TP a čisté R:R pre povolený obchod N/A. Poplatky približne1%+1%, spread neoverený.',
       'Udalosť sama nevytvára obchodný signál. Pravdepodobnosti N/A; dlhodobé prognózy zatiaľ nehodnotené. Kapitalizácia a objem nie sú čisté toky kapitálu.']
+    lines += ['', 'TECHNICKÁ PRÍLOHA',*technical_appendix]
     text='\n'.join(lines);require_public_data(text);return text,current
 
 
@@ -160,6 +163,7 @@ def run():
         fund=fundamentals.collect({},now)
         fund['macro_context']=macro_context.collect({},now)
         economic=macro_context.economic_observations(now)
+        fund['economic_observations']=economic
         history=state.setdefault('macro_observation_history_v1',[])
         history.append(economic);state['macro_observation_history_v1']=history[-100:]
         morning=state['slots'].get(now.astimezone(BL).date().isoformat()+'-morning',{})

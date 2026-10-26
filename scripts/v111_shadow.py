@@ -126,6 +126,11 @@ def protected_hashes():
 
 
 def render(snapshot, fundamental, ai_api, now, phase='preview', morning=None):
+    from v11.fundamental_analysis import analyze
+    from v11.ai import rank_evidence
+    ranking=rank_evidence(ai_api,{},analyze(fundamental,now)['evidence'],now)
+    fundamental=copy.deepcopy(fundamental)
+    fundamental['editorial_ranking']=ranking
     safety = market_status(snapshot, {})
     evals = {s: decide(snapshot['coins'][s], held=False, approved=False,
                       market_complete=snapshot['complete'], risk_normal=safety['state'] == 'NORMAL') for s in SYMBOLS}
@@ -239,6 +244,7 @@ def run(out, use_groq=False, phase='preview', checkpoint_path=None):
                 source_requests.append(item)
         fund = fundamentals.collect({}, now, fetcher=fetch)
         fund['macro_context'] = macro_context.collect({}, now, fetcher=fetch)
+        fund['economic_observations'] = macro_context.economic_observations(now, fetcher=fetch)
         reports, evaluations, ai = render(snap, fund, api, now,phase=phase,morning=morning)
         temporal=None
         if phase=='morning':
@@ -265,6 +271,8 @@ def run(out, use_groq=False, phase='preview', checkpoint_path=None):
             write_json(out / (name + '_parts.json'), chunks(report))
         write_json(out / 'market_snapshot.json', snap)
         write_json(out / 'fundamentals.json', fund)
+        from v11.fundamental_analysis import analyze
+        write_json(out / 'fundamental_evidence.json', analyze(fund,now))
         (out/'calendar.txt').write_text('SHADOW — SKUTOČNE NAČÍTANÉ ZDROJE\n'+'\n'.join(event_lines(fund,now.timestamp()))+'\n')
         write_json(out/'calendar_coverage.json',dict(scheduled_events=[e for e in fund['events'] if e.get('scheduled')],
             horizons_hours=[24,168,336],date_only_time='N/A; never assume midnight or decision time',

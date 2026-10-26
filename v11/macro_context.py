@@ -7,6 +7,16 @@ from datetime import datetime,timezone,timedelta
 from .fundamentals import fetch,timestamp
 
 
+def yield_comparison(rows):
+    ordered=sorted({r['date']:r for r in rows}.values(),key=lambda r:r['date'])
+    if not ordered:return None
+    latest=dict(ordered[-1])
+    if len(ordered)>1:
+        previous=ordered[-2]
+        latest.update(previous_date=previous['date'],change_bp={k:round((latest[k]-previous[k])*100,3) for k in ('2y','10y')})
+    return latest
+
+
 def parse_treasury(raw,now):
     rows=[]
     for node in ET.fromstring(raw).iter():
@@ -23,7 +33,7 @@ def parse_treasury(raw,now):
                 values[name]=value
             rows.append(dict(date=date.isoformat(),**values))
         except (ValueError,KeyError,TypeError):continue
-    return max(rows,key=lambda r:r['date']) if rows else None
+    return yield_comparison(rows)
 
 
 def parse_fred(raw,now):
@@ -36,7 +46,7 @@ def parse_fred(raw,now):
             if not all(math.isfinite(x) and -5<=x<=30 for x in (a,b)):continue
             rows.append(dict(date=day.isoformat(),**{'2y':a,'10y':b}))
         except (ValueError,KeyError,TypeError):continue
-    return max(rows,key=lambda r:r['date']) if rows else None
+    return yield_comparison(rows)
 
 
 def collect(state,now=None,fetcher=fetch):
@@ -85,7 +95,10 @@ def economic_observations(now,fetcher=fetch):
             valid.sort()
             if not valid or (now.date()-valid[-1][0]).days>90:continue
             day,value=valid[-1]
-            result['observations'][series]={'label':label,'unit':unit,'period':day.isoformat(),'value':value}
+            result['observations'][series]={'label':label,'unit':unit,'period':day.isoformat(),'value':value,
+                'previous_period':valid[-2][0].isoformat() if len(valid)>1 else None,
+                'previous_value':valid[-2][1] if len(valid)>1 else None,
+                'release_at':None,'consensus':None,'vintage':'latest_revised_not_first_release'}
     except Exception as exc:result['error_type']=type(exc).__name__
     return result
 

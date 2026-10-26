@@ -1,0 +1,669 @@
+{
+  "collected_at": "2026-10-26T20:01:29.138877+00:00",
+  "summary": {
+    "status": "CURRENT_MARKET_DATA",
+    "collected_at": "2026-10-26T20:01:29.138877+00:00",
+    "timezone": "Europe/Bratislava",
+    "symbols": [
+      "AAVE",
+      "TAO",
+      "FET",
+      "SOL",
+      "ONDO",
+      "RENDER"
+    ],
+    "current_market_data": {
+      "AAVE": true,
+      "TAO": true,
+      "FET": true,
+      "SOL": true,
+      "ONDO": true,
+      "RENDER": true
+    },
+    "complete": true,
+    "phase": "preview",
+    "same_snapshot_templates": true,
+    "real_morning_evening_comparison": false,
+    "fundamentals_available": 8,
+    "fundamentals_total": 16,
+    "groq": {
+      "requested": false,
+      "available": false,
+      "calls": 0,
+      "fallback": true
+    },
+    "protected_files_unchanged": true,
+    "telegram_enabled": false,
+    "production_state_loaded": false,
+    "real_positions_loaded": false,
+    "state_written": false,
+    "orders_enabled": false,
+    "faults": {
+      "passed": true,
+      "injected": true,
+      "groq_unavailable_fallback": true,
+      "sources_unavailable_na": true,
+      "no_ai_authored_facts": true,
+      "deterministic_decisions_unchanged": true
+    },
+    "commit": null,
+    "branch": null
+  },
+  "analysis": {
+    "evidence": [
+      {
+        "id": "6c7e3788d07577577377b63e897154125c9048cf96d1400904632a4865f41f27",
+        "title": "Fed, ECB and BOJ interest-rate decisions, Coinbase earnings: Crypto Week Ahead",
+        "source": "coindesk",
+        "url": "https://www.coindesk.com/markets/2026/10/26/fed-ecb-and-boj-interest-rate-decisions-coinbase-earnings-crypto-week-ahead",
+        "published_at": "2026-10-26T09:14:47+00:00",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "fact_scope": "zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu",
+        "symbols": [
+          "SOL",
+          "TAO",
+          "FET",
+          "AAVE",
+          "ONDO",
+          "RENDER"
+        ],
+        "significance": "relevantné pre sadzby a ochotu riskovať",
+        "impact": "obojsmerný; smer bez výsledku voči konsenzu nepotvrdený",
+        "confirmation": "prvý výsledok, overený konsenzus, revízie a reakciu výnosov",
+        "horizon": null,
+        "material": true,
+        "categories": [
+          "Fed"
+        ]
+      },
+      {
+        "id": "54af672800cbaf09c1d4df3fa7381d24eb20519559909e5e6906fb918b102edb",
+        "title": "v4.5.0-alpha.3: Bump version to 4.5.0-alpha.3 (#16402)",
+        "source": "sol_agave",
+        "url": "https://github.com/anza-xyz/agave/releases/tag/v4.5.0-alpha.3",
+        "published_at": "2026-10-26T15:58:03+00:00",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "fact_scope": "zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu",
+        "symbols": [
+          "SOL"
+        ],
+        "significance": "nízka bez potvrdenej aktivácie alebo merateľného používania",
+        "impact": "neutrálny/nepotvrdený",
+        "confirmation": "aktiváciu, rozsah nasadenia a nezávislé metriky používania",
+        "horizon": null,
+        "material": false,
+        "categories": [
+          "project"
+        ]
+      },
+      {
+        "id": "ec80b8fb8897355d6d237bf55b6c4bda5aa9943f74af922f55d08480b91f4925",
+        "title": "Add marketing budget allocation to RNP-024",
+        "source": "render_rnp",
+        "url": "https://github.com/rendernetwork/RNPs/commit/8568e90d782f302d9e3300622591e9eb1b4839a5",
+        "published_at": "2026-10-26T14:34:21+00:00",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "fact_scope": "zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu",
+        "symbols": [
+          "RENDER"
+        ],
+        "significance": "nízka bez potvrdenej aktivácie alebo merateľného používania",
+        "impact": "neutrálny/nepotvrdený",
+        "confirmation": "aktiváciu, rozsah nasadenia a nezávislé metriky používania",
+        "horizon": null,
+        "material": false,
+        "categories": [
+          "project"
+        ]
+      },
+      {
+        "id": "7824999816aa2ebddc14f766528cf2e803721e88cb64728a928d871869b2dd27",
+        "title": "BTC price risks $80K loss into FOMC, earnings: Three things to know in Bitcoin this week",
+        "source": "cointelegraph",
+        "url": "https://cointelegraph.com/markets/btc-price-risks-80k-loss-into-fomc-earnings-three-things-to-know-in-bitcoin-this-week",
+        "published_at": "2026-10-26T10:49:55+00:00",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "fact_scope": "zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu",
+        "symbols": [
+          "SOL",
+          "TAO",
+          "FET",
+          "AAVE",
+          "ONDO",
+          "RENDER"
+        ],
+        "significance": "nízka bez potvrdenej aktivácie alebo merateľného používania",
+        "impact": "neutrálny/nepotvrdený",
+        "confirmation": "aktiváciu, rozsah nasadenia a nezávislé metriky používania",
+        "horizon": null,
+        "material": false,
+        "categories": [
+          "Fed"
+        ]
+      },
+      {
+        "id": "ac5fa018c1dbd57c1ed11b539caa29081935078cff490b710bccaa0025212be0",
+        "title": "Netanyahu floats use of blockchain as solution to potential financial sanctions",
+        "source": "cointelegraph",
+        "url": "https://cointelegraph.com/news/netanyahu-floats-use-of-blockchain-as-solution-to-potential-financial-sanctions",
+        "published_at": "2026-10-25T11:42:00+00:00",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "fact_scope": "zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu",
+        "symbols": [
+          "SOL",
+          "TAO",
+          "FET",
+          "AAVE",
+          "ONDO",
+          "RENDER"
+        ],
+        "significance": "nízka bez potvrdenej aktivácie alebo merateľného používania",
+        "impact": "neutrálny/nepotvrdený",
+        "confirmation": "aktiváciu, rozsah nasadenia a nezávislé metriky používania",
+        "horizon": null,
+        "material": false,
+        "categories": [
+          "geopolitics"
+        ]
+      },
+      {
+        "id": "2364c79cf59c9f0dd43a4935f5f41c0d3dd43782fecf4ec5738a71db2a1ab55b",
+        "title": "v4.4.0-rc.0: Bump version to 4.4.0-rc.0 (#16364)",
+        "source": "sol_agave",
+        "url": "https://github.com/anza-xyz/agave/releases/tag/v4.4.0-rc.0",
+        "published_at": "2026-10-24T07:25:41+00:00",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "fact_scope": "zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu",
+        "symbols": [
+          "SOL"
+        ],
+        "significance": "nízka bez potvrdenej aktivácie alebo merateľného používania",
+        "impact": "neutrálny/nepotvrdený",
+        "confirmation": "aktiváciu, rozsah nasadenia a nezávislé metriky používania",
+        "horizon": null,
+        "material": false,
+        "categories": [
+          "project"
+        ]
+      }
+    ],
+    "coverage": {
+      "macro_releases": false,
+      "rates_expectations": false,
+      "yields": false,
+      "geopolitics": false,
+      "regulation_etf": false,
+      "verified_flows": false,
+      "project_events": false,
+      "usage_tvl": false,
+      "revenue_fees": false,
+      "unlocks_emissions": false
+    },
+    "source_ok": 8,
+    "source_total": 16,
+    "coverage_note": "Čiastočne pozorované tematické okruhy, nie percento všetkých významných informácií; úplnosť nie je merateľná."
+  },
+  "sources": [
+    {
+      "source": "fomc_calendar",
+      "symbol": null,
+      "coverage": [
+        "Fed"
+      ],
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "fomc_calendar",
+          "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "fed",
+      "symbol": null,
+      "coverage": [
+        "Fed"
+      ],
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "fed",
+          "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "fed_monetary",
+          "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "bls",
+      "symbol": null,
+      "coverage": [
+        "CPI",
+        "employment"
+      ],
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bls",
+          "url": "https://www.bls.gov/feed/bls_latest.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "bls_calendar",
+      "symbol": null,
+      "coverage": [
+        "CPI",
+        "employment"
+      ],
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bls_calendar",
+          "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "bls_year_calendar",
+          "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "bea",
+      "symbol": null,
+      "coverage": [
+        "PCE"
+      ],
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "bea",
+          "url": "https://apps.bea.gov/rss/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "bea_www",
+          "url": "https://www.bea.gov/rss/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "ecb",
+      "symbol": null,
+      "coverage": [
+        "Fed",
+        "regulation"
+      ],
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "ecb",
+          "url": "https://www.ecb.europa.eu/rss/press.html",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "ecb_blog",
+          "url": "https://www.ecb.europa.eu/rss/blog.html",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "cftc",
+      "symbol": null,
+      "coverage": [
+        "regulation"
+      ],
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "cftc",
+          "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "sec",
+      "symbol": null,
+      "coverage": [
+        "regulation"
+      ],
+      "url": "https://www.sec.gov/news/pressreleases.rss",
+      "status": "N/A",
+      "error_type": "URLError",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "attempts": [
+        {
+          "source": "sec",
+          "url": "https://www.sec.gov/news/pressreleases.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "sec_new_path",
+          "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        }
+      ],
+      "checked_at": "2026-10-26T20:01:29.138877+00:00"
+    },
+    {
+      "source": "aave",
+      "url": "https://github.com/aave/aip/commits/main.atom",
+      "selected_source": "aave_aip",
+      "official": false,
+      "symbol": "AAVE",
+      "coverage": [
+        "project"
+      ],
+      "kind": "governance_repository_change",
+      "fallback": true,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "aave",
+          "url": "https://governance.aave.com/latest.rss",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "aave_aip",
+          "url": "https://github.com/aave/aip/commits/main.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "ondo",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "selected_source": "ondo_secondary",
+      "official": false,
+      "symbol": "ONDO",
+      "coverage": [
+        "project",
+        "regulation"
+      ],
+      "kind": "secondary_project_report",
+      "fallback": true,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "ondo",
+          "url": "https://blog.ondo.finance/rss/",
+          "status": "N/A",
+          "error_type": "URLError",
+          "http_status": 403,
+          "error_layer": "network_tunnel"
+        },
+        {
+          "source": "ondo_secondary",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "sol_agave",
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "selected_source": "sol_agave",
+      "official": true,
+      "symbol": "SOL",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 2,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "sol_agave",
+          "url": "https://github.com/anza-xyz/agave/releases.atom",
+          "status": "OK",
+          "events": 2
+        }
+      ]
+    },
+    {
+      "source": "tao_subtensor",
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "selected_source": "tao_subtensor",
+      "official": true,
+      "symbol": "TAO",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "tao_subtensor",
+          "url": "https://github.com/opentensor/subtensor/releases.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "fet_fetchd",
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "selected_source": "fet_fetchd",
+      "official": true,
+      "symbol": "FET",
+      "coverage": [
+        "project"
+      ],
+      "kind": "software_release_notice",
+      "fallback": false,
+      "status": "OK",
+      "events": 0,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "fet_fetchd",
+          "url": "https://github.com/fetchai/fetchd/releases.atom",
+          "status": "OK",
+          "events": 0
+        }
+      ]
+    },
+    {
+      "source": "render_rnp",
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "selected_source": "render_rnp",
+      "official": false,
+      "symbol": "RENDER",
+      "coverage": [
+        "project"
+      ],
+      "kind": "governance_repository_change",
+      "fallback": false,
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "render_rnp",
+          "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+          "status": "OK",
+          "events": 1
+        }
+      ]
+    },
+    {
+      "source": "coindesk",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "selected_source": "coindesk",
+      "official": false,
+      "symbol": null,
+      "coverage": [
+        "regulation",
+        "hack",
+        "project"
+      ],
+      "kind": "news",
+      "fallback": false,
+      "status": "OK",
+      "events": 1,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "coindesk",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "status": "OK",
+          "events": 1
+        }
+      ]
+    },
+    {
+      "source": "cointelegraph",
+      "url": "https://cointelegraph.com/rss",
+      "selected_source": "cointelegraph",
+      "official": false,
+      "symbol": null,
+      "coverage": [
+        "regulation",
+        "hack",
+        "project"
+      ],
+      "kind": "news",
+      "fallback": false,
+      "status": "OK",
+      "events": 3,
+      "checked_at": "2026-10-26T20:01:29.138877+00:00",
+      "attempts": [
+        {
+          "source": "cointelegraph",
+          "url": "https://cointelegraph.com/rss",
+          "status": "OK",
+          "events": 3
+        }
+      ]
+    }
+  ],
+  "project_economics": {
+    "observations": {},
+    "sources": [
+      {
+        "symbol": "AAVE",
+        "metric": "fees",
+        "url": "https://api.llama.fi/summary/fees/aave?dataType=dailyFees",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "status": "N/A",
+        "error": "URLError"
+      },
+      {
+        "symbol": "AAVE",
+        "metric": "revenue",
+        "url": "https://api.llama.fi/summary/fees/aave?dataType=dailyRevenue",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "status": "N/A",
+        "error": "URLError"
+      },
+      {
+        "symbol": "SOL",
+        "metric": "fees",
+        "url": "https://api.llama.fi/overview/fees/Solana?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees",
+        "retrieved_at": "2026-10-26T20:01:29.138877+00:00",
+        "status": "N/A",
+        "error": "URLError"
+      }
+    ]
+  }
+}

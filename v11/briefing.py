@@ -9,6 +9,9 @@ from .strategy import costs
 BL=ZoneInfo('Europe/Bratislava')
 
 def money(value):
+    if value is not None:
+        for divisor,suffix in ((1e12,'T'),(1e9,'B'),(1e6,'M')):
+            if abs(value)>=divisor:return f'${value/divisor:,.2f}{suffix}'
     return 'N/A' if value is None else f'${value:,.2f}' if abs(value)>=1 else f'${value:.6f}'.rstrip('0').rstrip('.')
 
 def pct(value):
@@ -114,33 +117,19 @@ def event_lines(result,now):
     return out
 
 def fundamental_lines(symbol,result,state,now):
-    old=state.get('fundamental_seen_v11',{}).get(symbol,[])
-    events=[e for e in result.get('events',[]) if e.get('symbol')==symbol and not e.get('scheduled')]
-    fresh=[e for e in events if e['id'] not in old]
-    out=['Fundament: hodnotenie N/A — ekonomický dopad nie je overený.']
-    for source in result.get('sources',[]):
-        if source.get('symbol')!=symbol:continue
-        if source.get('fallback'):
-            out.append(f"Primárny zdroj nedostupný; záloha {source.get('selected_source')}: {source['url']}, aktuálne relevantné záznamy {source.get('events',0)}. Rozsah {source.get('kind')}; nie dôkaz adopcie ani nasadenia.")
-        elif source['status']!='OK':out.append(f"Projektový zdroj {source['source']}: N/A ({source.get('error_layer','neoverené')}), {source['url']}.")
-    for e in fresh[:2]:
-        out.append(f"Nový doložený záznam ({e['confidence']}): {e['title']} | {e['published_at']} | {e['url']}. Aktivácia a ekonomický dopad N/A.")
-    if not fresh:out.append('Zmena fundamentov: N/A — neznamená to absenciu udalostí.')
-    metrics=result.get('metrics',{}).get(symbol,{})
-    prior=state.get('fundamental_metrics_v11',{}).get(symbol,{})
-    if metrics:
-        out.append(f"TVL {money(metrics['value'])}; zmena od analýzy {pct(delta(metrics['value'],prior.get('value')))}; pozorované {metrics['observed_at']}; {metrics['url']}. TVL nie je čistý tok ani príjem tokenu.")
-    if fresh:out.append('Predpoklad: zmena môže ovplyvniť využitie/riziko projektu; smer ceny a horizont N/A. Vydanie softvéru nie je dôkaz nasadenia ani adopcie.')
-    return out
+    from .fundamental_analysis import coin_lines
+    return coin_lines(symbol,result,datetime.fromtimestamp(now,timezone.utc) if isinstance(now,(int,float)) else now,state.get('fundamental_metrics_v11',{}))
 
 def build(snap,evals,book,safety,fundamentals,state,slot,local):
     evening=bool(slot and str(slot).endswith('20:00'));now=snap['at']
+    analysis_now=max(datetime.fromtimestamp(now,timezone.utc),local.astimezone(timezone.utc)) if local.tzinfo else datetime.fromtimestamp(now,timezone.utc)
     out=[f"📊 V11.1 — {'VEČERNÉ VYHODNOTENIE' if evening else 'RANNÝ PLÁN' if slot else 'RUČNÁ ANALÝZA'}",
         local.strftime('%d.%m.%Y %H:%M Bratislava'),
         'Vývojový analytický report. V11 signály sú experimentálne; žiadny nový potvrdený produkčný signál sa týmto neaktivuje.',
         f"Technické riziko {safety['state']}; udalostné pokrytie neúplné. "+' '.join(safety['reasons'])]
     from .diagnostics import action_summary
     out=out[:2]+action_summary(snap,evals,safety,fundamentals,state)+out[2:]
+    from .fundamental_analysis import overview
     g=snap.get('global_data',{});oldg=state.get('global_previous_v11',{})
     out.append(f"TRH: kapitalizácia {money(g.get('cap'))}, 24h {pct(g.get('change'))}; objem {money(g.get('volume'))}; BTC dominancia {pct(g.get('dominance'))}; zmena dominancie od analýzy {format(g['dominance']-oldg['dominance'],'+.2f')+' p. b.' if g.get('dominance') is not None and oldg.get('dominance') is not None else 'N/A'}.")
     from .portfolio import valuation
@@ -154,6 +143,7 @@ def build(snap,evals,book,safety,fundamentals,state,slot,local):
     out.append(f"BTC {money(btc.get('price'))}, 24h {pct(btc.get('change_24h'))}; denná EMA50 {money(t.get('ema50'))}, EMA200 {money(t.get('ema200'))}; volatilita ATR {pct(t['atr']/btc['price']*100) if t.get('atr') and btc.get('price') else 'N/A'}.")
     if not btc.get('stale') and btc.get('change_24h') is not None and g.get('change') is not None and btc['change_24h']*g['change']<0 and abs(btc['change_24h']-g['change'])>=1:
         out.append('⚠️ Divergencia BTC a kapitalizácie trhu. Nejde o dôkaz toku kapitálu ani príčiny pohybu.')
+    out += overview(fundamentals,analysis_now)
     held=[s for s,e in evals.items() if e['held']]
     upcoming=sorted((e for e in fundamentals.get('events',[]) if e.get('scheduled')),key=lambda e:e.get('event_at') or e.get('event_date') or '')
     out += ['Najdôležitejšie riziko: '+('neúplné trhové dáta' if safety['state']=='UNKNOWN' else 'neúplné udalostné pokrytie; technické riziko '+safety['state']),
@@ -165,11 +155,12 @@ def build(snap,evals,book,safety,fundamentals,state,slot,local):
     morning=state.get('morning_plan_v11',{})
     compare=evening and morning.get('date')==local.date().isoformat()
     if evening:out.append('POROVNANIE S RÁNOM' if compare else 'Ranný plán pre dnešný deň N/A; neporovnávame s iným dňom.')
+    technical_appendix=[]
     for symbol in PRIMARY:
         d=snap['coins'][symbol];e=evals[symbol];tf=d.get('frames',{}).get('4h',{})
         label='experimentálny kandidát (neaktivovaný)' if any('čakajú na historickú validáciu' in r for r in e.get('reasons',[])) else 'experimentálny kandidát' if e['action'].startswith('BUY') else 'experimentálne ochranné posúdenie' if e['action'] in ('SELL','REDUCE') else 'analytický stav'
         out += ['',f"{symbol}: {e['action']} ({label}); {'DRŽBA N/A (SHADOW)' if state.get('shadow_mode') else 'VLASTNÍŠ' if e['held'] else 'BEZ POZÍCIE'}",
-            f"Cena {money(d.get('price'))}; 24h {pct(d.get('change_24h'))}; zdroj {d.get('price_source','N/A')}; vek {d.get('age_seconds')} s; {'NEAKTUÁLNE' if d.get('stale') else 'aktuálne'}.",
+            f"Cena {money(d.get('price'))}; 24h {pct(d.get('change_24h'))}; zdroj {d.get('price_source','N/A')}; vek {round(d['age_seconds']) if isinstance(d.get('age_seconds'),(int,float)) else 'N/A'} s; {'NEAKTUÁLNE' if d.get('stale') else 'aktuálne'}.",
             f"Kapitalizácia {money(d.get('market_cap'))}; objem {money(d.get('volume_24h'))}; "+' '.join(e.get('display_reasons') or e['reasons'])]
         from .diagnostics import entry_diagnostic
         diag=e.get('entry_diagnostic') or entry_diagnostic(d,e,approved=symbol in {x.strip().upper() for x in os.getenv('ETORO_VERIFIED_SYMBOLS','').split(',')},market_complete=snap.get('complete',False),risk_normal=safety['state']=='NORMAL')
@@ -179,10 +170,10 @@ def build(snap,evals,book,safety,fundamentals,state,slot,local):
         old=state.get('snapshots_v11',{}).get(symbol,{})
         out.append(f"Od predošlej analýzy: kap. {pct(delta(d.get('market_cap'),old.get('market_cap')))}, objem {pct(delta(d.get('volume_24h'),old.get('volume_24h')))}. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.")
         correction='prehlbuje sa' if tf.get('support_broken') else 'lokálny obrat technicky potvrdený' if tf.get('breakout') and (tf.get('relative_volume') or 0)>=1.1 else 'stabilizácia/nepotvrdený obrat' if tf else 'N/A'
-        out.append(f"Korekcia: {correction}; RSI {tf.get('rsi14','N/A')}; MACD hist. {tf.get('macd_hist','N/A')}; ADX {tf.get('adx','N/A')}; ATR {money(tf.get('atr'))}.")
-        out.append('EMA20/50/100/200 4h: '+' / '.join(money(tf.get('ema'+str(n))) for n in (20,50,100,200)))
-        out.append(f"Relatívna sila vs BTC 7 dní {pct(d.get('relative_strength_btc_7d')*100) if d.get('relative_strength_btc_7d') is not None else 'N/A'}; RVOL {tf.get('relative_volume','N/A')}.")
-        out += fundamental_lines(symbol,fundamentals,state,now)
+        technical_appendix.append(f"{symbol} — Korekcia: {correction}; RSI {tf.get('rsi14','N/A')}; MACD hist. {tf.get('macd_hist','N/A')}; ADX {tf.get('adx','N/A')}; ATR {money(tf.get('atr'))}.")
+        technical_appendix.append('EMA20/50/100/200 4h: '+' / '.join(money(tf.get('ema'+str(n))) for n in (20,50,100,200)))
+        technical_appendix.append(f"Relatívna sila vs BTC 7 dní {pct(d.get('relative_strength_btc_7d')*100) if d.get('relative_strength_btc_7d') is not None else 'N/A'}; RVOL {tf.get('relative_volume','N/A')}.")
+        out += fundamental_lines(symbol,fundamentals,state,analysis_now)
         out += [f['text'] for f in scenarios(d)]
         related=[x['title'] for x in fundamentals.get('events',[]) if x.get('scheduled') and x.get('symbol') in (None,symbol)]
         out.append('Udalosti pre oba horizonty: '+('; '.join(related[:2]) or 'N/A')+'. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.')
@@ -217,4 +208,5 @@ def build(snap,evals,book,safety,fundamentals,state,slot,local):
         '4. Preveriť ochranu: '+(', '.join(s for s,e in evals.items() if e['held'] and e['action'] in ('SELL','REDUCE')) or 'bez potvrdeného experimentálneho upozornenia')+'. Nevykonané predaje nemenia evidenciu.',
         '5. Pred významnou udalosťou neprekročiť vlastný rizikový rozpočet; pri neúplnom kalendári vhodnú výšku hotovosti nemožno spoľahlivo určiť.',
         'Malá korekcia sama neodôvodňuje predaj a opätovný nákup po nákladoch. Bot nikdy nevykonáva obchody. Monitoring neposiela rutinné správy.']
+    out += ['', 'TECHNICKÁ PRÍLOHA']+technical_appendix
     return out

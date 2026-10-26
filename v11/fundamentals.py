@@ -43,13 +43,14 @@ FALLBACKS={
 FUNDAMENTAL_TITLE=r'govern|proposal|tokeniz|unlock|emission|upgrade|launch|partner|regulat|enforcement|lawsuit|hack|exploit|treasury|treasuries|adoption'
 
 PATTERNS={
- 'Fed':r'\becb\b|monetary policy decisions|\bfomc\b|federal reserve|monetary policy|interest rate',
+ 'Fed':r'monetary policy decisions|\bfomc\b|federal reserve|monetary policy|\bfed\b|interest[- ]rates?',
  'CPI':r'consumer price|producer price|\bppi\b|\bcpi\b',
  'PCE':r'personal consumption|personal income and outlays|\bpce\b',
  'GDP':r'gross domestic product|\bgdp\b',
  'employment':r'employment situation|nonfarm|unemployment|payroll',
- 'regulation':r'\bsec\b|regulat|lawsuit|securities and exchange|enforcement',
+ 'regulation':r'\bsec\b|regulat|lawsuit|securities and exchange|enforcement|digital euro',
  'unlock':r'token unlock|vesting|token release',
+ 'geopolitics':r'\bwar\b|military conflict|\bsanctions\b|\btariffs\b|energy shock',
  'hack':r'hack|exploit|security breach|depeg|bankruptcy|insolven|withdrawals suspended',
 }
 MECHANISMS={
@@ -61,11 +62,12 @@ MECHANISMS={
  'regulation':'Regulačná udalosť môže zmeniť prístup k obchodovaniu alebo prevádzkové riziko.',
  'unlock':'Uvoľnená ponuka môže zvýšiť predajný tlak, ale uvoľnenie neznamená automatický predaj.',
  'hack':'Incident môže spôsobiť stratu dôvery, likvidity alebo nákazu medzi subjektmi; rozsah vyžaduje preverenie.',
+ 'geopolitics':'Konflikt, sankcie alebo clá môžu meniť podmienky likvidity a rizikovú averziu; expozícia a smer vyžadujú potvrdenie.',
  'project':'Projektová udalosť môže zmeniť využitie alebo riziko tokenu; titulok nie je dôkaz rastu hodnoty.'}
 
 
 def timestamp(raw):
-    if not raw:return None
+    if not isinstance(raw,str) or not raw:return None
     try:out=datetime.fromisoformat(raw.replace('Z','+00:00'))
     except ValueError:
         try:out=parsedate_to_datetime(raw)
@@ -120,7 +122,8 @@ def parse_feed(raw,source,now=None):
         if source.get('publisher_path') and (urllib.parse.urlsplit(url).hostname!=urllib.parse.urlsplit(source['url']).hostname or not urllib.parse.urlsplit(url).path.startswith(source['publisher_path'])):continue
         attributed=dict(source)
         if not source.get('symbol') and re.search(FUNDAMENTAL_TITLE,title,re.I):
-            symbols=[symbol for symbol in ('AAVE','ONDO') if re.search(r'\b'+symbol+r'\b',title,re.I)]
+            from .fundamental_analysis import ALIASES
+            symbols=[symbol for symbol,pattern in ALIASES.items() if re.search(pattern,title,re.I)]
             if len(symbols)==1:attributed['symbol']=symbols[0]
         item=event(title,url,published,attributed)
         if item:
@@ -279,7 +282,9 @@ def collect(state,now=None,fetcher=fetch):
                 metrics[symbol]=dict(value=value,at=at.isoformat(),observed_at=now.isoformat(),url=url)
         except Exception:
             pass  # Missing metrics remain N/A, never synthetic zeroes.
-    result=dict(metrics=metrics,fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:(not x['scheduled'],x['event_at'] or x.get('event_date') or x['published_at'] or ''))[:200],sources=statuses,
+    from .project_metrics import collect as collect_economics
+    economics=collect_economics(fetcher,now)
+    result=dict(project_economics=economics,metrics=metrics,fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:(not x['scheduled'],x['event_at'] or x.get('event_date') or x['published_at'] or ''))[:200],sources=statuses,
                 unavailable=['overený projektový token-unlock kalendár','priame potvrdenie incidentu z primárneho zdroja','potvrdenie skutočnej aktivácie upgrade na sieti'])
     state['fundamentals_v11']=result
     return result
