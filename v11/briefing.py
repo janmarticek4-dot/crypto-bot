@@ -9,7 +9,7 @@ from .strategy import costs
 BL=ZoneInfo('Europe/Bratislava')
 
 def money(value):
-    return 'N/A' if value is None else f'${value:,.2f}'
+    return 'N/A' if value is None else f'${value:,.2f}' if abs(value)>=1 else f'${value:.6f}'.rstrip('0').rstrip('.')
 
 def pct(value):
     return 'N/A' if value is None else f'{value:+.2f}%'
@@ -213,7 +213,7 @@ def build(snap,evals,book,safety,fundamentals,state,slot,local):
     ranked=sorted((s for s in PRIMARY if evals[s].get('data_complete')),key=lambda s:evals[s].get('score',-1),reverse=True)
     out += ['', 'AKČNÝ ZÁVER', '1. Potvrdený produkčný BUY: žiadny nový signál z tejto experimentálnej vrstvy.',
         '2. Technické poradie na preverenie: '+(' > '.join(ranked) or 'N/A')+'; vstupné a ochranné úrovne vyššie, poradie nie je pokyn na nákup.',
-        '3. Držané/HOLD: '+(', '.join(s for s,e in evals.items() if e['held'] and e['action']=='HOLD') or 'žiadne'),
+        '3. Držané/HOLD: '+('N/A — skutočné pozície sa nenačítali' if state.get('shadow_mode') else ', '.join(s for s,e in evals.items() if e['held'] and e['action']=='HOLD') or 'žiadne'),
         '4. Preveriť ochranu: '+(', '.join(s for s,e in evals.items() if e['held'] and e['action'] in ('SELL','REDUCE')) or 'bez potvrdeného experimentálneho upozornenia')+'. Nevykonané predaje nemenia evidenciu.',
         '5. Pred významnou udalosťou neprekročiť vlastný rizikový rozpočet; pri neúplnom kalendári vhodnú výšku hotovosti nemožno spoľahlivo určiť.',
         'Malá korekcia sama neodôvodňuje predaj a opätovný nákup po nákladoch. Bot nikdy nevykonáva obchody. Monitoring neposiela rutinné správy.']
