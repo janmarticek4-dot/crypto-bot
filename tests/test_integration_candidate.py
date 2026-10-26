@@ -98,3 +98,15 @@ class ReadOnlyContentsTests(unittest.TestCase):
         with patch.dict('os.environ',{'GITHUB_REPOSITORY':'owner/repo','GH_TOKEN':'synthetic'}),patch.object(delivery.urllib.request,'urlopen',return_value=response) as request:
             with self.assertRaisesRegex(ValueError,'empty'):delivery.latest_public_rule_state()
         self.assertEqual(request.call_args.args[0].get_method(),'GET')
+
+class NoNewPredictionModelTests(unittest.TestCase):
+    def test_enabled_adapter_only_audits_old_forecasts(self):
+        snap=IntegrationTests().data();original=delivery.pilot.forecast_audit.remember
+        def existing_job():
+            state={}
+            delivery.pilot.forecast_audit.update(state,snap,{'events':[]},'SYNTHETIC_07:00')
+            self.assertEqual(state['analysis_forecasts_v11'],[])
+            return 0
+        with patch.dict('os.environ',{'V111_INTEGRATION_ENABLED':'true'}),patch.object(delivery.pilot,'phase',return_value='morning'),patch.object(delivery,'latest_public_rule_state',return_value={}),patch.object(legacy,'get_fear_greed',return_value={}),patch.object(delivery.pilot,'run',side_effect=existing_job):
+            self.assertEqual(delivery.run(),0)
+        self.assertIs(delivery.pilot.forecast_audit.remember,original)

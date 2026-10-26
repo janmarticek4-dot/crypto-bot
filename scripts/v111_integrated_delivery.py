@@ -35,12 +35,15 @@ def run():
     if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':return pilot.run()
     original_read=pilot.PublicJournal.read
     original_render=pilot.render
+    original_remember=pilot.forecast_audit.remember
     def strict_read(journal):
         value=original_read(journal)
         if not value.get('slots'):raise RuntimeError('Existing delivery journal missing/empty; refusing a reset')
         return value
     try:
         pilot.PublicJournal.read=strict_read
+        # Evaluate prior delivered forecasts only; do not create/promote a V11 model.
+        pilot.forecast_audit.remember=lambda *args,**kwargs: None
         if pilot.phase(pilot.datetime.now(pilot.timezone.utc)) not in ('morning','evening'):return pilot.run()
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
@@ -52,5 +55,6 @@ def run():
     finally:
         pilot.render=original_render
         pilot.PublicJournal.read=original_read
+        pilot.forecast_audit.remember=original_remember
 
 if __name__=='__main__':raise SystemExit(run())

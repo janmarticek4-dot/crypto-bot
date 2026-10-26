@@ -15,7 +15,7 @@ Production is already hybrid: `main.py` remains V10.6, while the existing workfl
 | BUY/SELL/risk logic | Native V10.6 and previously deployed pilot | Calls unchanged `main.evaluate_all`, `technical_summary`, `calculate_technical_score`, `compute_structure`; new events do not modify scores or signals |
 | New fundamentals | Older pilot source | Evidence-bounded market/project explanations, dates/URLs, deduplication, source freshness/coverage, bp changes, TVL/fees/revenue history |
 | Source credibility | Mixed availability | Transport/schema/current relevant content distinguished; missing observations stay N/A; headlines are not verified outcomes |
-| Forecasts/strategies | Existing production behavior | No AdaptiveHold, Freqtrade, new V11 entry/exit rules or probabilistic model activation |
+| Forecasts/strategies | Existing production behavior | No AdaptiveHold, Freqtrade, new V11 entry/exit rules or probabilistic model activation; only prior delivered forecasts are audited, no new V11 forecast is created |
 | Morning/evening | Existing delivery journal | Public native-rule observations plus strict independent morning reference; missing/invalid reference N/A |
 | Telegram/dedup | Existing pilot sender/CAS | Same canonical journal and sender; no second delivery process. Missing established journal fails closed |
 | 15:00 USA | Existing pilot session/calendar implementation | Delegated to the same USA path; no legacy holiday logic re-enabled |
@@ -39,7 +39,7 @@ The data bridge recalculates native V10.6 indicators from the fetched closed 4h 
 
 ## Tests and actual observations
 
-- **76 main-based offline tests PASS**: all applicable integration-branch tests, native evaluation parity, immutable inputs, valid negative news not changing signals, secret canary refusal, malformed/empty state, existing sender ownership, USA delegation, missing journal no reset, public artifact gate and source analysis.
+- **77 main-based offline tests PASS**: all applicable integration-branch tests, native evaluation parity, immutable inputs, valid negative news not changing signals, secret canary refusal, malformed/empty state, existing sender ownership, USA delegation, missing journal no reset, public artifact gate and source analysis.
 - The review branch's **314-test** suite was run separately against its own V11 entrypoint. Review-only tests that require replacing `main.py` with the V11 entrypoint are not represented as tests of the production-main candidate. Production candidate keeps the selected source/renderer/transport/privacy tests plus native-rule tests; fixture-only helpers are named `fixtures_*` to prevent unrelated entrypoint suites being counted.
 - Actual isolated integration preview fetched current data for all six coins, exercised native V10.6 evaluation and produced the enriched evening preview. `legacy_rule_audit.json` confirms equality of native evaluations before/after enrichment. Protected file hashes remained unchanged; privacy staging PASSED.
 - This is **one preview**, not two real independent observations. Real morning/evening comparison is N/A. Missing market/fundamental inputs remain N/A; local macro-provider proxy restrictions are not proof the original servers are down.
