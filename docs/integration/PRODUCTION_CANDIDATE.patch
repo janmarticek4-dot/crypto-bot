@@ -1,0 +1,48 @@
+--- a/.github/workflows/run.yml
++++ b/.github/workflows/run.yml
+@@ -53,17 +53,20 @@
+           MANUAL_DEEP_SEARCH: ${{ inputs.manual_deep_search || false }}
+           PYTHONUNBUFFERED: "1"
+           V111_TRIAL_ENABLED: ${{ vars.V111_TRIAL_ENABLED || 'true' }}
+-        run: python main.py
++        run: |
++          python scripts/state_public_guard.py
++          python main.py
+       - name: Save bot state
+         if: always() && !cancelled()
+         run: |
+           if [ -f bot_state.json ]; then
++            python scripts/state_public_guard.py
+             git config user.name "crypto-ai-bot"
+             git config user.email "crypto-ai-bot@users.noreply.github.com"
+             git add bot_state.json
+             if ! git diff --cached --quiet; then
+               git commit -m "Update crypto bot state [skip ci]"
+-              git pull --rebase --autostash || true
++              git pull --rebase --autostash
+               git push
+             else
+               echo "Stav bota sa nezmenil."
+@@ -102,7 +105,7 @@
+       - name: Checkout reviewed immutable analytical pilot source
+         uses: actions/checkout@v4
+         with:
+-          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
++          ref: 9aadf86cc93c020585e744f184453c46c4d48ffe
+           persist-credentials: false
+       - uses: actions/setup-python@v5
+         with:
+@@ -117,11 +120,12 @@
+           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+           V11_RULES_VALIDATED: 'false'
++          V111_INTEGRATION_ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
+           PRIVATE_ADVISORY_ENABLED: ${{ vars.PROD_STATE_REPOSITORY != '' && secrets.PROD_STATE_TOKEN != '' && secrets.PROD_STATE_ENCRYPTION_KEY != '' }}
+           PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
+           PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
+           PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
+-        run: python scripts/v111_trial.py
++        run: python scripts/v111_integrated_delivery.py
+ 
+   us-source-validation:
+     if: github.event_name == 'push'

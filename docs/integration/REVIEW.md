@@ -83,3 +83,7 @@ For a full V10.6 fallback the pre-existing `V111_TRIAL_ENABLED=false` switch res
 ## Remaining gates
 
 No merge/deployment performed. No real two-time pair yet. Provider coverage is still incomplete (consensus/first release/ETF flows/unlocks and full project usage); no invented substitute. Algorithm parity does not equal provider parity or investment performance. Original monitor POST retry risk remains. Approval of the concrete patch and observing the first real scheduled delivery are still required.
+
+## Frozen source pin
+
+Candidate implementation: `9aadf86cc93c020585e744f184453c46c4d48ffe`. `PRODUCTION_CANDIDATE.patch` pins that exact implementation; later documentation-only commits need not change it. The patch is present for review only and was not applied to the production workflow.
