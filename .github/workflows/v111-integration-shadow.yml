@@ -75,6 +75,8 @@ jobs:
       - name: Real integration preview or independent observation
         env:
           PHASE: ${{ inputs.phase || 'preview' }}
+          INTEGRATION_READ_MAIN_STATE: 'true'
+          GH_TOKEN: ${{ github.token }}
         run: python scripts/integration_shadow.py --phase "$PHASE" --reference-if-present
       - name: Validate and stage public output only
         if: always()

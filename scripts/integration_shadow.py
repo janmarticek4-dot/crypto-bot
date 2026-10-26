@@ -17,7 +17,11 @@ def run(phase='preview',reference=None):
     now=datetime.now(timezone.utc)
     if phase!='preview':shadow_pair.slot(now,phase)
     before=protected_hashes();out=ROOT/'shadow-output/integration';out.mkdir(parents=True,exist_ok=True)
-    state=integration.read_rule_state(ROOT/'bot_state.json') # readonly checkout baseline, never a private ledger
+    state_origin='checkout public cache (not guaranteed latest main)'
+    if os.getenv('INTEGRATION_READ_MAIN_STATE','false')=='true':
+        from scripts.v111_integrated_delivery import latest_public_rule_state
+        state=latest_public_rule_state();state_origin='latest main public cache (read-only)'
+    else:state=integration.read_rule_state(ROOT/'bot_state.json')
     code=collect(out,False,report_phase=phase)
     snapshot=json.loads((out/'market_snapshot.json').read_text());fund=json.loads((out/'fundamentals.json').read_text())
     now=datetime.now(timezone.utc)
@@ -46,12 +50,12 @@ def run(phase='preview',reference=None):
             text,quotes,_=integration.render(legacy,snapshot,fund,now,kind,state,previous,fear)
         except (ValueError,TypeError,KeyError):
             pair=dict(status='N/A',verified_temporal_pair=False,reason='Reference refused: checksum/time/source mismatch');code=2
-    text='SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.\nV10.6 kontext = verejný cache z integračného checkoutu, nie potvrdená osobná držba.\n'+text
+    text='SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.\nV10.6 kontext: '+state_origin+'; nejde o potvrdenú osobnú držbu.\n'+text
     (out/(kind+'.txt')).write_text(text)
     write_json(out/'comparison.json',pair)
     (out/'comparison.txt').write_text(shadow_pair.report(pair) if pair.get('verified_temporal_pair') else 'Porovnanie N/A — '+pair.get('reason','čaká na večer'))
     write_json(out/'legacy_rule_audit.json',dict(identical_evaluations=True,rule_engine='main.py V10.6 unchanged',new_fundamentals_affect_signals=False,
-        legacy_cache='checkout public state, read-only; not latest production state guaranteed',source_commit=os.getenv('SHADOW_SOURCE_SHA')))
+        legacy_cache=state_origin,source_commit=os.getenv('SHADOW_SOURCE_SHA')))
     summary=json.loads((out/'summary.json').read_text());summary.update(phase=phase,verified_temporal_pair=pair.get('verified_temporal_pair',False),state_written=False,rule_engine='v10.6-original')
     write_json(out/'summary.json',summary)
     if before!=protected_hashes():raise RuntimeError('Protected production files changed')

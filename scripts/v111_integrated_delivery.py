@@ -26,7 +26,9 @@ def latest_public_rule_state():
     encoded=''.join(json.loads(raw)['content'].splitlines())
     state=json.loads(base64.b64decode(encoded,validate=True))
     if not state:raise ValueError('Unexpected empty public rule state')
-    return integration.rule_state(state)
+    selected=integration.rule_state(state)
+    if not selected:raise ValueError('No supported public rule-cache fields')
+    return selected
 
 
 def run():

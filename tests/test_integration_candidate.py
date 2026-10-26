@@ -85,3 +85,16 @@ class JournalContinuityTests(unittest.TestCase):
         with patch.dict('os.environ',{'V111_INTEGRATION_ENABLED':'true'}),patch.object(delivery.pilot,'phase',return_value='usa'),patch.object(delivery.pilot.PublicJournal,'read',return_value={'schema':1,'slots':{}}),patch.object(delivery.pilot,'run',side_effect=call_existing):
             with self.assertRaisesRegex(RuntimeError,'refusing a reset'):delivery.run()
         self.assertIs(delivery.pilot.PublicJournal.read,original)
+
+class ReadOnlyContentsTests(unittest.TestCase):
+    def test_api_state_missing_never_becomes_empty_ledger(self):
+        import urllib.error
+        with patch.dict('os.environ',{'GITHUB_REPOSITORY':'owner/repo','GH_TOKEN':'synthetic'}),patch.object(delivery.urllib.request,'urlopen',side_effect=urllib.error.HTTPError('https://example.org',404,'missing',None,None)):
+            with self.assertRaises(urllib.error.HTTPError):delivery.latest_public_rule_state()
+    def test_empty_remote_state_refused_without_write(self):
+        import base64
+        from unittest.mock import MagicMock
+        response=MagicMock();response.__enter__.return_value.read.return_value=json.dumps({'content':base64.b64encode(b'{}').decode()}).encode()
+        with patch.dict('os.environ',{'GITHUB_REPOSITORY':'owner/repo','GH_TOKEN':'synthetic'}),patch.object(delivery.urllib.request,'urlopen',return_value=response) as request:
+            with self.assertRaisesRegex(ValueError,'empty'):delivery.latest_public_rule_state()
+        self.assertEqual(request.call_args.args[0].get_method(),'GET')
