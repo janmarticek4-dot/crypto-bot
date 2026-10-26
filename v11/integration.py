@@ -63,15 +63,19 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
            'Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.',
            f"Trh24h {percent(ctx.get('global_change'))}; BTC {p(ctx['btc_data'].get('price_usd'))}; dominancia {ctx.get('btc_dominance') if ctx.get('btc_dominance') is not None else 'N/A'} %; bezpečnostné hodnotenie V10.6 {safety['state']}.",
            'Príčina pohybu nie je preukázaná samotným súbehom správ a cien.']
+    lines.append('Kapitalizácia trhu '+legacy.fmt_big(ctx.get('total_market_cap'))+'; objem24h '+legacy.fmt_big(ctx.get('total_volume'))+'; BTC24h '+percent(ctx.get('btc_change_24h'))+'.')
     lines+=overview(fundamentals,now)
     quotes={};appendix=[]
     for symbol in legacy.PORTFOLIO:
         e=evaluations[symbol];c=snapshot['coins'].get(symbol,{})
         lines+=['',f"{symbol} — {e['action']} (V10.6) | {p(e.get('price'))}; 24h {percent(c.get('change_24h'))}",
-                f"Trend {e.get('trend_score','N/A')}/10; riziko {e.get('risk_level','N/A')}; "+'; '.join(e.get('signals',[])[:2])]
+                f"Trend {e.get('trend_score','N/A')}/10; riziko {e.get('risk_level','N/A')} ({e.get('risk_pts','N/A')} b.); "+'; '.join(e.get('signals',[])[:2])]
         if e.get('entry') and e.get('stop'):
-            lines.append(f"Pôvodný plán: vstup {p(e['entry'])}, ochranná hranica {p(e['stop'])}, TP1 {p(e.get('tp1'))}, TP2 {p(e.get('tp2'))}. "+e.get('flip',''))
+            lines.append(f"Pôvodný plán: vstup {p(e['entry'])}, ochranná hranica {p(e['stop'])}, TP1 {p(e.get('tp1'))}, TP2 {p(e.get('tp2'))}.")
         else:lines.append('Potvrdený vstup/ochranný plán N/A.')
+        lines.append('Support '+p(e.get('support'))+'; rezistencia '+p(e.get('resistance'))+'; pokles od maxima '+percent(e.get('drawdown_pct'))+'.')
+        if e.get('tiers'):lines.append('Nepotvrdené možné vstupné zóny: '+' / '.join(p(v) for v in e['tiers']))
+        lines.append('Zmena odporúčania: '+e.get('flip','N/A'))
         lines+=coin_lines(symbol,fundamentals,now)
         lines.append(f"Kapitalizácia {legacy.fmt_big(c.get('market_cap'))}; objem24h {legacy.fmt_big(c.get('volume_24h'))}.")
         old=(previous or {}).get(symbol,{})
@@ -80,9 +84,10 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
             lines.append(f"Od rána: cena {percent(delta(c.get('price'),old.get('price')))}, kap. {percent(delta(c.get('market_cap'),old.get('market_cap')))}, objem {percent(delta(c.get('volume_24h'),old.get('volume_24h')))}; pokyn {action} → {e['action']}.")
         quotes[symbol]=dict(price=c.get('price') if not c.get('stale') else None,market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),
                             action=e['action'],trend_score_10=e.get('trend_score'),rule_engine='v10.6-original')
-        appendix.append(f"{symbol}: RSI {e.get('rsi','N/A')}; EMA20/50/200 "+' / '.join(p(e.get(k)) for k in ('ema20','ema50','ema200')))
+        tech=ctx['portfolio_data'][symbol].get('technical_4h',{})
+        appendix.append(f"{symbol}: RSI {round(e['rsi'],1) if e.get('rsi') is not None else 'N/A'}; EMA20/50/100/200 "+' / '.join(p(tech.get(k)) for k in ('ema20','ema50','ema100','ema200'))+'; MACD hist. '+str(round(e['macd_hist'],4) if e.get('macd_hist') is not None else 'N/A')+'; ATR '+p(tech.get('atr14')))
     if kind=='evening' and not previous:lines.append('Ranné porovnanie N/A — nezadávame syntetickú rannú referenciu.')
-    lines+=['',*event_lines(fundamentals,now.timestamp()),'',
+    lines+=['', 'AKČNÝ ZÁVER', 'V10.6 nákupné signály: '+(', '.join(s for s,e in evaluations.items() if e['action'] in ('BUY NOW','BUY PULLBACK')) or 'žiadne')+'. Existujúce pozície posudzuje iba oddelená súkromná časť, v shadow sú N/A.', 'V10.6 ochranné signály: '+(', '.join(s for s,e in evaluations.items() if e['action'] in ('SELL','REDUCE')) or 'žiadne')+'. Nevykonáva sa žiadny obchod.',*event_lines(fundamentals,now.timestamp()),'',
             'Nové udalosti nemenia V10.6 signál. Rizikové vstupy zo staršieho V10.6 cache nie sú týmto znovu overené.',
             'Kapitalizácia, TVL a objem nie sú čisté kapitálové toky. Náklady eToro približne 1 % nákup + 1 % predaj a spread treba posúdiť pred manuálnym obchodom; nejde o nové schválené čisté R:R.',
             'Osobné pozície sa v shadow nenahrávajú. Odporúčanie nie je uskutočnený obchod.',
