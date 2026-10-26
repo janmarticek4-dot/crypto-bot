@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv*/
+.pytest_cache/
+backtesting/user_data/
+*.lock
+
+.private-state/
+.env
+research/phase2/__pycache__/
+
+# Isolated live shadow output (public market data only)
+shadow-output/
+
+# Standalone macro-network diagnostic artifacts
+macro-diagnostics-output/
+
+# Validated public-only shadow upload staging
+shadow-public-artifacts/
+
+# Aggregate private-state integration test results (no state payload)
+state-integration-output/
+
+# Public US quote/provider diagnostics
+us-source-diagnostics/

@@ -1,0 +1,96 @@
+name: V11.1 Integration Shadow
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        options: [preview, morning, evening]
+        default: preview
+      morning_run_id:
+        type: string
+        default: ''
+  workflow_call:
+    inputs:
+      source_sha:
+        type: string
+        required: true
+      phase:
+        type: string
+        default: preview
+      morning_run_id:
+        type: string
+        default: ''
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: v111-integration-shadow
+  cancel-in-progress: false
+jobs:
+  shadow:
+    if: github.ref == 'refs/heads/integration/v11-1-main-review' || github.ref == 'refs/heads/feature/v11-1-review'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      BOT_DATA_MODE: shadow
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      GROQ_API_KEY: ''
+      V111_INTEGRATION_ENABLED: 'false'
+      SHADOW_SOURCE_BRANCH: integration/v11-1-main-review
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          persist-credentials: false
+      - name: Pin checked-out source for temporal validation
+        run: echo "SHADOW_SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - name: Main-based offline integration regressions
+        run: python scripts/test_integration_offline.py
+      - name: Validate optional morning run provenance
+        if: inputs.phase == 'evening' && inputs.morning_run_id != ''
+        id: morning
+        uses: actions/github-script@v7
+        env:
+          MORNING_RUN_ID: ${{ inputs.morning_run_id }}
+        with:
+          script: |
+            if (!/^\d+$/.test(process.env.MORNING_RUN_ID)) throw new Error('Numeric morning run ID required');
+            const {data:run} = await github.rest.actions.getWorkflowRun({...context.repo,run_id:process.env.MORNING_RUN_ID});
+            if (run.conclusion !== 'success' || run.event !== 'workflow_dispatch' || !['feature/v11-1-review','integration/v11-1-main-review'].includes(run.head_branch) || !['.github/workflows/run.yml','.github/workflows/v111-integration-shadow.yml'].includes(run.path)) throw new Error('Morning run provenance refused');
+            if (String(run.id) === String(context.runId)) throw new Error('Independent morning run required');
+            core.setOutput('artifact',`v111-integration-${run.id}-${run.run_attempt}`);
+      - uses: actions/download-artifact@v4
+        if: steps.morning.outputs.artifact != ''
+        with:
+          name: ${{ steps.morning.outputs.artifact }}
+          run-id: ${{ inputs.morning_run_id }}
+          github-token: ${{ github.token }}
+          path: shadow-output/reference
+      - name: Real integration preview or independent observation
+        env:
+          PHASE: ${{ inputs.phase || 'preview' }}
+        run: python scripts/integration_shadow.py --phase "$PHASE" --reference-if-present
+      - name: Validate and stage public output only
+        if: always()
+        run: python scripts/stage_shadow_artifacts.py --source shadow-output/integration --destination shadow-public-artifacts/integration
+      - name: Publish isolated integration artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v111-integration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: shadow-public-artifacts/integration/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Summary
+        if: always()
+        run: |
+          echo 'Shadow only: V10.6 rule engine, V11.1 enrichment, no delivery/state writes.' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f shadow-public-artifacts/integration/summary.json ]; then
+            cat shadow-public-artifacts/integration/summary.json >> "$GITHUB_STEP_SUMMARY"
+          fi

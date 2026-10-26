@@ -1,0 +1,2 @@
+# Minimal integration runner dependency; no bot, broker, market or Telegram client.
+cryptography==50.0.2
