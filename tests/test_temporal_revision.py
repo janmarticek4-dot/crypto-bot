@@ -136,3 +136,12 @@ class TVLHistoryTests(unittest.TestCase):
         saved=pair.checkpoint(sample(am),ev,am,dict(events=[]))
         saved['fundamentals']['events'].append({'invented':True})
         with self.assertRaisesRegex(ValueError,'checksum'):pair.compare(saved,sample(pm),ev,pm,{})
+
+class PublicationCoverageTests(unittest.TestCase):
+    def test_lost_secondary_source_is_not_new_fundamental_update(self):
+        am=datetime(2026,10,26,7,tzinfo=BL);pm=am.replace(hour=20)
+        a=item(id='a',title='Aave governance proposal',published_at=am.isoformat(),retrieved_at=am.isoformat())
+        b=item(id='b',title='Aave governance proposal',url='https://other.example/a',published_at=am.isoformat(),retrieved_at=am.isoformat())
+        old=dict(events=[a,b],sources=[dict(status='OK')]);new=dict(events=[dict(a,retrieved_at=pm.isoformat())],sources=[dict(status='OK')])
+        compared=pair.compare_fundamentals(old,new,am,pm)
+        self.assertEqual(compared['updated'],[]);self.assertEqual(compared['unchanged'],1)

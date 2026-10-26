@@ -122,7 +122,7 @@ def compare_fundamentals(old,new,start,now):
         if match is None:added.append(current)
         else:
             matched.add(match['id'])
-            if set(current.get('member_ids',[]))!=set(match.get('member_ids',[])):changed.append(current)
+            if set(current.get('member_ids',[]))-set(match.get('member_ids',[])):changed.append(current)
             else:unchanged+=1
     return dict(status='COMPARED',new=added,updated=changed,unchanged=unchanged,
                 not_observed_now=[e for e in a['evidence'] if e['id'] not in matched],

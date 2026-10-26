@@ -59,7 +59,7 @@ Prípadne spusti priamo **V11.1 Temporal Shadow**, ak ho GitHub už eviduje. Ži
 
 ## Výsledky a obmedzenia tejto úpravy
 
-- **313 offline testov prešlo**; z toho 17 nových regresných/integračných testov. Kontrolujú presnú jednotku bp, zachovanie staršieho porovnávacieho bodu, TVL, deduplikáciu a nezlučovanie rozdielnych tvrdení, dostupnosť vs. aktuálnosť/pokrytie, obe zmeny DST, checksum fundamentov, chýbajúce ráno a odmietnutie recyklovaného snapshotu.
+- **314 offline testov prešlo**; z toho 18 nových regresných/integračných testov. Kontrolujú presnú jednotku bp, zachovanie staršieho porovnávacieho bodu, TVL, deduplikáciu a nezlučovanie rozdielnych tvrdení, dostupnosť vs. aktuálnosť/pokrytie, obe zmeny DST, checksum fundamentov, chýbajúce ráno a odmietnutie recyklovaného snapshotu.
 - YAML oboch workflow a oddelenej šablóny bol overený. Dvojica v unit testoch je jasne syntetická; nie je výkonnostným ani živým časovým overením.
 - Jednorazový živý náhľad **26. 10. 2026 22:29 Bratislava** mal kompletné trhové dáta všetkých šiestich mincí a nezmenené chránené súbory. Je to iba náhľad mimo plánovaného slotu, nie skutočná ranná/večerná dvojica. Lokálne proxy obmedzenia makro/DeFiLlama zdrojov trvajú; predchádzajúci úspešný GitHub beh tieto lokálne sieťové podmienky nenahrádza.
 - Prvý automatický skutočný pár ešte **neprebehol**: treba vytvoriť výskumný repozitár alebo vykonať dva manuálne behy v reálnych oknách. Dnes nie je možné spätne vyrobiť ranný zber. Neuvádzame úspech deployu, schedule ani porovnania, ktoré sa nestalo.
