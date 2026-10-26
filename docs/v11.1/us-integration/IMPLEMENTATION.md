@@ -31,3 +31,16 @@ No trading rules, private ledger or actual fills change.
   instrument data, BLS alias, finite/current FRED observations and N/A outages.
 - Local actual probe: US quotes0/4, yields unavailable, feeds8/16 because network
   proxy blocks these hosts. This is NOT evidence of GitHub-hosted availability.
+
+## Actual runner evidence and deployment
+
+GitHub-hosted run40336881117 (main integration diagnostic,2026-10-26) succeeded:
+US_QUOTES_AVAILABLE=4/4; YIELDS_AVAILABLE=True; FUND_FEEDS_AVAILABLE=16/16;
+PHASE=AFTER OPEN. Public artifact us-source-validation-40336881117. The result
+means valid parsed quote observations, a fresh paired yield observation and
+available configured feeds including fallbacks; not complete fundamental coverage.
+
+Production43c955e enables integrated15:00 from2026-10-27. Code pinned to0209de9;
+only07/15/20 public-data analysis changes. Monitoring, actual holdings, private
+storage and trade rules remain untouched. First Telegram delivery of the new
+USA report still awaits its scheduled slot. Today's legacyUSA report is not replayed.
