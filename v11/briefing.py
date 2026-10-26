@@ -99,7 +99,7 @@ def event_lines(result,now):
             else:
                 days=(datetime.fromisoformat(date_only).date()-datetime.fromtimestamp(now,BL).date()).days
             if not (start<=days<end or (end==14 and days==14)):continue
-            if start==7 and not set(e.get('categories',[])) & {'Fed','CPI','PCE','employment','unlock','regulation','hack'}:continue
+            if start==7 and not set(e.get('categories',[])) & {'Fed','CPI','PCE','GDP','employment','unlock','regulation','hack'}:continue
             selected.append((at or datetime.fromisoformat(date_only).replace(tzinfo=BL),e))
         for at,e in sorted(selected,key=lambda x:x[0])[:5]:
             when=at.astimezone(BL).strftime('%d.%m.%Y %H:%M')+' Bratislava' if e.get('event_at') else e['event_date']+' (dátum zdroja) | presný čas Bratislava N/A'

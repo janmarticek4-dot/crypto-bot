@@ -46,6 +46,7 @@ PATTERNS={
  'Fed':r'\becb\b|monetary policy decisions|\bfomc\b|federal reserve|monetary policy|interest rate',
  'CPI':r'consumer price|producer price|\bppi\b|\bcpi\b',
  'PCE':r'personal consumption|personal income and outlays|\bpce\b',
+ 'GDP':r'gross domestic product|\bgdp\b',
  'employment':r'employment situation|nonfarm|unemployment|payroll',
  'regulation':r'\bsec\b|regulat|lawsuit|securities and exchange|enforcement',
  'unlock':r'token unlock|vesting|token release',
@@ -55,6 +56,7 @@ MECHANISMS={
  'Fed':'Zmena sadzieb alebo likvidity môže ovplyvniť diskontovanie a ochotu podstupovať riziko; smer bez údajov nie je potvrdený.',
  'CPI':'Prekvapenie inflácie môže zmeniť očakávania sadzieb; samotný titulok nepotvrdzuje dopad.',
  'PCE':'Inflácia a spotreba môžu ovplyvniť očakávania Fedu; smer vyžaduje porovnanie s očakávaniami.',
+ 'GDP':'Rast ekonomiky môže ovplyvniť očakávania sadzieb; smer vyžaduje výsledok voči overenému konsenzu.',
  'employment':'Údaje trhu práce môžu ovplyvniť sadzby aj ochotu riskovať; bez konsenzu je dopad neistý.',
  'regulation':'Regulačná udalosť môže zmeniť prístup k obchodovaniu alebo prevádzkové riziko.',
  'unlock':'Uvoľnená ponuka môže zvýšiť predajný tlak, ale uvoľnenie neznamená automatický predaj.',
@@ -265,7 +267,7 @@ def collect(state,now=None,fetcher=fetch):
         key=item['id']+str(item['event_at'])+str(item.get('event_date'))
         unique[key]=item
     metrics={}
-    metric_sources=[('AAVE','https://api.llama.fi/protocol/aave'),('SOL','https://api.llama.fi/v2/historicalChainTvl/Solana')]
+    metric_sources=[('AAVE','https://api.llama.fi/protocol/aave'),('SOL','https://api.llama.fi/v2/historicalChainTvl/Solana'),('ONDO','https://api.llama.fi/protocol/ondo-finance')]
     for symbol,url in metric_sources:
         try:
             data=json.loads(fetcher(dict(url=url)))

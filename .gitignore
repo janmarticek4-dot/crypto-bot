@@ -20,3 +20,6 @@ shadow-public-artifacts/
 
 # Aggregate private-state integration test results (no state payload)
 state-integration-output/
+
+# Public US quote/provider diagnostics
+us-source-diagnostics/

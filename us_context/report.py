@@ -218,9 +218,21 @@ def collect(api, now):
     jobs = {}
     def get(url, headers=None):
         return api.http_json(url,headers=headers,timeout=6,retries=1)
+    def equity(symbol):
+        last_code=None
+        for host in ('query1.finance.yahoo.com','query2.finance.yahoo.com'):
+            url='https://'+host+'/v8/finance/chart/'+urllib.parse.quote(symbol,safe='')+'?interval=1m&range=1d'
+            try:
+                value=get(url,{'User-Agent':'CryptoBotUS/11.1 public-data reader'})
+                chart=value.get('chart',{})
+                if chart.get('result') and not chart.get('error'):return value
+            except Exception as exc:
+                last_code=getattr(exc,'code',None) or getattr(getattr(exc,'response',None),'status_code',None)
+        error=ValueError('US quote providers unavailable')
+        error.code=last_code
+        raise error
     for symbol in QUOTES:
-        url='https://query1.finance.yahoo.com/v8/finance/chart/'+urllib.parse.quote(symbol,safe='')+'?interval=1m&range=1d'
-        jobs[symbol] = lambda url=url:get(url,{'User-Agent':'Mozilla/5.0 CryptoBot/10.6-US'})
+        jobs[symbol] = lambda symbol=symbol:equity(symbol)
     # Bulk endpoint: one delisted/unsupported symbol must not reject the entire
     # batch. Only the watched symbols are retained by crypto_snapshot().
     jobs['tickers']=lambda:get('https://data-api.binance.vision/api/v3/ticker/24hr')
@@ -344,7 +356,7 @@ def render(data, now, slot, previous=None, collected_seconds=0):
     if not data['macro']:
         lines.append('N/A — overená dnešná udalosť s časom z BLS/Fed/BEA nedostupná.')
     lines.append('Krátky scenár: súbežné potvrdené oslabenie akcií a šírky altcoinov zvyšuje opatrnosť; opačný vývoj tento scenár oslabí. Bez aktuálnych dát je smer N/A.')
-    lines.append('Pokyn: nepotvrdené nové vstupy WAIT; pri držaných pozíciách prever platné ochranné hranice. USA kontext sám nevytvára BUY/SELL; bot neobchoduje.')
+    lines.append('Pokyn: nepotvrdené nové vstupy WAIT; skutočná držba N/A v analytickom pilote, existujúce ochranné hranice musí posúdiť používateľ. USA kontext sám nevytvára BUY/SELL; bot neobchoduje.')
     return '\n'.join(lines)
 
 
@@ -381,3 +393,23 @@ def run(api, slot):
         state['us_market_previous']=dict(at=data['crypto']['global_at'].isoformat(),dominance=data['crypto']['dominance'])
     state.update(last_main_slot=slot,last_us_slot=slot,last_run=api.iso_now(),last_us_outlook=api.iso_now(),bot_version=api.VERSION)
     api.save_state(state)
+
+
+class PublicUSAPI:
+    """Read-only public market adapter; no bot state, broker, AI or Telegram."""
+    PORTFOLIO=COINS
+    @staticmethod
+    def coingecko_headers():return {'Accept':'application/json','User-Agent':'CryptoBotUS/11.1'}
+    def http_json(self,url,headers=None,timeout=6,retries=1):
+        import requests
+        parsed=urllib.parse.urlsplit(url)
+        known={('data-api.binance.vision','/api/v3/ticker/24hr'),
+               ('api.coingecko.com','/api/v3/global'),('api.coingecko.com','/api/v3/coins/markets')}
+        chart=(parsed.hostname in ('query1.finance.yahoo.com','query2.finance.yahoo.com') and
+               parsed.path.startswith('/v8/finance/chart/') and urllib.parse.unquote(parsed.path.rsplit('/',1)[-1]) in QUOTES)
+        if parsed.scheme!='https' or parsed.username or parsed.password or parsed.port not in (None,443) or not (chart or (parsed.hostname,parsed.path) in known):
+            raise ValueError('US adapter destination refused')
+        response=requests.get(url,headers=headers,timeout=min(timeout,8),allow_redirects=False)
+        response.raise_for_status()
+        if not 200<=response.status_code<300:raise ValueError('US redirect refused')
+        return response.json()

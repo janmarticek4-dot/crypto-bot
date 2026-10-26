@@ -1,5 +1,7 @@
 """Public Treasury yield observations, not real-time DXY or a macro consensus."""
 import math
+import csv
+import io
 import xml.etree.ElementTree as ET
 from datetime import datetime,timezone,timedelta
 from .fundamentals import fetch,timestamp
@@ -24,15 +26,36 @@ def parse_treasury(raw,now):
     return max(rows,key=lambda r:r['date']) if rows else None
 
 
+def parse_fred(raw,now):
+    rows=[]
+    for row in csv.DictReader(io.StringIO(raw.decode('utf-8-sig'))):
+        try:
+            day=datetime.fromisoformat(row.get('observation_date',row.get('DATE',''))).date()
+            if not 0<=(now.date()-day).days<=5:continue
+            a,b=float(row['DGS2']),float(row['DGS10'])
+            if not all(math.isfinite(x) and -5<=x<=30 for x in (a,b)):continue
+            rows.append(dict(date=day.isoformat(),**{'2y':a,'10y':b}))
+        except (ValueError,KeyError,TypeError):continue
+    return max(rows,key=lambda r:r['date']) if rows else None
+
+
 def collect(state,now=None,fetcher=fetch):
     now=now or datetime.now(timezone.utc)
     cache=state.get('macro_context_v111',{})
     checked=timestamp(cache.get('checked_at'))
     if checked and timedelta(0)<=now-checked<timedelta(hours=1):return cache
-    url=f'https://home.treasury.gov/resource-center-data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value={now.year}'
-    result=dict(checked_at=now.isoformat(),treasury=None,url=url)
-    try:result['treasury']=parse_treasury(fetcher(dict(url=url)),now)
-    except Exception as exc:result['error_type']=type(exc).__name__
+    monthly=f'https://home.treasury.gov/resource-center-data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value_month={now:%Y%m}'
+    fred='https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2,DGS10&cosd='+str((now-timedelta(days=10)).date())
+    result=dict(checked_at=now.isoformat(),treasury=None,url=monthly,attempts=[])
+    for source,parser in [(dict(url=monthly),parse_treasury),(dict(url=fred),parse_fred)]:
+        try:
+            value=parser(fetcher(source),now)
+            result['attempts'].append(dict(url=source['url'],status='OK' if value else 'N/A'))
+            if value:
+                result.update(treasury=value,url=source['url']);break
+        except Exception as exc:
+            result['attempts'].append(dict(url=source['url'],status='N/A',error_type=type(exc).__name__))
+    if not result['treasury']:result['error_type']='SourcesUnavailable'
     state['macro_context_v111']=result
     return result
 

@@ -51,6 +51,7 @@ def canonical_url(url):
 def parse_feed(raw,source,now=None):
     now=now or datetime.now(timezone.utc)
     root=ET.fromstring(raw)
+    if root.tag.rsplit('}',1)[-1] not in ('rss','feed'):raise ValueError('Invalid RSS/Atom format')
     out=[]
     for node in root.iter():
         if node.tag.rsplit('}',1)[-1] not in ('item','entry'):continue
@@ -93,7 +94,9 @@ def parse_calendar(raw,source,now=None):
         try:
             if date.endswith('Z'):dt=datetime.strptime(date,'%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
             elif 'TZID=' in dt_key:
-                tz=ZoneInfo(dt_key.split('TZID=',1)[1].split(';')[0])
+                name=dt_key.split('TZID=',1)[1].split(';')[0].strip(chr(34))
+                if name=='US-Eastern' and urllib.parse.urlsplit(source['url']).hostname in ('www.bls.gov','bls.gov'):name='America/New_York'
+                tz=ZoneInfo(name)
                 dt=datetime.strptime(date,'%Y%m%dT%H%M%S').replace(tzinfo=tz).astimezone(timezone.utc)
             else:continue  # Floating or date-only event has no proven precise time.
         except (ValueError,KeyError):continue

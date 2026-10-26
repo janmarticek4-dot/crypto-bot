@@ -12,7 +12,7 @@ import urllib.error
 from zoneinfo import ZoneInfo
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.v111_shadow import ShadowAPI, SYMBOLS
-from v11 import data,fundamentals
+from v11 import data,fundamentals,macro_context
 from v11.diagnostics import technical
 from v11.reporting import chunks
 from v11.state_policy import require_public_data
@@ -23,7 +23,7 @@ PATH='trial-public/v111-delivery.json'
 
 def phase(now):
     local=now.astimezone(BL);minute=local.hour*60+local.minute
-    for name,start in [('morning',420),('evening',1200)]:
+    for name,start in [('morning',420),('usa',900),('evening',1200)]:
         if start<=minute<=start+90:return name
     return None
 
@@ -59,7 +59,7 @@ def render(snap,fund,now,kind,previous=None):
         lines+=['',f"{symbol} — WAIT | {price(coin.get('price'))},24h {pct(coin.get('change_24h'))}",
           f"Technika {diagnostic.get('score','N/A')}/6; RSI {round(t['rsi14'],1) if t.get('rsi14') is not None else 'N/A'}; ADX {round(t['adx'],1) if t.get('adx') is not None else 'N/A'}; support {price(t.get('support'))}, rezistencia {price(t.get('resistance'))}.",
           f"EMA20/50/100/200: {' / '.join(price(t.get('ema'+str(n))) for n in (20,50,100,200))}; MACD hist. {format(t['macd_hist'],'.4g') if t.get('macd_hist') is not None else 'N/A'}; ATR {price(t.get('atr'))}.",
-          f"Kap. {price(coin.get('market_cap'))}; objem24h {price(coin.get('volume_24h'))}."]
+          f"Kap. {price(coin.get('market_cap'))}; objem24h {price(coin.get('volume_24h'))}; obeh tokenov {coin.get('circulating_supply') if coin.get('circulating_supply') is not None else 'N/A'}. Unlocky/emisie N/A bez kalendára."]
         if coin.get('stale'):lines.append('Dáta neúplné/zastarané — nové úrovne a výhľad N/A.')
         else:
             for label,tf in [('24–72h','4h'),('7–14d','1d')]:
@@ -72,6 +72,9 @@ def render(snap,fund,now,kind,previous=None):
         if previous and symbol in previous:
             old=previous[symbol]
             lines.append(f"Od rána: cena {pct(delta(current[symbol]['price'],old.get('price')))}, kap. {pct(delta(current[symbol]['market_cap'],old.get('market_cap')))}, objem {pct(delta(current[symbol]['volume_24h'],old.get('volume_24h')))}; technika {old.get('technical_score')}→{current[symbol]['technical_score']}/6; WAIT→WAIT.")
+    for symbol,metric in fund.get('metrics',{}).items():
+        lines.append(f"{symbol} TVL {price(metric['value'])}, pozorovanie {metric['at']}; {metric['url']}. Nie čistý tok ani adopcia tokenu.")
+    lines+=macro_context.lines(fund.get('macro_context',{}))[:1]
     lines+=['','KALENDÁR — čas Bratislava, konsenzus a smer dopadu N/A bez overenia:']
     for title,lower,upper in [('24h',0,1),('ďalšie dni do7d',1,7),('ďalšie dni do14d',7,14)]:
         selected=[]
@@ -125,17 +128,38 @@ def send(text):
 def run():
     now=datetime.now(timezone.utc);kind=phase(now)
     if not kind:return 0
+    if kind=='usa' and now.astimezone(BL).date().isoformat()<os.getenv('US_PILOT_START_DATE','2026-10-27'):return 0
     journal=PublicJournal();state=journal.read();key=now.astimezone(BL).date().isoformat()+'-'+kind
     if key in state['slots']:return 0
-    api=ShadowAPI();original=data.COINS
-    try:
-        data.COINS={s:original[s] for s in SYMBOLS};snap=data.collect(api,full=True)
-    finally:data.COINS=original
-    now=datetime.now(timezone.utc)
+    if kind=='usa':
+        from us_context import report as us
+        started=datetime.now(timezone.utc)
+        context=us.collect(us.PublicUSAPI(),started)
+        now=datetime.now(timezone.utc);us.refresh(context,now)
+        target='BRATISLAVA_'+now.astimezone(BL).date().isoformat()+'_15:00'
+        previous=next((entry.get('quotes') for slot,entry in sorted(state['slots'].items(),reverse=True) if slot.endswith('-usa') and entry.get('status')=='sent'),None)
+        text=us.render(context,now,target,previous,(now-started).total_seconds())
+        fundamental=fundamentals.collect({},now)
+        upcoming=[e for e in fundamental.get('events',[]) if e.get('scheduled')]
+        text+='\nNajbližšie plánované: '+(' | '.join(e['title'][:80]+'; '+(fundamentals.timestamp(e['event_at']).astimezone(BL).strftime('%d.%m. %H:%M Bratislava') if e.get('event_at') else e.get('event_date','N/A')+' čas N/A')+'; '+e['url'] for e in upcoming[:2]) or 'N/A v dostupných zdrojoch.')
+        text+='\n'+macro_context.lines(macro_context.collect({},now))[0]
+        require_public_data(text)
+        quotes={'at':context['crypto']['global_at'].isoformat() if context['crypto']['global_at'] else None,
+                'dominance':context['crypto']['dominance'],
+                'us_data':{symbol:{'status':q['status'],'price':q['price'],'at':q['at'].isoformat() if q['at'] else None,'kind':q['kind']} for symbol,q in context['quotes'].items()},
+                'sources':context['sources'],'phase':context['market']['phase']}
+        print('US pilot source status: '+json.dumps({'quotes':{k:v['status'] for k,v in quotes['us_data'].items()},'sources':context['sources'],'phase':quotes['phase']}))
+    else:
+        api=ShadowAPI();original=data.COINS
+        try:
+            data.COINS={s:original[s] for s in SYMBOLS};snap=data.collect(api,full=True)
+        finally:data.COINS=original
+        now=datetime.now(timezone.utc)
+        fund=fundamentals.collect({},now)
+        fund['macro_context']=macro_context.collect({},now)
+        morning=state['slots'].get(now.astimezone(BL).date().isoformat()+'-morning',{})
+        text,quotes=render(snap,fund,now,kind,morning.get('quotes') if morning.get('status')=='sent' else None)
     if phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
-    fund=fundamentals.collect({},now)
-    morning=state['slots'].get(now.astimezone(BL).date().isoformat()+'-morning',{})
-    text,quotes=render(snap,fund,now,kind,morning.get('quotes') if morning.get('status')=='sent' else None)
     require_public_data(quotes)
     state['slots']={k:v for k,v in state['slots'].items() if k[:10]>=(now.astimezone(BL).date().isoformat()[:8]+'01')}
     state['slots'][key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
