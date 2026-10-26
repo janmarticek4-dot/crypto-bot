@@ -58,7 +58,7 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
     p=legacy.format_price
     def percent(x):return 'N/A' if x is None else f'{x:+.2f}%'
     def delta(a,b):return (a/b-1)*100 if isinstance(a,(float,int)) and isinstance(b,(float,int)) and b>0 else None
-    lines=['📊 CRYPTO AI BOT — INTEGRAČNÝ NÁVRH '+('RÁNO' if kind=='morning' else 'VEČER'),
+    lines=['📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — '+('RÁNO' if kind=='morning' else 'VEČER'),
            now.astimezone(legacy.TZ).strftime('%d.%m.%Y %H:%M Bratislava'),
            'Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.',
            f"Trh24h {percent(ctx.get('global_change'))}; BTC {p(ctx['btc_data'].get('price_usd'))}; dominancia {ctx.get('btc_dominance') if ctx.get('btc_dominance') is not None else 'N/A'} %; bezpečnostné hodnotenie V10.6 {safety['state']}.",
@@ -87,10 +87,10 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
         tech=ctx['portfolio_data'][symbol].get('technical_4h',{})
         appendix.append(f"{symbol}: RSI {round(e['rsi'],1) if e.get('rsi') is not None else 'N/A'}; EMA20/50/100/200 "+' / '.join(p(tech.get(k)) for k in ('ema20','ema50','ema100','ema200'))+'; MACD hist. '+str(round(e['macd_hist'],4) if e.get('macd_hist') is not None else 'N/A')+'; ATR '+p(tech.get('atr14')))
     if kind=='evening' and not previous:lines.append('Ranné porovnanie N/A — nezadávame syntetickú rannú referenciu.')
-    lines+=['', 'AKČNÝ ZÁVER', 'V10.6 nákupné signály: '+(', '.join(s for s,e in evaluations.items() if e['action'] in ('BUY NOW','BUY PULLBACK')) or 'žiadne')+'. Existujúce pozície posudzuje iba oddelená súkromná časť, v shadow sú N/A.', 'V10.6 ochranné signály: '+(', '.join(s for s,e in evaluations.items() if e['action'] in ('SELL','REDUCE')) or 'žiadne')+'. Nevykonáva sa žiadny obchod.',*event_lines(fundamentals,now.timestamp()),'',
+    lines+=['', 'AKČNÝ ZÁVER', 'V10.6 nákupné signály: '+(', '.join(s for s,e in evaluations.items() if e['action'] in ('BUY NOW','BUY PULLBACK')) or 'žiadne')+'. Existujúce pozície posudzuje iba oddelená súkromná časť.', 'V10.6 ochranné signály: '+(', '.join(s for s,e in evaluations.items() if e['action'] in ('SELL','REDUCE')) or 'žiadne')+'. Nevykonáva sa žiadny obchod.',*event_lines(fundamentals,now.timestamp()),'',
             'Nové udalosti nemenia V10.6 signál. Rizikové vstupy zo staršieho V10.6 cache nie sú týmto znovu overené.',
             'Kapitalizácia, TVL a objem nie sú čisté kapitálové toky. Náklady eToro približne 1 % nákup + 1 % predaj a spread treba posúdiť pred manuálnym obchodom; nejde o nové schválené čisté R:R.',
-            'Osobné pozície sa v shadow nenahrávajú. Odporúčanie nie je uskutočnený obchod.',
+            'Držba N/A — skutočné pozície sa nenačítavajú.',
             '', 'TECHNICKÁ PRÍLOHA',*appendix]
     text='\n'.join(lines);require_public_data(text);require_public_data(quotes)
     return text,quotes,evaluations

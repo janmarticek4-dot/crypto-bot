@@ -110,3 +110,20 @@ class NoNewPredictionModelTests(unittest.TestCase):
         with patch.dict('os.environ',{'V111_INTEGRATION_ENABLED':'true'}),patch.object(delivery.pilot,'phase',return_value='morning'),patch.object(delivery,'latest_public_rule_state',return_value={}),patch.object(legacy,'get_fear_greed',return_value={}),patch.object(delivery.pilot,'run',side_effect=existing_job):
             self.assertEqual(delivery.run(),0)
         self.assertIs(delivery.pilot.forecast_audit.remember,original)
+
+class IntegratedPrivacyTests(unittest.TestCase):
+    def test_private_canary_only_reaches_existing_sender_not_public_journal(self):
+        import os
+        from v11.state_policy import require_public_data
+        pilot=delivery.pilot;now=datetime(2026,10,27,6,tzinfo=timezone.utc);writes=[]
+        snapshot=IntegrationTests().data()
+        with patch.dict(os.environ,{'V111_INTEGRATION_ENABLED':'true','PRIVATE_ADVISORY_ENABLED':'true'}),patch.object(pilot,'datetime') as clock,patch.object(pilot,'PublicJournal') as journal,patch.object(pilot.data,'collect',return_value=snapshot),patch.object(pilot.fundamentals,'collect',return_value={'events':[]}),patch.object(pilot.macro_context,'collect',return_value={}),patch.object(pilot.macro_context,'economic_observations',return_value={'url':'https://fred.stlouisfed.org','checked_at':now.isoformat(),'observations':{}}),patch.object(delivery,'latest_public_rule_state',return_value={}),patch.object(legacy,'get_fear_greed',return_value={}),patch('v11.advisory_portfolio.load',return_value={'synthetic':True}),patch('v11.advisory_portfolio.advice',return_value='PRIVATE-CANARY-NOT-A-REAL-POSITION'),patch.object(pilot,'send') as send:
+            clock.now.return_value=now
+            journal.return_value.read.return_value={'schema':1,'slots':{'2026-10-26-evening':{'status':'sent'}}}
+            journal.return_value.save.side_effect=lambda state:writes.append(copy.deepcopy(state))
+            delivery.run()
+        self.assertIn('PRIVATE-CANARY-NOT-A-REAL-POSITION',send.call_args.args[0])
+        self.assertNotIn('Držba N/A',send.call_args.args[0])
+        self.assertTrue(writes)
+        for state in writes:
+            self.assertNotIn('PRIVATE-CANARY',json.dumps(state));require_public_data(state)
