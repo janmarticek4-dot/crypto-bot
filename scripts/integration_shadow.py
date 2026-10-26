@@ -26,17 +26,22 @@ def run(phase='preview',reference=None):
     snapshot=json.loads((out/'market_snapshot.json').read_text());fund=json.loads((out/'fundamentals.json').read_text())
     now=datetime.now(timezone.utc)
     kind='morning' if phase=='morning' else 'evening'
-    previous=None;morning=None
+    previous=None;morning=None;reference_error=False
     if reference:
-        p=Path(reference).resolve()
-        if not p.is_relative_to(ROOT/'shadow-output') or p.stat().st_size>20_000_000:raise ValueError('Invalid public reference')
-        morning=json.loads(p.read_text())
+        try:
+            p=Path(reference).resolve()
+            if not p.is_relative_to(ROOT/'shadow-output') or p.stat().st_size>20_000_000:raise ValueError('Invalid public reference')
+            morning=json.loads(p.read_text())
+            if not isinstance(morning,dict):raise ValueError('Invalid reference object')
+        except (ValueError,OSError,TypeError):reference_error=True
     fear=legacy.get_fear_greed()
     text,quotes,evaluations=integration.render(legacy,snapshot,fund,now,kind,state,fear=fear)
     # Signal values are outputs of the original function, not V11 strategy decisions.
     _,_,_,baseline=integration.evaluate(legacy,snapshot,state,fear)
     assert evaluations==baseline
     pair=dict(status='N/A',verified_temporal_pair=False,reason='Preview or missing real morning observation')
+    if phase=='evening' and reference_error:
+        pair=dict(status='N/A',verified_temporal_pair=False,reason='Invalid or unreadable morning reference');code=2
     if not code and phase=='morning':
         checkpoint=shadow_pair.checkpoint(snapshot,{s:dict(action=e['action']) for s,e in evaluations.items()},now,fund)
         shadow_pair.save_once(out/'checkpoints/morning.json',checkpoint)
