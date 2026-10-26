@@ -250,9 +250,17 @@ def collect(state,now=None,fetcher=fetch):
                 parser={'ics':parse_calendar,'fomc_html':parse_fomc}.get(fmt,parse_feed)
                 items=parser(raw,candidate,now)
                 attempts.append(dict(source=candidate['id'],url=candidate['url'],status='OK',events=len(items)))
+                newest=None
+                if fmt not in ('ics','fomc_html'):
+                    nodes=[n for n in ET.fromstring(raw).iter() if n.tag.rsplit('}',1)[-1] in ('item','entry')]
+                    dates=[timestamp(c.text) for n in nodes for c in n if c.tag.rsplit('}',1)[-1] in ('pubDate','published','updated')]
+                    dates=[d for d in dates if d and d<=now]
+                    newest=max(dates) if dates else None
+                freshness='CURRENT_RELEVANT' if items else 'STALE' if newest and now-newest>timedelta(hours=72) else 'NO_RECENT_RELEVANT_ITEMS'
                 for item in items:item['retrieved_at']=now.isoformat()
                 return items,dict(source=source['id'],url=candidate['url'],selected_source=candidate['id'],
                     official=candidate['official'],symbol=source.get('symbol'),coverage=candidate.get('coverage',[]),kind=candidate.get('kind','news'),fallback=candidate is not source,
+                    freshness=freshness,latest_publication_at=newest.isoformat() if newest else None,
                     status='OK',events=len(items),checked_at=now.isoformat(),attempts=attempts)
             except Exception as exc:
                 code=getattr(exc,'code',None)
@@ -275,11 +283,21 @@ def collect(state,now=None,fetcher=fetch):
         try:
             data=json.loads(fetcher(dict(url=url)))
             rows=data.get('tvl',[]) if isinstance(data,dict) else data
-            latest=max(rows,key=lambda x:x['date'])
-            value=latest.get('totalLiquidityUSD',latest.get('tvl'))
-            at=datetime.fromtimestamp(latest['date'],timezone.utc)
-            if isinstance(value,(int,float)) and 0<=value<float('inf') and timedelta(minutes=-5)<=now-at<=timedelta(hours=48):
-                metrics[symbol]=dict(value=value,at=at.isoformat(),observed_at=now.isoformat(),url=url)
+            valid=[]
+            import math
+            for row in rows:
+                if not isinstance(row,dict):continue
+                try:
+                    value=row.get('totalLiquidityUSD',row.get('tvl'))
+                    at=datetime.fromtimestamp(row['date'],timezone.utc)
+                    if type(value) in (int,float) and math.isfinite(value) and value>=0 and timedelta(0)<=now-at<=timedelta(days=30):valid.append((at,value))
+                except (ValueError,TypeError,KeyError,OverflowError,OSError):continue
+            valid=sorted(dict(valid).items())
+            if valid and now-valid[-1][0]<=timedelta(hours=48):
+                at,value=valid[-1]
+                metrics[symbol]=dict(value=value,at=at.isoformat(),observed_at=now.isoformat(),url=url,
+                    previous_at=valid[-2][0].isoformat() if len(valid)>1 else None,
+                    previous_value=valid[-2][1] if len(valid)>1 else None)
         except Exception:
             pass  # Missing metrics remain N/A, never synthetic zeroes.
     from .project_metrics import collect as collect_economics

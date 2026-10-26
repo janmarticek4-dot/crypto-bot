@@ -22,12 +22,13 @@ def parse(raw,now,expected_type=None):
             day=datetime.fromtimestamp(float(row[0]),timezone.utc)
             value=float(row[1])
             # Daily aggregates are admissible only after the complete UTC day.
-            if day.hour or day.minute or not math.isfinite(value) or value<0 or not timedelta(days=1)<=now-day<=timedelta(days=2):continue
+            if day.hour or day.minute or not math.isfinite(value) or value<0 or not timedelta(days=1)<=now-day<=timedelta(days=30):continue
             values[day.isoformat()]=value
         except (ValueError,TypeError,OverflowError,OSError):continue
     dates=sorted(values)
     if not dates:return None
     latest=dates[-1]
+    if now-datetime.fromisoformat(latest)>timedelta(days=2):return None
     return dict(metric_type=obj.get('dataType') or expected_type,metric_type_confirmation='response_metadata' if obj.get('dataType') else 'request_query_only',period=latest,value=values[latest],unit='USD/day',previous_period=dates[-2] if len(dates)>1 else None,
                 previous_value=values[dates[-2]] if len(dates)>1 else None,
                 status='latest_provider_aggregate_not_final_audited_revenue')

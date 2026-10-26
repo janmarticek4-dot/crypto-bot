@@ -148,7 +148,7 @@ def diagnostics(rows,fund,ai,now):
     return '\n'.join(out)+'\n'
 
 
-def run(output,use_groq=False):
+def run(output,use_groq=False,report_phase='preview'):
     out=Path(output).resolve();allowed=(ROOT/'shadow-output').resolve()
     if not out.is_relative_to(allowed):raise ValueError('Shadow output path required')
     out.mkdir(parents=True,exist_ok=True)
@@ -174,15 +174,16 @@ def run(output,use_groq=False):
             tested.add(candidate['url'])
         # Date of completion, not snapshot start, is the analysis clock.
         completed=datetime.now(timezone.utc)
-        reports,evals,ai=render(snap,fund,api,completed)
+        reports,evals,ai=render(snap,fund,api,completed,phase=report_phase)
         evidence=analyze(fund,completed)
         faults,_=outage_checks(snap,completed)
         ai_status=dict(requested=use_groq,key_available=bool(api.GROQ_API_KEY),calls=api.groq_attempts,
                        fundamental_ranking=ai.get('fundamental_ranking',{}),technical_selection=ai['available'],
                        requests=[r for r in api.requests if r['host']=='api.groq.com'])
-        evening=reports['evening'].replace('Oba náhľady používajú rovnaký aktuálny snapshot. Reálne ranné/večerné porovnanie N/A.',
+        report_name='morning' if report_phase=='morning' else 'evening'
+        evening=reports[report_name].replace('Oba náhľady používajú rovnaký aktuálny snapshot. Reálne ranné/večerné porovnanie N/A.',
                                           'Samostatná večerná ukážka; bez overeného ranného snapshotu sa porovnanie nepredstiera.')
-        (out/'evening.txt').write_text(evening)
+        (out/(report_name+'.txt')).write_text(evening)
         rendered=[e for e in evidence['evidence'] if e['title'] in evening]
         write_json(out/'analysis_validation.json',dict(rendered_evidence=len(rendered),
             source_urls_present=all(e['url'] in evening for e in rendered),

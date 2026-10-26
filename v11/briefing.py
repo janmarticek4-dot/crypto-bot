@@ -168,15 +168,15 @@ def build(snap,evals,book,safety,fundamentals,state,slot,local):
         out.append(f"Technická príležitosť: {tech['quality']}; skóre {tech['score'] if tech['score'] is not None else 'N/A'}/6; nesplnené: {', '.join({'trend':'trend4h','broad':'denný trend','momentum':'momentum','volume':'objem','structure':'štruktúra','strength':'sila ADX'}.get(k,k) for k in tech['failed']) or 'žiadne'}.")
         out.append('Samostatné blokovania nového vstupu: '+('; '.join(diag['entry_blockers']) or 'žiadne z diagnostikovaných')+'. Signál zostáva '+e['action']+'.')
         old=state.get('snapshots_v11',{}).get(symbol,{})
-        out.append(f"Od predošlej analýzy: kap. {pct(delta(d.get('market_cap'),old.get('market_cap')))}, objem {pct(delta(d.get('volume_24h'),old.get('volume_24h')))}. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.")
+        out.append(f"Od predošlej analýzy: kap. {pct(delta(d.get('market_cap'),old.get('market_cap')))}, objem {pct(delta(d.get('volume_24h'),old.get('volume_24h')))}.")
         correction='prehlbuje sa' if tf.get('support_broken') else 'lokálny obrat technicky potvrdený' if tf.get('breakout') and (tf.get('relative_volume') or 0)>=1.1 else 'stabilizácia/nepotvrdený obrat' if tf else 'N/A'
         technical_appendix.append(f"{symbol} — Korekcia: {correction}; RSI {tf.get('rsi14','N/A')}; MACD hist. {tf.get('macd_hist','N/A')}; ADX {tf.get('adx','N/A')}; ATR {money(tf.get('atr'))}.")
         technical_appendix.append('EMA20/50/100/200 4h: '+' / '.join(money(tf.get('ema'+str(n))) for n in (20,50,100,200)))
         technical_appendix.append(f"Relatívna sila vs BTC 7 dní {pct(d.get('relative_strength_btc_7d')*100) if d.get('relative_strength_btc_7d') is not None else 'N/A'}; RVOL {tf.get('relative_volume','N/A')}.")
         out += fundamental_lines(symbol,fundamentals,state,analysis_now)
         out += [f['text'] for f in scenarios(d)]
-        related=[x['title'] for x in fundamentals.get('events',[]) if x.get('scheduled') and x.get('symbol') in (None,symbol)]
-        out.append('Udalosti pre oba horizonty: '+('; '.join(related[:2]) or 'N/A')+'. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.')
+        related=[x['title'] for x in fundamentals.get('events',[]) if x.get('scheduled') and x.get('symbol')==symbol]
+        if related:out.append('Projektové udalosti: '+'; '.join(related[:2])+'. Dopad vyžaduje potvrdenie.')
         if d.get('relative_strength_alt_median_7d') is not None:out.append(f"Relatívna sila nad medián hlavnej šestice: {pct(d['relative_strength_alt_median_7d']*100)}.")
         if e.get('economics') and e.get('stop',0)>0:
             c=e['economics'];c2=costs(e['entry'],e['tp2'],e['stop'],c['spread'])
