@@ -1,0 +1,110 @@
+SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.
+V10.6 kontext: checkout public cache (not guaranteed latest main); nejde o potvrdenú osobnú držbu.
+📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — VEČER
+26.10.2026 23:09 Bratislava
+Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.
+Trh24h -1.94%; BTC $80,043; dominancia 59.462439026209715 %; bezpečnostné hodnotenie V10.6 WARNING.
+Príčina pohybu nie je preukázaná samotným súbehom správ a cien.
+Režim V10.6: Konsolidácia; Fear & Greed 50.
+Kapitalizácia trhu $2.70T; objem24h $73.04B; BTC24h -0.63%.
+FUNDAMENTÁLNY SÚHRN
+Príčina dnešného pohybu: nepreukázaná; nasledujúce faktory nie sú dôkaz príčinnej súvislosti.
+• Bitcoin holds near $80,000 as oil retreats and the Fed decision looms (2026-10-26T11:24:33+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-holds-near-usd80-000-as-oil-retreats-and-the-fed-decision-looms | zber 2026-10-26T22:09:04.286984+00:00.
+• Fed, ECB and BOJ interest-rate decisions, Coinbase earnings: Crypto Week Ahead (2026-10-26T09:14:47+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/fed-ecb-and-boj-interest-rate-decisions-coinbase-earnings-crypto-week-ahead | zber 2026-10-26T22:09:04.286984+00:00.
+• Bitcoin slips under $80,000 as traders de-risk ahead of Fed meeting (2026-10-26T04:37:02+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-slips-under-usd80-000-as-traders-de-risk-ahead-of-fed-meeting | zber 2026-10-26T22:09:04.286984+00:00.
+24–72 h: smer fundamentov nepotvrdený; pri makro prekvapení sledovať výnosy a reakciu BTC, nie samotný titulok.
+7–14 dní: podmienený výhľad podľa kalendára, účinnosti oznámení a následných metrík; pravdepodobnosti N/A.
+Formát/dostupnosť zdrojov 8/16; aktuálne relevantný obsah potvrdený pri 4. Čiastočne pokryté okruhy 1/10. Podiel všetkých významných informácií: neznámy.
+
+AAVE — REDUCE (V10.6) | $135.27; 24h -1.39%
+Trend 2.1/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $133.61; rezistencia $160.55; pokles od maxima +15.75%.
+Nepotvrdené možné vstupné zóny: $133.61
+Zmena odporúčania: Zmierni sa po návrate nad $144.89 a poklese rizika pod 3 bodov.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $2.08B; objem24h $222.0M.
+
+TAO — REDUCE (V10.6) | $250.00; 24h -1.42%
+Trend 2.5/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $242.60; rezistencia $281.40; pokles od maxima +11.16%.
+Nepotvrdené možné vstupné zóny: $242.60
+Zmena odporúčania: Zmierni sa po návrate nad $259.79 a poklese rizika pod 3 bodov.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $2.83B; objem24h $109.6M.
+
+FET — REDUCE (V10.6) | $0.1744; 24h -0.68%
+Trend 2.1/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $0.1695; rezistencia $0.2023; pokles od maxima +13.79%.
+Nepotvrdené možné vstupné zóny: $0.1695
+Zmena odporúčania: Zmierni sa po návrate nad $0.1850 a poklese rizika pod 3 bodov.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $402.4M; objem24h $71.4M.
+
+SOL — REDUCE (V10.6) | $100.57; 24h -1.12%
+Trend 2.1/10; riziko VYSOKÉ (5 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $98.620; rezistencia $109.20; pokles od maxima +7.90%.
+Nepotvrdené možné vstupné zóny: $98.620
+Zmena odporúčania: Zmierni sa po návrate nad $103.46 a poklese rizika pod 3 bodov.
+Fundamentálny stav: smer nepotvrdený.
+• Release v4.4.0-rc.1 (2026-10-26T21:47:59+00:00; sol_agave).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: nízka bez potvrdenej aktivácie alebo merateľného používania. Dopad: neutrálny/nepotvrdený. Overiť: aktiváciu, rozsah nasadenia a nezávislé metriky používania.
+Dotknuté: SOL; horizont dopadu N/A. https://github.com/anza-xyz/agave/releases/tag/v4.4.0-rc.1 | zber 2026-10-26T22:09:04.286984+00:00.
+24–72 h / 7–14 dní: smer podmienený potvrdením účinnosti a metrík, nie titulkom.
+Kapitalizácia $59.22B; objem24h $2.45B.
+
+ONDO — REDUCE (V10.6) | $0.4127; 24h +1.38%
+Trend 2.5/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $0.3966; rezistencia $0.4725; pokles od maxima +12.66%.
+Nepotvrdené možné vstupné zóny: $0.3966
+Zmena odporúčania: Zmierni sa po návrate nad $0.4273 a poklese rizika pod 3 bodov.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $2.01B; objem24h $108.9M.
+
+RENDER — REDUCE (V10.6) | $1.708; 24h -0.87%
+Trend 2.5/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $1.643; rezistencia $1.946; pokles od maxima +12.23%.
+Nepotvrdené možné vstupné zóny: $1.643
+Zmena odporúčania: Zmierni sa po návrate nad $1.779 a poklese rizika pod 3 bodov.
+Fundamentálny stav: smer nepotvrdený.
+• Add marketing budget allocation to RNP-024 (2026-10-26T14:34:21+00:00; render_rnp).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: nízka bez potvrdenej aktivácie alebo merateľného používania. Dopad: neutrálny/nepotvrdený. Overiť: aktiváciu, rozsah nasadenia a nezávislé metriky používania.
+Dotknuté: RENDER; horizont dopadu N/A. https://github.com/rendernetwork/RNPs/commit/8568e90d782f302d9e3300622591e9eb1b4839a5 | zber 2026-10-26T22:09:04.286984+00:00.
+24–72 h / 7–14 dní: smer podmienený potvrdením účinnosti a metrík, nie titulkom.
+Kapitalizácia $885.3M; objem24h $43.5M.
+Ranné porovnanie N/A — nezadávame syntetickú rannú referenciu.
+
+AKČNÝ ZÁVER
+V10.6 nákupné signály: žiadne. Existujúce pozície posudzuje iba oddelená súkromná časť.
+V10.6 ochranné signály: AAVE, TAO, FET, SOL, ONDO, RENDER. Nevykonáva sa žiadny obchod.
+NAJBLIŽŠÍCH 24 HODÍN
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+NAJBLIŽŠÍCH 7 DNÍ (ďalšie dni, bez opakovania)
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+RIZIKOVÉ UDALOSTI DO 14 DNÍ (ďalšie dni, bez opakovania)
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+Nedostupné zdroje: fomc_calendar, fed, bls, bls_calendar, bea, ecb, cftc, sec
+Konsenzus, FedWatch, ETF toky, unlock kalendár a geopolitické pokrytie: N/A, ak nie sú doložené konkrétnym zdrojom.
+
+Nové udalosti nemenia V10.6 signál. Rizikové vstupy zo staršieho V10.6 cache nie sú týmto znovu overené.
+Kapitalizácia, TVL a objem nie sú čisté kapitálové toky. Náklady eToro približne 1 % nákup + 1 % predaj a spread treba posúdiť pred manuálnym obchodom; nejde o nové schválené čisté R:R.
+Držba N/A — skutočné pozície sa nenačítavajú.
+
+TECHNICKÁ PRÍLOHA
+AAVE: RSI 34.4; EMA20/50/100/200 $138.90 / $144.89 / $150.49 / $149.73; MACD hist. 0.2048; ATR $2.939
+TAO: RSI 43.6; EMA20/50/100/200 $253.36 / $259.79 / $267.32 / $270.28; MACD hist. 0.7484; ATR $4.993
+FET: RSI 39.4; EMA20/50/100/200 $0.1778 / $0.1850 / $0.1944 / $0.1971; MACD hist. 0.0004; ATR $0.00407143
+SOL: RSI 39.8; EMA20/50/100/200 $101.94 / $103.46 / $105.65 / $107.28; MACD hist. 0.0452; ATR $1.629
+ONDO: RSI 46.8; EMA20/50/100/200 $0.4142 / $0.4273 / $0.4415 / $0.4412; MACD hist. 0.0021; ATR $0.00936429
+RENDER: RSI 46.9; EMA20/50/100/200 $1.730 / $1.779 / $1.827 / $1.799; MACD hist. 0.0082; ATR $0.0401

@@ -87,3 +87,7 @@ No merge/deployment performed. No real two-time pair yet. Provider coverage is s
 ## Frozen source pin
 
 Candidate implementation: `15c13917e2d6543aac96dd4d5e46d400a73917b2`. `PRODUCTION_CANDIDATE.patch` pins that exact implementation; later documentation-only commits need not change it. The patch is present for review only and was not applied to the production workflow.
+
+## Latest local evidence
+
+`LOCAL_PREVIEW_CHECK.json` and `EXAMPLE_EVENING.txt` record the isolated actual collection at **26 October 2026 23:09 Bratislava**. All six market datasets were complete; native evaluation equality and artifact privacy passed; protected files remained unchanged; a temporal pair was **not** verified. No production Telegram/state/portfolio operation occurred. GitHub API dispatch from the workspace was refused with **Forbidden**, so manual GitHub execution remains pending.

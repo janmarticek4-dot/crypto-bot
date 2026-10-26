@@ -1,0 +1,32 @@
+{
+  "summary": {
+    "collected_at": "2026-10-26T22:09:04.286984+00:00",
+    "completed_at": "2026-10-26T22:09:07.044965+00:00",
+    "market_complete": true,
+    "endpoints": 32,
+    "current": 4,
+    "protected_files_unchanged": true,
+    "telegram_enabled": false,
+    "real_positions_loaded": false,
+    "orders_enabled": false,
+    "commit": null,
+    "branch": null,
+    "phase": "preview",
+    "verified_temporal_pair": false,
+    "state_written": false,
+    "rule_engine": "v10.6-original"
+  },
+  "native_rule_audit": {
+    "identical_evaluations": true,
+    "rule_engine": "main.py V10.6 unchanged",
+    "new_fundamentals_affect_signals": false,
+    "legacy_cache": "checkout public cache (not guaranteed latest main)",
+    "source_commit": null
+  },
+  "privacy": {
+    "status": "PASSED",
+    "files": 13,
+    "scope": "allowlist, private fields, credential patterns and known environment values; not complete semantic DLP"
+  },
+  "note": "One live local preview, not a real morning/evening pair. No GitHub-hosted integration run claimed."
+}
