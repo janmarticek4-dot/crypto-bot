@@ -7,8 +7,12 @@ on:
       task:
         description: Izolovaná diagnostika alebo V11.1 shadow test
         type: choice
-        options: [macro, shadow, private-state]
+        options: [macro, shadow, fundamental-sources, private-state]
         default: macro
+      use_groq:
+        description: Voliteľné AI pre fundamental-sources; bez kľúča deterministický fallback
+        type: boolean
+        default: false
       confirm_private_state_test:
         description: Potvrdzujem iba syntetické zápisy do osobitného testovacieho PRIVATE repozitára
         type: boolean
@@ -32,7 +36,7 @@ jobs:
   diagnostics:
     # Original repo: research branch only. A clean diagnostics-only research repo
     # can use its own default branch, without changing original main at all.
-    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow' && inputs.task != 'private-state'
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task != 'shadow' && inputs.task != 'fundamental-sources' && inputs.task != 'private-state'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -76,6 +80,14 @@ jobs:
       phase: ${{ inputs.phase || 'preview' }}
       morning_run_id: ${{ inputs.morning_run_id || '' }}
       use_groq: false
+
+  fundamental-sources:
+    if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'fundamental-sources'
+    uses: ./.github/workflows/fundamental-sources-shadow.yml
+    with:
+      use_groq: ${{ inputs.use_groq || false }}
+    secrets:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
   private-state-authorization:
     if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'private-state'

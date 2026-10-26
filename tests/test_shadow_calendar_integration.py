@@ -20,10 +20,10 @@ class ShadowCalendarIntegration(unittest.TestCase):
     def test_registered_entrypoint_calls_same_commit_shadow_without_secrets(self):
         root=Path(__file__).resolve().parents[1]
         text=(root/'.github/workflows/run.yml').read_text()
-        job=text.split('\n  shadow:\n',1)[1]
+        job=text.split('\n  shadow:\n',1)[1].split('\n  fundamental-sources:',1)[0]
         self.assertIn('uses: ./.github/workflows/v11-1-shadow-test.yml',job)
         self.assertIn('use_groq: false',job)
-        self.assertNotIn('secrets:',text)
+        self.assertNotIn('secrets:',job)
         self.assertIn("inputs.task == 'shadow'",job)
         reused=(root/'.github/workflows/v11-1-shadow-test.yml').read_text()
         for constraint in ('run.head_sha !== context.sha', 'run.conclusion', 'dedicated',

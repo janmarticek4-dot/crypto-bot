@@ -1,0 +1,186 @@
+SHADOW TEST — ŽIVÉ DÁTA, ŽIADNE ODOSLANIE ANI OBCHODY
+Čas zberu: 2026-10-26T21:24:23.811944+01:00
+Ide o náhľad šablóny 20:00, nie historickú analýzu v tomto čase.
+Samostatná večerná ukážka; bez overeného ranného snapshotu sa porovnanie nepredstiera.
+Skutočné pozície a zostatky nie sú načítané; držba je N/A v izolovanom shadow kontexte.
+📊 V11.1 — VEČERNÉ VYHODNOTENIE
+26.10.2026 21:24 Bratislava
+AKČNÝ SÚHRN
+Trh: technická podmienka NORMAL; cenový kontext bez kombinovaného potvrdenia. Kapitalizácia24h -2.46%.
+Overená príčina pohybu: N/A — súbeh správ a ceny nedokazuje príčinu.
+Technické príležitosti na preverenie: SOL 3/6, TAO 3/6, ONDO 3/6. Nie je to povolený BUY.
+Riziká: neúplné udalostné pokrytie; nové vstupy majú samostatné bezpečnostné blokovania.
+Zmeny od ranného snapshotu: N/A — chýba overený časovo oddelený ranný snapshot.
+NORMAL znamená iba nesplnený kombinovaný technický breakdown; nie nízke celkové riziko ani potvrdenie absencie incidentov.
+Vývojový analytický report. V11 signály sú experimentálne; žiadny nový potvrdený produkčný signál sa týmto neaktivuje.
+Technické riziko NORMAL; udalostné pokrytie neúplné. V dostupných cenových dátach nie je kombinované potvrdenie krízy; udalosti nemusia byť pokryté.
+TRH: kapitalizácia $2.70T, 24h -2.46%; objem $72.50B; BTC dominancia +59.43%; zmena dominancie od analýzy N/A.
+Globálne dáta: 2026-10-26T21:17:09+01:00 CoinGecko
+BTC $79,898.00, 24h -0.86%; denná EMA50 $80,826.81, EMA200 $75,923.64; volatilita ATR +2.58%.
+FUNDAMENTÁLNY SÚHRN
+Príčina dnešného pohybu: nepreukázaná; nasledujúce faktory nie sú dôkaz príčinnej súvislosti.
+• Bitcoin holds near $80,000 as oil retreats and the Fed decision looms (2026-10-26T11:24:33+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-holds-near-usd80-000-as-oil-retreats-and-the-fed-decision-looms | zber 2026-10-26T20:24:21.226871+00:00.
+• Fed, ECB and BOJ interest-rate decisions, Coinbase earnings: Crypto Week Ahead (2026-10-26T09:14:47+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/fed-ecb-and-boj-interest-rate-decisions-coinbase-earnings-crypto-week-ahead | zber 2026-10-26T20:24:21.226871+00:00.
+• Bitcoin slips under $80,000 as traders de-risk ahead of Fed meeting (2026-10-26T04:37:02+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-slips-under-usd80-000-as-traders-de-risk-ahead-of-fed-meeting | zber 2026-10-26T20:24:21.226871+00:00.
+24–72 h: smer fundamentov nepotvrdený; pri makro prekvapení sledovať výnosy a reakciu BTC, nie samotný titulok.
+7–14 dní: podmienený výhľad podľa kalendára, účinnosti oznámení a následných metrík; pravdepodobnosti N/A.
+Dostupnosť zdrojov 8/16; čiastočne pokryté okruhy 1/10. Podiel všetkých významných informácií: neznámy.
+Najdôležitejšie riziko: neúplné udalostné pokrytie; technické riziko NORMAL
+Najlepšia potvrdená produkčná príležitosť: N/A — výskumné signály nie sú schválené.
+Držané pozície: N/A — shadow test nenačítava skutočnú evidenciu
+Najbližšia udalosť: N/A
+24–72 h: základ konsolidácia $79,220.74–$82,060.88; rast po uzavretí 4h nad $82,060.88 → $82,845.95; pokles po uzavretí pod $79,220.74 → $78,435.67. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $79,220.74–$86,999.11; rast po uzavretí 1d nad $86,999.11 → $89,063.79; pokles po uzavretí pod $79,220.74 → $77,156.06. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend rastový. Neistota vysoká; pravdepodobnosti N/A.
+Makro/fundamentálny smer BTC N/A; blížiace sa overené udalosti sú v kalendári nižšie a môžu zneplatniť technický plán.
+Ranný plán pre dnešný deň N/A; neporovnávame s iným dňom.
+
+SOL: WAIT (analytický stav); DRŽBA N/A (SHADOW)
+Cena $100.32; 24h -1.48%; zdroj Binance; vek 26 s; aktuálne.
+Kapitalizácia $59.10B; objem $2.47B; denný trend nad EMA200 zvýšený objem
+Technická príležitosť: čiastočný technický podklad; skóre 3/6; nesplnené: trend4h, momentum, štruktúra.
+Samostatné blokovania nového vstupu: dostupnosť na eToro neoverená; spread neznámy; V11 pravidlá nie sú schválené na aktiváciu; nedostatočná nákladová výhoda alebo čisté R:R. Signál zostáva WAIT.
+Od predošlej analýzy: kap. N/A, objem N/A. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.
+Fundamentálny stav: smer nepotvrdený.
+• Release v4.5.0-alpha.4 (2026-10-26T20:13:27+00:00; sol_agave).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: nízka bez potvrdenej aktivácie alebo merateľného používania. Dopad: neutrálny/nepotvrdený. Overiť: aktiváciu, rozsah nasadenia a nezávislé metriky používania.
+Dotknuté: SOL; horizont dopadu N/A. https://github.com/anza-xyz/agave/releases/tag/v4.5.0-alpha.4 | zber 2026-10-26T20:24:21.226871+00:00.
+Fundamentálny výhľad 24–72 h / 7–14 dní: bez potvrdeného smerového impulzu; zmení ho overená účinnosť udalosti alebo metriky.
+24–72 h: základ konsolidácia $98.62–$105.24; rast po uzavretí 4h nad $105.24 → $106.84; pokles po uzavretí pod $98.62 → $97.02. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $98.62–$122.08; rast po uzavretí 1d nad $122.08 → $126.55; pokles po uzavretí pod $98.62 → $94.15. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend rastový. Neistota vysoká; pravdepodobnosti N/A.
+Udalosti pre oba horizonty: N/A. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.
+Relatívna sila nad medián hlavnej šestice: +1.09%.
+Experimentálny plán: vstup $100.32; stop $96.22; TP1 $105.24, TP2 $112.62; čisté R:R 0.47/1.68. Poplatky 1.0% + 1.0%; spread N/A — R:R optimistická hranica. Výnos pri cieli nie je očakávaný výnos; manuálne vykonanie môže zhoršiť cenu.
+
+TAO: WAIT (analytický stav); DRŽBA N/A (SHADOW)
+Cena $250.80; 24h -1.57%; zdroj Binance; vek 18 s; aktuálne.
+Kapitalizácia $2.84B; objem $108.33M; denný trend nad EMA200 potvrdené momentum
+Technická príležitosť: čiastočný technický podklad; skóre 3/6; nesplnené: trend4h, objem, štruktúra.
+Samostatné blokovania nového vstupu: dostupnosť na eToro neoverená; spread neznámy; V11 pravidlá nie sú schválené na aktiváciu; nedostatočná nákladová výhoda alebo čisté R:R. Signál zostáva WAIT.
+Od predošlej analýzy: kap. N/A, objem N/A. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.
+Fundamentálny stav: smer nepotvrdený.
+Nová významná projektová zmena v dostupných zdrojoch nepotvrdená; hodnotenie N/A, neznamená to absenciu udalostí.
+Fundamentálny výhľad 24–72 h / 7–14 dní: bez potvrdeného smerového impulzu; zmení ho overená účinnosť udalosti alebo metriky.
+24–72 h: základ konsolidácia $242.60–$263.30; rast po uzavretí 4h nad $263.30 → $268.67; pokles po uzavretí pod $242.60 → $237.23. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $242.60–$309.70; rast po uzavretí 1d nad $309.70 → $327.74; pokles po uzavretí pod $242.60 → $224.56. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend rastový. Neistota vysoká; pravdepodobnosti N/A.
+Udalosti pre oba horizonty: N/A. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.
+Relatívna sila nad medián hlavnej šestice: -0.80%.
+Experimentálny plán: vstup $250.80; stop $234.54; TP1 $263.30, TP2 $299.57; čisté R:R 0.35/2.05. Poplatky 1.0% + 1.0%; spread N/A — R:R optimistická hranica. Výnos pri cieli nie je očakávaný výnos; manuálne vykonanie môže zhoršiť cenu.
+
+ONDO: WAIT (analytický stav); DRŽBA N/A (SHADOW)
+Cena $0.4144; 24h +1.52%; zdroj Binance; vek 29 s; aktuálne.
+Kapitalizácia $2.01B; objem $109.84M; denný trend nad EMA200 potvrdené momentum
+Technická príležitosť: čiastočný technický podklad; skóre 3/6; nesplnené: trend4h, objem, štruktúra.
+Samostatné blokovania nového vstupu: dostupnosť na eToro neoverená; spread neznámy; V11 pravidlá nie sú schválené na aktiváciu; nedostatočná nákladová výhoda alebo čisté R:R. Signál zostáva WAIT.
+Od predošlej analýzy: kap. N/A, objem N/A. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.
+Fundamentálny stav: smer nepotvrdený.
+Nová významná projektová zmena v dostupných zdrojoch nepotvrdená; hodnotenie N/A, neznamená to absenciu udalostí.
+Fundamentálny výhľad 24–72 h / 7–14 dní: bez potvrdeného smerového impulzu; zmení ho overená účinnosť udalosti alebo metriky.
+24–72 h: základ konsolidácia $0.3966–$0.4395; rast po uzavretí 4h nad $0.4395 → $0.449404; pokles po uzavretí pod $0.3966 → $0.386696. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $0.3966–$0.5325; rast po uzavretí 1d nad $0.5325 → $0.566103; pokles po uzavretí pod $0.3966 → $0.362997. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend rastový. Neistota vysoká; pravdepodobnosti N/A.
+Udalosti pre oba horizonty: N/A. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.
+Relatívna sila nad medián hlavnej šestice: +0.90%.
+Experimentálny plán: vstup $0.4144; stop $0.381744; TP1 $0.4395, TP2 $0.512368; čisté R:R 0.41/2.18. Poplatky 1.0% + 1.0%; spread N/A — R:R optimistická hranica. Výnos pri cieli nie je očakávaný výnos; manuálne vykonanie môže zhoršiť cenu.
+
+RENDER: WAIT (analytický stav); DRŽBA N/A (SHADOW)
+Cena $1.72; 24h -0.06%; zdroj Binance; vek 35 s; aktuálne.
+Kapitalizácia $893.06M; objem $43.22M; denný trend nad EMA200 potvrdené momentum
+Technická príležitosť: čiastočný technický podklad; skóre 3/6; nesplnené: trend4h, objem, štruktúra.
+Samostatné blokovania nového vstupu: dostupnosť na eToro neoverená; spread neznámy; V11 pravidlá nie sú schválené na aktiváciu; nedostatočná nákladová výhoda alebo čisté R:R. Signál zostáva WAIT.
+Od predošlej analýzy: kap. N/A, objem N/A. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.
+Fundamentálny stav: smer nepotvrdený.
+• Add marketing budget allocation to RNP-024 (2026-10-26T14:34:21+00:00; render_rnp).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: nízka bez potvrdenej aktivácie alebo merateľného používania. Dopad: neutrálny/nepotvrdený. Overiť: aktiváciu, rozsah nasadenia a nezávislé metriky používania.
+Dotknuté: RENDER; horizont dopadu N/A. https://github.com/rendernetwork/RNPs/commit/8568e90d782f302d9e3300622591e9eb1b4839a5 | zber 2026-10-26T20:24:21.226871+00:00.
+Fundamentálny výhľad 24–72 h / 7–14 dní: bez potvrdeného smerového impulzu; zmení ho overená účinnosť udalosti alebo metriky.
+24–72 h: základ konsolidácia $1.64–$1.80; rast po uzavretí 4h nad $1.80 → $1.84; pokles po uzavretí pod $1.64 → $1.60. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $1.64–$2.23; rast po uzavretí 1d nad $2.23 → $2.37; pokles po uzavretí pod $1.64 → $1.51. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend rastový. Neistota vysoká; pravdepodobnosti N/A.
+Udalosti pre oba horizonty: N/A. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.
+Relatívna sila nad medián hlavnej šestice: +0.80%.
+Experimentálny plán: vstup $1.72; stop $1.58; TP1 $1.80, TP2 $2.15; čisté R:R 0.24/2.22. Poplatky 1.0% + 1.0%; spread N/A — R:R optimistická hranica. Výnos pri cieli nie je očakávaný výnos; manuálne vykonanie môže zhoršiť cenu.
+
+AAVE: WAIT (analytický stav); DRŽBA N/A (SHADOW)
+Cena $135.06; 24h -2.00%; zdroj Binance; vek 12 s; aktuálne.
+Kapitalizácia $2.08B; objem $221.64M; denný trend nad EMA200 ADX potvrdzuje silu trendu
+Technická príležitosť: slabý technický podklad; skóre 2/6; nesplnené: trend4h, momentum, objem, štruktúra.
+Samostatné blokovania nového vstupu: dostupnosť na eToro neoverená; spread neznámy; V11 pravidlá nie sú schválené na aktiváciu; nedostatočná nákladová výhoda alebo čisté R:R. Signál zostáva WAIT.
+Od predošlej analýzy: kap. N/A, objem N/A. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.
+Fundamentálny stav: smer nepotvrdený.
+Nová významná projektová zmena v dostupných zdrojoch nepotvrdená; hodnotenie N/A, neznamená to absenciu udalostí.
+Fundamentálny výhľad 24–72 h / 7–14 dní: bez potvrdeného smerového impulzu; zmení ho overená účinnosť udalosti alebo metriky.
+24–72 h: základ konsolidácia $133.61–$149.99; rast po uzavretí 4h nad $149.99 → $153.10; pokles po uzavretí pod $133.61 → $130.50. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $134.00–$187.59; rast po uzavretí 1d nad $187.59 → $197.37; pokles po uzavretí pod $134.00 → $124.22. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend rastový. Neistota vysoká; pravdepodobnosti N/A.
+Udalosti pre oba horizonty: N/A. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.
+Relatívna sila nad medián hlavnej šestice: -3.99%.
+Experimentálny plán: vstup $135.06; stop $128.95; TP1 $149.99, TP2 $153.40; čisté R:R 1.38/1.77. Poplatky 1.0% + 1.0%; spread N/A — R:R optimistická hranica. Výnos pri cieli nie je očakávaný výnos; manuálne vykonanie môže zhoršiť cenu.
+
+FET: WAIT (analytický stav); DRŽBA N/A (SHADOW)
+Cena $0.1738; 24h -1.19%; zdroj Binance; vek 23 s; aktuálne.
+Kapitalizácia $401.37M; objem $70.87M; ADX potvrdzuje silu trendu Dostupnosť na eToro nebola používateľom overená; nový nákup zablokovaný.
+Technická príležitosť: slabý technický podklad; skóre 1/6; nesplnené: trend4h, denný trend, momentum, objem, štruktúra.
+Samostatné blokovania nového vstupu: dostupnosť na eToro neoverená; spread neznámy; V11 pravidlá nie sú schválené na aktiváciu; nedostatočná nákladová výhoda alebo čisté R:R. Signál zostáva WAIT.
+Od predošlej analýzy: kap. N/A, objem N/A. Kapitalizácia nie je čistý tok; objem porovnáva priebežné 24h okná.
+Fundamentálny stav: smer nepotvrdený.
+Nová významná projektová zmena v dostupných zdrojoch nepotvrdená; hodnotenie N/A, neznamená to absenciu udalostí.
+Fundamentálny výhľad 24–72 h / 7–14 dní: bez potvrdeného smerového impulzu; zmení ho overená účinnosť udalosti alebo metriky.
+24–72 h: základ konsolidácia $0.1695–$0.1893; rast po uzavretí 4h nad $0.1893 → $0.193774; pokles po uzavretí pod $0.1695 → $0.165026. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 4h štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+7–14 dní: základ konsolidácia $0.1695–$0.2723; rast po uzavretí 1d nad $0.2723 → $0.289398; pokles po uzavretí pod $0.1695 → $0.152402. Neplatnosť základného scenára: uzavretie mimo pásma. Dôvod: 1d štruktúra, trend nepotvrdený/slabý. Neistota vysoká; pravdepodobnosti N/A.
+Udalosti pre oba horizonty: N/A. Fundamentálny/makro smer neoverený; nejde o potvrdenie absencie rizika.
+Relatívna sila nad medián hlavnej šestice: -2.59%.
+Experimentálny plán: vstup $0.1738; stop $0.16279; TP1 $0.1893, TP2 $0.206831; čisté R:R 0.83/2.03. Poplatky 1.0% + 1.0%; spread N/A — R:R optimistická hranica. Výnos pri cieli nie je očakávaný výnos; manuálne vykonanie môže zhoršiť cenu.
+Spoločné medzery fundamentov: nepokryté príjmy, aktivita, emisie/unlocky a adopcia sú N/A. Marketing nie je dôkaz ekonomického výsledku.
+
+DOPLNKOVÝ WATCHLIST (mimo hlavnej šestice):
+VYSVETLENIE TECHNICKÉHO STAVU
+WARNING vyžaduje súčasný support breakdown BTC aj ETH a najmenej4 zo6 altcoinov; neúplné dáta UNKNOWN
+BTC support prelomený: False; ETH: False; altcoiny: 0/6.
+NORMAL znamená iba nesplnený kombinovaný technický breakdown; nie nízke celkové riziko ani potvrdenie absencie incidentov.
+Cenová pravdepodobnosť ďalšieho prepadu: N/A; táto diagnostika negeneruje alert ani BUY/SELL.
+US Treasury výnosy: N/A.
+DXY, overený sadzbový konsenzus a ETF toky: N/A bez dostupného licencovaného/primárneho zdroja.
+
+NAJBLIŽŠÍCH 24 HODÍN
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+NAJBLIŽŠÍCH 7 DNÍ (ďalšie dni, bez opakovania)
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+RIZIKOVÉ UDALOSTI DO 14 DNÍ (ďalšie dni, bez opakovania)
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+Nedostupné zdroje: fomc_calendar, fed, bls, bls_calendar, bea, ecb, cftc, sec
+Konsenzus, FedWatch, ETF toky, unlock kalendár a geopolitické pokrytie: N/A, ak nie sú doložené konkrétnym zdrojom.
+USKUTOČNENÉ UDALOSTI – KONTROLA VÝSLEDKU
+N/A — v evidencii nie je nedávna plánovaná udalosť s overeným časom.
+KONTROLA DOZRETÝCH SCENÁROV
+N/A — žiadny vyhodnotiteľný dozretý scenár. Otvorené horizonty nehodnotíme predčasne.
+
+AKČNÝ ZÁVER
+1. Potvrdený produkčný BUY: žiadny nový signál z tejto experimentálnej vrstvy.
+2. Technické poradie na preverenie: SOL > TAO > ONDO > RENDER > AAVE > FET; vstupné a ochranné úrovne vyššie, poradie nie je pokyn na nákup.
+3. Držané/HOLD: N/A — skutočné pozície sa nenačítali
+4. Preveriť ochranu: bez potvrdeného experimentálneho upozornenia. Nevykonané predaje nemenia evidenciu.
+5. Pred významnou udalosťou neprekročiť vlastný rizikový rozpočet; pri neúplnom kalendári vhodnú výšku hotovosti nemožno spoľahlivo určiť.
+Malá korekcia sama neodôvodňuje predaj a opätovný nákup po nákladoch. Bot nikdy nevykonáva obchody. Monitoring neposiela rutinné správy.
+
+TECHNICKÁ PRÍLOHA
+SOL — Korekcia: stabilizácia/nepotvrdený obrat; RSI 39.78034682712555; MACD hist. 0.04522120754508263; ADX 27.195612406058707; ATR $1.60.
+EMA20/50/100/200 4h: $101.94 / $103.46 / $105.65 / $107.28
+Relatívna sila vs BTC 7 dní -1.16%; RVOL 1.4505898243091113.
+TAO — Korekcia: stabilizácia/nepotvrdený obrat; RSI 43.6144681641857; MACD hist. 0.7484024301135186; ADX 30.78814639570475; ATR $5.37.
+EMA20/50/100/200 4h: $253.36 / $259.79 / $267.32 / $270.28
+Relatívna sila vs BTC 7 dní -3.04%; RVOL 0.7173946510210357.
+ONDO — Korekcia: stabilizácia/nepotvrdený obrat; RSI 46.78941128480972; MACD hist. 0.002100239935914556; ADX 29.347048654305276; ATR $0.009904.
+EMA20/50/100/200 4h: $0.414212 / $0.427314 / $0.44152 / $0.441193
+Relatívna sila vs BTC 7 dní -1.35%; RVOL 0.7415587048596786.
+RENDER — Korekcia: stabilizácia/nepotvrdený obrat; RSI 46.87433676589062; MACD hist. 0.008190809804527511; ADX 27.01459292809115; ATR $0.042037.
+EMA20/50/100/200 4h: $1.73 / $1.78 / $1.83 / $1.80
+Relatívna sila vs BTC 7 dní -1.44%; RVOL 0.5559090696212076.
+AAVE — Korekcia: stabilizácia/nepotvrdený obrat; RSI 34.36609230687459; MACD hist. 0.2047909368130436; ADX 28.7426786699747; ATR $3.11.
+EMA20/50/100/200 4h: $138.90 / $144.89 / $150.49 / $149.73
+Relatívna sila vs BTC 7 dní -6.24%; RVOL 0.780958303054609.
+FET — Korekcia: stabilizácia/nepotvrdený obrat; RSI 39.40993477649797; MACD hist. 0.0004183026532633147; ADX 40.15291473315186; ATR $0.004474.
+EMA20/50/100/200 4h: $0.177759 / $0.185025 / $0.194357 / $0.197082
+Relatívna sila vs BTC 7 dní -4.83%; RVOL 0.9449084563338183.

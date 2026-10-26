@@ -15,7 +15,7 @@ from v11.state_policy import PublicDataError, PRIVATE_FIELDS, KEY_PATTERNS, requ
 
 ROOT=Path(__file__).resolve().parents[1]
 ALLOWED=frozenset({
- 'fundamental_evidence.json','README.txt','calendar.txt','calendar_coverage.json','entry_diagnostics.json',
+ 'analysis_validation.json','REPORT.md','source_diagnostics.json','ai_diagnostics.json','fundamental_evidence.json','README.txt','calendar.txt','calendar_coverage.json','entry_diagnostics.json',
  'evening.txt','evening_injected_outage.txt','evening_parts.json','fundamentals.json',
  'market_snapshot.json','morning.txt','morning_injected_outage.txt','morning_parts.json',
  'offline-tests.log','outage_checks.json','phase_validation.json','risk_evidence.json',

@@ -1,0 +1,32 @@
+{
+  "requested": true,
+  "key_available": true,
+  "calls": 2,
+  "fundamental_ranking": {
+    "ids": [
+      "00dda6cf2bbb547f31b51ec73fffa36fc2ec41264b3b82e6b3f8dc4abf507802",
+      "6c7e3788d07577577377b63e897154125c9048cf96d1400904632a4865f41f27",
+      "afa3177ef29911646d08cc68ad1c8aacf4379b74f6dfb6a4320b6b591761c3a8"
+    ],
+    "available": true
+  },
+  "technical_selection": true,
+  "requests": [
+    {
+      "host": "api.groq.com",
+      "path": "/openai/v1/chat/completions",
+      "method": "POST",
+      "checked_at": "2026-10-26T20:24:23.812718+00:00",
+      "http_status": 200,
+      "seconds": 0.854
+    },
+    {
+      "host": "api.groq.com",
+      "path": "/openai/v1/chat/completions",
+      "method": "POST",
+      "checked_at": "2026-10-26T20:24:24.668345+00:00",
+      "http_status": 200,
+      "seconds": 0.367
+    }
+  ]
+}

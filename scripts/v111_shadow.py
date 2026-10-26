@@ -80,6 +80,11 @@ class ShadowAPI:
                     raise ValueError('Shadow redirects refused')
                 return response.json()
             except requests.HTTPError:
+                if parsed.hostname=='api.groq.com':
+                    try:
+                        error=response.json().get('error',{})
+                        record['provider_error']={k:str(error[k])[:80] for k in ('type','code','param') if k in error and isinstance(error[k],(str,int))}
+                    except (ValueError,TypeError,AttributeError):pass
                 if response.status_code not in (429, 500, 502, 503, 504) or attempt + 1 >= min(retries, 2):
                     raise
                 try:
@@ -108,10 +113,13 @@ class ShadowAPI:
         if not self.GROQ_API_KEY:
             raise RuntimeError('Groq key unavailable')
         self.groq_attempts += 1
+        payload=dict(model=self.model, messages=[dict(role='user', content=prompt)],
+                     response_format={'type': 'json_object'}, temperature=0, max_tokens=500)
+        if self.model in ('openai/gpt-oss-120b','openai/gpt-oss-20b'):
+            payload['reasoning_effort']='low'
         raw = self.request('https://api.groq.com/openai/v1/chat/completions', method='POST',
             headers={'Authorization': 'Bearer ' + self.GROQ_API_KEY}, timeout=20, retries=2,
-            payload=dict(model=self.model, messages=[dict(role='user', content=prompt)],
-                         response_format={'type': 'json_object'}, temperature=0, max_tokens=500))
+            payload=payload)
         return json.loads(raw['choices'][0]['message']['content'])
 
 
@@ -139,6 +147,7 @@ def render(snapshot, fundamental, ai_api, now, phase='preview', morning=None):
     ai = explain(ai_api, {}, evals)
     if not any(ai.get('selections', {}).values()):
         ai = dict(available=False, selections={})
+    ai['fundamental_ranking']=ranking
     for symbol, reasons in ai.get('selections', {}).items():
         if symbol in evals:
             evals[symbol]['display_reasons'] = reasons

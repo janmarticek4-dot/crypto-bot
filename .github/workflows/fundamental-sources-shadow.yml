@@ -1,0 +1,75 @@
+name: Fundamental Sources Shadow Test
+on:
+  workflow_dispatch:
+    inputs:
+      use_groq:
+        description: Použiť existujúci Groq kľúč (iba obmedzené AI volania; bez kľúča fallback)
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      use_groq:
+        type: boolean
+        default: false
+    secrets:
+      GROQ_API_KEY:
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: fundamental-sources-shadow-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  sources:
+    if: github.ref == 'refs/heads/feature/v11-1-review'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      BOT_DATA_MODE: shadow
+      V11_RULES_VALIDATED: 'false'
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Offline regressions without network or credentials
+        run: python scripts/test_offline.py
+      - name: Real source diagnostics and isolated evening analysis
+        env:
+          USE_GROQ: ${{ inputs.use_groq }}
+          GROQ_API_KEY: ${{ inputs.use_groq && secrets.GROQ_API_KEY || '' }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
+        run: |
+          args=()
+          if [ "$USE_GROQ" = 'true' ]; then args+=(--use-groq); fi
+          python scripts/fundamental_sources_shadow.py "${args[@]}"
+      - name: Validate public artifacts only
+        if: always()
+        env:
+          GROQ_API_KEY: ${{ inputs.use_groq && secrets.GROQ_API_KEY || '' }}
+        run: python scripts/stage_shadow_artifacts.py --source shadow-output/fundamental-sources --destination shadow-public-artifacts/fundamental-sources
+      - name: Upload source diagnostics and evening preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fundamental-sources-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: shadow-public-artifacts/fundamental-sources/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Summary
+        if: always()
+        run: |
+          echo '## Fundamental Sources Shadow Test' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Download the artifact: REPORT.md, evening.txt, source_diagnostics.json, ai_diagnostics.json, summary.json. No production delivery or portfolio.' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f shadow-public-artifacts/fundamental-sources/summary.json ]; then
+            cat shadow-public-artifacts/fundamental-sources/summary.json >> "$GITHUB_STEP_SUMMARY"
+          fi
