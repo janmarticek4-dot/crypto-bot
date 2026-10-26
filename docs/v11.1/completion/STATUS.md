@@ -24,3 +24,9 @@ refusal, nullable inventory, encrypted checkpoint before acknowledgement, privat
 Telegram text absent from every public journal write, strict macro observation
 periods, maturity-only failure counting and preservation of14-day pending forecasts.
 No production inventory/credentials created or imported during these tests.
+
+Production deployment d9f2b80 (main), pinned source929bd63. Live GitHub-hosted
+validation40343248459 succeeded:4/4 US quotes, yields available,16/16 feeds,
+4/4 economic series observations. No Telegram/private import ran on push.
+Private credentials/repository and INITIAL_ADVISORY_PORTFOLIO still absent;
+real inventory is NOT claimed to be activated. Public analysis continues safely.
