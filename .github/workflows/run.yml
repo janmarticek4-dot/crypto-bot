@@ -98,9 +98,9 @@ jobs:
 
   integration-shadow:
     if: github.ref == 'refs/heads/feature/v11-1-review' && inputs.task == 'integration-shadow'
-    uses: janmarticek4-dot/crypto-bot/.github/workflows/v111-integration-shadow.yml@718f7504ac641007cbb814361bd7aa48600d8d9c
+    uses: janmarticek4-dot/crypto-bot/.github/workflows/v111-integration-shadow.yml@15c13917e2d6543aac96dd4d5e46d400a73917b2
     with:
-      source_sha: 718f7504ac641007cbb814361bd7aa48600d8d9c
+      source_sha: 15c13917e2d6543aac96dd4d5e46d400a73917b2
       phase: ${{ inputs.phase || 'preview' }}
       morning_run_id: ${{ inputs.morning_run_id || '' }}
 
