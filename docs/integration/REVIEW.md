@@ -39,7 +39,7 @@ The data bridge recalculates native V10.6 indicators from the fetched closed 4h 
 
 ## Tests and actual observations
 
-- **81 main-based offline tests PASS**: all applicable integration-branch tests, native evaluation parity, immutable inputs, valid negative news not changing signals, secret canary refusal, malformed/empty state, existing sender ownership, USA delegation, missing journal no reset, public artifact gate and source analysis.
+- **82 main-based offline tests PASS**: all applicable integration-branch tests, native evaluation parity, immutable inputs, valid negative news not changing signals, secret canary refusal, malformed/empty state, existing sender ownership, USA delegation, missing journal no reset, public artifact gate and source analysis.
 - The review branch's **314-test** suite was run separately against its own V11 entrypoint. Review-only tests that require replacing `main.py` with the V11 entrypoint are not represented as tests of the production-main candidate. Production candidate keeps the selected source/renderer/transport/privacy tests plus native-rule tests; fixture-only helpers are named `fixtures_*` to prevent unrelated entrypoint suites being counted.
 - Actual isolated integration preview fetched current data for all six coins, exercised native V10.6 evaluation and produced the enriched evening preview. `legacy_rule_audit.json` confirms equality of native evaluations before/after enrichment. Protected file hashes remained unchanged; privacy staging PASSED.
 - This is **one preview**, not two real independent observations. Real morning/evening comparison is N/A. Missing market/fundamental inputs remain N/A; local macro-provider proxy restrictions are not proof the original servers are down.

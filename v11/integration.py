@@ -63,6 +63,7 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
            'Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.',
            f"Trh24h {percent(ctx.get('global_change'))}; BTC {p(ctx['btc_data'].get('price_usd'))}; dominancia {ctx.get('btc_dominance') if ctx.get('btc_dominance') is not None else 'N/A'} %; bezpečnostné hodnotenie V10.6 {safety['state']}.",
            'Príčina pohybu nie je preukázaná samotným súbehom správ a cien.']
+    lines.append('Režim V10.6: '+legacy.market_regime(ctx,evaluations)+'; Fear & Greed '+str((ctx.get('fear') or {}).get('value') if (ctx.get('fear') or {}).get('value') is not None else 'N/A')+'.')
     lines.append('Kapitalizácia trhu '+legacy.fmt_big(ctx.get('total_market_cap'))+'; objem24h '+legacy.fmt_big(ctx.get('total_volume'))+'; BTC24h '+percent(ctx.get('btc_change_24h'))+'.')
     lines+=overview(fundamentals,now)
     quotes={};appendix=[]
@@ -71,6 +72,8 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
         lines+=['',f"{symbol} — {e['action']} (V10.6) | {p(e.get('price'))}; 24h {percent(c.get('change_24h'))}",
                 f"Trend {e.get('trend_score','N/A')}/10; riziko {e.get('risk_level','N/A')} ({e.get('risk_pts','N/A')} b.); "+'; '.join(e.get('signals',[])[:2])]
         if e.get('entry') and e.get('stop'):
+            rr1,rr2=legacy.calculate_rr(e['entry'],e['stop'],e.get('tp1'),e.get('tp2'))
+            lines.append(f"Pôvodné hrubé R:R {rr1 if rr1 is not None else 'N/A'} / {rr2 if rr2 is not None else 'N/A'}; čisté R:R N/A bez overeného spreadu.")
             lines.append(f"Pôvodný plán: vstup {p(e['entry'])}, ochranná hranica {p(e['stop'])}, TP1 {p(e.get('tp1'))}, TP2 {p(e.get('tp2'))}.")
         else:lines.append('Potvrdený vstup/ochranný plán N/A.')
         lines.append('Support '+p(e.get('support'))+'; rezistencia '+p(e.get('resistance'))+'; pokles od maxima '+percent(e.get('drawdown_pct'))+'.')
