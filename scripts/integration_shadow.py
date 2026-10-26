@@ -57,6 +57,9 @@ def run(phase='preview',reference=None):
             pair=dict(status='N/A',verified_temporal_pair=False,reason='Reference refused: checksum/time/source mismatch');code=2
     text='SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.\nV10.6 kontext: '+state_origin+'; nejde o potvrdenú osobnú držbu.\n'+text
     (out/(kind+'.txt')).write_text(text)
+    from v11.fundamental_analysis import analyze
+    displayed=[e for e in analyze(fund,now)['evidence'] if e['title'] in text]
+    write_json(out/'analysis_validation.json',dict(renderer='v10.6-native-with-v11-enrichment',rendered_evidence=len(displayed),source_urls_present=all(e['url'] in text for e in displayed),meaning_and_impact_present=not displayed or all(t in text for t in ('Význam:','Dopad:','Overiť:'))))
     write_json(out/'comparison.json',pair)
     (out/'comparison.txt').write_text(shadow_pair.report(pair) if pair.get('verified_temporal_pair') else 'Porovnanie N/A — '+pair.get('reason','čaká na večer'))
     write_json(out/'legacy_rule_audit.json',dict(identical_evaluations=True,rule_engine='main.py V10.6 unchanged',new_fundamentals_affect_signals=False,
