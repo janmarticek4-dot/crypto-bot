@@ -64,3 +64,7 @@ Prípadne spusti priamo **V11.1 Temporal Shadow**, ak ho GitHub už eviduje. Ži
 - Jednorazový živý náhľad **26. 10. 2026 22:29 Bratislava** mal kompletné trhové dáta všetkých šiestich mincí a nezmenené chránené súbory. Je to iba náhľad mimo plánovaného slotu, nie skutočná ranná/večerná dvojica. Lokálne proxy obmedzenia makro/DeFiLlama zdrojov trvajú; predchádzajúci úspešný GitHub beh tieto lokálne sieťové podmienky nenahrádza.
 - Prvý automatický skutočný pár ešte **neprebehol**: treba vytvoriť výskumný repozitár alebo vykonať dva manuálne behy v reálnych oknách. Dnes nie je možné spätne vyrobiť ranný zber. Neuvádzame úspech deployu, schedule ani porovnania, ktoré sa nestalo.
 - Stále nejde o úplné fundamentálne pokrytie ani validáciu obchodnej stratégie. Semantická deduplikácia je konzervatívna a môže vynechať vzdialenejšie parafrázy. Dátové výpadky môžu vytvoriť N/A. Ak chýba celý večerný beh, nebude ani večerný artifact — samotný schedule nezaručuje doručenie.
+
+## Pevný zdroj pripraveného automatického testu
+
+Pripravená šablóna už obsahuje commit **`dedf8427ac83fbfea5daef14078ba95fe2015950`** na oboch miestach. Obsah súboru `shadow-temporal.yml.example` stačí celý skopírovať do výskumného repozitára pod uvedeným názvom. Tento commit obsahuje otestovanú implementáciu; neskoršie čisto dokumentačné úpravy nevyžadujú zmenu pinu.

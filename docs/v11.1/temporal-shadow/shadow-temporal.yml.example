@@ -1,5 +1,5 @@
 # Install ONLY in a separate research repository as .github/workflows/shadow-temporal.yml.
-# Replace PIN_REVIEW_COMMIT with the same 40-character review-branch SHA in both places.
+# Immutable tested review source; update both pins only between observation days.
 name: Automated Research Shadow
 on:
   schedule:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   shadow:
-    uses: janmarticek4-dot/crypto-bot/.github/workflows/v11-temporal-shadow.yml@PIN_REVIEW_COMMIT
+    uses: janmarticek4-dot/crypto-bot/.github/workflows/v11-temporal-shadow.yml@dedf8427ac83fbfea5daef14078ba95fe2015950
     with:
-      source_sha: PIN_REVIEW_COMMIT
+      source_sha: dedf8427ac83fbfea5daef14078ba95fe2015950
       observation_workflow: shadow-temporal.yml
