@@ -65,3 +65,35 @@ def lines(result):
     out=[f"US Treasury {item['date']}: 2Y {item['2y']:.2f} %, 10Y {item['10y']:.2f} %; denné pozorovanie, nie živá kotácia. {result['url']}" if item else 'US Treasury výnosy: N/A.']
     out.append('DXY, overený sadzbový konsenzus a ETF toky: N/A bez dostupného licencovaného/primárneho zdroja.')
     return out
+
+
+def economic_observations(now,fetcher=fetch):
+    """Latest revised monthly levels, NOT consensus or first-release vintages."""
+    names={'CPIAUCSL':('CPI index','index'),'PCEPI':('PCE index','index'),
+           'UNRATE':('Nezamestnanosť','%'),'PAYEMS':('Nonfarm zamestnanosť','tisíc osôb')}
+    url='https://fred.stlouisfed.org/graph/fredgraph.csv?id='+','.join(names)+'&cosd='+str((now-timedelta(days=500)).date())
+    result={'url':url,'checked_at':now.isoformat(),'observations':{},'consensus':None,'first_release':False}
+    try:
+        rows=list(csv.DictReader(io.StringIO(fetcher(dict(url=url)).decode('utf-8-sig'))))
+        for series,(label,unit) in names.items():
+            valid=[]
+            for row in rows:
+                try:
+                    day=datetime.fromisoformat(row.get('observation_date',row.get('DATE',''))).date();value=float(row[series])
+                    if math.isfinite(value) and value>=0 and 0<=(now.date()-day).days<=500:valid.append((day,value))
+                except (ValueError,TypeError,KeyError):continue
+            valid.sort()
+            if not valid or (now.date()-valid[-1][0]).days>90:continue
+            day,value=valid[-1]
+            result['observations'][series]={'label':label,'unit':unit,'period':day.isoformat(),'value':value}
+    except Exception as exc:result['error_type']=type(exc).__name__
+    return result
+
+
+def economic_lines(result):
+    out=['Makro merania (najnovšie dostupné revidované hodnoty, nie konsenzus):']
+    for item in result.get('observations',{}).values():
+        out.append(f"{item['label']}: {item['value']:,.2f} {item['unit']}; obdobie {item['period']}. Čas prvého zverejnenia N/A.")
+    if not result.get('observations'):out.append('N/A — aktuálne overiteľné merania nedostupné.')
+    out.append('Zdroj: '+result['url']+'; načítané '+result['checked_at']+'. Merané obdobie nie je dátum zverejnenia; prekvapenie voči trhu N/A.')
+    return out

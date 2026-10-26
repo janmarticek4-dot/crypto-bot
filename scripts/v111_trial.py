@@ -12,7 +12,7 @@ import urllib.error
 from zoneinfo import ZoneInfo
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.v111_shadow import ShadowAPI, SYMBOLS
-from v11 import data,fundamentals,macro_context
+from v11 import data,fundamentals,macro_context,forecast_audit
 from v11.diagnostics import technical
 from v11.reporting import chunks
 from v11.state_policy import require_public_data
@@ -110,7 +110,9 @@ class PublicJournal:
         return value
     def save(self,value):
         require_public_data(value)
-        body={'message':'Update public analytical pilot delivery journal [skip ci]','branch':'main','content':base64.b64encode(json.dumps(value,allow_nan=False).encode()).decode()}
+        raw=json.dumps(value,allow_nan=False).encode()
+        if len(raw)>800_000:raise RuntimeError('Public analytical journal requires archival; refusing oversized write')
+        body={'message':'Update public analytical pilot delivery journal [skip ci]','branch':'main','content':base64.b64encode(raw).decode()}
         if self.sha:body['sha']=self.sha
         response=self.request('PUT',body);self.sha=response['content']['sha']
 
@@ -157,18 +159,36 @@ def run():
         now=datetime.now(timezone.utc)
         fund=fundamentals.collect({},now)
         fund['macro_context']=macro_context.collect({},now)
+        economic=macro_context.economic_observations(now)
+        history=state.setdefault('macro_observation_history_v1',[])
+        history.append(economic);state['macro_observation_history_v1']=history[-100:]
         morning=state['slots'].get(now.astimezone(BL).date().isoformat()+'-morning',{})
         text,quotes=render(snap,fund,now,kind,morning.get('quotes') if morning.get('status')=='sent' else None)
+        slot=now.astimezone(BL).date().isoformat()+('_07:00' if kind=='morning' else '_20:00')
+        forecast_audit.update(state,snap,fund,slot)
+        text+='\n'+'\n'.join(forecast_audit.lines(state))+'\n'+'\n'.join(macro_context.economic_lines(economic))
     if phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
     require_public_data(quotes)
     state['slots']={k:v for k,v in state['slots'].items() if k[:10]>=(now.astimezone(BL).date().isoformat()[:8]+'01')}
     state['slots'][key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
+    if kind!='usa' and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
+        try:
+            from v11.advisory_portfolio import load,advice
+            private_text=advice(load(),snap)
+            text=text.replace('Držba N/A — skutočné pozície sa nenačítavajú.','Držba je posúdená v súkromnej časti nižšie.').replace('HOLD/REDUCE/SELL pre tvoje pozície N/A.','Posúdenie existujúcich pozícií je v súkromnej časti nižšie.')
+            text+='\n'+private_text  # Telegram only; NEVER persisted in public journal.
+        except Exception:
+            text+='\nSúkromné portfólio N/A — úložisko alebo evidencia sa nedali bezpečne overiť; nie je to prázdne portfólio.'
     try:send(text)
     except Exception:
         state['slots'][key]['status']='uncertain';journal.save(state);raise
-    state['slots'][key]['status']='sent';journal.save(state)
-    print('Analytical pilot sent; no portfolio or trading state accessed.')
+    state['slots'][key]['status']='sent'
+    if kind!='usa':
+        for forecast in state.get('analysis_forecasts_v11',[]):
+            if forecast['id'].startswith(slot+'|'):forecast['delivery_confirmed']=True
+    journal.save(state)
+    print('Analytical report delivered; no orders executed.')
     return 0
 
 

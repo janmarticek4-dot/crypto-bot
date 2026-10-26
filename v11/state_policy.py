@@ -7,7 +7,7 @@ class PublicDataError(ValueError):
 # Prices/technical entry zones are public. Actual fills, ownership, balances and
 # credentials belong only in private state, even if their current value is zero.
 PRIVATE_FIELDS=frozenset({
-    'portfolio_v11','portfolio','holdings','transactions','cash','initial_cash',
+    'portfolio_v11','inventory_change_history','telegram_update_offset','advisory_portfolio','average_cost','portfolio','holdings','transactions','cash','initial_cash',
     'additional_capital','cash_delta','balances','balance','account_balance',
     'qty','quantity','purchase_price','average_purchase_price','cost_basis',
     'realized','unrealized','credentials','password','private_key','api_key',
