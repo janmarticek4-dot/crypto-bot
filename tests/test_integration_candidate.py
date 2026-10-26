@@ -127,3 +127,24 @@ class IntegratedPrivacyTests(unittest.TestCase):
         self.assertTrue(writes)
         for state in writes:
             self.assertNotIn('PRIVATE-CANARY',json.dumps(state));require_public_data(state)
+
+class StateContinuityTests(unittest.TestCase):
+    def test_nonempty_reset_also_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'state.json';schema=Path(directory)/'schema.json'
+            state.write_text(json.dumps({'peaks':{},'last_actions':{},'last_run':'synthetic'}))
+            check(state,record_schema=schema)
+            state.write_text(json.dumps({'last_run':'synthetic reset'}))
+            with self.assertRaisesRegex(ValueError,'sections were lost'):check(state,require_schema=schema)
+    def test_schema_has_no_state_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'state.json';schema=Path(directory)/'schema.json'
+            state.write_text(json.dumps({'last_run':'PUBLIC-STATE-VALUE-CANARY'}))
+            check(state,record_schema=schema)
+            self.assertNotIn('CANARY',schema.read_text());self.assertEqual(json.loads(schema.read_text()),['last_run'])
+            check(state,require_schema=schema)
+    def test_schema_cannot_overwrite_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'state.json';state.write_text('{"last_run":"synthetic"}');before=state.read_bytes()
+            with self.assertRaises(ValueError):check(state,record_schema=state)
+            self.assertEqual(state.read_bytes(),before)
