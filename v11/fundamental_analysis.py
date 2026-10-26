@@ -28,6 +28,7 @@ def analyze(result, now):
         symbols=[s for s,p in ALIASES.items() if re.search(p,title,re.I)]
         if event.get('symbol') in SYMBOLS and event['symbol'] not in symbols:symbols.append(event['symbol'])
         low=kind in ('software_release_notice','governance_repository_change') or bool(re.search(r'proposal|proposes|\bfloats\b|digital euro|price risks|price prediction|price forecast|three things|partnership|partner|governance|marketing',title,re.I))
+        if event.get('source')=='aave' and not cats & {'hack','unlock'} and re.search(r'assessments?|cap increases?|risk stewards',title,re.I):low=True
         if low:
             significance='nízka bez potvrdenej aktivácie alebo merateľného používania'
             impact='neutrálny/nepotvrdený';verify='aktiváciu, rozsah nasadenia a nezávislé metriky používania'
@@ -58,7 +59,7 @@ def analyze(result, now):
     coverage['usage_tvl']=bool(result.get('metrics'))
     coverage['revenue_fees']=bool(result.get('project_economics',{}).get('observations'))
     coverage['project_events']=any(e['material'] and set(e['categories']) & {'project','hack','unlock'} for e in evidence)
-    coverage['regulation_etf']=any('regulation' in e['categories'] for e in evidence)
+    coverage['regulation_etf']=any(e['material'] and 'regulation' in e['categories'] for e in evidence)
     return dict(evidence=evidence,coverage=coverage,current_relevant_sources=sum(s.get('freshness')=='CURRENT_RELEVANT' for s in result.get('sources',[])),source_ok=available,source_total=len(result.get('sources',[])),
                 coverage_note='Čiastočne pozorované tematické okruhy, nie percento všetkých významných informácií; úplnosť nie je merateľná.')
 
@@ -76,24 +77,26 @@ def overview(result,now):
     out=['FUNDAMENTÁLNY SÚHRN', 'Príčina dnešného pohybu: nepreukázaná; nasledujúce faktory nie sú dôkaz príčinnej súvislosti.']
     relevant=[e for e in a['evidence'] if e['material']]
     ranking=result.get('editorial_ranking',{}).get('ids',[])
-    relevant.sort(key=lambda e:ranking.index(e['id']) if e['id'] in ranking else len(ranking))
+    relevant.sort(key=lambda e:(0 if set(e['categories']) & {'Fed','CPI','PCE','employment','GDP','hack'} else 1 if 'regulation' in e['categories'] else 2, ranking.index(e['id']) if e['id'] in ranking else len(ranking)))
     for item in relevant[:3]:out+=event_lines(item)
     if not relevant:out.append('V dostupných aktuálnych zdrojoch nebola identifikovaná nová významná správa; pokrytie je neúplné.')
     macro=result.get('macro_context',{});y=macro.get('treasury')
-    if y:out.append(f"US výnosy: US výnosy {y['date']}: 2Y {y['2y']:.2f} %, 10Y {y['10y']:.2f} %. {macro['url']}; zber {macro.get('checked_at','N/A')}.")
+    if y:out.append(f"US výnosy {y['date']}: 2Y {y['2y']:.2f} %, 10Y {y['10y']:.2f} %. {macro['url']}; zber {macro.get('checked_at','N/A')}.")
     if y and y.get('change_bp'):
         out.append(f"Výnosy od {y['previous_date']}: 2Y {y['change_bp']['2y']:+g} bp, 10Y {y['change_bp']['10y']:+g} bp (bázické body). Rast môže sprísňovať diskontovanie, pokles ho uvoľňovať; samotný rozdiel nedokazuje dôvod pohybu krypta.")
     for item in result.get('economic_observations',{}).get('observations',{}).values():
         out.append(f"{item['label']}: {item['value']:,.2f} {item['unit']}, obdobie {item['period']}; predchádzajúca hodnota {item.get('previous_value','N/A')}. Najnovšie revidované meranie, prvý výsledok a konsenzus N/A.")
     out+=['24–72 h: smer fundamentov nepotvrdený; pri makro prekvapení sledovať výnosy a reakciu BTC, nie samotný titulok.',
           '7–14 dní: podmienený výhľad podľa kalendára, účinnosti oznámení a následných metrík; pravdepodobnosti N/A.',
-          f"Formát/dostupnosť zdrojov {a['source_ok']}/{a['source_total']}; aktuálne relevantný obsah potvrdený pri {a['current_relevant_sources']}. Čiastočne pokryté okruhy {sum(a['coverage'].values())}/{len(DIMENSIONS)}. Podiel všetkých významných informácií: neznámy."]
+          f"Načítané formáty {a['source_ok']}/{a['source_total']} (vrátane záloh); aktuálne relevantný obsah potvrdený pri {a['current_relevant_sources']}. Dostupné podklady v okruhoch {sum(a['coverage'].values())}/{len(DIMENSIONS)}. Podiel všetkých významných informácií: neznámy."]
+    degraded=[s['source']+' → '+s.get('selected_source','N/A')+' ('+str(s.get('events',0))+' aktuálnych položiek)' for s in result.get('sources',[]) if s.get('fallback')]
+    if degraded:out.append('Primárne zdroje nedostupné, použité zálohy: '+'; '.join(degraded)+'. Záloha nie je primárne potvrdenie.')
     return out
 
 
 def coin_lines(symbol,result,now,previous=None):
     a=analyze(result,now)
-    items=[e for e in a['evidence'] if symbol in e['symbols'] and (len(e['symbols'])<6 or 'project' in e['categories'])]
+    items=[e for e in a['evidence'] if e['material'] and symbol in e['symbols'] and (len(e['symbols'])<6 or 'project' in e['categories'])]
     out=['Fundamentálny stav: smer nepotvrdený.'] if items else []
     for item in items[:1]:out+=event_lines(item)
     if not items:out.append('Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.')

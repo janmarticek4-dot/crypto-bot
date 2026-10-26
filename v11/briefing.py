@@ -1,5 +1,6 @@
 """Deterministic analytical reports. Events never alter trade decisions."""
 import os
+import re
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from .data import PRIMARY
@@ -94,6 +95,7 @@ def event_lines(result,now):
         out.append(title+(' (ďalšie dni, bez opakovania)' if start else ''))
         selected=[]
         for e in events:
+            if 'employment' in e.get('categories',[]) and re.search(r'metropolitan|county|state employment|regional',e.get('title',''),re.I):continue
             at=timestamp(e.get('event_at'))
             date_only=e.get('event_date')
             if not e.get('scheduled') or (not at and not date_only):continue

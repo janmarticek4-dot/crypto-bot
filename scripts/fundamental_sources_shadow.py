@@ -23,6 +23,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def error_details(exc):
+    if isinstance(exc,fundamentals.SourcePolicyError):return dict(status='SOURCE_POLICY_ERROR',error_type=type(exc).__name__,http_status=None,error_layer='response_policy',error_code=exc.reason_code)
     reason=getattr(exc,'reason',None)
     if 'Tunnel connection failed: 403' in str(reason):return dict(status='NETWORK_BLOCKED',error_type=type(exc).__name__,http_status=403,error_layer='network_tunnel')
     if isinstance(exc,urllib.error.HTTPError):return dict(status='HTTP_ERROR',error_type=type(exc).__name__,http_status=exc.code,error_layer='origin_or_gateway')

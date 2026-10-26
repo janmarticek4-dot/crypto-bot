@@ -62,6 +62,7 @@ def run(phase='preview',reference=None):
     write_json(out/'analysis_validation.json',dict(renderer='v10.6-native-with-v11-enrichment',rendered_evidence=len(displayed),source_urls_present=all(e['url'] in text for e in displayed),meaning_and_impact_present=not displayed or all(t in text for t in ('Význam:','Dopad:','Overiť:'))))
     write_json(out/'comparison.json',pair)
     (out/'comparison.txt').write_text(shadow_pair.report(pair) if pair.get('verified_temporal_pair') else 'Porovnanie N/A — '+pair.get('reason','čaká na večer'))
+    write_json(out/'risk_diagnostics.json',{s:integration.risk_breakdown(legacy,e) for s,e in evaluations.items()})
     write_json(out/'legacy_rule_audit.json',dict(identical_evaluations=True,rule_engine='main.py V10.6 unchanged',new_fundamentals_affect_signals=False,
         legacy_cache=state_origin,source_commit=os.getenv('SHADOW_SOURCE_SHA')))
     summary=json.loads((out/'summary.json').read_text());summary.update(phase=phase,verified_temporal_pair=pair.get('verified_temporal_pair',False),state_written=False,rule_engine='v10.6-original')

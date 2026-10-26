@@ -221,15 +221,23 @@ def parse_fomc(raw,source,now=None):
     return out
 
 
+class SourcePolicyError(ValueError):
+    def __init__(self,reason_code):
+        self.reason_code=reason_code
+        super().__init__(reason_code)
+
+
 def fetch(source):
     req=urllib.request.Request(source['url'],headers={'User-Agent':'CryptoBotResearch/11.0 (public-source calendar reader)'})
     with urllib.request.urlopen(req,timeout=8) as r:
         initial=urllib.parse.urlsplit(source['url']).hostname.removeprefix('www.')
         final=urllib.parse.urlsplit(r.geturl()).hostname.removeprefix('www.')
         publisher=source.get('publisher_host',initial)
-        if urllib.parse.urlsplit(r.geturl()).scheme!='https' or (final!=initial and final!=publisher and not final.endswith('.'+publisher)):raise ValueError('Unexpected feed redirect')
-        raw=r.read(2_000_001)
-        if len(raw)>2_000_000:raise ValueError('Feed too large')
+        if urllib.parse.urlsplit(r.geturl()).scheme!='https' or (final!=initial and final!=publisher and not final.endswith('.'+publisher)):raise SourcePolicyError('UNEXPECTED_REDIRECT')
+        # Detailed TVL histories are larger than RSS. Keep both paths bounded.
+        limit=8_000_000 if initial=='api.llama.fi' and urllib.parse.urlsplit(source['url']).path.startswith('/protocol/') else 2_000_000
+        raw=r.read(limit+1)
+        if len(raw)>limit:raise SourcePolicyError('PAYLOAD_LIMIT_EXCEEDED')
         return raw
 
 

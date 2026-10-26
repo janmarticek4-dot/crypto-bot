@@ -61,7 +61,7 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
     lines=['📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — '+('RÁNO' if kind=='morning' else 'VEČER'),
            now.astimezone(legacy.TZ).strftime('%d.%m.%Y %H:%M Bratislava'),
            'Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.',
-           f"Trh24h {percent(ctx.get('global_change'))}; BTC {p(ctx['btc_data'].get('price_usd'))}; dominancia {ctx.get('btc_dominance') if ctx.get('btc_dominance') is not None else 'N/A'} %; bezpečnostné hodnotenie V10.6 {safety['state']}.",
+           f"Trh24h {percent(ctx.get('global_change'))}; BTC {p(ctx['btc_data'].get('price_usd'))}; dominancia {format(ctx['btc_dominance'],'.2f') if ctx.get('btc_dominance') is not None else 'N/A'} %; bezpečnostné hodnotenie V10.6 {safety['state']}.",
            'Príčina pohybu nie je preukázaná samotným súbehom správ a cien.']
     lines.append('Režim V10.6: '+legacy.market_regime(ctx,evaluations)+'; Fear & Greed '+str((ctx.get('fear') or {}).get('value') if (ctx.get('fear') or {}).get('value') is not None else 'N/A')+'.')
     lines.append('Kapitalizácia trhu '+legacy.fmt_big(ctx.get('total_market_cap'))+'; objem24h '+legacy.fmt_big(ctx.get('total_volume'))+'; BTC24h '+percent(ctx.get('btc_change_24h'))+'.')
@@ -79,6 +79,9 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
         lines.append('Support '+p(e.get('support'))+'; rezistencia '+p(e.get('resistance'))+'; pokles od maxima '+percent(e.get('drawdown_pct'))+'.')
         if e.get('tiers'):lines.append('Nepotvrdené možné vstupné zóny: '+' / '.join(p(v) for v in e['tiers']))
         lines.append('Zmena odporúčania: '+e.get('flip','N/A'))
+        audit=risk_breakdown(legacy,e)
+        lines.append('Rizikové body V10.6: '+'; '.join(f"{c['points']} b. {c['reason']}" for c in audit['components'])+f"; spolu {audit['sum'] if audit['matched'] else 'N/A — nerozpoznaná položka'} b.; kontrola V10.6 {e.get('risk_pts','N/A')} b.")
+        if e['action'] in ('REDUCE','SELL'):lines.append(audit['trigger'])
         lines+=coin_lines(symbol,fundamentals,now)
         lines.append(f"Kapitalizácia {legacy.fmt_big(c.get('market_cap'))}; objem24h {legacy.fmt_big(c.get('volume_24h'))}.")
         old=(previous or {}).get(symbol,{})
@@ -97,3 +100,20 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
             '', 'TECHNICKÁ PRÍLOHA',*appendix]
     text='\n'.join(lines);require_public_data(text);require_public_data(quotes)
     return text,quotes,evaluations
+
+
+def risk_breakdown(legacy,evaluation):
+    weights=(('hlboký pokles',3),('pokles ',1),('prelomený support',2),
+             ('rastúci predajný objem',1),('cena pod EMA50',1),('cena pod EMA200',1),
+             ('MACD histogram záporný',1),('slabý trend',1),
+             ('bezpečnostný stav trhu: WARNING',1),('bezpečnostný stav trhu: CRITICAL',2),
+             ('negatívna správa o projekte',1))
+    components=[]
+    for reason in evaluation.get('risk_reasons',[]):
+        points=next((value for prefix,value in weights if reason.startswith(prefix)),None)
+        components.append(dict(reason=reason,points=points))
+    total=sum(c['points'] for c in components if c['points'] is not None)
+    matched=all(c['points'] is not None for c in components) and total==evaluation.get('risk_pts',0)
+    return dict(components=components,sum=total,matched=matched,action=evaluation['action'],
+                previous_action=evaluation.get('previous_action'),smoothing_note=evaluation.get('action_note'),
+                trigger=f"Pôvodné prahy: REDUCE od {legacy.CONFIG['risk_high_pts']} b.; SELL od {legacy.CONFIG['sell_pts']} b. a skóre ≤3.5. "+(evaluation.get('action_note') or '')+' Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.')

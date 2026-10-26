@@ -157,3 +157,38 @@ class NativePlanPreservationTests(unittest.TestCase):
             text,_,_=integration.render(legacy,snap,{},datetime.now(timezone.utc),'evening',{})
         self.assertIn('hrubé R:R 1.0 / 2.0',text);self.assertIn('SYNTHETIC INVALIDATION',text)
         self.assertIn('čisté R:R N/A',text)
+
+class DiagnosticRepairTests(unittest.TestCase):
+    def test_policy_error_is_not_network_failure(self):
+        from scripts.fundamental_sources_shadow import error_details
+        from v11.fundamentals import SourcePolicyError
+        for reason in ('PAYLOAD_LIMIT_EXCEEDED','UNEXPECTED_REDIRECT'):
+            value=error_details(SourcePolicyError(reason));self.assertEqual(value['status'],'SOURCE_POLICY_ERROR');self.assertEqual(value['error_code'],reason)
+    def test_detailed_tvl_has_larger_but_bounded_payload(self):
+        from v11 import fundamentals
+        from unittest.mock import MagicMock
+        for url,expected in [('https://api.llama.fi/protocol/aave',8_000_001),('https://www.bls.gov/feed/bls_latest.rss',2_000_001)]:
+            response=MagicMock();response.__enter__.return_value.geturl.return_value=url;response.__enter__.return_value.read.return_value=b'{}'
+            with patch.object(fundamentals.urllib.request,'urlopen',return_value=response):fundamentals.fetch(dict(url=url))
+            response.__enter__.return_value.read.assert_called_once_with(expected)
+    def test_risk_reasons_exactly_account_for_native_scores(self):
+        _,_,_,ev=integration.evaluate(legacy,IntegrationTests().data(),{})
+        for e in ev.values():self.assertTrue(integration.risk_breakdown(legacy,e)['matched'])
+    def test_reported_seven_and_five_point_reduce_explained(self):
+        for dd,points in [('hlboký pokles 15.9% od lokálneho maxima',7),('pokles 8.1% od lokálneho maxima (prah 6.0%)',5)]:
+            e=dict(action='REDUCE',risk_pts=points,risk_reasons=[dd,'cena pod EMA50','cena pod EMA200','slabý trend (skóre 2.1/10)','bezpečnostný stav trhu: WARNING'])
+            result=integration.risk_breakdown(legacy,e);self.assertEqual(result['sum'],points);self.assertTrue(result['matched']);self.assertIn('nie overenú predikciu',result['trigger'])
+    def test_unrecognized_risk_reason_not_silently_assigned(self):
+        r=integration.risk_breakdown(legacy,dict(action='REDUCE',risk_pts=5,risk_reasons=['unknown']))
+        self.assertFalse(r['matched']);self.assertIsNone(r['components'][0]['points'])
+    def test_routine_governance_and_code_release_not_prominent(self):
+        from v11.fundamental_analysis import analyze,coin_lines
+        now=datetime.now(timezone.utc)
+        e=dict(id='synthetic',title='Risk Stewards: Cap Increases on Aave',source='aave',url='https://governance.aave.com/synthetic',published_at=now.isoformat(),retrieved_at=now.isoformat(),categories=['project'],symbol='AAVE')
+        self.assertFalse(analyze({'events':[e]},now)['evidence'][0]['material'])
+        self.assertNotIn(e['title'],' '.join(coin_lines('AAVE',{'events':[e]},now)))
+    def test_regional_employment_not_in_main_calendar(self):
+        from v11.briefing import event_lines
+        now=datetime(2026,10,26,tzinfo=timezone.utc)
+        event=dict(scheduled=True,event_at='2026-10-28T14:00:00+00:00',title='Metropolitan Area Employment',url='https://www.bls.gov',categories=['employment'])
+        self.assertNotIn('Metropolitan',' '.join(event_lines({'events':[event]},now.timestamp())))
