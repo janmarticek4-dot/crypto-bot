@@ -1,0 +1,182 @@
+{
+  "AAVE": {
+    "components": [
+      {
+        "reason": "hlboký pokles 15.9% od lokálneho maxima",
+        "points": 3
+      },
+      {
+        "reason": "cena pod EMA50",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA200",
+        "points": 1
+      },
+      {
+        "reason": "slabý trend (skóre 2.1/10)",
+        "points": 1
+      },
+      {
+        "reason": "bezpečnostný stav trhu: WARNING",
+        "points": 1
+      }
+    ],
+    "sum": 7,
+    "matched": true,
+    "action": "REDUCE",
+    "previous_action": "SELL",
+    "smoothing_note": null,
+    "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+  },
+  "TAO": {
+    "components": [
+      {
+        "reason": "hlboký pokles 11.4% od lokálneho maxima",
+        "points": 3
+      },
+      {
+        "reason": "cena pod EMA50",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA200",
+        "points": 1
+      },
+      {
+        "reason": "slabý trend (skóre 2.5/10)",
+        "points": 1
+      },
+      {
+        "reason": "bezpečnostný stav trhu: WARNING",
+        "points": 1
+      }
+    ],
+    "sum": 7,
+    "matched": true,
+    "action": "REDUCE",
+    "previous_action": "SELL",
+    "smoothing_note": null,
+    "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+  },
+  "FET": {
+    "components": [
+      {
+        "reason": "hlboký pokles 14.0% od lokálneho maxima",
+        "points": 3
+      },
+      {
+        "reason": "cena pod EMA50",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA200",
+        "points": 1
+      },
+      {
+        "reason": "slabý trend (skóre 2.1/10)",
+        "points": 1
+      },
+      {
+        "reason": "bezpečnostný stav trhu: WARNING",
+        "points": 1
+      }
+    ],
+    "sum": 7,
+    "matched": true,
+    "action": "REDUCE",
+    "previous_action": "SELL",
+    "smoothing_note": null,
+    "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+  },
+  "SOL": {
+    "components": [
+      {
+        "reason": "pokles 8.1% od lokálneho maxima (prah 6.0%)",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA50",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA200",
+        "points": 1
+      },
+      {
+        "reason": "slabý trend (skóre 2.1/10)",
+        "points": 1
+      },
+      {
+        "reason": "bezpečnostný stav trhu: WARNING",
+        "points": 1
+      }
+    ],
+    "sum": 5,
+    "matched": true,
+    "action": "REDUCE",
+    "previous_action": "REDUCE",
+    "smoothing_note": null,
+    "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+  },
+  "ONDO": {
+    "components": [
+      {
+        "reason": "hlboký pokles 12.9% od lokálneho maxima",
+        "points": 3
+      },
+      {
+        "reason": "cena pod EMA50",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA200",
+        "points": 1
+      },
+      {
+        "reason": "slabý trend (skóre 2.5/10)",
+        "points": 1
+      },
+      {
+        "reason": "bezpečnostný stav trhu: WARNING",
+        "points": 1
+      }
+    ],
+    "sum": 7,
+    "matched": true,
+    "action": "REDUCE",
+    "previous_action": "SELL",
+    "smoothing_note": null,
+    "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+  },
+  "RENDER": {
+    "components": [
+      {
+        "reason": "hlboký pokles 12.3% od lokálneho maxima",
+        "points": 3
+      },
+      {
+        "reason": "cena pod EMA50",
+        "points": 1
+      },
+      {
+        "reason": "cena pod EMA200",
+        "points": 1
+      },
+      {
+        "reason": "slabý trend (skóre 2.5/10)",
+        "points": 1
+      },
+      {
+        "reason": "bezpečnostný stav trhu: WARNING",
+        "points": 1
+      }
+    ],
+    "sum": 7,
+    "matched": true,
+    "action": "REDUCE",
+    "previous_action": "SELL",
+    "smoothing_note": null,
+    "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+  }
+}

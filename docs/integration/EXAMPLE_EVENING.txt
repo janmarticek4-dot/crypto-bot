@@ -1,88 +1,93 @@
 SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.
 V10.6 kontext: checkout public cache (not guaranteed latest main); nejde o potvrdenú osobnú držbu.
 📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — VEČER
-26.10.2026 23:09 Bratislava
+26.10.2026 23:28 Bratislava
 Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.
-Trh24h -1.94%; BTC $80,043; dominancia 59.462439026209715 %; bezpečnostné hodnotenie V10.6 WARNING.
+Trh24h -2.04%; BTC $80,000; dominancia 59.47 %; bezpečnostné hodnotenie V10.6 WARNING.
 Príčina pohybu nie je preukázaná samotným súbehom správ a cien.
 Režim V10.6: Konsolidácia; Fear & Greed 50.
-Kapitalizácia trhu $2.70T; objem24h $73.04B; BTC24h -0.63%.
+Kapitalizácia trhu $2.69T; objem24h $72.80B; BTC24h -0.67%.
 FUNDAMENTÁLNY SÚHRN
 Príčina dnešného pohybu: nepreukázaná; nasledujúce faktory nie sú dôkaz príčinnej súvislosti.
 • Bitcoin holds near $80,000 as oil retreats and the Fed decision looms (2026-10-26T11:24:33+00:00; coindesk).
 Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
-Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-holds-near-usd80-000-as-oil-retreats-and-the-fed-decision-looms | zber 2026-10-26T22:09:04.286984+00:00.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-holds-near-usd80-000-as-oil-retreats-and-the-fed-decision-looms | zber 2026-10-26T22:28:09.308502+00:00.
 • Fed, ECB and BOJ interest-rate decisions, Coinbase earnings: Crypto Week Ahead (2026-10-26T09:14:47+00:00; coindesk).
 Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
-Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/fed-ecb-and-boj-interest-rate-decisions-coinbase-earnings-crypto-week-ahead | zber 2026-10-26T22:09:04.286984+00:00.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/fed-ecb-and-boj-interest-rate-decisions-coinbase-earnings-crypto-week-ahead | zber 2026-10-26T22:28:09.308502+00:00.
 • Bitcoin slips under $80,000 as traders de-risk ahead of Fed meeting (2026-10-26T04:37:02+00:00; coindesk).
 Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
-Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-slips-under-usd80-000-as-traders-de-risk-ahead-of-fed-meeting | zber 2026-10-26T22:09:04.286984+00:00.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/26/bitcoin-slips-under-usd80-000-as-traders-de-risk-ahead-of-fed-meeting | zber 2026-10-26T22:28:09.308502+00:00.
 24–72 h: smer fundamentov nepotvrdený; pri makro prekvapení sledovať výnosy a reakciu BTC, nie samotný titulok.
 7–14 dní: podmienený výhľad podľa kalendára, účinnosti oznámení a následných metrík; pravdepodobnosti N/A.
-Formát/dostupnosť zdrojov 8/16; aktuálne relevantný obsah potvrdený pri 4. Čiastočne pokryté okruhy 1/10. Podiel všetkých významných informácií: neznámy.
+Načítané formáty 8/16 (vrátane záloh); aktuálne relevantný obsah potvrdený pri 4. Dostupné podklady v okruhoch 0/10. Podiel všetkých významných informácií: neznámy.
+Primárne zdroje nedostupné, použité zálohy: aave → aave_aip (0 aktuálnych položiek); ondo → ondo_secondary (0 aktuálnych položiek). Záloha nie je primárne potvrdenie.
 
-AAVE — REDUCE (V10.6) | $135.27; 24h -1.39%
+AAVE — REDUCE (V10.6) | $135.05; 24h -1.48%
 Trend 2.1/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
 Potvrdený vstup/ochranný plán N/A.
-Support $133.61; rezistencia $160.55; pokles od maxima +15.75%.
+Support $133.61; rezistencia $160.55; pokles od maxima +15.88%.
 Nepotvrdené možné vstupné zóny: $133.61
 Zmena odporúčania: Zmierni sa po návrate nad $144.89 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 15.9% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.1/10); 1 b. bezpečnostný stav trhu: WARNING; spolu 7 b.; kontrola V10.6 7 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
 Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
-Kapitalizácia $2.08B; objem24h $222.0M.
+Kapitalizácia $2.08B; objem24h $221.4M.
 
-TAO — REDUCE (V10.6) | $250.00; 24h -1.42%
+TAO — REDUCE (V10.6) | $249.30; 24h -1.85%
 Trend 2.5/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
 Potvrdený vstup/ochranný plán N/A.
-Support $242.60; rezistencia $281.40; pokles od maxima +11.16%.
+Support $242.60; rezistencia $281.40; pokles od maxima +11.41%.
 Nepotvrdené možné vstupné zóny: $242.60
 Zmena odporúčania: Zmierni sa po návrate nad $259.79 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 11.4% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.5/10); 1 b. bezpečnostný stav trhu: WARNING; spolu 7 b.; kontrola V10.6 7 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
 Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
-Kapitalizácia $2.83B; objem24h $109.6M.
+Kapitalizácia $2.83B; objem24h $109.4M.
 
-FET — REDUCE (V10.6) | $0.1744; 24h -0.68%
+FET — REDUCE (V10.6) | $0.1740; 24h -1.30%
 Trend 2.1/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
 Potvrdený vstup/ochranný plán N/A.
-Support $0.1695; rezistencia $0.2023; pokles od maxima +13.79%.
+Support $0.1695; rezistencia $0.2023; pokles od maxima +13.99%.
 Nepotvrdené možné vstupné zóny: $0.1695
 Zmena odporúčania: Zmierni sa po návrate nad $0.1850 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 14.0% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.1/10); 1 b. bezpečnostný stav trhu: WARNING; spolu 7 b.; kontrola V10.6 7 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
 Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
-Kapitalizácia $402.4M; objem24h $71.4M.
+Kapitalizácia $402.3M; objem24h $71.2M.
 
-SOL — REDUCE (V10.6) | $100.57; 24h -1.12%
+SOL — REDUCE (V10.6) | $100.36; 24h -1.35%
 Trend 2.1/10; riziko VYSOKÉ (5 b.); cena pod EMA20; cena pod EMA50
 Potvrdený vstup/ochranný plán N/A.
-Support $98.620; rezistencia $109.20; pokles od maxima +7.90%.
+Support $98.620; rezistencia $109.20; pokles od maxima +8.10%.
 Nepotvrdené možné vstupné zóny: $98.620
 Zmena odporúčania: Zmierni sa po návrate nad $103.46 a poklese rizika pod 3 bodov.
-Fundamentálny stav: smer nepotvrdený.
-• Release v4.4.0-rc.1 (2026-10-26T21:47:59+00:00; sol_agave).
-Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: nízka bez potvrdenej aktivácie alebo merateľného používania. Dopad: neutrálny/nepotvrdený. Overiť: aktiváciu, rozsah nasadenia a nezávislé metriky používania.
-Dotknuté: SOL; horizont dopadu N/A. https://github.com/anza-xyz/agave/releases/tag/v4.4.0-rc.1 | zber 2026-10-26T22:09:04.286984+00:00.
-24–72 h / 7–14 dní: smer podmienený potvrdením účinnosti a metrík, nie titulkom.
-Kapitalizácia $59.22B; objem24h $2.45B.
+Rizikové body V10.6: 1 b. pokles 8.1% od lokálneho maxima (prah 6.0%); 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.1/10); 1 b. bezpečnostný stav trhu: WARNING; spolu 5 b.; kontrola V10.6 5 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $59.13B; objem24h $2.50B.
 
-ONDO — REDUCE (V10.6) | $0.4127; 24h +1.38%
+ONDO — REDUCE (V10.6) | $0.4116; 24h +0.59%
 Trend 2.5/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
 Potvrdený vstup/ochranný plán N/A.
-Support $0.3966; rezistencia $0.4725; pokles od maxima +12.66%.
+Support $0.3966; rezistencia $0.4725; pokles od maxima +12.89%.
 Nepotvrdené možné vstupné zóny: $0.3966
 Zmena odporúčania: Zmierni sa po návrate nad $0.4273 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 12.9% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.5/10); 1 b. bezpečnostný stav trhu: WARNING; spolu 7 b.; kontrola V10.6 7 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
 Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
-Kapitalizácia $2.01B; objem24h $108.9M.
+Kapitalizácia $2.00B; objem24h $103.8M.
 
-RENDER — REDUCE (V10.6) | $1.708; 24h -0.87%
+RENDER — REDUCE (V10.6) | $1.707; 24h -0.99%
 Trend 2.5/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
 Potvrdený vstup/ochranný plán N/A.
-Support $1.643; rezistencia $1.946; pokles od maxima +12.23%.
+Support $1.643; rezistencia $1.946; pokles od maxima +12.28%.
 Nepotvrdené možné vstupné zóny: $1.643
 Zmena odporúčania: Zmierni sa po návrate nad $1.779 a poklese rizika pod 3 bodov.
-Fundamentálny stav: smer nepotvrdený.
-• Add marketing budget allocation to RNP-024 (2026-10-26T14:34:21+00:00; render_rnp).
-Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: nízka bez potvrdenej aktivácie alebo merateľného používania. Dopad: neutrálny/nepotvrdený. Overiť: aktiváciu, rozsah nasadenia a nezávislé metriky používania.
-Dotknuté: RENDER; horizont dopadu N/A. https://github.com/rendernetwork/RNPs/commit/8568e90d782f302d9e3300622591e9eb1b4839a5 | zber 2026-10-26T22:09:04.286984+00:00.
-24–72 h / 7–14 dní: smer podmienený potvrdením účinnosti a metrík, nie titulkom.
-Kapitalizácia $885.3M; objem24h $43.5M.
+Rizikové body V10.6: 3 b. hlboký pokles 12.3% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.5/10); 1 b. bezpečnostný stav trhu: WARNING; spolu 7 b.; kontrola V10.6 7 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $884.8M; objem24h $42.7M.
 Ranné porovnanie N/A — nezadávame syntetickú rannú referenciu.
 
 AKČNÝ ZÁVER

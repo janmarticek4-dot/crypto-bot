@@ -1,7 +1,7 @@
 {
   "summary": {
-    "collected_at": "2026-10-26T22:09:04.286984+00:00",
-    "completed_at": "2026-10-26T22:09:07.044965+00:00",
+    "collected_at": "2026-10-26T22:28:09.308502+00:00",
+    "completed_at": "2026-10-26T22:28:12.261854+00:00",
     "market_complete": true,
     "endpoints": 32,
     "current": 4,
@@ -25,8 +25,8 @@
   },
   "privacy": {
     "status": "PASSED",
-    "files": 13,
+    "files": 14,
     "scope": "allowlist, private fields, credential patterns and known environment values; not complete semantic DLP"
   },
-  "note": "One live local preview, not a real morning/evening pair. No GitHub-hosted integration run claimed."
+  "note": "Actual local preview only; no genuine morning/evening pair and no GitHub-hosted new run claimed."
 }
