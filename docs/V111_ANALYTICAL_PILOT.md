@@ -30,3 +30,28 @@ whole research branch. No production portfolio migration is involved.
 refusal, CAS-before-send and independent morning reference changes. Production
 routing is tested separately using mocked calls. No Telegram smoke message was
 sent during preparation; actual07/20 delivery remains to be observed.
+
+## USA/fundamentals rollout2026-10-26
+
+New immutable source:0209de98779a9d3e10a177dc70c66cc38ddab371.
+USA15:00 switches to the integrated session/index/futures report from2026-10-27
+Bratislava, preventing a duplicate after today's legacy15:00 delivery.
+07/20 use the upgraded fundamentals/yield adapters from the next run.
+
+Actual GitHub-hosted validation40336881117 succeeded on2026-10-26:
+US_QUOTES_AVAILABLE=4/4; YIELDS_AVAILABLE=True; FUND_FEEDS_AVAILABLE=16/16;
+PHASE=AFTER OPEN. This is live runner evidence, not a local fixture result.
+No Telegram or production state ran in the push-triggered validation job.
+Artifact us-source-validation-40336881117 contains the public diagnostic report.
+Feed reachability is not complete coverage or proof of an economic effect.
+
+Cash indices vs futures, NY calendar/DST, quote timestamps, stale-data refusal,
+crypto divergence and primary-source macro dates are integrated. Monthly Treasury
+and FRED fallback give daily observations, not live quotes or DXY. Ongoing gaps:
+verified consensus/FedWatch, ETF flows, comprehensive unlock/emissions/adoption/
+revenues, and ONDO primary news remain N/A where not evidenced. No fabricated
+substitution. Existing15-minute risk monitoring and actual trading rules unchanged.
+
+242 offline tests +5 production routing/cutover tests passed. Rollback variable
+V111_TRIAL_ENABLED=false restores legacy07/15/20 on subsequent runs. Before
+replaying any slot, inspect Telegram and public delivery journal.

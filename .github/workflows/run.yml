@@ -83,7 +83,7 @@ jobs:
           from zoneinfo import ZoneInfo
           now = datetime.now(ZoneInfo('Europe/Bratislava'))
           minute = now.hour * 60 + now.minute
-          phase = 'morning' if 420 <= minute <= 510 else 'evening' if 1200 <= minute <= 1290 else ''
+          phase = 'morning' if 420 <= minute <= 510 else 'usa' if 900 <= minute <= 990 and now.date().isoformat() >= '2026-10-27' else 'evening' if 1200 <= minute <= 1290 else ''
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('phase=' + phase + '\n')
   v111-analytical-pilot:
@@ -106,7 +106,7 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Offline regression with delivery disabled
         run: python scripts/test_offline.py
-      - name: Send public-data07 or20 pilot (no real portfolio)
+      - name: Send public-data07/15/20 analysis (no real portfolio)
         env:
           GH_TOKEN: ${{ github.token }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
