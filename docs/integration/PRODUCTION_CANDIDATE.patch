@@ -28,7 +28,7 @@
          uses: actions/checkout@v4
          with:
 -          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
-+          ref: 718f7504ac641007cbb814361bd7aa48600d8d9c
++          ref: 15c13917e2d6543aac96dd4d5e46d400a73917b2
            persist-credentials: false
        - uses: actions/setup-python@v5
          with:
