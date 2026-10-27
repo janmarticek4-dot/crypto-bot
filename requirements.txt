@@ -2,3 +2,7 @@ Flask
 requests
 google-generativeai
 gunicorn
+
+# Direct analytical runtime dependencies (also required in clean CI).
+-r requirements-us.txt
+cryptography>=43,<51

@@ -1,0 +1,20 @@
+{
+  "offline_tests": 139,
+  "main_baseline": "3307d040097c1b58ce7ffad67142fd9e10fa9851",
+  "production_main_and_state_unchanged": true,
+  "cron_and_concurrency_unchanged": true,
+  "other_production_jobs_unchanged": true,
+  "experiment_files_in_candidate": false,
+  "live_final_runner_test": false,
+  "live_temporal_pair_verified": false,
+  "secrets_changed": false,
+  "telegram_test_sent": false,
+  "clean_python_environment": true,
+  "before_fix_failures": 29,
+  "after_fix_tests_passed": 139,
+  "calendar_package": "exchange-calendars==4.13.2",
+  "pandas_version": "3.1.0",
+  "unavailable_calendar_returns_na": true,
+  "tests_changed_for_ci_fix": false,
+  "full_github_logs_accessible": false
+}
