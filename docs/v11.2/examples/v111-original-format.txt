@@ -1,0 +1,57 @@
+SYNTETICKÝ NÁHĽAD — ceny, udalosť a portfólio sú výlučne modelové. Nejde o skutočný ranný/ručný beh ani investičné odporúčanie.
+
+📊 V11.1 — RÁNO | VYSOKÉ RIZIKO
+27.10.2026 07:00 Bratislava
+BTC $80,000 (+0.2%); trh $2.70T (-3.0%).
+BTC dominancia 60.0%; Fear & Greed N/A; riziko V10.6 CRITICAL.
+Pohyb cien je pozorovaný; jeho príčina nie je overená.
+SELL/REDUCE = technické riziko V10.6, nie potvrdená predikcia poklesu ani osobný pokyn predať. Držbu posudzuje súkromná časť.
+HLAVNÉ FAKTORY
+• 28.10. 19:00: MODEL — plánované menové rozhodnutie. Význam: môže zmeniť sadzby/očakávania a riziko altcoinov; smer závisí od výsledku. https://example.org/synthetic-calendar
+24–72 h: rast potrebuje návrat nad rezistencie; pod podporami hrozí pokračovanie korekcie. Smer neistý; pravdepodobnosti N/A.
+
+AAVE $130.00 (+0.2%) — TECHNICKÝ SELL
+Pokles od maxima -16.6% a súbeh rizík V10.6.
+S $125.12 / R $154.74
+Zmena: Zmierni sa po návrate nad $143.47 a poklese rizika pod 3 bodov.
+
+TAO $250.00 (+0.2%) — TECHNICKÝ SELL
+Pokles od maxima -16.6% a súbeh rizík V10.6.
+S $240.88 / R $299.62
+Zmena: Zmierni sa po návrate nad $276.04 a poklese rizika pod 3 bodov.
+
+FET $0.2000 (+0.2%) — TECHNICKÝ SELL
+Pokles od maxima -16.6% a súbeh rizík V10.6.
+S $0.1926 / R $0.2397
+Zmena: Zmierni sa po návrate nad $0.2207 a poklese rizika pod 3 bodov.
+
+SOL $100.00 (+0.2%) — TECHNICKÝ SELL
+Pokles od maxima -16.5% a súbeh rizík V10.6.
+S $96.400 / R $119.80
+Zmena: Zmierni sa po návrate nad $110.47 a poklese rizika pod 3 bodov.
+
+ONDO $0.4000 (+0.2%) — TECHNICKÝ SELL
+Pokles od maxima -16.7% a súbeh rizík V10.6.
+S $0.3848 / R $0.4795
+Zmena: Zmierni sa po návrate nad $0.4416 a poklese rizika pod 3 bodov.
+
+RENDER $1.700 (+0.2%) — TECHNICKÝ SELL
+Pokles od maxima -16.7% a súbeh rizík V10.6.
+S $1.635 / R $2.041
+Zmena: Zmierni sa po návrate nad $1.878 a poklese rizika pod 3 bodov.
+
+PLÁN
+Kúpiť: žiadny potvrdený vstup.
+HOLD: žiadny výslovný signál; WAIT znamená čakať s novým nákupom.
+Zatiaľ nedokupovať: AAVE, TAO, FET, SOL, ONDO, RENDER.
+Pre držané pozície preveriť: AAVE SELL, TAO SELL, FET SELL, SOL SELL, ONDO SELL, RENDER SELL. Bez potvrdenej držby nejde o osobný predajný pokyn.
+Kontrola: pri prerazení hraníc, makro udalosti alebo ďalšej analýze.
+eToro ≈1% nákup + 1% predaj a spread: malá korekcia sama nie je dôvod predať a znovu kúpiť. Signály V10.6 nezmenené; bez automatických obchodov.
+Kapitalizácia/objem/TVL ≠ čisté toky; detaily v diagnostike.
+Držba N/A — skutočné pozície sa nenačítavajú.
+
+SÚKROMNÉ PORTFÓLIO — údaje používateľa, iba odporúčania:
+AAVE: HOLD (predbežné analytické odporúčanie, vykonanie je na tebe). Bez úplnej kombinácie support breakdownu, predajného objemu a slabého denného trendu; samotná korekcia nestačí na predaj.
+Technická ochranná hranica 121.568 USD; uzavretie pod ňou vyžaduje preverenie, nie automatický obchod.
+Cena vs zadaný all-in náklad -1.52%; nie čistý výsledok predaja. Predaj približne1% + neoverený spread.
+Predaj a spätný nákup len pri jasnej výhode po poplatkoch a neistote; hotovosť sa nedopĺňa predvolenou sumou.

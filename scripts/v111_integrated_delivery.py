@@ -56,11 +56,14 @@ def manual_request_key():
 def run():
     manual_key=manual_request_key()
     if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':
-        if manual_key:raise RuntimeError('Manual V11.1 requires approved integration enabled')
+        if manual_key or os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':raise RuntimeError('Approved V11.1 integration must remain enabled')
         return pilot.run()
     def invoke():return pilot.run(manual_key=manual_key) if manual_key else pilot.run()
     original_read=pilot.PublicJournal.read
     original_render=pilot.render
+    original_personalize=pilot.personalize
+    v112=os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true'
+    holder={}
     original_remember=pilot.forecast_audit.remember
     def strict_read(journal):
         value=original_read(journal)
@@ -74,8 +77,14 @@ def run():
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
         def enrich(snap,fund,now,kind,previous=None):
-            previous=comparable_morning(previous,snap,now) if kind=='evening' else None
+            previous=previous if v112 else comparable_morning(previous,snap,now) if kind=='evening' else None
             text,quotes,evaluations=integration.render(legacy,snap,fund,now,kind,state,previous,fear)
+            if v112:
+                from v11 import analyst
+                model=analyst.prepare(snap,fund,now,quotes,evaluations,previous)
+                holder['model']=model
+                text=analyst.final_text(model,snap,now,kind)
+                quotes['_v112_observation']=model['observation']
             directory=os.getenv('V111_DIAGNOSTICS_DIR')
             if directory:
                 # Public data only; private inventory is loaded later by the existing sender.
@@ -84,15 +93,20 @@ def run():
                 details,_,_=integration.render_detailed(legacy,snap,fund,now,kind,state,previous,fear)
                 files={'analysis_details.txt':details,'risk_diagnostics.json':{s:integration.risk_breakdown(legacy,e) for s,e in evaluations.items()},
                     'fundamental_evidence.json':analyze(fund,now),'market_snapshot.json':snap}
+                if v112:files['v112_analysis.json']=holder['model']
                 target=Path(directory);target.mkdir(parents=True,exist_ok=True)
                 for name,value in files.items():
                     require_public_data(value)
                     (target/name).write_text(value if isinstance(value,str) else json.dumps(value,ensure_ascii=False,allow_nan=False))
             return text,quotes
         pilot.render=enrich
+        if v112:
+            from v11 import analyst
+            pilot.personalize=lambda inventory,snap,now,kind:analyst.final_text(holder['model'],snap,now,kind,inventory)
         return invoke() # same canonical slot and CAS-before-send owner
     finally:
         pilot.render=original_render
+        pilot.personalize=original_personalize
         pilot.PublicJournal.read=original_read
         pilot.forecast_audit.remember=original_remember
 

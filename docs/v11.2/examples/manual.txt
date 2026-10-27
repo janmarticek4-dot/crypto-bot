@@ -1,0 +1,25 @@
+SYNTETICKÝ NÁHĽAD — ceny, udalosť a portfólio sú výlučne modelové. Nejde o skutočný ranný/ručný beh ani investičné odporúčanie.
+
+📊 CRYPTO AI BOT V11.2 — RUČNÁ
+27.10.2026 18:00 Bratislava
+TRH: Korekcia
+BTC $80,960 (+3.7%); kap. $2.74T (-1.7% za24h); dominancia 60.2%.
+ČO SA DEJE:
+Od 27.10. 07:00: zlepšuje sa. Kap. +1.5%, objem24h -5.0%, dominancia +0.20 p. b..
+Podporu prelomilo 0/6 mincí, objemový predajný signál 0/6; silnejších než BTC za7d: 2/6.
+PREČO — príčina cenového pohybu nie je potvrdená:
+• 28.10. 19:00 MODEL — plánované menové rozhodnutie: miernejší/prísnejší výsledok môže podporiť/brzdiť rizikové aktíva; konsenzus neoverený. https://example.org/synthetic-calendar
+VÝHĽAD BTC:
+24–72 h: smer neistý (4h: cena pod EMA50, momentum kladné). Alternatíva: Uzavretie 4h nad $92,880; riziko: Uzavretie 4h pod $76,880. Prehodnotiť pri EMA50 $87,494 na 4h.
+7–14 dní: oslabenie (1d: cena pod EMA50, momentum záporné). Alternatíva: Uzavretie 1d nad $85,192; riziko: Support je prerazený alebo nemožno určiť ďalšiu podporu. Prehodnotiť pri EMA50 $84,862 na 1d.
+ODPORÚČANIA:
+SOL $101.40 (+3.9% za24h, od minule +1.4%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $96.40.
+TAO $255.00 (+4.5% za24h, od minule +2.0%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $240.88.
+FET $0.199 (+1.9% za24h, od minule -0.5%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.1926.
+AAVE $131.04 (+3.3% za24h, od minule +0.8%) — HOLD (držba): Ochranný výstup nie je potvrdený podporou/objemom/denným trendom; samotná korekcia nestačí. vs evidovaná nákupná cena -0.7% (nie čistý predaj)
+ONDO $0.4012 (+2.8% za24h, od minule +0.3%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.3848.
+RENDER $1.719 (+3.6% za24h, od minule +1.1%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $1.635.
+PRÍLEŽITOSŤ: žiadna potvrdená; nenakupovať iba preto, že cena klesla.
+RIZIKO: makro prekvapenie pri najbližšej udalosti; prever reakciu BTC a objem.
+ZÁVER: nové nákupy zatiaľ WAIT. Držané pozície podľa jedného záveru vyššie; preveriť pri zmene podpory/objemu alebo overenom incidente.
+Technické signály V10.6 sú v diagnostike; nepredstavujú potvrdenú predikciu ani osobný predajný pokyn.

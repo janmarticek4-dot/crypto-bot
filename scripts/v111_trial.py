@@ -19,6 +19,8 @@ from v11.state_policy import require_public_data
 
 BL=ZoneInfo('Europe/Bratislava')
 PATH='trial-public/v111-delivery.json'
+# Optional presentation hook; never persisted and unused by V11.1.
+personalize=None
 
 
 def phase(now):
@@ -170,16 +172,17 @@ def run(manual_key=None):
             history=state.setdefault('macro_observation_history_v1',[])
             history.append(economic);state['macro_observation_history_v1']=history[-100:]
         morning=state['slots'].get(now.astimezone(BL).date().isoformat()+'-morning',{})
-        text,quotes=render(snap,fund,now,kind,morning.get('quotes') if morning.get('status')=='sent' else None)
+        reference=state.get('last_analysis_v112') if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' else morning.get('quotes') if morning.get('status')=='sent' else None
+        text,quotes=render(snap,fund,now,kind,reference)
         slot=None
         if not manual_key:
             slot=now.astimezone(BL).date().isoformat()+('_07:00' if kind=='morning' else '_20:00')
             forecast_audit.update(state,snap,fund,slot)
-        else:text='RUČNÁ ANALÝZA V11.1 | '+manual_key+'\n'+text
         if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':
             text+='\n'+'\n'.join(forecast_audit.lines(state))+'\n'+'\n'.join(macro_context.economic_lines(economic))
     if not manual_key and phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
     require_public_data(quotes)
+    pending_observation=quotes.pop('_v112_observation',None) if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' else None
     if manual_key:
         records[key]={'status':'attempting','at':now.isoformat()}
     else:
@@ -188,17 +191,32 @@ def run(manual_key=None):
         records[key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if kind!='usa' and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
+        private_stage='storage_or_inventory'
         try:
             from v11.advisory_portfolio import load,advice
-            private_text=advice(load(),snap)
+            inventory=load()
+            private_stage='assessment'
+            if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' and personalize is not None:
+                text=personalize(inventory,snap,now,kind)
+                private_text=''
+            else:private_text=advice(inventory,snap)
             text=text.replace('Držba N/A — skutočné pozície sa nenačítavajú.','Držba je posúdená v súkromnej časti nižšie.').replace('HOLD/REDUCE/SELL pre tvoje pozície N/A.','Posúdenie existujúcich pozícií je v súkromnej časti nižšie.')
             text+='\n'+private_text  # Telegram only; NEVER persisted in public journal.
-        except Exception:
-            text+='\nSúkromné portfólio N/A — úložisko alebo evidencia sa nedali bezpečne overiť; nie je to prázdne portfólio.'
+        except Exception as exc:
+            if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':
+                print('V112 private context unavailable: '+private_stage+'/'+type(exc).__name__)
+                text+='\nPosúdenie držby sa nepodarilo bezpečne overiť; nejde o prázdne portfólio ani potvrdené HOLD.'
+            else:text+='\nSúkromné portfólio N/A — úložisko alebo evidencia sa nedali bezpečne overiť; nie je to prázdne portfólio.'
+    if manual_key:
+        if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':text=text.replace('— RUČNÁ','— RUČNÁ | '+manual_key,1)
+        else:text='RUČNÁ ANALÝZA V11.1 | '+manual_key+'\n'+text
     try:send(text)
     except Exception:
         records[key]['status']='uncertain';journal.save(state);raise
     records[key]['status']='sent'
+    if pending_observation is not None and kind!='usa':
+        require_public_data(pending_observation)
+        state['last_analysis_v112']=pending_observation
     if kind!='usa' and not manual_key:
         for forecast in state.get('analysis_forecasts_v11',[]):
             if forecast['id'].startswith(slot+'|'):forecast['delivery_confirmed']=True
