@@ -31,3 +31,7 @@ Posledný dodaný runner Artifact `40504368871` ukázal úplné ceny6 mincí, no
 ## Overenie a aktivácia
 
 Presné kroky v ACTIVATION.md. Offline testy sa spúšťajú bez nemockovanej siete. Zahŕňajú paritu V10.6, ochranu stavu, súkromný canary mimo verejného denníka, doručovací CAS/deduplikáciu, warning, neúplné dáta, fundamenty, DST/sviatky USA a odmietnutie rovnakého ranného snapshotu. Testy USA sú adaptované na reálny pilotný routing; nepoužíva sa novší review-only main.py runtime. Samotná produkčná stratégia sa nevaliduje ako zisková.
+
+## Doplnenie po CI40519908096
+
+Pôvodné lokálne výsledky neodhalili neúplné requirements v čistom runneri. Presná reprodukcia139 testov/29 zlyhaní a oprava sú v CI_FIX_40519908096.md. Po explicitnej inštalácii kalendára prešlo139 testov aj v novom venv bez globálnych balíkov. SOURCE.json a navrhovaný pin boli aktualizované na opravený runtime. Tri nové stavové/journal commity main do3307d04 boli zlúčené bez prepisovania produkčných dát. Existujúci PR#1 už vytvoril používateľ; pôvodná poznámka o nemožnosti automatického vytvorenia PR je historická.

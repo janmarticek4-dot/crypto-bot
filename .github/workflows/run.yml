@@ -105,7 +105,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V111_INTEGRATION_ENABLED == 'true' && '0da0fc3bd67f197b15e1744934e8c8792775db21' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V111_INTEGRATION_ENABLED == 'true' && '2af13f63a465219c6a8d63e42f79d4ece8d6a4f6' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
