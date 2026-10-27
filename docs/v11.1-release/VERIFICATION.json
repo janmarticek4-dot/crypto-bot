@@ -1,0 +1,12 @@
+{
+  "offline_tests": 139,
+  "main_baseline": "87a31439c5eeaeca995824805dd601d02c3c41b7",
+  "production_main_and_state_unchanged": true,
+  "cron_and_concurrency_unchanged": true,
+  "other_production_jobs_unchanged": true,
+  "experiment_files_in_candidate": false,
+  "live_final_runner_test": false,
+  "live_temporal_pair_verified": false,
+  "secrets_changed": false,
+  "telegram_test_sent": false
+}
