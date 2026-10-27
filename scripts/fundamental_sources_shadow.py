@@ -5,6 +5,7 @@ import io
 import re
 from datetime import datetime,timezone,timedelta
 import json
+import math
 from pathlib import Path
 import socket
 import ssl
@@ -69,6 +70,10 @@ def inspect(raw,source,now):
         return out
     if host=='api.llama.fi':
         obj=json.loads(raw)
+        if '/tvl/' in url:
+            if type(obj) not in (int,float) or not math.isfinite(obj) or obj<0:raise ValueError('TVL_VALUE_SCHEMA_MISSING')
+            out.update(format='json_numeric',schema_valid=True,status='OBSERVED_ASOF_UNKNOWN',latest_observation={'value':obj,'provider_asof':None},provides='TVL estimate; čas merania poskytovateľa nie je uvedený',freshness='N/A — čas zberu nie je čas merania')
+            return out
         if '/fees/' in url:
             expected=parse_qs(urlsplit(url).query).get('dataType',['dailyFees'])[0]
             if not isinstance(obj,dict) or 'totalDataChart' not in obj:raise ValueError('FEES_CHART_SCHEMA_MISSING')
@@ -78,7 +83,6 @@ def inspect(raw,source,now):
             rows=obj.get('tvl') if isinstance(obj,dict) else obj
             if not isinstance(rows,list):raise ValueError('TVL_SERIES_SCHEMA_MISSING')
             values=[]
-            import math
             for row in rows:
                 try:
                     at=datetime.fromtimestamp(row['date'],timezone.utc);v=row.get('totalLiquidityUSD',row.get('tvl'))

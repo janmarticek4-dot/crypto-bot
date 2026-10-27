@@ -89,7 +89,7 @@ def render_detailed(legacy,snapshot,fundamentals,now,kind,state,previous=None,fe
             action=old.get('action') if old.get('rule_engine')=='v10.6-original' else 'N/A (iný/neoverený pôvod odporúčania)'
             lines.append(f"Od rána: cena {percent(delta(c.get('price'),old.get('price')))}, kap. {percent(delta(c.get('market_cap'),old.get('market_cap')))}, objem {percent(delta(c.get('volume_24h'),old.get('volume_24h')))}; pokyn {action} → {e['action']}.")
         quotes[symbol]=dict(price=c.get('price') if not c.get('stale') else None,market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),
-                            action=e['action'],trend_score_10=e.get('trend_score'),rule_engine='v10.6-original')
+                            action=e['action'],trend_score_10=e.get('trend_score'),risk_points=e.get('risk_pts'),rule_engine='v10.6-original')
         tech=ctx['portfolio_data'][symbol].get('technical_4h',{})
         appendix.append(f"{symbol}: RSI {round(e['rsi'],1) if e.get('rsi') is not None else 'N/A'}; EMA20/50/100/200 "+' / '.join(p(tech.get(k)) for k in ('ema20','ema50','ema100','ema200'))+'; MACD hist. '+str(round(e['macd_hist'],4) if e.get('macd_hist') is not None else 'N/A')+'; ATR '+p(tech.get('atr14')))
     if kind=='evening' and not previous:lines.append('Ranné porovnanie N/A — nezadávame syntetickú rannú referenciu.')
@@ -130,7 +130,7 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
     text=compact(legacy,snapshot,fundamentals,now,kind,ctx,safety,evaluations,previous)
     quotes={s:dict(price=c.get('price') if not c.get('stale') else None,
         market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),action=evaluations[s]['action'],
-        trend_score_10=evaluations[s].get('trend_score'),rule_engine='v10.6-original')
+        trend_score_10=evaluations[s].get('trend_score'),risk_points=evaluations[s].get('risk_pts'),rule_engine='v10.6-original')
         for s in legacy.PORTFOLIO for c in [snapshot['coins'].get(s,{})]}
     from .fundamental_analysis import analyze
     from .shadow_pair import fingerprint

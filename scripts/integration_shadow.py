@@ -44,6 +44,10 @@ def run(phase='preview',reference=None):
         pair=dict(status='N/A',verified_temporal_pair=False,reason='Invalid or unreadable morning reference');code=2
     if not code and phase=='morning':
         checkpoint=shadow_pair.checkpoint(snapshot,{s:dict(action=e['action']) for s,e in evaluations.items()},now,fund)
+        if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':
+            from v11 import analyst
+            checkpoint['v112_observation']=analyst.observation(snapshot,fund,now,quotes)
+            checkpoint['sha256']=shadow_pair.digest({k:v for k,v in checkpoint.items() if k!='sha256'})
         shadow_pair.save_once(out/'checkpoints/morning.json',checkpoint)
         pair=dict(status='AWAITING_EVENING',verified_temporal_pair=False)
     elif not code and phase=='evening' and morning:
@@ -55,13 +59,20 @@ def run(phase='preview',reference=None):
             text,quotes,_=integration.render(legacy,snapshot,fund,now,kind,state,previous,fear)
         except (ValueError,TypeError,KeyError):
             pair=dict(status='N/A',verified_temporal_pair=False,reason='Reference refused: checksum/time/source mismatch');code=2
+    if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':
+        from v11 import analyst
+        old_observation=morning.get('v112_observation') if morning and pair.get('verified_temporal_pair') else None
+        model=analyst.prepare(snapshot,fund,now,quotes,evaluations,old_observation)
+        text=analyst.final_text(model,snapshot,now,kind)
+        write_json(out/'v112_analysis.json',model)
     detailed,_,_=integration.render_detailed(legacy,snapshot,fund,now,kind,state,previous,fear)
     (out/'analysis_details.txt').write_text(detailed)
     text='SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.\nV10.6 kontext: '+state_origin+'; nejde o potvrdenú osobnú držbu.\n'+text
     (out/(kind+'.txt')).write_text(text)
     from v11.fundamental_analysis import analyze
     displayed=[e for e in analyze(fund,now)['evidence'] if e['title'] in text]
-    write_json(out/'analysis_validation.json',dict(renderer='v10.6-native-with-v11-enrichment',rendered_evidence=len(displayed),source_urls_present=all(e['url'] in text for e in displayed),meaning_and_impact_present=not displayed or all(t in text for t in ('Význam:','Dopad:','Overiť:'))))
+    interpreted=all(e['significance'] in text and e['impact'] in text for e in displayed) if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' else not displayed or all(t in text for t in ('Význam:','Dopad:','Overiť:'))
+    write_json(out/'analysis_validation.json',dict(renderer='v112-evidence-analyst' if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' else 'v10.6-native-with-v11-enrichment',rendered_evidence=len(displayed),source_urls_present=all(e['url'] in text for e in displayed),meaning_and_impact_present=interpreted))
     write_json(out/'comparison.json',pair)
     (out/'comparison.txt').write_text(shadow_pair.report(pair) if pair.get('verified_temporal_pair') else 'Porovnanie N/A — '+pair.get('reason','čaká na večer'))
     write_json(out/'risk_diagnostics.json',{s:integration.risk_breakdown(legacy,e) for s,e in evaluations.items()})

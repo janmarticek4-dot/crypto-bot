@@ -2,6 +2,7 @@
 import concurrent.futures
 import hashlib
 import json
+import math
 from html import unescape
 import re
 import urllib.request
@@ -274,7 +275,7 @@ def collect(state,now=None,fetcher=fetch):
                 code=getattr(exc,'code',None)
                 tunnel='Tunnel connection failed: 403' in str(getattr(exc,'reason',''))
                 attempts.append(dict(source=candidate['id'],url=candidate['url'],status='N/A',error_type=type(exc).__name__,
-                    http_status=403 if tunnel else code,error_layer='network_tunnel' if tunnel else 'http_origin_or_gateway' if code else 'transport_or_parse'))
+                    http_status=403 if tunnel else code,error_code=getattr(exc,'reason_code',None) if isinstance(exc,SourcePolicyError) else None,error_layer='response_policy' if isinstance(exc,SourcePolicyError) else 'network_tunnel' if tunnel else 'http_origin_or_gateway' if code else 'transport_or_parse'))
         last=attempts[-1]
         return [],dict(source=source['id'],symbol=source.get('symbol'),coverage=source.get('coverage',[]),url=source['url'],status='N/A',error_type=last['error_type'],
             http_status=last['http_status'],error_layer=last['error_layer'],attempts=attempts,checked_at=now.isoformat())
@@ -285,14 +286,14 @@ def collect(state,now=None,fetcher=fetch):
         # Scheduled monthly releases sharing a calendar URL remain distinct.
         key=item['id']+str(item['event_at'])+str(item.get('event_date'))
         unique[key]=item
-    metrics={}
+    metrics={};metric_statuses=[]
     metric_sources=[('AAVE','https://api.llama.fi/protocol/aave'),('SOL','https://api.llama.fi/v2/historicalChainTvl/Solana'),('ONDO','https://api.llama.fi/protocol/ondo-finance')]
     for symbol,url in metric_sources:
+        status=dict(symbol=symbol,url=url,status='N/A',checked_at=now.isoformat())
         try:
             data=json.loads(fetcher(dict(url=url)))
             rows=data.get('tvl',[]) if isinstance(data,dict) else data
             valid=[]
-            import math
             for row in rows:
                 if not isinstance(row,dict):continue
                 try:
@@ -306,11 +307,24 @@ def collect(state,now=None,fetcher=fetch):
                 metrics[symbol]=dict(value=value,at=at.isoformat(),observed_at=now.isoformat(),url=url,
                     previous_at=valid[-2][0].isoformat() if len(valid)>1 else None,
                     previous_value=valid[-2][1] if len(valid)>1 else None)
-        except Exception:
-            pass  # Missing metrics remain N/A, never synthetic zeroes.
+                status['status']='OK'
+            else:status['error']='NO_RECENT_VALID_OBSERVATIONS'
+        except Exception as exc:
+            status.update(error=type(exc).__name__,error_code=getattr(exc,'reason_code',None) or getattr(exc,'code',None))
+        metric_statuses.append(status)
+        if symbol=='AAVE' and symbol not in metrics:
+            fallback='https://api.llama.fi/tvl/aave'
+            attempt=dict(symbol=symbol,url=fallback,status='N/A',checked_at=now.isoformat(),fallback=True)
+            try:
+                value=json.loads(fetcher(dict(url=fallback)))
+                if type(value) not in (int,float) or not math.isfinite(value) or value<0:raise ValueError('Invalid current TVL')
+                metrics[symbol]=dict(value=value,at=None,observed_at=now.isoformat(),url=fallback,previous_at=None,previous_value=None,measurement='provider_current_value_unknown_asof',freshness='ASOF_UNKNOWN',published_at=None)
+                attempt.update(status='OK',freshness='ASOF_UNKNOWN')
+            except Exception as exc:attempt.update(error=type(exc).__name__,error_code=getattr(exc,'reason_code',None) or getattr(exc,'code',None))
+            metric_statuses.append(attempt)
     from .project_metrics import collect as collect_economics
     economics=collect_economics(fetcher,now)
-    result=dict(project_economics=economics,metrics=metrics,fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:(not x['scheduled'],x['event_at'] or x.get('event_date') or x['published_at'] or ''))[:200],sources=statuses,
+    result=dict(project_economics=economics,metrics=metrics,metric_sources=metric_statuses,fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:(not x['scheduled'],x['event_at'] or x.get('event_date') or x['published_at'] or ''))[:200],sources=statuses,
                 unavailable=['overený projektový token-unlock kalendár','priame potvrdenie incidentu z primárneho zdroja','potvrdenie skutočnej aktivácie upgrade na sieti'])
     state['fundamentals_v11']=result
     return result

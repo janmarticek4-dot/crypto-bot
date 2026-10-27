@@ -1,0 +1,25 @@
+SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.
+V10.6 kontext: checkout public cache (not guaranteed latest main); nejde o potvrdenú osobnú držbu.
+📊 CRYPTO AI BOT V11.2 — ŽIVÝ PREVIEW
+27.10.2026 19:21 Bratislava
+TRH: Korekcia
+BTC $80,635 (+0.4%); kap. $2.72T (-2.2% za24h); dominancia 59.4%.
+ČO SA DEJE:
+Zmenu od poslednej analýzy zatiaľ nemožno overiť; pokles24h nie je zmena od posledného reportu.
+Podporu prelomilo 0/6 mincí, objemový predajný signál 0/6; silnejších než BTC za7d: 0/6.
+PREČO — príčina cenového pohybu nie je potvrdená:
+• 2026-10-27 Bitcoin drops below $80,000 as crypto ignores Asian tech rally, Fed meeting begins: relevantné pre sadzby a ochotu riskovať; obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Zdroj coindesk: https://www.coindesk.com/markets/2026/10/27/bitcoin-drops-below-usd80-000-as-crypto-ignores-asian-tech-rally-fed-meeting-begins
+VÝHĽAD BTC:
+24–72 h: smer neistý (4h: cena pod EMA50, momentum kladné). Alternatíva: Uzavretie 4h nad $81,097; riziko: Uzavretie 4h pod $79,221. Prehodnotiť pri EMA50 $81,108 na 4h.
+7–14 dní: smer neistý / slabý trend (1d: cena pod EMA50, momentum záporné). Alternatíva: Uzavretie 1d nad $86,699; riziko: Uzavretie 1d pod $79,221. Prehodnotiť pri EMA50 $80,800 na 1d.
+ODPORÚČANIA:
+SOL $100.94 (-0.3% za24h) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $98.62.
+TAO $252.60 (-0.2% za24h) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $242.60.
+FET $0.1807 (+2.9% za24h) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.1695.
+AAVE $132.23 (-2.9% za24h) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $129.51.
+ONDO $0.4162 (-0.4% za24h) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.3966.
+RENDER $1.701 (-2.2% za24h) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $1.643.
+PRÍLEŽITOSŤ: žiadna potvrdená; nenakupovať iba preto, že cena klesla.
+RIZIKO: nepotvrdené zlepšenie štruktúry a neúplné udalostné pokrytie.
+ZÁVER: nové nákupy zatiaľ WAIT. Držba sa v tomto verejnom náhľade neposudzuje; osobný predajný pokyn nevzniká.
+Technické signály V10.6 sú v diagnostike; nepredstavujú potvrdenú predikciu ani osobný predajný pokyn.

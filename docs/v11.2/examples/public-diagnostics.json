@@ -1,0 +1,1018 @@
+{
+  "morning": {
+    "observation": {
+      "schema": "public-analysis-v112",
+      "at": "2026-10-27T06:00:00+00:00",
+      "fingerprint": "6dbf1be596f88a7bfe79390f5eecf424dcd6861f6a2909d919e42455ca7d43f3",
+      "global_data": {
+        "cap": 2700000000000.0,
+        "volume": 80000000000.0,
+        "dominance": 60.0,
+        "change": -3.0,
+        "at": 1793080800.0,
+        "source": "SYNTHETIC"
+      },
+      "coins": {
+        "SOL": {
+          "price": 100,
+          "market_cap": 1000000000.0,
+          "volume_24h": 100000000.0,
+          "technical_score": 1.2,
+          "legacy_action": "SELL",
+          "risk_points": 9,
+          "support_broken": false
+        },
+        "TAO": {
+          "price": 250,
+          "market_cap": 2500000000.0,
+          "volume_24h": 250000000.0,
+          "technical_score": 1.2,
+          "legacy_action": "SELL",
+          "risk_points": 9,
+          "support_broken": false
+        },
+        "FET": {
+          "price": 0.2,
+          "market_cap": 2000000.0,
+          "volume_24h": 200000.0,
+          "technical_score": 1.2,
+          "legacy_action": "SELL",
+          "risk_points": 9,
+          "support_broken": false
+        },
+        "AAVE": {
+          "price": 130,
+          "market_cap": 1300000000.0,
+          "volume_24h": 130000000.0,
+          "technical_score": 1.2,
+          "legacy_action": "SELL",
+          "risk_points": 9,
+          "support_broken": false
+        },
+        "ONDO": {
+          "price": 0.4,
+          "market_cap": 4000000.0,
+          "volume_24h": 400000.0,
+          "technical_score": 1.2,
+          "legacy_action": "SELL",
+          "risk_points": 9,
+          "support_broken": false
+        },
+        "RENDER": {
+          "price": 1.7,
+          "market_cap": 17000000.0,
+          "volume_24h": 1700000.0,
+          "technical_score": 1.2,
+          "legacy_action": "SELL",
+          "risk_points": 9,
+          "support_broken": false
+        },
+        "BTC": {
+          "price": 80000,
+          "market_cap": 800000000000.0,
+          "volume_24h": 80000000000.0,
+          "technical_score": null,
+          "legacy_action": null,
+          "risk_points": null,
+          "support_broken": false
+        }
+      },
+      "metrics": {},
+      "economics": {},
+      "event_ids": []
+    },
+    "comparison": {
+      "status": "N/A",
+      "reason": "Chýba predchádzajúca doručená V11.2 analýza."
+    },
+    "forecasts": {
+      "BTC": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 76880.0,
+          "resistance": 95141.65342924642,
+          "invalidates": 88379.37134618222,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $95,142",
+          "downside": "Uzavretie 4h pod $76,880",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 85192.04166111485,
+          "invalidates": 84861.96354354834,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $85,192",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "SOL": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 96.4,
+          "resistance": 118.6,
+          "invalidates": 110.46734503076895,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $118.60",
+          "downside": "Uzavretie 4h pod $96.40",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 106.37380772137338,
+          "invalidates": 106.04842093757627,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $106.37",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "TAO": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 240.875,
+          "resistance": 296.625,
+          "invalidates": 276.0405338235371,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $296.62",
+          "downside": "Uzavretie 4h pod $240.88",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 267.6220193034335,
+          "invalidates": 264.37944715732135,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $267.62",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "FET": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 0.1926,
+          "resistance": 0.2374,
+          "invalidates": 0.2207276053722532,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $0.2374",
+          "downside": "Uzavretie 4h pod $0.1926",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 0.21544761544274685,
+          "invalidates": 0.21079207819628298,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $0.2154",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "AAVE": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 125.125,
+          "resistance": 154.56025651438642,
+          "invalidates": 143.46578842507404,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $154.56",
+          "downside": "Uzavretie 4h pod $125.12",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "1d: cena pod EMA50, momentum kladné",
+          "support": null,
+          "resistance": 139.65831264196817,
+          "invalidates": 136.90074728509694,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $139.66",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "ONDO": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 0.38480000000000003,
+          "resistance": 0.4795184622083769,
+          "invalidates": 0.44161904837867555,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $0.4795",
+          "downside": "Uzavretie 4h pod $0.3848",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "1d: cena pod EMA50, momentum kladné",
+          "support": null,
+          "resistance": 0.4228238443771703,
+          "invalidates": 0.42227664050797953,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $0.4228",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "RENDER": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "4h: cena pod EMA50, momentum záporné",
+          "support": 1.63455,
+          "resistance": 2.0378602530682888,
+          "invalidates": 1.8778280657380524,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $2.038",
+          "downside": "Uzavretie 4h pod $1.635",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "1d: cena pod EMA50, momentum kladné",
+          "support": null,
+          "resistance": 1.7988558852986907,
+          "invalidates": 1.8009605221666334,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $1.799",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      }
+    },
+    "evidence": [],
+    "scheduled": [
+      {
+        "title": "MODEL — plánované menové rozhodnutie",
+        "when": "28.10. 19:00",
+        "url": "https://example.org/synthetic-calendar",
+        "categories": [
+          "Fed"
+        ]
+      }
+    ],
+    "coins": {
+      "SOL": {
+        "price": 100,
+        "change_24h": 0.20040080160321772,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "SELL",
+        "zone": 96.4,
+        "invalidates": 94.00138384379456,
+        "target": 118.6,
+        "economics": {
+          "gross": 0.23029045643153512,
+          "net": 0.19991366434167257,
+          "spread": 0.0025,
+          "break_even": 98.8404445457077,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 4.083345234020379,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Momentum a trend sú slabé; sleduj podporu $96.40.",
+        "sell_pressure": false
+      },
+      "TAO": {
+        "price": 250,
+        "change_24h": 0.2004008016031955,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "SELL",
+        "zone": 240.875,
+        "invalidates": 234.56470764044798,
+        "target": 296.625,
+        "economics": {
+          "gross": 0.23144784639335758,
+          "net": 0.20104247747917392,
+          "spread": 0.0025,
+          "break_even": 246.97294688742053,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 4.001538987467048,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Momentum a trend sú slabé; sleduj podporu $240.88.",
+        "sell_pressure": false
+      },
+      "FET": {
+        "price": 0.2,
+        "change_24h": 0.20040080160321772,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "SELL",
+        "zone": 0.1926,
+        "invalidates": 0.18734059486569082,
+        "target": 0.2374,
+        "economics": {
+          "gross": 0.2326064382139148,
+          "net": 0.20217246280061874,
+          "spread": 0.0025,
+          "break_even": 0.19747582592845747,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.939147891576956,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Momentum a trend sú slabé; sleduj podporu $0.1926.",
+        "sell_pressure": false
+      },
+      "AAVE": {
+        "price": 130,
+        "change_24h": 0.2004008016031955,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "SELL",
+        "zone": 125.125,
+        "invalidates": 121.56771168500799,
+        "target": 154.56025651438642,
+        "economics": {
+          "gross": 0.2352468053097816,
+          "net": 0.20474763725689948,
+          "spread": 0.0025,
+          "break_even": 128.29264132553604,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.9060059499429607,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Momentum a trend sú slabé; sleduj podporu $125.12.",
+        "sell_pressure": false
+      },
+      "ONDO": {
+        "price": 0.4,
+        "change_24h": 0.20040080160321772,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "SELL",
+        "zone": 0.38480000000000003,
+        "invalidates": 0.37337483749964967,
+        "target": 0.4795184622083769,
+        "economics": {
+          "gross": 0.24614984981386923,
+          "net": 0.21538147743259817,
+          "spread": 0.0025,
+          "break_even": 0.3945415255309992,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 4.0146543734910445,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Momentum a trend sú slabé; sleduj podporu $0.3848.",
+        "sell_pressure": false
+      },
+      "RENDER": {
+        "price": 1.7,
+        "change_24h": 0.20040080160321772,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "SELL",
+        "zone": 1.63455,
+        "invalidates": 1.5841260877248773,
+        "target": 2.0378602530682888,
+        "economics": {
+          "gross": 0.24674084798157825,
+          "net": 0.21595788341325717,
+          "spread": 0.0025,
+          "break_even": 1.6759299650641752,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.9424292142526305,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Momentum a trend sú slabé; sleduj podporu $1.635.",
+        "sell_pressure": false
+      }
+    },
+    "macro": {},
+    "economic_observations": {},
+    "metric_sources": [],
+    "source_status": [],
+    "coverage": {
+      "macro_releases": false,
+      "rates_expectations": false,
+      "yields": false,
+      "geopolitics": false,
+      "regulation_etf": false,
+      "verified_flows": false,
+      "project_events": false,
+      "usage_tvl": false,
+      "revenue_fees": false,
+      "unlocks_emissions": false
+    },
+    "missing": [],
+    "cost_assumptions": {
+      "buy_fee": 0.01,
+      "sell_fee": 0.01,
+      "adverse_fill_per_side": 0.0025,
+      "source": "conservative assumption, not eToro quote"
+    },
+    "data_quality": {
+      "current_price_count": 6,
+      "primary_official_current_sources": 0,
+      "provider_asof_unknown_metrics": [],
+      "liquidity_depth": null,
+      "verified_etf_flows": null,
+      "rate_consensus": null,
+      "confidence": "kvalitatívna, obmedzená pokrytím; nie kalibrovaná pravdepodobnosť",
+      "unavailable_dimensions": [
+        "overené ETF toky",
+        "likvidácie derivátov",
+        "hĺbka orderbooku",
+        "DXY",
+        "sadzbový konsenzus",
+        "úplná geopolitika",
+        "projektoví aktívni používatelia",
+        "úplný token-unlock kalendár"
+      ]
+    },
+    "project_activity": []
+  },
+  "manual": {
+    "observation": {
+      "schema": "public-analysis-v112",
+      "at": "2026-10-27T17:00:00+00:00",
+      "fingerprint": "4f790d179b16db6672b158f018e6b7bfa273acf6c6d9564f777e95fcfc4cc072",
+      "global_data": {
+        "cap": 2740499999999.9995,
+        "volume": 76000000000.0,
+        "dominance": 60.2,
+        "change": -1.7,
+        "at": 1793120400.0,
+        "source": "SYNTHETIC"
+      },
+      "coins": {
+        "SOL": {
+          "price": 101.4,
+          "market_cap": 1014000000.0,
+          "volume_24h": 97000000.0,
+          "technical_score": 2.1,
+          "legacy_action": "REDUCE",
+          "risk_points": 7,
+          "support_broken": false
+        },
+        "TAO": {
+          "price": 255.0,
+          "market_cap": 2550000000.0,
+          "volume_24h": 242500000.0,
+          "technical_score": 2.1,
+          "legacy_action": "REDUCE",
+          "risk_points": 7,
+          "support_broken": false
+        },
+        "FET": {
+          "price": 0.199,
+          "market_cap": 1990000.0,
+          "volume_24h": 194000.0,
+          "technical_score": 2.4,
+          "legacy_action": "REDUCE",
+          "risk_points": 7,
+          "support_broken": false
+        },
+        "AAVE": {
+          "price": 131.04,
+          "market_cap": 1310400000.0,
+          "volume_24h": 126100000.0,
+          "technical_score": 2.4,
+          "legacy_action": "REDUCE",
+          "risk_points": 7,
+          "support_broken": false
+        },
+        "ONDO": {
+          "price": 0.4012,
+          "market_cap": 4011999.9999999995,
+          "volume_24h": 388000.0,
+          "technical_score": 2.4,
+          "legacy_action": "REDUCE",
+          "risk_points": 7,
+          "support_broken": false
+        },
+        "RENDER": {
+          "price": 1.7186999999999997,
+          "market_cap": 17187000.0,
+          "volume_24h": 1649000.0,
+          "technical_score": 2.4,
+          "legacy_action": "REDUCE",
+          "risk_points": 7,
+          "support_broken": false
+        },
+        "BTC": {
+          "price": 80960.0,
+          "market_cap": 809600000000.0,
+          "volume_24h": 77600000000.0,
+          "technical_score": null,
+          "legacy_action": null,
+          "risk_points": null,
+          "support_broken": false
+        }
+      },
+      "metrics": {},
+      "economics": {},
+      "event_ids": []
+    },
+    "comparison": {
+      "status": "COMPARED",
+      "previous_at": "2026-10-27T06:00:00+00:00",
+      "global_cap_pct": 1.4999999999999902,
+      "global_volume_pct": -5.000000000000004,
+      "dominance_pp": 0.20000000000000284,
+      "coins": {
+        "SOL": {
+          "price_pct": 1.4000000000000012,
+          "cap_pct": 1.4000000000000012,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": 1.2,
+          "trend_now": 2.1,
+          "legacy_before": "SELL",
+          "legacy_now": "REDUCE",
+          "risk_before": 9,
+          "risk_now": 7
+        },
+        "TAO": {
+          "price_pct": 2.0000000000000018,
+          "cap_pct": 2.0000000000000018,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": 1.2,
+          "trend_now": 2.1,
+          "legacy_before": "SELL",
+          "legacy_now": "REDUCE",
+          "risk_before": 9,
+          "risk_now": 7
+        },
+        "FET": {
+          "price_pct": -0.5000000000000004,
+          "cap_pct": -0.5000000000000004,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": 1.2,
+          "trend_now": 2.4,
+          "legacy_before": "SELL",
+          "legacy_now": "REDUCE",
+          "risk_before": 9,
+          "risk_now": 7
+        },
+        "AAVE": {
+          "price_pct": 0.8000000000000007,
+          "cap_pct": 0.8000000000000007,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": 1.2,
+          "trend_now": 2.4,
+          "legacy_before": "SELL",
+          "legacy_now": "REDUCE",
+          "risk_before": 9,
+          "risk_now": 7
+        },
+        "ONDO": {
+          "price_pct": 0.29999999999998916,
+          "cap_pct": 0.29999999999998916,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": 1.2,
+          "trend_now": 2.4,
+          "legacy_before": "SELL",
+          "legacy_now": "REDUCE",
+          "risk_before": 9,
+          "risk_now": 7
+        },
+        "RENDER": {
+          "price_pct": 1.0999999999999899,
+          "cap_pct": 1.0999999999999899,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": 1.2,
+          "trend_now": 2.4,
+          "legacy_before": "SELL",
+          "legacy_now": "REDUCE",
+          "risk_before": 9,
+          "risk_now": 7
+        },
+        "BTC": {
+          "price_pct": 1.200000000000001,
+          "cap_pct": 1.200000000000001,
+          "volume_pct": -3.0000000000000027,
+          "trend_before": null,
+          "trend_now": null,
+          "legacy_before": null,
+          "legacy_now": null,
+          "risk_before": null,
+          "risk_now": null
+        }
+      },
+      "metrics": {},
+      "economics": {},
+      "direction": "zlepšuje sa",
+      "new_events": 0
+    },
+    "forecasts": {
+      "BTC": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 76880.0,
+          "resistance": 92880.0,
+          "invalidates": 87493.60200894828,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $92,880",
+          "downside": "Uzavretie 4h pod $76,880",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 85192.04166111485,
+          "invalidates": 84861.96354354834,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $85,192",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "SOL": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 96.4,
+          "resistance": 115.79999999999998,
+          "invalidates": 109.377043386904,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $115.80",
+          "downside": "Uzavretie 4h pod $96.40",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 106.37380772137338,
+          "invalidates": 106.04842093757627,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $106.37",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "TAO": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 240.875,
+          "resistance": 289.625,
+          "invalidates": 273.4502328231464,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $289.62",
+          "downside": "Uzavretie 4h pod $240.88",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": 251.30328058823218,
+          "resistance": 267.6220193034335,
+          "invalidates": 264.37944715732135,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $267.62",
+          "downside": "Uzavretie 1d pod $251.30",
+          "probability": null
+        }
+      },
+      "FET": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 0.1926,
+          "resistance": 0.2318,
+          "invalidates": 0.21826385454454666,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $0.2318",
+          "downside": "Uzavretie 4h pod $0.1926",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "oslabenie",
+          "reason": "1d: cena pod EMA50, momentum záporné",
+          "support": null,
+          "resistance": 0.21544761544274685,
+          "invalidates": 0.21079207819628298,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $0.2154",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "AAVE": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 125.125,
+          "resistance": 150.73499999999999,
+          "invalidates": 142.00149923450877,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $150.73",
+          "downside": "Uzavretie 4h pod $125.12",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "1d: cena pod EMA50, momentum kladné",
+          "support": 130.9604229702898,
+          "resistance": 139.65831264196817,
+          "invalidates": 136.90074728509694,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $139.66",
+          "downside": "Uzavretie 1d pod $130.96",
+          "probability": null
+        }
+      },
+      "ONDO": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 0.38480000000000003,
+          "resistance": 0.46399999999999997,
+          "invalidates": 0.43693119917327977,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $0.464",
+          "downside": "Uzavretie 4h pod $0.3848",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "1d: cena pod EMA50, momentum kladné",
+          "support": null,
+          "resistance": 0.4228238443771703,
+          "invalidates": 0.42227664050797953,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $0.4228",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      },
+      "RENDER": {
+        "24–72 h": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "4h: cena pod EMA50, momentum kladné",
+          "support": 1.63455,
+          "resistance": 1.9728499999999998,
+          "invalidates": 1.8588947777616416,
+          "confirmation_timeframe": "4h",
+          "upside": "Uzavretie 4h nad $1.973",
+          "downside": "Uzavretie 4h pod $1.635",
+          "probability": null
+        },
+        "7–14 dní": {
+          "status": "CONDITIONAL",
+          "base": "smer neistý",
+          "reason": "1d: cena pod EMA50, momentum kladné",
+          "support": null,
+          "resistance": 1.7988558852986907,
+          "invalidates": 1.8009605221666334,
+          "confirmation_timeframe": "1d",
+          "upside": "Uzavretie 1d nad $1.799",
+          "downside": "Support je prerazený alebo nemožno určiť ďalšiu podporu",
+          "probability": null
+        }
+      }
+    },
+    "evidence": [],
+    "scheduled": [
+      {
+        "title": "MODEL — plánované menové rozhodnutie",
+        "when": "28.10. 19:00",
+        "url": "https://example.org/synthetic-calendar",
+        "categories": [
+          "Fed"
+        ]
+      }
+    ],
+    "coins": {
+      "SOL": {
+        "price": 101.4,
+        "change_24h": 3.893442622950838,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "REDUCE",
+        "zone": 96.4,
+        "invalidates": 94.08098626268828,
+        "target": 115.79999999999998,
+        "economics": {
+          "gross": 0.20124481327800803,
+          "net": 0.17158517985468524,
+          "spread": 0.0025,
+          "break_even": 98.8404445457077,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.5633373476136687,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Odraz ešte nepotvrdil obrat trendu; sleduj podporu $96.40.",
+        "sell_pressure": false
+      },
+      "TAO": {
+        "price": 255.0,
+        "change_24h": 4.508196721311486,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "REDUCE",
+        "zone": 240.875,
+        "invalidates": 234.74310283748696,
+        "target": 289.625,
+        "economics": {
+          "gross": 0.20238713025428123,
+          "net": 0.17269929216993085,
+          "spread": 0.0025,
+          "break_even": 246.97294688742053,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.487538593168828,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Odraz ešte nepotvrdil obrat trendu; sleduj podporu $240.88.",
+        "sell_pressure": false
+      },
+      "FET": {
+        "price": 0.199,
+        "change_24h": 1.946721311475419,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "REDUCE",
+        "zone": 0.1926,
+        "invalidates": 0.1876751782507007,
+        "target": 0.2318,
+        "economics": {
+          "gross": 0.2035306334371756,
+          "net": 0.17381456140346851,
+          "spread": 0.0025,
+          "break_even": 0.19747582592845747,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.502235280780843,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.1926.",
+        "sell_pressure": false
+      },
+      "AAVE": {
+        "price": 131.04,
+        "change_24h": 3.2786885245901676,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "REDUCE",
+        "zone": 125.125,
+        "invalidates": 121.79654587535079,
+        "target": 150.73499999999999,
+        "economics": {
+          "gross": 0.20467532467532457,
+          "net": 0.17493098935828755,
+          "spread": 0.0025,
+          "break_even": 128.29264132553604,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.4547458310243773,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Odraz ešte nepotvrdil obrat trendu; sleduj podporu $125.12.",
+        "sell_pressure": false
+      },
+      "ONDO": {
+        "price": 0.4012,
+        "change_24h": 2.7663934426229497,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "REDUCE",
+        "zone": 0.38480000000000003,
+        "invalidates": 0.37421644110303587,
+        "target": 0.46399999999999997,
+        "economics": {
+          "gross": 0.20582120582120567,
+          "net": 0.17604857784112626,
+          "spread": 0.0025,
+          "break_even": 0.3945415255309992,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.4173769223531276,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.3848.",
+        "sell_pressure": false
+      },
+      "RENDER": {
+        "price": 1.7186999999999997,
+        "change_24h": 3.5860655737704805,
+        "action": "WAIT",
+        "context": "new_purchase",
+        "legacy_action": "REDUCE",
+        "zone": 1.63455,
+        "invalidates": 1.587649783047214,
+        "target": 1.9728499999999998,
+        "economics": {
+          "gross": 0.2069682787311491,
+          "net": 0.17716732866248064,
+          "spread": 0.0025,
+          "break_even": 1.6759299650641752,
+          "buy_fee": 0.01,
+          "sell_fee": 0.01,
+          "net_rr": 3.3633826771990294,
+          "estimated": true
+        },
+        "candidate": false,
+        "reason": "Odraz ešte nepotvrdil obrat trendu; sleduj podporu $1.635.",
+        "sell_pressure": false
+      }
+    },
+    "macro": {},
+    "economic_observations": {},
+    "metric_sources": [],
+    "source_status": [],
+    "coverage": {
+      "macro_releases": false,
+      "rates_expectations": false,
+      "yields": false,
+      "geopolitics": false,
+      "regulation_etf": false,
+      "verified_flows": false,
+      "project_events": false,
+      "usage_tvl": false,
+      "revenue_fees": false,
+      "unlocks_emissions": false
+    },
+    "missing": [],
+    "cost_assumptions": {
+      "buy_fee": 0.01,
+      "sell_fee": 0.01,
+      "adverse_fill_per_side": 0.0025,
+      "source": "conservative assumption, not eToro quote"
+    },
+    "data_quality": {
+      "current_price_count": 6,
+      "primary_official_current_sources": 0,
+      "provider_asof_unknown_metrics": [],
+      "liquidity_depth": null,
+      "verified_etf_flows": null,
+      "rate_consensus": null,
+      "confidence": "kvalitatívna, obmedzená pokrytím; nie kalibrovaná pravdepodobnosť",
+      "unavailable_dimensions": [
+        "overené ETF toky",
+        "likvidácie derivátov",
+        "hĺbka orderbooku",
+        "DXY",
+        "sadzbový konsenzus",
+        "úplná geopolitika",
+        "projektoví aktívni používatelia",
+        "úplný token-unlock kalendár"
+      ]
+    },
+    "project_activity": []
+  }
+}

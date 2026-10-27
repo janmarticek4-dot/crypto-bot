@@ -125,7 +125,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && vars.V112_APPROVED_SOURCE == 'feab545852a159c5f61d9b18af16279aebcd77d9' && 'feab545852a159c5f61d9b18af16279aebcd77d9' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -147,6 +147,7 @@ jobs:
           V11_RULES_VALIDATED: 'false'
           V111_INTEGRATION_ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
           V111_DIAGNOSTICS_DIR: analytical-diagnostics
+          V112_ANALYTICS_ENABLED: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && vars.V112_APPROVED_SOURCE == 'feab545852a159c5f61d9b18af16279aebcd77d9' }}
           V111_MANUAL_ANALYSIS: ${{ github.event_name == 'workflow_dispatch' && inputs.manual_v111_analysis == true }}
           PRIVATE_ADVISORY_ENABLED: ${{ vars.PROD_STATE_REPOSITORY != '' && secrets.PROD_STATE_TOKEN != '' && secrets.PROD_STATE_ENCRYPTION_KEY != '' }}
           PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
@@ -168,6 +169,7 @@ jobs:
             analytical-diagnostics/risk_diagnostics.json
             analytical-diagnostics/fundamental_evidence.json
             analytical-diagnostics/market_snapshot.json
+            analytical-diagnostics/v112_analysis.json
           if-no-files-found: ignore
           retention-days: 7
 

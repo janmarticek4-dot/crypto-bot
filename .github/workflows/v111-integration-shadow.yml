@@ -2,6 +2,9 @@ name: V11.1 Integration Shadow
 on:
   workflow_dispatch:
     inputs:
+      v112_preview:
+        type: boolean
+        default: false
       phase:
         type: choice
         options: [preview, morning, evening]
@@ -14,6 +17,9 @@ on:
       source_sha:
         type: string
         required: true
+      v112_preview:
+        type: boolean
+        default: false
       phase:
         type: string
         default: preview
@@ -38,6 +44,7 @@ jobs:
       TELEGRAM_CHAT_ID: ''
       GROQ_API_KEY: ''
       V111_INTEGRATION_ENABLED: 'false'
+      V112_ANALYTICS_ENABLED: ${{ inputs.v112_preview && 'true' || 'false' }}
       SHADOW_SOURCE_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4

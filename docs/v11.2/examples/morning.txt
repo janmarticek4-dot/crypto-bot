@@ -1,0 +1,25 @@
+SYNTETICKÝ NÁHĽAD — ceny, udalosť a portfólio sú výlučne modelové. Nejde o skutočný ranný/ručný beh ani investičné odporúčanie.
+
+📊 CRYPTO AI BOT V11.2 — RÁNO
+27.10.2026 07:00 Bratislava
+TRH: Korekcia
+BTC $80,000 (+0.2%); kap. $2.70T (-3.0% za24h); dominancia 60.0%.
+ČO SA DEJE:
+Zmenu od poslednej analýzy zatiaľ nemožno overiť; pokles24h nie je zmena od posledného reportu.
+Podporu prelomilo 0/6 mincí, objemový predajný signál 0/6; silnejších než BTC za7d: 2/6.
+PREČO — príčina cenového pohybu nie je potvrdená:
+• 28.10. 19:00 MODEL — plánované menové rozhodnutie: miernejší/prísnejší výsledok môže podporiť/brzdiť rizikové aktíva; konsenzus neoverený. https://example.org/synthetic-calendar
+VÝHĽAD BTC:
+24–72 h: oslabenie (4h: cena pod EMA50, momentum záporné). Alternatíva: Uzavretie 4h nad $95,142; riziko: Uzavretie 4h pod $76,880. Prehodnotiť pri EMA50 $88,379 na 4h.
+7–14 dní: oslabenie (1d: cena pod EMA50, momentum záporné). Alternatíva: Uzavretie 1d nad $85,192; riziko: Support je prerazený alebo nemožno určiť ďalšiu podporu. Prehodnotiť pri EMA50 $84,862 na 1d.
+ODPORÚČANIA:
+SOL $100.00 (+0.2% za24h) — WAIT (nový nákup): Momentum a trend sú slabé; sleduj podporu $96.40.
+TAO $250.00 (+0.2% za24h) — WAIT (nový nákup): Momentum a trend sú slabé; sleduj podporu $240.88.
+FET $0.2 (+0.2% za24h) — WAIT (nový nákup): Momentum a trend sú slabé; sleduj podporu $0.1926.
+AAVE $130.00 (+0.2% za24h) — HOLD (držba): Ochranný výstup nie je potvrdený podporou/objemom/denným trendom; samotná korekcia nestačí. vs evidovaná nákupná cena -1.5% (nie čistý predaj)
+ONDO $0.4 (+0.2% za24h) — WAIT (nový nákup): Momentum a trend sú slabé; sleduj podporu $0.3848.
+RENDER $1.7 (+0.2% za24h) — WAIT (nový nákup): Momentum a trend sú slabé; sleduj podporu $1.635.
+PRÍLEŽITOSŤ: žiadna potvrdená; nenakupovať iba preto, že cena klesla.
+RIZIKO: makro prekvapenie pri najbližšej udalosti; prever reakciu BTC a objem.
+ZÁVER: nové nákupy zatiaľ WAIT. Držané pozície podľa jedného záveru vyššie; preveriť pri zmene podpory/objemu alebo overenom incidente.
+Technické signály V10.6 sú v diagnostike; nepredstavujú potvrdenú predikciu ani osobný predajný pokyn.

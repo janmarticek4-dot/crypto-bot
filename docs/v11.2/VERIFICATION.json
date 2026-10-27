@@ -1,0 +1,22 @@
+{
+  "base_at_branch_creation": "b367f54",
+  "latest_main_preserved": "1ef7c5b",
+  "offline_tests_passed": 170,
+  "native_trade_rules_changed": false,
+  "new_strategy_activated": false,
+  "real_portfolio_accessed": false,
+  "production_state_written": false,
+  "telegram_test_sent": false,
+  "new_ai_calls": 0,
+  "live_environment": "local Codex; macro endpoints blocked by tunnel HTTP403",
+  "independent_live_pair_verified": false,
+  "personal_history_publicly_stored": false,
+  "final_review_fixes": [
+    "stale BTC quote",
+    "missing reference fingerprint",
+    "invalid forecast/held levels",
+    "candidate without valid target",
+    "nonfinite percentage delta"
+  ],
+  "github_runner_check": "configured on existing feature/main push; pending"
+}
