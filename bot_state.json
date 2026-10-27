@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-27T23:50:47.701787+01:00",
+  "last_run": "2026-10-28T00:22:05.716971+01:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2459,8 +2459,8 @@
     "risk_pts": 1
   },
   "crash_monitor": {
-    "last_checked_at": "2026-10-27T22:50:47.701762+00:00",
-    "last_result": "quiet_verification_failed",
+    "last_checked_at": "2026-10-27T23:22:05.716956+00:00",
+    "last_result": "quiet_api_cooldown",
     "verification_failed_at": "2026-10-27T22:50:47.701780+00:00",
     "last_error": "Groq API HTTP 400: {\"error\":{\"message\":\"Tool choice is required, but model did not call a tool\",\"type\":\"invalid_request_error\",\"code\":\"tool_use_failed\",\"failed_generation\":\"{\\n  \\\"alert\\\": false,\\n  \\\"event\\\": \\\"\\\",\\n  \\\"expected_drawdown_pct\\\": 0,\\n  \\\"confidence_pct\\\": 0,\\n  \\\"evidence\\\": [],\\n  \\"
   },
