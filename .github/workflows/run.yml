@@ -12,8 +12,13 @@ on:
         description: Inicializovať iba používateľom zadanú súkromnú evidenciu z Environment Secretu?
         type: boolean
         default: false
+      manual_v111_analysis:
+        description: "Ručná analýza V11.1 — kompletný aktuálny report do Telegramu"
+        required: false
+        default: false
+        type: boolean
       manual_analysis:
-        description: "Spustiť okamžitú hlavnú analýzu?"
+        description: "Staršia ručná analýza V10.6 (nezaškrtávať pre V11.1)"
         required: false
         default: false
         type: boolean
@@ -31,8 +36,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-manual-v111:
+    if: github.event_name == 'workflow_dispatch' && inputs.manual_v111_analysis == true
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require approved V11.1 and one explicit manual action
+        env:
+          ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
+          IMPORT: ${{ inputs.advisory_import || false }}
+          LEGACY: ${{ inputs.manual_analysis || false }}
+          DEEP: ${{ inputs.manual_deep_search || false }}
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/main' || { echo 'Vyberte vetvu main.'; exit 1; }
+          test "$ENABLED" = 'true' || { echo 'Schválená integrácia V11.1 nie je zapnutá.'; exit 1; }
+          test "$IMPORT:$LEGACY:$DEEP" = 'false:false:false' || { echo 'Pre ručnú V11.1 ponechajte ostatné ručné možnosti vypnuté.'; exit 1; }
   crypto-bot:
-    if: github.event_name != 'push' && inputs.advisory_import != true
+    if: github.event_name != 'push' && inputs.advisory_import != true && inputs.manual_v111_analysis != true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -95,8 +115,8 @@ jobs:
               output.write('phase=' + phase + '\n')
   v111-analytical-pilot:
     environment: production-advisory
-    needs: [crypto-bot, pilot-slot, private-advisory-updates]
-    if: always() && needs.pilot-slot.outputs.phase != '' && needs.crypto-bot.result != 'cancelled' && vars.V111_TRIAL_ENABLED != 'false'
+    needs: [crypto-bot, pilot-slot, private-advisory-updates, validate-manual-v111]
+    if: always() && ((needs.pilot-slot.outputs.phase != '' && needs.crypto-bot.result != 'cancelled' && vars.V111_TRIAL_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.manual_v111_analysis == true && needs.validate-manual-v111.result == 'success'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -127,6 +147,7 @@ jobs:
           V11_RULES_VALIDATED: 'false'
           V111_INTEGRATION_ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
           V111_DIAGNOSTICS_DIR: analytical-diagnostics
+          V111_MANUAL_ANALYSIS: ${{ github.event_name == 'workflow_dispatch' && inputs.manual_v111_analysis == true }}
           PRIVATE_ADVISORY_ENABLED: ${{ vars.PROD_STATE_REPOSITORY != '' && secrets.PROD_STATE_TOKEN != '' && secrets.PROD_STATE_ENCRYPTION_KEY != '' }}
           PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
           PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
@@ -202,7 +223,7 @@ jobs:
         run: python scripts/private_advisory_updates.py
 
   initialize-private-advisory:
-    if: github.event_name == 'workflow_dispatch' && inputs.advisory_import == true
+    if: github.event_name == 'workflow_dispatch' && inputs.advisory_import == true && inputs.manual_v111_analysis != true
     environment: production-advisory
     runs-on: ubuntu-latest
     timeout-minutes: 5

@@ -58,7 +58,7 @@ def render_detailed(legacy,snapshot,fundamentals,now,kind,state,previous=None,fe
     p=legacy.format_price
     def percent(x):return 'N/A' if x is None else f'{x:+.2f}%'
     def delta(a,b):return (a/b-1)*100 if isinstance(a,(float,int)) and isinstance(b,(float,int)) and b>0 else None
-    lines=['📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — '+('RÁNO' if kind=='morning' else 'VEČER'),
+    lines=['📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — '+('RUČNÁ' if kind=='manual' else 'RÁNO' if kind=='morning' else 'VEČER'),
            now.astimezone(legacy.TZ).strftime('%d.%m.%Y %H:%M Bratislava'),
            'Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.',
            f"Trh24h {percent(ctx.get('global_change'))}; BTC {p(ctx['btc_data'].get('price_usd'))}; dominancia {format(ctx['btc_dominance'],'.2f') if ctx.get('btc_dominance') is not None else 'N/A'} %; bezpečnostné hodnotenie V10.6 {safety['state']}.",
