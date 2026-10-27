@@ -32,7 +32,7 @@ def render(legacy,snapshot,fund,now,kind,ctx,safety,ev,previous=None):
     label=('VYSOKÉ RIZIKO' if safety['state']=='CRITICAL' else
            'KOREKCIA' if change is not None and change < -1 else
            'RAST' if change is not None and change > 1 else 'STABILIZÁCIA' if change is not None else 'N/A')
-    lines=[f"📊 V11.1 — {'RÁNO' if kind=='morning' else 'VEČER'} | {label}",
+    lines=[f"📊 V11.1 — {'RUČNÁ' if kind=='manual' else 'RÁNO' if kind=='morning' else 'VEČER'} | {label}",
         now.astimezone(legacy.TZ).strftime('%d.%m.%Y %H:%M Bratislava'),
         f"BTC {p(ctx['btc_data'].get('price_usd'))} ({pct(ctx.get('btc_change_24h'))}); trh {legacy.fmt_big(ctx.get('total_market_cap'))} ({pct(change)}).",
         f"BTC dominancia {format(ctx['btc_dominance'],'.1f')+'%' if ctx.get('btc_dominance') is not None else 'N/A'}; Fear & Greed {(ctx.get('fear') or {}).get('value','N/A')}; riziko V10.6 {safety['state']}.",

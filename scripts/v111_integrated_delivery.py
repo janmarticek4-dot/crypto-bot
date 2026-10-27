@@ -45,8 +45,20 @@ def comparable_morning(previous,snapshot,now):
     except (KeyError,TypeError,ValueError):return None
 
 
+def manual_request_key():
+    if os.getenv('V111_MANUAL_ANALYSIS','false').lower()!='true':return None
+    run_id=os.getenv('GITHUB_RUN_ID','')
+    if os.getenv('GITHUB_EVENT_NAME')!='workflow_dispatch' or os.getenv('GITHUB_REF')!='refs/heads/main' or not run_id.isdigit():
+        raise ValueError('Explicit main-branch workflow_dispatch with run ID required')
+    return 'github-run-'+run_id # deliberately independent of GITHUB_RUN_ATTEMPT
+
+
 def run():
-    if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':return pilot.run()
+    manual_key=manual_request_key()
+    if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':
+        if manual_key:raise RuntimeError('Manual V11.1 requires approved integration enabled')
+        return pilot.run()
+    def invoke():return pilot.run(manual_key=manual_key) if manual_key else pilot.run()
     original_read=pilot.PublicJournal.read
     original_render=pilot.render
     original_remember=pilot.forecast_audit.remember
@@ -58,7 +70,7 @@ def run():
         pilot.PublicJournal.read=strict_read
         # Evaluate prior delivered forecasts only; do not create/promote a V11 model.
         pilot.forecast_audit.remember=lambda *args,**kwargs: None
-        if pilot.phase(pilot.datetime.now(pilot.timezone.utc)) not in ('morning','evening'):return pilot.run()
+        if not manual_key and pilot.phase(pilot.datetime.now(pilot.timezone.utc)) not in ('morning','evening'):return invoke()
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
         def enrich(snap,fund,now,kind,previous=None):
@@ -78,7 +90,7 @@ def run():
                     (target/name).write_text(value if isinstance(value,str) else json.dumps(value,ensure_ascii=False,allow_nan=False))
             return text,quotes
         pilot.render=enrich
-        return pilot.run() # same canonical slot and CAS-before-send owner
+        return invoke() # same canonical slot and CAS-before-send owner
     finally:
         pilot.render=original_render
         pilot.PublicJournal.read=original_read

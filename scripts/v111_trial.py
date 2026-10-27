@@ -130,12 +130,14 @@ def send(text):
             if not json.load(response).get('ok'):raise RuntimeError('Telegram refused pilot report')
 
 
-def run():
-    now=datetime.now(timezone.utc);kind=phase(now)
+def run(manual_key=None):
+    if manual_key is not None and not re.fullmatch(r'github-run-[0-9]+',manual_key):raise ValueError('Invalid manual delivery key')
+    now=datetime.now(timezone.utc);kind='manual' if manual_key else phase(now)
     if not kind:return 0
     if kind=='usa' and now.astimezone(BL).date().isoformat()<os.getenv('US_PILOT_START_DATE','2026-10-27'):return 0
-    journal=PublicJournal();state=journal.read();key=now.astimezone(BL).date().isoformat()+'-'+kind
-    if key in state['slots']:return 0
+    journal=PublicJournal();state=journal.read();key=manual_key or now.astimezone(BL).date().isoformat()+'-'+kind
+    records=state.setdefault('manual_slots',{}) if manual_key else state['slots']
+    if key in records:return 0
     if kind=='usa':
         from us_context import report as us
         started=datetime.now(timezone.utc)
@@ -164,18 +166,26 @@ def run():
         fund['macro_context']=macro_context.collect({},now)
         economic=macro_context.economic_observations(now)
         fund['economic_observations']=economic
-        history=state.setdefault('macro_observation_history_v1',[])
-        history.append(economic);state['macro_observation_history_v1']=history[-100:]
+        if not manual_key:
+            history=state.setdefault('macro_observation_history_v1',[])
+            history.append(economic);state['macro_observation_history_v1']=history[-100:]
         morning=state['slots'].get(now.astimezone(BL).date().isoformat()+'-morning',{})
         text,quotes=render(snap,fund,now,kind,morning.get('quotes') if morning.get('status')=='sent' else None)
-        slot=now.astimezone(BL).date().isoformat()+('_07:00' if kind=='morning' else '_20:00')
-        forecast_audit.update(state,snap,fund,slot)
+        slot=None
+        if not manual_key:
+            slot=now.astimezone(BL).date().isoformat()+('_07:00' if kind=='morning' else '_20:00')
+            forecast_audit.update(state,snap,fund,slot)
+        else:text='RUČNÁ ANALÝZA V11.1 | '+manual_key+'\n'+text
         if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':
             text+='\n'+'\n'.join(forecast_audit.lines(state))+'\n'+'\n'.join(macro_context.economic_lines(economic))
-    if phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
+    if not manual_key and phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
     require_public_data(quotes)
-    state['slots']={k:v for k,v in state['slots'].items() if k[:10]>=(now.astimezone(BL).date().isoformat()[:8]+'01')}
-    state['slots'][key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
+    if manual_key:
+        records[key]={'status':'attempting','at':now.isoformat()}
+    else:
+        state['slots']={k:v for k,v in state['slots'].items() if k[:10]>=(now.astimezone(BL).date().isoformat()[:8]+'01')}
+        records=state['slots']
+        records[key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if kind!='usa' and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
         try:
@@ -187,9 +197,9 @@ def run():
             text+='\nSúkromné portfólio N/A — úložisko alebo evidencia sa nedali bezpečne overiť; nie je to prázdne portfólio.'
     try:send(text)
     except Exception:
-        state['slots'][key]['status']='uncertain';journal.save(state);raise
-    state['slots'][key]['status']='sent'
-    if kind!='usa':
+        records[key]['status']='uncertain';journal.save(state);raise
+    records[key]['status']='sent'
+    if kind!='usa' and not manual_key:
         for forecast in state.get('analysis_forecasts_v11',[]):
             if forecast['id'].startswith(slot+'|'):forecast['delivery_confirmed']=True
     journal.save(state)
