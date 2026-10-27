@@ -53,7 +53,7 @@ def evaluate(legacy,snapshot,state,fear=None):
     return ctx,metrics,safety,evaluations
 
 
-def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
+def render_detailed(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
     ctx,metrics,safety,evaluations=evaluate(legacy,snapshot,state,fear)
     p=legacy.format_price
     def percent(x):return 'N/A' if x is None else f'{x:+.2f}%'
@@ -117,3 +117,16 @@ def risk_breakdown(legacy,evaluation):
     return dict(components=components,sum=total,matched=matched,action=evaluation['action'],
                 previous_action=evaluation.get('previous_action'),smoothing_note=evaluation.get('action_note'),
                 trigger=f"Pôvodné prahy: REDUCE od {legacy.CONFIG['risk_high_pts']} b.; SELL od {legacy.CONFIG['sell_pts']} b. a skóre ≤3.5. "+(evaluation.get('action_note') or '')+' Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.')
+
+
+def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
+    """Presentation only; the unchanged native evaluations remain authoritative."""
+    from .compact_report import render as compact
+    ctx,metrics,safety,evaluations=evaluate(legacy,snapshot,state,fear)
+    text=compact(legacy,snapshot,fundamentals,now,kind,ctx,safety,evaluations,previous)
+    quotes={s:dict(price=c.get('price') if not c.get('stale') else None,
+        market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),action=evaluations[s]['action'],
+        trend_score_10=evaluations[s].get('trend_score'),rule_engine='v10.6-original')
+        for s in legacy.PORTFOLIO for c in [snapshot['coins'].get(s,{})]}
+    require_public_data(text);require_public_data(quotes)
+    return text,quotes,evaluations

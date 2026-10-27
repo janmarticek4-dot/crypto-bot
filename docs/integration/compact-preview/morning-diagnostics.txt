@@ -1,0 +1,130 @@
+NÁHĽAD FORMÁTU — prehratie verejného snapshotu 27.10.2026 13:31 Bratislava. Nie skutočný ranný/večerný pár. Pravidlový kontext: lokálny verejný baseline, nie aktuálny produkčný stav.
+
+📊 CRYPTO AI BOT V11.1 | PRAVIDLÁ V10.6 — RÁNO
+27.10.2026 13:31 Bratislava
+Rozhodnutia: nezmenený kód V10.6; nové fundamenty iba vysvetľujú, nemenia obchodné pravidlá.
+Trh24h -2.87%; BTC $80,205; dominancia 59.44 %; bezpečnostné hodnotenie V10.6 CRITICAL.
+Príčina pohybu nie je preukázaná samotným súbehom správ a cien.
+Režim V10.6: Konsolidácia; Fear & Greed N/A.
+Kapitalizácia trhu $2.70T; objem24h $66.02B; BTC24h -0.31%.
+FUNDAMENTÁLNY SÚHRN
+Príčina dnešného pohybu: nepreukázaná; nasledujúce faktory nie sú dôkaz príčinnej súvislosti.
+• Bitcoin drops below $80,000 as crypto ignores Asian tech rally, Fed meeting begins (2026-10-27T11:32:45+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/markets/2026/10/27/bitcoin-drops-below-usd80-000-as-crypto-ignores-asian-tech-rally-fed-meeting-begins | zber 2026-10-27T12:31:48.849789+00:00.
+• Crypto wallet maker Keystone to destroy almost 19,000 devices after security breach (2026-10-27T11:13:54+00:00; coindesk).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: potenciálne významné bezpečnostné riziko. Dopad: negatívny, iba ak sa potvrdí incident a expozícia. Overiť: primárne vyjadrenie, stratu a dotknuté protokoly.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://www.coindesk.com/business/2026/10/27/crypto-wallet-maker-keystone-to-destroy-almost-19-000-devices-after-security-breach | zber 2026-10-27T12:31:48.849789+00:00.
+• Bloom bot hackers loot $953K faster than you can microwave popcorn (2026-10-27T09:07:37+00:00; cointelegraph).
+Publikované tvrdenie, nie nezávislé potvrdenie realizácie. Význam: potenciálne významné bezpečnostné riziko. Dopad: negatívny, iba ak sa potvrdí incident a expozícia. Overiť: primárne vyjadrenie, stratu a dotknuté protokoly.
+Dotknuté: SOL, TAO, FET, AAVE, ONDO, RENDER; horizont dopadu N/A. https://cointelegraph.com/news/bloom-bot-hackers-953k-faster-popcorn | zber 2026-10-27T12:31:48.849789+00:00.
+US výnosy 2026-10-23: 2Y 4.69 %, 10Y 5.00 %. https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2,DGS10&cosd=2026-10-17; zber 2026-10-27T12:31:48.849789+00:00.
+Výnosy od 2026-10-22: 2Y +4 bp, 10Y +4 bp (bázické body). Rast môže sprísňovať diskontovanie, pokles ho uvoľňovať; samotný rozdiel nedokazuje dôvod pohybu krypta.
+CPI index: 336.30 index, obdobie 2026-09-01; predchádzajúca hodnota 334.131. Najnovšie revidované meranie, prvý výsledok a konsenzus N/A.
+PCE index: 131.58 index, obdobie 2026-08-01; predchádzajúca hodnota 131.172. Najnovšie revidované meranie, prvý výsledok a konsenzus N/A.
+Nezamestnanosť: 4.20 %, obdobie 2026-09-01; predchádzajúca hodnota 4.1. Najnovšie revidované meranie, prvý výsledok a konsenzus N/A.
+Nonfarm zamestnanosť: 159,044.00 tisíc osôb, obdobie 2026-09-01; predchádzajúca hodnota 159015.0. Najnovšie revidované meranie, prvý výsledok a konsenzus N/A.
+24–72 h: smer fundamentov nepotvrdený; pri makro prekvapení sledovať výnosy a reakciu BTC, nie samotný titulok.
+7–14 dní: podmienený výhľad podľa kalendára, účinnosti oznámení a následných metrík; pravdepodobnosti N/A.
+Načítané formáty 16/16 (vrátane záloh); aktuálne relevantný obsah potvrdený pri 8. Dostupné podklady v okruhoch 5/10. Podiel všetkých významných informácií: neznámy.
+Primárne zdroje nedostupné, použité zálohy: ondo → ondo_secondary (0 aktuálnych položiek). Záloha nie je primárne potvrdenie.
+
+AAVE — SELL (V10.6) | $132.19; 24h -2.98%
+Trend 1.2/10; riziko VEĽMI VYSOKÉ (9 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $131.08; rezistencia $151.13; pokles od maxima +17.66%.
+Nepotvrdené možné vstupné zóny: $131.08
+Zmena odporúčania: Zmierni sa po návrate nad $143.12 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 17.7% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. MACD histogram záporný; 1 b. slabý trend (skóre 1.2/10); 2 b. bezpečnostný stav trhu: CRITICAL; spolu 9 b.; kontrola V10.6 9 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Poplatky: $1,156,883/deň, obdobie 2026-10-26T00:00:00+00:00; zmena +0.1% od 2026-10-25T00:00:00+00:00. https://api.llama.fi/summary/fees/aave?dataType=dailyFees; zber 2026-10-27T12:31:48.849789+00:00. Čas publikovania N/A; agregát poskytovateľa, nie príjem držiteľa tokenu.
+Príjmy: $147,659/deň, obdobie 2026-10-26T00:00:00+00:00; zmena +0.6% od 2026-10-25T00:00:00+00:00. https://api.llama.fi/summary/fees/aave?dataType=dailyRevenue; zber 2026-10-27T12:31:48.849789+00:00. Čas publikovania N/A; agregát poskytovateľa, nie príjem držiteľa tokenu.
+Kapitalizácia $2.04B; objem24h $249.4M.
+
+TAO — SELL (V10.6) | $250.10; 24h -1.26%
+Trend 2.1/10; riziko VEĽMI VYSOKÉ (8 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $242.60; rezistencia $263.90; pokles od maxima +11.12%.
+Nepotvrdené možné vstupné zóny: $242.60
+Zmena odporúčania: Zmierni sa po návrate nad $258.24 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 11.1% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.1/10); 2 b. bezpečnostný stav trhu: CRITICAL; spolu 8 b.; kontrola V10.6 8 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $2.91B; objem24h $101.9M.
+
+FET — SELL (V10.6) | $0.1759; 24h -0.11%
+Trend 2.5/10; riziko VEĽMI VYSOKÉ (8 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $0.1695; rezistencia $0.1896; pokles od maxima +13.05%.
+Nepotvrdené možné vstupné zóny: $0.1695
+Zmena odporúčania: Zmierni sa po návrate nad $0.1834 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 13.1% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.5/10); 2 b. bezpečnostný stav trhu: CRITICAL; spolu 8 b.; kontrola V10.6 8 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $405.2M; objem24h $71.3M.
+
+SOL — REDUCE (V10.6) | $100.45; 24h -1.30%
+Trend 0.9/10; riziko VEĽMI VYSOKÉ (7 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $98.620; rezistencia $105.28; pokles od maxima +8.01%.
+Nepotvrdené možné vstupné zóny: $98.620
+Zmena odporúčania: Zmierni sa po návrate nad $102.99 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 1 b. pokles 8.0% od lokálneho maxima (prah 6.0%); 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. MACD histogram záporný; 1 b. slabý trend (skóre 0.9/10); 2 b. bezpečnostný stav trhu: CRITICAL; spolu 7 b.; kontrola V10.6 7 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Pozorovaný TVL $5,654,992,239 k 2026-10-27T00:00:00+00:00; https://api.llama.fi/v2/historicalChainTvl/Solana; zber 2026-10-27T12:31:48.849789+00:00. TVL nie je príjem, adopcia tokenu ani čistý tok kapitálu.
+TVL od 2026-10-26T00:00:00+00:00 -0.9 %; porovnanie rôznych pozorovaní, nie čistý prílev kapitálu.
+Poplatky: $11,669,901/deň, obdobie 2026-10-26T00:00:00+00:00; zmena +25.6% od 2026-10-25T00:00:00+00:00. https://api.llama.fi/overview/fees/Solana?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees; zber 2026-10-27T12:31:48.849789+00:00. Čas publikovania N/A; agregát poskytovateľa, nie príjem držiteľa tokenu.
+Kapitalizácia $59.17B; objem24h $2.33B.
+
+ONDO — SELL (V10.6) | $0.4114; 24h -0.84%
+Trend 2.5/10; riziko VEĽMI VYSOKÉ (8 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $0.3966; rezistencia $0.4406; pokles od maxima +12.93%.
+Nepotvrdené možné vstupné zóny: $0.3966
+Zmena odporúčania: Zmierni sa po návrate nad $0.4248 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 12.9% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.5/10); 2 b. bezpečnostný stav trhu: CRITICAL; spolu 8 b.; kontrola V10.6 8 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $2.00B; objem24h $99.4M.
+
+RENDER — SELL (V10.6) | $1.676; 24h -3.01%
+Trend 2.1/10; riziko VEĽMI VYSOKÉ (8 b.); cena pod EMA20; cena pod EMA50
+Potvrdený vstup/ochranný plán N/A.
+Support $1.643; rezistencia $1.850; pokles od maxima +13.87%.
+Nepotvrdené možné vstupné zóny: $1.643
+Zmena odporúčania: Zmierni sa po návrate nad $1.766 a poklese rizika pod 3 bodov.
+Rizikové body V10.6: 3 b. hlboký pokles 13.9% od lokálneho maxima; 1 b. cena pod EMA50; 1 b. cena pod EMA200; 1 b. slabý trend (skóre 2.1/10); 2 b. bezpečnostný stav trhu: CRITICAL; spolu 8 b.; kontrola V10.6 8 b.
+Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %.
+Fundamenty: hodnotenie N/A — bez novej potvrdenej zmeny; neznamená to absenciu udalostí.
+Kapitalizácia $867.1M; objem24h $37.7M.
+
+AKČNÝ ZÁVER
+V10.6 nákupné signály: žiadne. Existujúce pozície posudzuje iba oddelená súkromná časť.
+V10.6 ochranné signály: AAVE, TAO, FET, SOL, ONDO, RENDER. Nevykonáva sa žiadny obchod.
+NAJBLIŽŠÍCH 24 HODÍN
+N/A — žiadna dostupná overená udalosť v pokrytých kalendároch; úplnosť kalendára nie je potvrdená.
+NAJBLIŽŠÍCH 7 DNÍ (ďalšie dni, bez opakovania)
+2026-10-28 (dátum zdroja) | presný čas Bratislava N/A | FOMC zasadnutie – October 27-28 | https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+Očakávanie trhu N/A; predchádzajúca hodnota N/A; výsledok N/A. Dotknuté: BTC a sledované altcoiny.
+Overený cenový dopad: N/A. Možný mechanizmus (nie predikcia): Zmena sadzieb alebo likvidity môže ovplyvniť diskontovanie a ochotu podstupovať riziko; smer bez údajov nie je potvrdený. Priaznivý/nepriaznivý scenár závisí od výsledku voči overeným očakávaniam; bez konsenzu N/A.
+Po zverejnení: overiť výsledok a revízie, potom reakciu BTC/altcoinov. Horizont hodiny až dni; volatilita môže vzrásť. Existujúce pozície: preveriť ochranné hranice; nové: neprekročiť plánované riziko. Udalosť nevytvára BUY/SELL.
+RIZIKOVÉ UDALOSTI DO 14 DNÍ (ďalšie dni, bez opakovania)
+06.11.2026 14:30 Bratislava | Employment Situation | https://www.bls.gov/schedule/news_release/bls.ics
+Očakávanie trhu N/A; predchádzajúca hodnota N/A; výsledok N/A. Dotknuté: BTC a sledované altcoiny.
+Overený cenový dopad: N/A. Možný mechanizmus (nie predikcia): Údaje trhu práce môžu ovplyvniť sadzby aj ochotu riskovať; bez konsenzu je dopad neistý. Priaznivý/nepriaznivý scenár závisí od výsledku voči overeným očakávaniam; bez konsenzu N/A.
+Po zverejnení: overiť výsledok a revízie, potom reakciu BTC/altcoinov. Horizont hodiny až dni; volatilita môže vzrásť. Existujúce pozície: preveriť ochranné hranice; nové: neprekročiť plánované riziko. Udalosť nevytvára BUY/SELL.
+Konsenzus, FedWatch, ETF toky, unlock kalendár a geopolitické pokrytie: N/A, ak nie sú doložené konkrétnym zdrojom.
+
+Nové udalosti nemenia V10.6 signál. Rizikové vstupy zo staršieho V10.6 cache nie sú týmto znovu overené.
+Kapitalizácia, TVL a objem nie sú čisté kapitálové toky. Náklady eToro približne 1 % nákup + 1 % predaj a spread treba posúdiť pred manuálnym obchodom; nejde o nové schválené čisté R:R.
+Držba N/A — skutočné pozície sa nenačítavajú.
+
+TECHNICKÁ PRÍLOHA
+AAVE: RSI 28.8; EMA20/50/100/200 $136.87 / $143.12 / $149.13 / $149.03; MACD hist. -0.0194; ATR $2.661
+TAO: RSI 39.5; EMA20/50/100/200 $252.01 / $258.24 / $265.91 / $269.50; MACD hist. 0.329; ATR $4.750
+FET: RSI 41.9; EMA20/50/100/200 $0.1765 / $0.1834 / $0.1928 / $0.1962; MACD hist. 0.0005; ATR $0.00399286
+SOL: RSI 39.2; EMA20/50/100/200 $101.40 / $102.99 / $105.23 / $107.08; MACD hist. -0.0124; ATR $1.447
+ONDO: RSI 42.9; EMA20/50/100/200 $0.4128 / $0.4248 / $0.4391 / $0.4400; MACD hist. 0.0015; ATR $0.00930714
+RENDER: RSI 36.2; EMA20/50/100/200 $1.716 / $1.766 / $1.816 / $1.795; MACD hist. 0.0009; ATR $0.0379

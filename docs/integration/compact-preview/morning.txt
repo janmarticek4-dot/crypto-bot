@@ -1,0 +1,53 @@
+NÁHĽAD FORMÁTU — prehratie verejného snapshotu 27.10.2026 13:31 Bratislava. Nie skutočný ranný/večerný pár. Pravidlový kontext: lokálny verejný baseline, nie aktuálny produkčný stav.
+
+📊 V11.1 — RÁNO | VYSOKÉ RIZIKO
+27.10.2026 13:31 Bratislava
+BTC $80,205 (-0.3%); trh $2.70T (-2.9%).
+BTC dominancia 59.4%; Fear & Greed N/A; riziko V10.6 CRITICAL.
+Pohyb cien je pozorovaný; jeho príčina nie je overená.
+HLAVNÉ FAKTORY
+• 2026-10-28 čas N/A: FOMC zasadnutie – October 27-28. Význam: môže zmeniť sadzby/očakávania a riziko altcoinov; smer závisí od výsledku. https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+• 2026-10-27: Bitcoin drops below $80,000 as crypto ignores Asian tech rally, Fed meeting begins. Význam: relevantné pre sadzby a ochotu riskovať. Dopad: obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Overiť: prvý výsledok, overený konsenzus, revízie a reakciu výnosov. https://www.coindesk.com/markets/2026/10/27/bitcoin-drops-below-usd80-000-as-crypto-ignores-asian-tech-rally-fed-meeting-begins
+• US 10Y 5.00% (2026-10-23, +4 bp): vyššie výnosy môžu brzdiť rizikové aktíva; nedokazujú príčinu pohybu. https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2,DGS10&cosd=2026-10-17
+24–72 h: rast potrebuje návrat nad rezistencie; pod podporami hrozí pokračovanie korekcie. Smer neistý; pravdepodobnosti N/A.
+
+AAVE $132.19 (-3.0%) — SELL
+Pokles od maxima -17.7% a súbeh rizík V10.6.
+S $131.08 / R $151.13
+Zmena: Zmierni sa po návrate nad $143.12 a poklese rizika pod 3 bodov.
+
+TAO $250.10 (-1.3%) — SELL
+Pokles od maxima -11.1% a súbeh rizík V10.6.
+S $242.60 / R $263.90
+Zmena: Zmierni sa po návrate nad $258.24 a poklese rizika pod 3 bodov.
+
+FET $0.1759 (-0.1%) — SELL
+Pokles od maxima -13.1% a súbeh rizík V10.6.
+S $0.1695 / R $0.1896
+Zmena: Zmierni sa po návrate nad $0.1834 a poklese rizika pod 3 bodov.
+
+SOL $100.45 (-1.3%) — REDUCE
+Pokles od maxima -8.0% a súbeh rizík V10.6.
+S $98.620 / R $105.28
+Zmena: Zmierni sa po návrate nad $102.99 a poklese rizika pod 3 bodov.
+
+ONDO $0.4114 (-0.8%) — SELL
+Pokles od maxima -12.9% a súbeh rizík V10.6.
+S $0.3966 / R $0.4406
+Zmena: Zmierni sa po návrate nad $0.4248 a poklese rizika pod 3 bodov.
+
+RENDER $1.676 (-3.0%) — SELL
+Pokles od maxima -13.9% a súbeh rizík V10.6.
+S $1.643 / R $1.850
+Zmena: Zmierni sa po návrate nad $1.766 a poklese rizika pod 3 bodov.
+Ekonomická aktivita (DeFiLlama): AAVE poplatky +0.1% (2026-10-26); AAVE príjmy +0.6% (2026-10-26); SOL poplatky +25.6% (2026-10-26). Nie je to výnos tokenu ani čistý tok; zdroje v diagnostike.
+
+PLÁN
+Kúpiť: žiadny potvrdený vstup.
+HOLD: žiadny výslovný signál; WAIT znamená čakať s novým nákupom.
+Zatiaľ nedokupovať: AAVE, TAO, FET, SOL, ONDO, RENDER.
+Pre držané pozície preveriť: AAVE SELL, TAO SELL, FET SELL, SOL REDUCE, ONDO SELL, RENDER SELL. Bez potvrdenej držby nejde o osobný predajný pokyn.
+Kontrola: pri prerazení hraníc, makro udalosti alebo ďalšej analýze.
+eToro ≈1% nákup + 1% predaj a spread: malá korekcia sama nie je dôvod predať a znovu kúpiť. Signály V10.6 nezmenené; bez automatických obchodov.
+Kapitalizácia/objem/TVL ≠ čisté toky; detaily v diagnostike.
+Držba N/A — skutočné pozície sa nenačítavajú.

@@ -154,7 +154,7 @@ class NativePlanPreservationTests(unittest.TestCase):
         snap=IntegrationTests().data();ctx,metrics,safety,ev=integration.evaluate(legacy,snap,{})
         for value in ev.values():value.update(entry=100,stop=90,tp1=110,tp2=120,flip='SYNTHETIC INVALIDATION')
         with patch.object(integration,'evaluate',return_value=(ctx,metrics,safety,ev)):
-            text,_,_=integration.render(legacy,snap,{},datetime.now(timezone.utc),'evening',{})
+            text,_,_=integration.render_detailed(legacy,snap,{},datetime.now(timezone.utc),'evening',{})
         self.assertIn('hrubé R:R 1.0 / 2.0',text);self.assertIn('SYNTHETIC INVALIDATION',text)
         self.assertIn('čisté R:R N/A',text)
 

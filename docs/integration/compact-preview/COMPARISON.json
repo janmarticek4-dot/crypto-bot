@@ -1,0 +1,12 @@
+{
+  "morning": {
+    "compact_characters": 2970,
+    "detailed_characters": 12755,
+    "reduction_percent": 76.7
+  },
+  "evening": {
+    "compact_characters": 3016,
+    "detailed_characters": 12819,
+    "reduction_percent": 76.5
+  }
+}

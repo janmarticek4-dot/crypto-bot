@@ -55,6 +55,8 @@ def run(phase='preview',reference=None):
             text,quotes,_=integration.render(legacy,snapshot,fund,now,kind,state,previous,fear)
         except (ValueError,TypeError,KeyError):
             pair=dict(status='N/A',verified_temporal_pair=False,reason='Reference refused: checksum/time/source mismatch');code=2
+    detailed,_,_=integration.render_detailed(legacy,snapshot,fund,now,kind,state,previous,fear)
+    (out/'analysis_details.txt').write_text(detailed)
     text='SHADOW — SKUTOČNÝ ZBER, BEZ ODOSLANIA.\nV10.6 kontext: '+state_origin+'; nejde o potvrdenú osobnú držbu.\n'+text
     (out/(kind+'.txt')).write_text(text)
     from v11.fundamental_analysis import analyze
