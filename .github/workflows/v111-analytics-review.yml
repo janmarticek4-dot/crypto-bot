@@ -78,6 +78,8 @@ jobs:
           if gate.get('status')!='PASSED':raise SystemExit('Privacy gate refused')
           summary=json.loads((root/'summary.json').read_text())
           rows=json.loads((root/'source_diagnostics.json').read_text())
+          audit={'collected_at':summary.get('collected_at'),'market_complete':summary.get('market_complete'),'endpoints':summary.get('endpoints'),'current':summary.get('current'),'sources':[{'source':r.get('source'),'status':r.get('status'),'layer':r.get('error_layer'),'http':r.get('http_status')} for r in rows]}
+          print('::notice title=Public source audit::'+json.dumps(audit,ensure_ascii=True).replace('%','%25'))
           def safe(value):return str(value).replace('|','/').replace('\n',' ')
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as output:
               output.write('# Public source availability — no Telegram or private state\n')
