@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+shadow-output/
+shadow-public-artifacts/
+analytical-diagnostics/
+.venv/
