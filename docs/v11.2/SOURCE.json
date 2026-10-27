@@ -1,10 +1,12 @@
 {
-  "candidate_v112_source": "61e498864e30d6a5f22977149d49f9cafababf03",
+  "candidate_v112_source": "feab545852a159c5f61d9b18af16279aebcd77d9",
   "unchanged_v111_source": "c012eca0fe8967220025deb60d431d7621f40485",
   "legacy_fallback_source": "929bd6389216be1b4eefcd1be61be89d944abf33",
   "enable_requires": [
     "V111_INTEGRATION_ENABLED=true",
-    "V112_ANALYTICS_ENABLED=true"
+    "V112_ANALYTICS_ENABLED=true",
+    "V112_APPROVED_SOURCE=feab545852a159c5f61d9b18af16279aebcd77d9"
   ],
-  "v112_default_enabled": false
+  "v112_default_enabled": false,
+  "approval_variable": "V112_APPROVED_SOURCE"
 }
