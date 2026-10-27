@@ -49,7 +49,7 @@ class AnalystTests(unittest.TestCase):
         for old in (obs,dict(obs,at=(NOW+timedelta(hours=1)).isoformat()),dict(obs,global_data=[]),dict(obs,coins={'SOL':None})):
             self.assertEqual(analyst.comparison(old,obs)['status'],'N/A')
     def test_real_changes_not_24h_change_and_dominance_in_points(self):
-        obs=model()['observation'];old=copy.deepcopy(obs);old.update(at=(NOW-timedelta(hours=1)).isoformat(),fingerprint='prior')
+        obs=model()['observation'];old=copy.deepcopy(obs);old.update(at=(NOW-timedelta(hours=1)).isoformat(),fingerprint='a'*64)
         old['global_data'].update(cap=obs['global_data']['cap']/1.02,dominance=59)
         for c in old['coins'].values():c['price']/=1.01
         c=analyst.comparison(old,obs)
@@ -72,7 +72,7 @@ class AnalystTests(unittest.TestCase):
         m=model();self.assertNotEqual(m['forecasts']['AAVE']['24–72 h']['support'],m['forecasts']['FET']['24–72 h']['support'])
         for fs in m['forecasts'].values():
             for f in fs.values():self.assertIsNone(f['probability'])
-        c=sample()['coins']['BTC'];c['frames']['4h']['support']=90000
+        c=sample()['coins']['BTC'];c['frames']['4h']['support']=85000
         self.assertIsNone(analyst.outlook(c,'4h')['support'])
     def test_no_buy_is_activated_by_native_buy_or_headline(self):
         snap=sample();q={s:dict(action='BUY NOW') for s in analyst.COINS};ev={s:dict(action='BUY NOW') for s in analyst.COINS}
@@ -133,3 +133,24 @@ class AnalystDeliveryTests(unittest.TestCase):
                 delivery.run()
             send.assert_called_once();self.assertNotIn('last_analysis_v112',j.value)
             self.assertEqual(j.value['manual_slots']['github-run-1000']['status'],'attempting')
+
+class FinalReviewTests(unittest.TestCase):
+    def test_missing_reference_hash_is_not_verified(self):
+        obs=model()['observation'];old=copy.deepcopy(obs);old.pop('fingerprint');old['at']=(NOW-timedelta(hours=1)).isoformat()
+        self.assertEqual(analyst.comparison(old,obs)['status'],'N/A')
+    def test_stale_btc_is_not_printed_as_current(self):
+        snap=sample();snap['coins']['BTC']['stale']=True
+        text=analyst.final_text(model(snap),snap,NOW,'manual')
+        self.assertIn('BTC N/A',text);self.assertNotIn('BTC $80,000',text)
+    def test_invalid_price_or_levels_cannot_create_forecast_or_held_action(self):
+        snap=sample();snap['coins']['BTC']['price']=0
+        self.assertEqual(analyst.outlook(snap['coins']['BTC'],'4h')['status'],'N/A')
+        snap['coins']['AAVE']['frames']['4h']['atr']=-1
+        text=analyst.final_text(model(snap),snap,NOW,'manual',INVENTORY)
+        self.assertIn('WAIT (držba)',text)
+    def test_candidate_requires_an_available_target_above_current_price(self):
+        snap=sample()
+        for c in snap['coins'].values():c['frames']['4h'].update(support=c['price']*.9,resistance=c['price']*.99,atr=c['price']*.001)
+        q={s:dict(action='BUY NOW') for s in analyst.COINS};ev={s:dict(action='BUY NOW') for s in analyst.COINS}
+        self.assertFalse(any(c['candidate'] for c in analyst.prepare(snap,{},NOW,q,ev)['coins'].values()))
+        self.assertIsNone(analyst.delta(1e308,1e-308))

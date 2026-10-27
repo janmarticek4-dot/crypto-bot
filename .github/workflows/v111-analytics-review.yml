@@ -1,5 +1,8 @@
 name: V11.1 Analytical Release Review
 on:
+  push:
+    branches: [main, feature/v112-analytical-review]
+    paths: ['v11/**', 'scripts/**', 'tests/**', '.github/workflows/v111-analytics-review.yml']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -27,3 +30,58 @@ jobs:
           python -m pip check
           python -c "import pandas, exchange_calendars, cryptography; print('pandas', pandas.__version__, 'exchange-calendars', exchange_calendars.__version__, 'cryptography', cryptography.__version__)"
       - run: python scripts/test_integration_offline.py
+
+  public-source-check:
+    if: github.event_name != 'pull_request'
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      BOT_DATA_MODE: shadow
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      GROQ_API_KEY: ''
+      PRIVATE_ADVISORY_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - name: Public fundamentals and macro availability only
+        run: python scripts/fundamental_sources_shadow.py --output shadow-output/runner-sources
+      - name: Validate public files before upload
+        if: always()
+        run: python scripts/stage_shadow_artifacts.py --source shadow-output/runner-sources --destination shadow-public-artifacts/runner-sources
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v112-runner-sources-${{ github.run_id }}
+          path: shadow-public-artifacts/runner-sources/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Publish verified public source status in job summary
+        if: always()
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+          root=Path('shadow-public-artifacts/runner-sources')
+          if not (root/'artifact_privacy.json').exists():
+              raise SystemExit('Public privacy gate unavailable; no summary published')
+          gate=json.loads((root/'artifact_privacy.json').read_text())
+          if gate.get('status')!='PASSED':raise SystemExit('Privacy gate refused')
+          summary=json.loads((root/'summary.json').read_text())
+          rows=json.loads((root/'source_diagnostics.json').read_text())
+          def safe(value):return str(value).replace('|','/').replace('\n',' ')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as output:
+              output.write('# Public source availability — no Telegram or private state\n')
+              output.write('Collected: '+safe(summary.get('collected_at'))+'; endpoints: '+safe(summary.get('endpoints'))+'; current: '+safe(summary.get('current'))+'\n\n')
+              output.write('| Source | Status | Error layer/code |\n|---|---|---|\n')
+              for row in rows:
+                  output.write('| '+safe(row.get('source') or row.get('url'))+' | '+safe(row.get('status'))+' | '+safe(row.get('error_layer',''))+' '+safe(row.get('error_code') or row.get('http_status') or '')+' |\n')

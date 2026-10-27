@@ -12,7 +12,10 @@ COINS=('SOL','TAO','FET','AAVE','ONDO','RENDER')
 
 
 def number(x):return type(x) in (int,float) and math.isfinite(x)
-def delta(a,b):return (a/b-1)*100 if number(a) and number(b) and b>0 else None
+def delta(a,b):
+    if not number(a) or not number(b) or b<=0:return None
+    value=(a/b-1)*100
+    return value if math.isfinite(value) else None
 def pct(x):return 'N/A' if x is None else f'{x:+.1f}%'
 def price(x):
     if not number(x):return 'N/A'
@@ -28,7 +31,7 @@ def observation(snapshot,fund,now,quotes):
     economics={s:{k:dict(value=v.get('value'),period=v.get('period')) for k,v in items.items()}
                for s,items in fund.get('project_economics',{}).get('observations',{}).items()}
     obs=dict(schema='public-analysis-v112',at=now.isoformat(),fingerprint=fingerprint(snapshot),global_data=copy.deepcopy(snapshot.get('global_data',{})),
-        coins={s:dict(price=None if c.get('stale') else c.get('price'),market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),
+        coins={s:dict(price=c.get('price') if not c.get('stale',True) and number(c.get('price')) and c['price']>0 else None,market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),
                 technical_score=quotes.get(s,{}).get('trend_score_10'),legacy_action=quotes.get(s,{}).get('action'),risk_points=quotes.get(s,{}).get('risk_points'),
                 support_broken=c.get('frames',{}).get('4h',{}).get('support_broken')) for s,c in snapshot.get('coins',{}).items() if s in (*COINS,'BTC')},
         metrics={s:dict(value=v.get('value'),at=v.get('at')) for s,v in fund.get('metrics',{}).items()},economics=economics,event_ids=[e['id'] for e in relevant_events(fund,now)])
@@ -41,6 +44,7 @@ def comparison(old,current):
     if not all(isinstance(old.get(k,{}),dict) for k in ('global_data','coins','metrics','economics')):return dict(status='N/A',reason='Neplatná verejná referencia.')
     if any(not isinstance(v,dict) for k in ('coins','metrics','economics') for v in old.get(k,{}).values()):return dict(status='N/A',reason='Neplatné položky verejnej referencie.')
     if any(not isinstance(v,dict) for values in old.get('economics',{}).values() for v in values.values()):return dict(status='N/A',reason='Neplatné ekonomické pozorovanie.')
+    if not isinstance(old.get('fingerprint'),str) or not re.fullmatch(r'[0-9a-f]{64}',old['fingerprint']):return dict(status='N/A',reason='Chýba overiteľný zdrojový fingerprint.')
     a=timestamp(old.get('at'));b=timestamp(current.get('at'))
     if not a or not b or not timedelta(0)<b-a<=timedelta(days=7) or old.get('fingerprint')==current.get('fingerprint'):
         return dict(status='N/A',reason='Referencia je rovnaká, stará alebo časovo neoveriteľná.')
@@ -73,7 +77,7 @@ def comparison(old,current):
 def outlook(coin,tf):
     t=coin.get('frames',{}).get(tf,{})
     p=coin.get('price');lo=t.get('support');hi=t.get('resistance');ema=t.get('ema50');macd=t.get('macd_hist')
-    if coin.get('stale',True) or not all(number(x) for x in (p,lo,hi,ema,macd)):
+    if coin.get('stale',True) or not all(number(x) for x in (p,lo,hi,ema,macd)) or min(p,lo,hi,ema)<=0 or lo>=hi:
         return dict(status='N/A',base='Nedostatok spoľahlivých údajov pre tento horizont.')
     support=lo if 0<lo<p else None;resistance=hi if hi>p else None
     bias='oslabenie' if p<ema and macd<0 else 'rastový sklon' if p>ema and macd>0 else 'smer neistý'
@@ -135,7 +139,7 @@ def prepare(snapshot,fund,now,quotes,legacy_evaluations,old=None):
             reason=('Odraz ešte nepotvrdil obrat trendu' if number(t.get('macd_hist')) and t['macd_hist']>0 else 'Momentum a trend sú slabé')+(f'; sleduj podporu {price(zone)}.' if zone else '; ďalšia podpora nepotvrdená.')
         else:reason='Trend treba potvrdiť štruktúrou a objemom; nový vstup zatiaľ nepotvrdený.'
         model['coins'][s]=dict(price=p if valid else None,change_24h=c.get('change_24h'),action='WAIT',context='new_purchase',legacy_action=e.get('action'),zone=zone,invalidates=stop,target=resistance if number(resistance) and valid and resistance>p else None,economics=economics,
-            candidate=bool(valid and e.get('action') in ('BUY NOW','BUY PULLBACK') and economics and economics['net']>0 and (economics['net_rr'] or 0)>=1.5),
+            candidate=bool(valid and number(resistance) and resistance>p and e.get('action') in ('BUY NOW','BUY PULLBACK') and economics and economics['net']>0 and (economics['net_rr'] or 0)>=1.5),
             reason=reason,sell_pressure=any('rastúci predajný objem' in r for r in e.get('risk_reasons',[])))
     activity=[]
     for s,items in fund.get('project_economics',{}).get('observations',{}).items():
@@ -165,8 +169,8 @@ def final_text(model,snapshot,now,kind,inventory=None):
             try:
                 t=c.get('frames',{}).get('4h',{})
                 required=('ema20','ema50','ema200','support','resistance','atr','rsi14','macd_hist')
-                if not all(number(c.get('frames',{}).get('1d',{}).get(k)) for k in ('ema50','ema200')):raise ValueError('Incomplete daily assessment')
-                if not all(number(t.get(k)) for k in required):raise ValueError('Incomplete held assessment')
+                if not all(number(c.get('frames',{}).get('1d',{}).get(k)) and c['frames']['1d'][k]>0 for k in ('ema50','ema200')):raise ValueError('Incomplete daily assessment')
+                if not all(number(t.get(k)) for k in required) or any(t[k]<=0 for k in ('ema20','ema50','ema200','support','resistance','atr')) or not 0<=t['rsi14']<=100:raise ValueError('Incomplete held assessment')
                 result=decide(c,held=True,approved=False,market_complete=snapshot.get('complete',False))
                 if not result.get('data_complete'):raise ValueError('Incomplete held assessment')
                 action=result['action']
@@ -180,7 +184,7 @@ def final_text(model,snapshot,now,kind,inventory=None):
     change=g.get('change');label='Korekcia' if number(change) and change<0 else 'Rast' if number(change) and change>0 else 'Konsolidácia / údaje obmedzené'
     if private and any(c['action'] in ('REDUCE','SELL') for c in rows.values()):label='Zvýšené riziko držby'
     lines=['📊 CRYPTO AI BOT V11.2 — '+('RUČNÁ' if kind=='manual' else 'RÁNO' if kind=='morning' else 'VEČER'),now.astimezone(BL).strftime('%d.%m.%Y %H:%M Bratislava'),'TRH: '+label,
-        f"BTC {price(btc.get('price'))} ({pct(btc.get('change_24h'))}); kap. {compact(g.get('cap'))} ({pct(change)} za24h); dominancia {format(g['dominance'],'.1f')+'%' if number(g.get('dominance')) else 'N/A'}.",'ČO SA DEJE:']
+        f"BTC {price(model['observation']['coins'].get('BTC',{}).get('price'))} ({pct(btc.get('change_24h'))}); kap. {compact(g.get('cap'))} ({pct(change)} za24h); dominancia {format(g['dominance'],'.1f')+'%' if number(g.get('dominance')) else 'N/A'}.",'ČO SA DEJE:']
     if comp['status']=='COMPARED':
         lines.append(f"Od {timestamp(comp['previous_at']).astimezone(BL).strftime('%d.%m. %H:%M')}: {comp['direction']}. Kap. {pct(comp['global_cap_pct'])}, objem24h {pct(comp['global_volume_pct'])}, dominancia {format(comp['dominance_pp'],'+.2f')+' p. b.' if comp['dominance_pp'] is not None else 'neporovnateľná'}.")
     else:lines.append('Zmenu od poslednej analýzy zatiaľ nemožno overiť; pokles24h nie je zmena od posledného reportu.')
