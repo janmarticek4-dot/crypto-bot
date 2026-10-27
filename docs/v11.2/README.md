@@ -10,3 +10,11 @@
 - [Postup aktivácie a rollback](DEPLOYMENT.md)
 
 Nič nemergované/aktivované, žiadny testovací Telegram. Nové obchodné stratégie nie sú súčasťou PR. Osobné kontexty sa vytvárajú až pred odoslaním a nikdy sa neexportujú verejne.
+
+## Stav PR
+
+Vetva `feature/v112-analytical-review` je uložená na GitHube. Automatické vytvorenie draft PR bolo odmietnuté GitHub REST API chybou Forbidden; PR týmto nevznikol. Pripravený popis je v [PR_DESCRIPTION.md](PR_DESCRIPTION.md).
+
+[Otvoriť porovnanie a vytvoriť jediný PR](https://github.com/janmarticek4-dot/crypto-bot/compare/main...feature/v112-analytical-review?expand=1)
+
+GitHub CI sa nepovažuje za dokončené, kým PR nevznikne a jeho nový beh úspešne nedobehne. Uvedených166 testov je lokálny izolovaný offline výsledok, nie predstieraný výsledok GitHub runnera. Nemenil sa žiadny token ani Secret kvôli vytvoreniu PR.
