@@ -1,0 +1,1446 @@
+{
+  "as_of": "2026-10-27T12:31:48.849789+00:00",
+  "clock": "frozen at snapshot retrieval; not a current market observation",
+  "market_context": {
+    "fear": {},
+    "btc_change_24h": -0.307,
+    "btc_dominance": 59.43981542256904,
+    "global_change": -2.872063802853469,
+    "total_market_cap": 2703951410798.8916,
+    "total_volume": 66015842312.45981
+  },
+  "btc": {
+    "metrics": {
+      "symbol": "BTC",
+      "price": 80204.68,
+      "peak": 84898.0,
+      "drawdown_pct": 5.53,
+      "review_thr": 6.0,
+      "deep_thr": 10.0,
+      "support_broken": false,
+      "resistance_broken": false,
+      "sell_pressure": false,
+      "volume_ratio": 1.1025130263750564,
+      "support": 79220.74,
+      "resistance": 82267.79
+    },
+    "technical": {
+      "price": 80204.68,
+      "chart_last_close": 79910.01,
+      "ema20": 80407.94679627732,
+      "ema50": 81130.62740741302,
+      "ema100": 81745.57959199164,
+      "ema200": 81761.87566111628,
+      "above_ema20": false,
+      "above_ema50": false,
+      "above_ema100": false,
+      "above_ema200": false,
+      "rsi14": 39.77081485998814,
+      "macd": {
+        "macd": -437.61566720326664,
+        "signal": -449.5852824455108,
+        "histogram": 11.969615242244174
+      },
+      "atr14": 725.5378571428549,
+      "atr_percent": 0.9046078821620571,
+      "support_30_candles": 79220.74,
+      "resistance_30_candles": 82086.96,
+      "candles_4h_available": 299,
+      "last_chart_timestamp": 1793088000000
+    }
+  },
+  "safety": {
+    "state": "CRITICAL",
+    "previous_state": "CRITICAL",
+    "score": 6,
+    "reasons": [
+      "6 z 6 altcoinov je pod prahom poklesu",
+      "trhová kapitalizácia klesla o 2.9% za 24h",
+      "Bitcoin pod EMA200",
+      "Bitcoin pod EMA50"
+    ],
+    "market_cap_change_24h": -2.872063802853469,
+    "btc_change_24h": -0.307,
+    "weak_altcoins": [
+      "AAVE",
+      "TAO",
+      "FET",
+      "SOL",
+      "ONDO",
+      "RENDER"
+    ]
+  },
+  "coins": {
+    "AAVE": {
+      "evaluation": {
+        "symbol": "AAVE",
+        "price": 132.19,
+        "drawdown_pct": 17.66,
+        "review_thr": 6.0,
+        "peak": 160.55,
+        "previous_action": "SELL",
+        "action_note": null,
+        "status": "potvrdený",
+        "entry": null,
+        "stop": null,
+        "tp1": null,
+        "tp2": null,
+        "tiers": [
+          131.08
+        ],
+        "signals": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 28.8: extrémna zóna",
+          "MACD histogram záporný"
+        ],
+        "action": "SELL",
+        "trend_score": 1.2,
+        "trend_label": "slabá",
+        "risk_pts": 9,
+        "risk_level": "VEĽMI VYSOKÉ",
+        "risk_reasons": [
+          "hlboký pokles 17.7% od lokálneho maxima",
+          "cena pod EMA50",
+          "cena pod EMA200",
+          "MACD histogram záporný",
+          "slabý trend (skóre 1.2/10)",
+          "bezpečnostný stav trhu: CRITICAL"
+        ],
+        "rsi": 28.80604449262421,
+        "macd_hist": -0.019385365526461307,
+        "ema20": 136.87181138435795,
+        "ema50": 143.11533902626286,
+        "ema200": 149.02843666961334,
+        "support": 131.08,
+        "resistance": 151.13,
+        "volume_ratio": 1.2556342760443697,
+        "support_broken": false,
+        "cause_category": null,
+        "flip": "Zmierni sa po návrate nad $143.12 a poklese rizika pod 3 bodov."
+      },
+      "metrics": {
+        "symbol": "AAVE",
+        "price": 132.19,
+        "peak": 160.55,
+        "drawdown_pct": 17.66,
+        "review_thr": 6.0,
+        "deep_thr": 10.0,
+        "support_broken": false,
+        "resistance_broken": false,
+        "sell_pressure": false,
+        "volume_ratio": 1.2556342760443697,
+        "support": 131.08,
+        "resistance": 151.13
+      },
+      "technical_4h": {
+        "price": 132.19,
+        "chart_last_close": 131.26,
+        "ema20": 136.87181138435795,
+        "ema50": 143.11533902626286,
+        "ema100": 149.13373646852966,
+        "ema200": 149.02843666961334,
+        "above_ema20": false,
+        "above_ema50": false,
+        "above_ema100": false,
+        "above_ema200": false,
+        "rsi14": 28.80604449262421,
+        "macd": {
+          "macd": -3.494343608090645,
+          "signal": -3.474958242564184,
+          "histogram": -0.019385365526461307
+        },
+        "atr14": 2.661428571428569,
+        "atr_percent": 2.013335782909879,
+        "support_30_candles": 129.51,
+        "resistance_30_candles": 151.13,
+        "candles_4h_available": 299,
+        "last_chart_timestamp": 1793088000000
+      },
+      "score_components": {
+        "score": 1.2,
+        "label": "slabá",
+        "reasons": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 28.8: extrémna zóna",
+          "MACD histogram záporný"
+        ],
+        "known_emas": 4
+      },
+      "risk": {
+        "components": [
+          {
+            "reason": "hlboký pokles 17.7% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "MACD histogram záporný",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 1.2/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 9,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "candle_last_open": "2026-10-27T08:00:00+00:00",
+      "candle_last_close": "2026-10-27T12:00:00+00:00",
+      "metadata_at": "2026-10-27T12:30:50.000Z",
+      "price_source": "Binance",
+      "window_peak": {
+        "price": 160.55,
+        "timestamp": 1792598400000
+      },
+      "stored_peak": {
+        "price": 160.55,
+        "ts": "2026-10-21T16:00:00+00:00"
+      },
+      "support_break_trigger": 130.4246,
+      "current_price_above_support": true,
+      "sell_pressure": false,
+      "change_24h": -2.98,
+      "volume_24h": 249370260
+    },
+    "TAO": {
+      "evaluation": {
+        "symbol": "TAO",
+        "price": 250.1,
+        "drawdown_pct": 11.12,
+        "review_thr": 6.0,
+        "peak": 281.4,
+        "previous_action": "SELL",
+        "action_note": null,
+        "status": "potvrdený",
+        "entry": null,
+        "stop": null,
+        "tp1": null,
+        "tp2": null,
+        "tiers": [
+          242.6
+        ],
+        "signals": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 39.5: slabé momentum",
+          "MACD histogram kladný"
+        ],
+        "action": "SELL",
+        "trend_score": 2.1,
+        "trend_label": "slabá",
+        "risk_pts": 8,
+        "risk_level": "VEĽMI VYSOKÉ",
+        "risk_reasons": [
+          "hlboký pokles 11.1% od lokálneho maxima",
+          "cena pod EMA50",
+          "cena pod EMA200",
+          "slabý trend (skóre 2.1/10)",
+          "bezpečnostný stav trhu: CRITICAL"
+        ],
+        "rsi": 39.511872950470845,
+        "macd_hist": 0.3289934115115991,
+        "ema20": 252.00909941981453,
+        "ema50": 258.243541053848,
+        "ema200": 269.49556147585224,
+        "support": 242.6,
+        "resistance": 263.9,
+        "volume_ratio": 0.590900041606485,
+        "support_broken": false,
+        "cause_category": null,
+        "flip": "Zmierni sa po návrate nad $258.24 a poklese rizika pod 3 bodov."
+      },
+      "metrics": {
+        "symbol": "TAO",
+        "price": 250.1,
+        "peak": 281.4,
+        "drawdown_pct": 11.12,
+        "review_thr": 6.0,
+        "deep_thr": 10.0,
+        "support_broken": false,
+        "resistance_broken": false,
+        "sell_pressure": false,
+        "volume_ratio": 0.590900041606485,
+        "support": 242.6,
+        "resistance": 263.9
+      },
+      "technical_4h": {
+        "price": 250.1,
+        "chart_last_close": 247.9,
+        "ema20": 252.00909941981453,
+        "ema50": 258.243541053848,
+        "ema100": 265.90634186476336,
+        "ema200": 269.49556147585224,
+        "above_ema20": false,
+        "above_ema50": false,
+        "above_ema100": false,
+        "above_ema200": false,
+        "rsi14": 39.511872950470845,
+        "macd": {
+          "macd": -2.679861030553468,
+          "signal": -3.008854442065067,
+          "histogram": 0.3289934115115991
+        },
+        "atr14": 4.750000000000006,
+        "atr_percent": 1.899240303878451,
+        "support_30_candles": 242.6,
+        "resistance_30_candles": 263.9,
+        "candles_4h_available": 299,
+        "last_chart_timestamp": 1793088000000
+      },
+      "score_components": {
+        "score": 2.1,
+        "label": "slabá",
+        "reasons": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 39.5: slabé momentum",
+          "MACD histogram kladný"
+        ],
+        "known_emas": 4
+      },
+      "risk": {
+        "components": [
+          {
+            "reason": "hlboký pokles 11.1% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.1/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "candle_last_open": "2026-10-27T08:00:00+00:00",
+      "candle_last_close": "2026-10-27T12:00:00+00:00",
+      "metadata_at": "2026-10-27T12:30:50.000Z",
+      "price_source": "Binance",
+      "window_peak": {
+        "price": 281.4,
+        "timestamp": 1792598400000
+      },
+      "stored_peak": {
+        "price": 281.4,
+        "ts": "2026-10-21T16:00:00+00:00"
+      },
+      "support_break_trigger": 241.387,
+      "current_price_above_support": true,
+      "sell_pressure": false,
+      "change_24h": -1.263,
+      "volume_24h": 101948233
+    },
+    "FET": {
+      "evaluation": {
+        "symbol": "FET",
+        "price": 0.1759,
+        "drawdown_pct": 13.05,
+        "review_thr": 6.0,
+        "peak": 0.2023,
+        "previous_action": "SELL",
+        "action_note": null,
+        "status": "potvrdený",
+        "entry": null,
+        "stop": null,
+        "tp1": null,
+        "tp2": null,
+        "tiers": [
+          0.1695
+        ],
+        "signals": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 41.9: neutrálne až slabšie",
+          "MACD histogram kladný"
+        ],
+        "action": "SELL",
+        "trend_score": 2.5,
+        "trend_label": "slabá",
+        "risk_pts": 8,
+        "risk_level": "VEĽMI VYSOKÉ",
+        "risk_reasons": [
+          "hlboký pokles 13.1% od lokálneho maxima",
+          "cena pod EMA50",
+          "cena pod EMA200",
+          "slabý trend (skóre 2.5/10)",
+          "bezpečnostný stav trhu: CRITICAL"
+        ],
+        "rsi": 41.926569286698424,
+        "macd_hist": 0.0004587956386586734,
+        "ema20": 0.17651198010722954,
+        "ema50": 0.1833909142394029,
+        "ema200": 0.1962181496612618,
+        "support": 0.1695,
+        "resistance": 0.1896,
+        "volume_ratio": 1.1735637419328,
+        "support_broken": false,
+        "cause_category": null,
+        "flip": "Zmierni sa po návrate nad $0.1834 a poklese rizika pod 3 bodov."
+      },
+      "metrics": {
+        "symbol": "FET",
+        "price": 0.1759,
+        "peak": 0.2023,
+        "drawdown_pct": 13.05,
+        "review_thr": 6.0,
+        "deep_thr": 10.0,
+        "support_broken": false,
+        "resistance_broken": false,
+        "sell_pressure": false,
+        "volume_ratio": 1.1735637419328,
+        "support": 0.1695,
+        "resistance": 0.1896
+      },
+      "technical_4h": {
+        "price": 0.1759,
+        "chart_last_close": 0.1739,
+        "ema20": 0.17651198010722954,
+        "ema50": 0.1833909142394029,
+        "ema100": 0.19277506359833713,
+        "ema200": 0.1962181496612618,
+        "above_ema20": false,
+        "above_ema50": false,
+        "above_ema100": false,
+        "above_ema200": false,
+        "rsi14": 41.926569286698424,
+        "macd": {
+          "macd": -0.002889301499099356,
+          "signal": -0.0033480971377580293,
+          "histogram": 0.0004587956386586734
+        },
+        "atr14": 0.0039928571428571435,
+        "atr_percent": 2.269958580362219,
+        "support_30_candles": 0.1695,
+        "resistance_30_candles": 0.1896,
+        "candles_4h_available": 299,
+        "last_chart_timestamp": 1793088000000
+      },
+      "score_components": {
+        "score": 2.5,
+        "label": "slabá",
+        "reasons": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 41.9: neutrálne až slabšie",
+          "MACD histogram kladný"
+        ],
+        "known_emas": 4
+      },
+      "risk": {
+        "components": [
+          {
+            "reason": "hlboký pokles 13.1% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.5/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "candle_last_open": "2026-10-27T08:00:00+00:00",
+      "candle_last_close": "2026-10-27T12:00:00+00:00",
+      "metadata_at": "2026-10-27T12:30:50.000Z",
+      "price_source": "Binance",
+      "window_peak": {
+        "price": 0.2023,
+        "timestamp": 1792598400000
+      },
+      "stored_peak": {
+        "price": 0.2023,
+        "ts": "2026-10-21T16:00:00+00:00"
+      },
+      "support_break_trigger": 0.1686525,
+      "current_price_above_support": true,
+      "sell_pressure": false,
+      "change_24h": -0.114,
+      "volume_24h": 71318139
+    },
+    "SOL": {
+      "evaluation": {
+        "symbol": "SOL",
+        "price": 100.45,
+        "drawdown_pct": 8.01,
+        "review_thr": 6.0,
+        "peak": 109.2,
+        "previous_action": "REDUCE",
+        "action_note": null,
+        "status": "potvrdený",
+        "entry": null,
+        "stop": null,
+        "tp1": null,
+        "tp2": null,
+        "tiers": [
+          98.62
+        ],
+        "signals": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 39.2: slabé momentum",
+          "MACD histogram záporný"
+        ],
+        "action": "REDUCE",
+        "trend_score": 0.9,
+        "trend_label": "slabá",
+        "risk_pts": 7,
+        "risk_level": "VEĽMI VYSOKÉ",
+        "risk_reasons": [
+          "pokles 8.0% od lokálneho maxima (prah 6.0%)",
+          "cena pod EMA50",
+          "cena pod EMA200",
+          "MACD histogram záporný",
+          "slabý trend (skóre 0.9/10)",
+          "bezpečnostný stav trhu: CRITICAL"
+        ],
+        "rsi": 39.200735577417134,
+        "macd_hist": -0.0124225727778573,
+        "ema20": 101.4025544099713,
+        "ema50": 102.99270910337931,
+        "ema200": 107.07699479806298,
+        "support": 98.62,
+        "resistance": 105.28,
+        "volume_ratio": 1.0096796447277985,
+        "support_broken": false,
+        "cause_category": null,
+        "flip": "Zmierni sa po návrate nad $102.99 a poklese rizika pod 3 bodov."
+      },
+      "metrics": {
+        "symbol": "SOL",
+        "price": 100.45,
+        "peak": 109.2,
+        "drawdown_pct": 8.01,
+        "review_thr": 6.0,
+        "deep_thr": 10.0,
+        "support_broken": false,
+        "resistance_broken": false,
+        "sell_pressure": false,
+        "volume_ratio": 1.0096796447277985,
+        "support": 98.62,
+        "resistance": 105.28
+      },
+      "technical_4h": {
+        "price": 100.45,
+        "chart_last_close": 100.13,
+        "ema20": 101.4025544099713,
+        "ema50": 102.99270910337931,
+        "ema100": 105.23417355459262,
+        "ema200": 107.07699479806298,
+        "above_ema20": false,
+        "above_ema50": false,
+        "above_ema100": false,
+        "above_ema200": false,
+        "rsi14": 39.200735577417134,
+        "macd": {
+          "macd": -0.8814498493606209,
+          "signal": -0.8690272765827636,
+          "histogram": -0.0124225727778573
+        },
+        "atr14": 1.4471428571428564,
+        "atr_percent": 1.4406598876484384,
+        "support_30_candles": 98.62,
+        "resistance_30_candles": 105.28,
+        "candles_4h_available": 299,
+        "last_chart_timestamp": 1793088000000
+      },
+      "score_components": {
+        "score": 0.9,
+        "label": "slabá",
+        "reasons": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 39.2: slabé momentum",
+          "MACD histogram záporný"
+        ],
+        "known_emas": 4
+      },
+      "risk": {
+        "components": [
+          {
+            "reason": "pokles 8.0% od lokálneho maxima (prah 6.0%)",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "MACD histogram záporný",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 0.9/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 7,
+        "matched": true,
+        "action": "REDUCE",
+        "previous_action": "REDUCE",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "candle_last_open": "2026-10-27T08:00:00+00:00",
+      "candle_last_close": "2026-10-27T12:00:00+00:00",
+      "metadata_at": "2026-10-27T12:30:50.000Z",
+      "price_source": "Binance",
+      "window_peak": {
+        "price": 109.2,
+        "timestamp": 1792598400000
+      },
+      "stored_peak": {
+        "price": 109.2,
+        "ts": "2026-10-21T16:00:00+00:00"
+      },
+      "support_break_trigger": 98.1269,
+      "current_price_above_support": true,
+      "sell_pressure": false,
+      "change_24h": -1.297,
+      "volume_24h": 2331923057
+    },
+    "ONDO": {
+      "evaluation": {
+        "symbol": "ONDO",
+        "price": 0.4114,
+        "drawdown_pct": 12.93,
+        "review_thr": 6.0,
+        "peak": 0.4725,
+        "previous_action": "SELL",
+        "action_note": null,
+        "status": "potvrdený",
+        "entry": null,
+        "stop": null,
+        "tp1": null,
+        "tp2": null,
+        "tiers": [
+          0.3966
+        ],
+        "signals": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 42.9: neutrálne až slabšie",
+          "MACD histogram kladný"
+        ],
+        "action": "SELL",
+        "trend_score": 2.5,
+        "trend_label": "slabá",
+        "risk_pts": 8,
+        "risk_level": "VEĽMI VYSOKÉ",
+        "risk_reasons": [
+          "hlboký pokles 12.9% od lokálneho maxima",
+          "cena pod EMA50",
+          "cena pod EMA200",
+          "slabý trend (skóre 2.5/10)",
+          "bezpečnostný stav trhu: CRITICAL"
+        ],
+        "rsi": 42.9180705756954,
+        "macd_hist": 0.0014509889101549014,
+        "ema20": 0.41278665157398525,
+        "ema50": 0.4247606587300419,
+        "ema200": 0.4399948067765974,
+        "support": 0.3966,
+        "resistance": 0.4406,
+        "volume_ratio": 0.8777871320079048,
+        "support_broken": false,
+        "cause_category": null,
+        "flip": "Zmierni sa po návrate nad $0.4248 a poklese rizika pod 3 bodov."
+      },
+      "metrics": {
+        "symbol": "ONDO",
+        "price": 0.4114,
+        "peak": 0.4725,
+        "drawdown_pct": 12.93,
+        "review_thr": 6.0,
+        "deep_thr": 10.0,
+        "support_broken": false,
+        "resistance_broken": false,
+        "sell_pressure": false,
+        "volume_ratio": 0.8777871320079048,
+        "support": 0.3966,
+        "resistance": 0.4406
+      },
+      "technical_4h": {
+        "price": 0.4114,
+        "chart_last_close": 0.4079,
+        "ema20": 0.41278665157398525,
+        "ema50": 0.4247606587300419,
+        "ema100": 0.43907265102728166,
+        "ema200": 0.4399948067765974,
+        "above_ema20": false,
+        "above_ema50": false,
+        "above_ema100": false,
+        "above_ema200": false,
+        "rsi14": 42.9180705756954,
+        "macd": {
+          "macd": -0.004698836078418589,
+          "signal": -0.00614982498857349,
+          "histogram": 0.0014509889101549014
+        },
+        "atr14": 0.009307142857142856,
+        "atr_percent": 2.262309882630738,
+        "support_30_candles": 0.3966,
+        "resistance_30_candles": 0.4399,
+        "candles_4h_available": 299,
+        "last_chart_timestamp": 1793088000000
+      },
+      "score_components": {
+        "score": 2.5,
+        "label": "slabá",
+        "reasons": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 42.9: neutrálne až slabšie",
+          "MACD histogram kladný"
+        ],
+        "known_emas": 4
+      },
+      "risk": {
+        "components": [
+          {
+            "reason": "hlboký pokles 12.9% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.5/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "candle_last_open": "2026-10-27T08:00:00+00:00",
+      "candle_last_close": "2026-10-27T12:00:00+00:00",
+      "metadata_at": "2026-10-27T12:30:50.000Z",
+      "price_source": "Binance",
+      "window_peak": {
+        "price": 0.4725,
+        "timestamp": 1792598400000
+      },
+      "stored_peak": {
+        "price": 0.4725,
+        "ts": "2026-10-21T16:00:00+00:00"
+      },
+      "support_break_trigger": 0.394617,
+      "current_price_above_support": true,
+      "sell_pressure": false,
+      "change_24h": -0.844,
+      "volume_24h": 99434370
+    },
+    "RENDER": {
+      "evaluation": {
+        "symbol": "RENDER",
+        "price": 1.676,
+        "drawdown_pct": 13.87,
+        "review_thr": 6.0,
+        "peak": 1.946,
+        "previous_action": "SELL",
+        "action_note": null,
+        "status": "potvrdený",
+        "entry": null,
+        "stop": null,
+        "tp1": null,
+        "tp2": null,
+        "tiers": [
+          1.643
+        ],
+        "signals": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 36.2: slabé momentum",
+          "MACD histogram kladný"
+        ],
+        "action": "SELL",
+        "trend_score": 2.1,
+        "trend_label": "slabá",
+        "risk_pts": 8,
+        "risk_level": "VEĽMI VYSOKÉ",
+        "risk_reasons": [
+          "hlboký pokles 13.9% od lokálneho maxima",
+          "cena pod EMA50",
+          "cena pod EMA200",
+          "slabý trend (skóre 2.1/10)",
+          "bezpečnostný stav trhu: CRITICAL"
+        ],
+        "rsi": 36.188450549993156,
+        "macd_hist": 0.0008839064328005942,
+        "ema20": 1.7155786441339416,
+        "ema50": 1.7657543731079057,
+        "ema200": 1.7946354478492588,
+        "support": 1.643,
+        "resistance": 1.85,
+        "volume_ratio": 0.6169626409006312,
+        "support_broken": false,
+        "cause_category": null,
+        "flip": "Zmierni sa po návrate nad $1.766 a poklese rizika pod 3 bodov."
+      },
+      "metrics": {
+        "symbol": "RENDER",
+        "price": 1.676,
+        "peak": 1.946,
+        "drawdown_pct": 13.87,
+        "review_thr": 6.0,
+        "deep_thr": 10.0,
+        "support_broken": false,
+        "resistance_broken": false,
+        "sell_pressure": false,
+        "volume_ratio": 0.6169626409006312,
+        "support": 1.643,
+        "resistance": 1.85
+      },
+      "technical_4h": {
+        "price": 1.676,
+        "chart_last_close": 1.664,
+        "ema20": 1.7155786441339416,
+        "ema50": 1.7657543731079057,
+        "ema100": 1.8157231208710203,
+        "ema200": 1.7946354478492588,
+        "above_ema20": false,
+        "above_ema50": false,
+        "above_ema100": false,
+        "above_ema200": false,
+        "rsi14": 36.188450549993156,
+        "macd": {
+          "macd": -0.022971815758560332,
+          "signal": -0.023855722191360926,
+          "histogram": 0.0008839064328005942
+        },
+        "atr14": 0.037857142857142874,
+        "atr_percent": 2.2587794067507683,
+        "support_30_candles": 1.643,
+        "resistance_30_candles": 1.85,
+        "candles_4h_available": 299,
+        "last_chart_timestamp": 1793088000000
+      },
+      "score_components": {
+        "score": 2.1,
+        "label": "slabá",
+        "reasons": [
+          "cena pod EMA20",
+          "cena pod EMA50",
+          "cena pod EMA100",
+          "cena pod EMA200",
+          "RSI 36.2: slabé momentum",
+          "MACD histogram kladný"
+        ],
+        "known_emas": 4
+      },
+      "risk": {
+        "components": [
+          {
+            "reason": "hlboký pokles 13.9% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.1/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "candle_last_open": "2026-10-27T08:00:00+00:00",
+      "candle_last_close": "2026-10-27T12:00:00+00:00",
+      "metadata_at": "2026-10-27T12:30:50.000Z",
+      "price_source": "Binance",
+      "window_peak": {
+        "price": 1.946,
+        "timestamp": 1792598400000
+      },
+      "stored_peak": {
+        "price": 1.946,
+        "ts": "2026-10-21T16:00:00+00:00"
+      },
+      "support_break_trigger": 1.634785,
+      "current_price_above_support": true,
+      "sell_pressure": false,
+      "change_24h": -3.009,
+      "volume_24h": 37743216
+    }
+  },
+  "ablations": {
+    "without_stored_peaks": {
+      "safety": {
+        "state": "CRITICAL",
+        "previous_state": "CRITICAL",
+        "score": 6,
+        "reasons": [
+          "6 z 6 altcoinov je pod prahom poklesu",
+          "trhová kapitalizácia klesla o 2.9% za 24h",
+          "Bitcoin pod EMA200",
+          "Bitcoin pod EMA50"
+        ],
+        "market_cap_change_24h": -2.872063802853469,
+        "btc_change_24h": -0.307,
+        "weak_altcoins": [
+          "AAVE",
+          "TAO",
+          "FET",
+          "SOL",
+          "ONDO",
+          "RENDER"
+        ]
+      },
+      "coins": {
+        "AAVE": {
+          "action": "SELL",
+          "risk_pts": 9,
+          "peak": 160.55
+        },
+        "TAO": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 281.4
+        },
+        "FET": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 0.2023
+        },
+        "SOL": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 109.2
+        },
+        "ONDO": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 0.4725
+        },
+        "RENDER": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 1.946
+        }
+      }
+    },
+    "without_safety_memory": {
+      "safety": {
+        "state": "WARNING",
+        "previous_state": "NORMAL",
+        "score": 6,
+        "reasons": [
+          "6 z 6 altcoinov je pod prahom poklesu",
+          "trhová kapitalizácia klesla o 2.9% za 24h",
+          "Bitcoin pod EMA200",
+          "Bitcoin pod EMA50"
+        ],
+        "market_cap_change_24h": -2.872063802853469,
+        "btc_change_24h": -0.307,
+        "weak_altcoins": [
+          "AAVE",
+          "TAO",
+          "FET",
+          "SOL",
+          "ONDO",
+          "RENDER"
+        ]
+      },
+      "coins": {
+        "AAVE": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 160.55
+        },
+        "TAO": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 281.4
+        },
+        "FET": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 0.2023
+        },
+        "SOL": {
+          "action": "REDUCE",
+          "risk_pts": 6,
+          "peak": 109.2
+        },
+        "ONDO": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 0.4725
+        },
+        "RENDER": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 1.946
+        }
+      }
+    },
+    "without_action_memory": {
+      "safety": {
+        "state": "CRITICAL",
+        "previous_state": "CRITICAL",
+        "score": 6,
+        "reasons": [
+          "6 z 6 altcoinov je pod prahom poklesu",
+          "trhová kapitalizácia klesla o 2.9% za 24h",
+          "Bitcoin pod EMA200",
+          "Bitcoin pod EMA50"
+        ],
+        "market_cap_change_24h": -2.872063802853469,
+        "btc_change_24h": -0.307,
+        "weak_altcoins": [
+          "AAVE",
+          "TAO",
+          "FET",
+          "SOL",
+          "ONDO",
+          "RENDER"
+        ]
+      },
+      "coins": {
+        "AAVE": {
+          "action": "SELL",
+          "risk_pts": 9,
+          "peak": 160.55
+        },
+        "TAO": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 281.4
+        },
+        "FET": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 0.2023
+        },
+        "SOL": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 109.2
+        },
+        "ONDO": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 0.4725
+        },
+        "RENDER": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 1.946
+        }
+      }
+    },
+    "without_cached_fundamentals": {
+      "safety": {
+        "state": "CRITICAL",
+        "previous_state": "CRITICAL",
+        "score": 6,
+        "reasons": [
+          "6 z 6 altcoinov je pod prahom poklesu",
+          "trhová kapitalizácia klesla o 2.9% za 24h",
+          "Bitcoin pod EMA200",
+          "Bitcoin pod EMA50"
+        ],
+        "market_cap_change_24h": -2.872063802853469,
+        "btc_change_24h": -0.307,
+        "weak_altcoins": [
+          "AAVE",
+          "TAO",
+          "FET",
+          "SOL",
+          "ONDO",
+          "RENDER"
+        ]
+      },
+      "coins": {
+        "AAVE": {
+          "action": "SELL",
+          "risk_pts": 9,
+          "peak": 160.55
+        },
+        "TAO": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 281.4
+        },
+        "FET": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 0.2023
+        },
+        "SOL": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 109.2
+        },
+        "ONDO": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 0.4725
+        },
+        "RENDER": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 1.946
+        }
+      }
+    },
+    "without_any_state": {
+      "safety": {
+        "state": "WARNING",
+        "previous_state": "NORMAL",
+        "score": 6,
+        "reasons": [
+          "6 z 6 altcoinov je pod prahom poklesu",
+          "trhová kapitalizácia klesla o 2.9% za 24h",
+          "Bitcoin pod EMA200",
+          "Bitcoin pod EMA50"
+        ],
+        "market_cap_change_24h": -2.872063802853469,
+        "btc_change_24h": -0.307,
+        "weak_altcoins": [
+          "AAVE",
+          "TAO",
+          "FET",
+          "SOL",
+          "ONDO",
+          "RENDER"
+        ]
+      },
+      "coins": {
+        "AAVE": {
+          "action": "SELL",
+          "risk_pts": 8,
+          "peak": 160.55
+        },
+        "TAO": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 281.4
+        },
+        "FET": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 0.2023
+        },
+        "SOL": {
+          "action": "REDUCE",
+          "risk_pts": 6,
+          "peak": 109.2
+        },
+        "ONDO": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 0.4725
+        },
+        "RENDER": {
+          "action": "REDUCE",
+          "risk_pts": 7,
+          "peak": 1.946
+        }
+      }
+    }
+  },
+  "provenance": {
+    "artifact": "v111-integration-40504368871-1.zip",
+    "artifact_sha256": "3aa1fe9d46fc5f42ff0f24313503789b9fca8ad10f49854842fe25ed5fc9967a",
+    "state_sha256": "fcf5c314e537b63895ea1bdd1152fa39481310af5f4c894b511e03c51f602010",
+    "state_context": "local public baseline; not original runner state",
+    "original_recorded_risks": {
+      "AAVE": {
+        "components": [
+          {
+            "reason": "hlboký pokles 17.7% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "MACD histogram záporný",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 1.2/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 9,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "TAO": {
+        "components": [
+          {
+            "reason": "hlboký pokles 11.1% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.1/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "FET": {
+        "components": [
+          {
+            "reason": "hlboký pokles 13.1% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.5/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "SOL": {
+        "components": [
+          {
+            "reason": "pokles 8.0% od lokálneho maxima (prah 6.0%)",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "MACD histogram záporný",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 0.9/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 7,
+        "matched": true,
+        "action": "REDUCE",
+        "previous_action": "REDUCE",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "ONDO": {
+        "components": [
+          {
+            "reason": "hlboký pokles 12.9% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.5/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      },
+      "RENDER": {
+        "components": [
+          {
+            "reason": "hlboký pokles 13.9% od lokálneho maxima",
+            "points": 3
+          },
+          {
+            "reason": "cena pod EMA50",
+            "points": 1
+          },
+          {
+            "reason": "cena pod EMA200",
+            "points": 1
+          },
+          {
+            "reason": "slabý trend (skóre 2.1/10)",
+            "points": 1
+          },
+          {
+            "reason": "bezpečnostný stav trhu: CRITICAL",
+            "points": 2
+          }
+        ],
+        "sum": 8,
+        "matched": true,
+        "action": "SELL",
+        "previous_action": "SELL",
+        "smoothing_note": null,
+        "trigger": "Pôvodné prahy: REDUCE od 5 b.; SELL od 8 b. a skóre ≤3.5.  Ide o technické/legacy riziko, nie overenú predikciu ďalšieho prepadu nad 10 %."
+      }
+    }
+  }
+}
