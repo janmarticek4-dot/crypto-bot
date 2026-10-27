@@ -48,7 +48,19 @@ def run():
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
         def enrich(snap,fund,now,kind,previous=None):
-            text,quotes,_=integration.render(legacy,snap,fund,now,kind,state,previous,fear)
+            text,quotes,evaluations=integration.render(legacy,snap,fund,now,kind,state,previous,fear)
+            directory=os.getenv('V111_DIAGNOSTICS_DIR')
+            if directory:
+                # Public data only; private inventory is loaded later by the existing sender.
+                from v11.state_policy import require_public_data
+                from v11.fundamental_analysis import analyze
+                details,_,_=integration.render_detailed(legacy,snap,fund,now,kind,state,previous,fear)
+                files={'analysis_details.txt':details,'risk_diagnostics.json':{s:integration.risk_breakdown(legacy,e) for s,e in evaluations.items()},
+                    'fundamental_evidence.json':analyze(fund,now),'market_snapshot.json':snap}
+                target=Path(directory);target.mkdir(parents=True,exist_ok=True)
+                for name,value in files.items():
+                    require_public_data(value)
+                    (target/name).write_text(value if isinstance(value,str) else json.dumps(value,ensure_ascii=False,allow_nan=False))
             return text,quotes
         pilot.render=enrich
         return pilot.run() # same canonical slot and CAS-before-send owner

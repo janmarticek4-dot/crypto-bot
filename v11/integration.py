@@ -98,6 +98,9 @@ def render_detailed(legacy,snapshot,fundamentals,now,kind,state,previous=None,fe
             'Kapitalizácia, TVL a objem nie sú čisté kapitálové toky. Náklady eToro približne 1 % nákup + 1 % predaj a spread treba posúdiť pred manuálnym obchodom; nejde o nové schválené čisté R:R.',
             'Držba N/A — skutočné pozície sa nenačítavajú.',
             '', 'TECHNICKÁ PRÍLOHA',*appendix]
+    from .fundamental_analysis import analyze
+    evidence=analyze(fundamentals,now)
+    quotes['_context']=dict(at=now.isoformat(),event_ids=[e['id'] for e in evidence['evidence'] if e['material']], source_freshness=[dict(source=s.get('source'),status=s.get('status'),freshness=s.get('freshness')) for s in fundamentals.get('sources',[])])
     text='\n'.join(lines);require_public_data(text);require_public_data(quotes)
     return text,quotes,evaluations
 
@@ -128,5 +131,9 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
         market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),action=evaluations[s]['action'],
         trend_score_10=evaluations[s].get('trend_score'),rule_engine='v10.6-original')
         for s in legacy.PORTFOLIO for c in [snapshot['coins'].get(s,{})]}
+    from .fundamental_analysis import analyze
+    evidence=analyze(fundamentals,now)
+    quotes['_context']=dict(at=now.isoformat(),event_ids=[e['id'] for e in evidence['evidence'] if e['material']],
+        source_freshness=[dict(source=s.get('source'),status=s.get('status'),freshness=s.get('freshness')) for s in fundamentals.get('sources',[])])
     require_public_data(text);require_public_data(quotes)
     return text,quotes,evaluations

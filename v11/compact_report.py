@@ -51,6 +51,8 @@ def render(legacy,snapshot,fund,now,kind,ctx,safety,ev,previous=None):
         if not cats & {'Fed','CPI','PCE','employment','GDP','regulation','unlock'}:continue
         if re.search(r'metropolitan|county|state employment|regional',e.get('title',''),re.I):continue
         scheduled.append((order,e,when))
+    if any(e['action'] in ('SELL','REDUCE') for e in ev.values()):
+        lines.append('SELL/REDUCE = technické riziko V10.6, nie potvrdená predikcia poklesu ani osobný pokyn predať. Držbu posudzuje súkromná časť.')
     lines.append('HLAVNÉ FAKTORY')
     used=0
     for _,e,when in sorted(scheduled,key=lambda x:x[0])[:1]:
@@ -71,7 +73,7 @@ def render(legacy,snapshot,fund,now,kind,ctx,safety,ev,previous=None):
     lines.append('24–72 h: rast potrebuje návrat nad rezistencie; pod podporami hrozí pokračovanie korekcie. Smer neistý; pravdepodobnosti N/A.')
     for s in legacy.PORTFOLIO:
         e=ev[s];c=snapshot['coins'].get(s,{})
-        lines.extend(['',f"{s} {p(e.get('price'))} ({pct(c.get('change_24h'))}) — {e['action']}",reason(e),levels(e,p), 'Zmena: '+e.get('flip','N/A')])
+        lines.extend(['',f"{s} {p(e.get('price'))} ({pct(c.get('change_24h'))}) — {'TECHNICKÝ ' if e['action'] in ('SELL','REDUCE') else ''}{e['action']}",reason(e),levels(e,p), 'Zmena: '+e.get('flip','N/A')])
         # Only explicitly attributed material project evidence; no marketing/code feed.
         project=next((x for x in evidence if x['material'] and s in x['symbols'] and len(x['symbols'])<6 and 'project' in x['categories']),None)
         if project:lines.append(f"Projekt: {project['title']} ({project['published_at'][:10]}, {project['source']}); {project['impact']}. {project['url']}")
@@ -92,6 +94,12 @@ def render(legacy,snapshot,fund,now,kind,ctx,safety,ev,previous=None):
                 action=old.get('action') if old.get('rule_engine')=='v10.6-original' else 'iný/neoverený pôvod'
                 changes.append(f"{s} {pct((price/base-1)*100) if price and base else 'N/A'} {action}→{ev[s]['action']}")
             lines.append('Od rána: '+'; '.join(changes)+'. Kap./objemy v diagnostike.')
+            old_context=previous.get('_context',{})
+            old_at=timestamp(old_context.get('at'))
+            if old_at and old_at<now:
+                old_ids=set(old_context.get('event_ids',[]));new_ids={e['id'] for e in evidence if e['material']}
+                lines.append(f"Fundamenty od rána: {len(new_ids-old_ids)} nových, {len(old_ids-new_ids)} už mimo aktuálneho výberu (nie dôkaz zániku rizika).")
+            else:lines.append('Fundamentálne porovnanie rána N/A — chýba časovo overená referencia.')
     buy=[s for s,e in ev.items() if e['action'].startswith('BUY')]
     hold=[s for s,e in ev.items() if e['action']=='HOLD']
     wait=[s for s,e in ev.items() if e['action'] in ('WAIT','REDUCE','SELL')]

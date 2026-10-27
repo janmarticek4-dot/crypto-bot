@@ -170,7 +170,8 @@ def run():
         text,quotes=render(snap,fund,now,kind,morning.get('quotes') if morning.get('status')=='sent' else None)
         slot=now.astimezone(BL).date().isoformat()+('_07:00' if kind=='morning' else '_20:00')
         forecast_audit.update(state,snap,fund,slot)
-        text+='\n'+'\n'.join(forecast_audit.lines(state))+'\n'+'\n'.join(macro_context.economic_lines(economic))
+        if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':
+            text+='\n'+'\n'.join(forecast_audit.lines(state))+'\n'+'\n'.join(macro_context.economic_lines(economic))
     if phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
     require_public_data(quotes)
     state['slots']={k:v for k,v in state['slots'].items() if k[:10]>=(now.astimezone(BL).date().isoformat()[:8]+'01')}

@@ -38,3 +38,15 @@ class CompactTests(unittest.TestCase):
         fund={'project_economics':{'observations':{'AAVE':{'fees':dict(value=110,previous_value=100,period='2026-10-26',previous_period='2026-10-25')}}}}
         text,*_=integration.render(legacy,fixtures.IntegrationTests().data(),fund,now,'morning',{})
         self.assertIn('AAVE poplatky +10.0%',text);self.assertIn('Nie je to výnos tokenu ani čistý tok',text)
+    def test_legacy_exit_has_explicit_nonpersonal_warning(self):
+        from unittest.mock import patch
+        snap=fixtures.IntegrationTests().data();ctx,metrics,safety,ev=integration.evaluate(legacy,snap,{})
+        for value in ev.values():value['action']='SELL'
+        with patch.object(integration,'evaluate',return_value=(ctx,metrics,safety,ev)):
+            text,_,_=integration.render(legacy,snap,{},datetime.now(timezone.utc),'morning',{})
+        self.assertIn('TECHNICKÝ SELL',text)
+        self.assertIn('nie potvrdená predikcia poklesu ani osobný pokyn predať',text)
+    def test_fundamental_comparison_requires_earlier_real_reference(self):
+        now=datetime.now(timezone.utc);snap=fixtures.IntegrationTests().data()
+        text,_,_=integration.render(legacy,snap,{},now,'evening',{},previous={'_context':{'at':now.isoformat(),'event_ids':['old']}})
+        self.assertIn('chýba časovo overená referencia',text)

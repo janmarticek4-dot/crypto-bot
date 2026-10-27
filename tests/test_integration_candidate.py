@@ -28,7 +28,7 @@ class IntegrationTests(unittest.TestCase):
         snap=self.data();state={};before=copy.deepcopy(snap)
         text,quotes,first=integration.render(legacy,snap,{},datetime.now(timezone.utc),'evening',state)
         text2,quotes2,second=integration.render(legacy,snap,{'events':[{'id':'synthetic','title':'Aave exploit confirmed','source':'synthetic','url':'https://example.org/a','published_at':datetime.now(timezone.utc).isoformat(),'retrieved_at':datetime.now(timezone.utc).isoformat(),'symbol':'AAVE','categories':['hack']}]},datetime.now(timezone.utc),'evening',state)
-        self.assertEqual(first,second);self.assertEqual(quotes,quotes2);self.assertEqual(snap,before)
+        self.assertEqual(first,second);self.assertEqual({s:quotes[s] for s in legacy.PORTFOLIO},{s:quotes2[s] for s in legacy.PORTFOLIO});self.assertEqual(snap,before)
     def test_private_canary_refused_not_redacted(self):
         with self.assertRaises(Exception):integration.rule_state({'portfolio':{'SOL':{'quantity':99}}})
     def test_corrupt_state_never_reset(self):
@@ -56,7 +56,7 @@ class IntegrationTests(unittest.TestCase):
         snap=self.data();original=delivery.pilot.render
         def same_owner():
             text,quotes=delivery.pilot.render(snap,{},datetime.now(timezone.utc),'morning')
-            self.assertTrue(all(q['rule_engine']=='v10.6-original' for q in quotes.values()));return 0
+            self.assertTrue(all(q['rule_engine']=='v10.6-original' for s,q in quotes.items() if s in legacy.PORTFOLIO));return 0
         with patch.dict('os.environ',{'V111_INTEGRATION_ENABLED':'true'}),patch.object(delivery.pilot,'phase',return_value='morning'),patch.object(delivery,'latest_public_rule_state',return_value={}),patch.object(legacy,'get_fear_greed',return_value={}),patch.object(delivery.pilot,'run',side_effect=same_owner) as run:
             self.assertEqual(delivery.run(),0);run.assert_called_once()
         self.assertIs(delivery.pilot.render,original)
