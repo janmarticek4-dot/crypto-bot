@@ -34,3 +34,13 @@ Produkčný main.py, USA implementácia, obchodné pravidlá, Secrets a živý s
 ## Návrat späť
 
 Ak po nasadení ručné spúšťanie nebude fungovať, nepoužívať Re-run na opakované doručenie. Automatické reporty zostávajú vo vlastných slotových záznamoch. Vrátiť iba tento PR/workflow source pin riadnym revertom, nikdy bot_state alebo doručovací denník zo starého commitu. Nevymazať manual_slots — už odoslané/neurčité záznamy musia blokovať opakované pokusy.
+
+## Stav pripraveného PR
+
+Vetva `feature/v111-manual-analysis` je pushnutá. Automatické vytvorenie PR cez GitHub REST API bolo odmietnuté chybou Forbidden; PR týmto nevznikol. Otvorenie jediného pripraveného porovnania:
+
+https://github.com/janmarticek4-dot/crypto-bot/compare/main...feature/v111-manual-analysis?expand=1
+
+Návrh názvu: V11.1: explicit anytime manual analysis with isolated delivery IDs.
+
+Stručný popis: Pridáva výslovný checkbox ručnej V11.1 kedykoľvek, zdieľa existujúci analytický zdroj a sender, oddelí manuálne run-ID od plánovaných slotov a zabráni dvojitému V10.6/V11.1 odoslaniu. 149 offline testov prešlo; žiadny reálny Telegram alebo stavový zápis. Postup, fail-closed limity a rollback sú v tomto dokumente. Nemergovať bez schválenia.
