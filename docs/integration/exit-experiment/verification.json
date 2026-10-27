@@ -1,0 +1,16 @@
+{
+  "tests_passed": 112,
+  "experiment_rule_variants": 1,
+  "optimization": false,
+  "independent_holdout": false,
+  "result_rows": 378,
+  "historical_backtest_completed": true,
+  "native_freqtrade_lookahead_run": false,
+  "production_changes": false,
+  "files_sha256": {
+    "results.json": "4ce20bd11dad9437cc96d3981f7bc9ace8a47f35f5f67c63164f902ec81e8bb0",
+    "results.csv": "3c622191e6ebaf3dc6c27d4816612c0eb5d306e6af698f10bdc54e2ee569e7da",
+    "orders.json": "119320c3bb86ca2f1cfab83d7c5ed29ba22dc15648e85a7997b8e261f509d82a",
+    "coverage.json": "e411eb8e346845c7e3b1af702b9eca06b6ddc8027c637db90b98a3d4a32c973b"
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "symbol": "BTC",
+    "first": "2023-01-01T00:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 8336,
+    "sha256": "34aeeb27e832950767288429d30a992f54c3e056e2996ad3991c129a281d9813",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  },
+  {
+    "symbol": "AAVE",
+    "first": "2023-01-01T00:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 8336,
+    "sha256": "23f4cd1ad0ba84337ba85c834809f3017c038fbe8628aebeaf16bebaf041c498",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  },
+  {
+    "symbol": "TAO",
+    "first": "2024-04-11T12:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 5537,
+    "sha256": "4923c8fe402880b20aba11c0d103a39e65a3ffc2760dca80557e5739ac1f1de6",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  },
+  {
+    "symbol": "FET",
+    "first": "2023-01-01T00:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 8336,
+    "sha256": "d2ba4d022e5c265598086b92d9fc46a5fe8341a1655812b43c8a650f1b8dca0f",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  },
+  {
+    "symbol": "SOL",
+    "first": "2023-01-01T00:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 8336,
+    "sha256": "5f308a8758b6743cb7578d48199a3713a3ecb4b763920a80ffd89bc86ed26c76",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  },
+  {
+    "symbol": "ONDO",
+    "first": "2025-04-11T12:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 3347,
+    "sha256": "fa0d8461669c2e2f8ea0d1ee5212a8f3e7726ec7e32019e94a9d847f1f889816",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  },
+  {
+    "symbol": "RENDER",
+    "first": "2024-07-26T08:00:00+00:00",
+    "last": "2026-10-21T04:00:00+00:00",
+    "rows": 4902,
+    "sha256": "72cd05902b09758274b093bcda615560f8ea54f1b038ffa5b71b8f9629b87483",
+    "source": "existing Binance spot OHLCV via CCXT/Freqtrade; independently unverified download"
+  }
+]

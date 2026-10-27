@@ -1,0 +1,21 @@
+# One frozen experiment: exit-only alternative E1
+
+Rules written before reading experiment returns. One rule variant; no parameter search. Cost/latency variants are robustness scenarios, not candidates for choosing the best return. Production V10.6 definitions remain untouched.
+
+Price family: last two closed 4h closes below 99.5% of the support known before the first break, current price below EMA50 and EMA200, native score <=3.5. Drawdown/EMA/score are not separate votes. Liquidity family: native volume ratio >=1.3 and closed-candle 24h return <-2%. Market family: BTC breaks its own prior support and has negative MACD. These are different observations, not proof of statistical independence (BTC and altcoin prices correlate).
+
+E1 REDUCE = confirmed price family plus liquidity OR market family. SELL = all three. Otherwise HOLD. No stored CRITICAL is consulted: market evidence is recomputed from current closed bars only. Missing data does not trigger a new sale.
+
+Extraordinary protective SELL: explicit verified directly relevant severe event, HTTPS primary citation, known-at no later than decision and no older than one hour. No historical event archive exists, so this path is unit tested only and is never fabricated in backtest. A passed event test does not validate event-source coverage or prediction of a 10% decline.
+
+Voluntary sell-to-rebuy is disabled: no independently verified forward price advantage exists. Protective exits and common reentry remain separate; no claim that every sale will permit a cheaper rebuy.
+
+Execution wrapper identical for both active models: initial equal six sleeves ($1,000 each) at first open. REDUCE caps exposure at50% once per full-exposure episode (latched until common reentry; no subsequent price-drift rebalancing), SELL targets0%, HOLD never sells. Common reentry returns to full exposure only after two closed bars above EMA20/50, positive MACD, unbroken support. Native BUY is not used for reentry: this deliberately isolates exits, is not a full production strategy backtest. Signals execute no earlier than following open; second latency scenario executes one bar later. No leverage/shorting/transfers/rebalancing. Identical fee/spread conventions for HOLD and active models.
+
+Cost scenarios: commission1% each side, adverse fill0.25% each side (assumed half-spread0.20% + slippage0.05%);1.2% commission with same adverse fill;1.2% commission with adverse fill0.50%. These are transparent conservative assumptions, not measured historic eToro quotes. Fees charged on buys and sells; terminal valuation always net of hypothetical liquidation costs. Entry costs and remaining initial loss are included in drawdown relative to initial cash. Orders metric includes initial purchase and terminal valuation as two charged executions per sleeve (terminal order is hypothetical liquidation).
+
+Periods, all previously explored: development2025-06-01..2026-01-01 exclusive, retrospective locked test2026H1, retrospective locked test2026-07-01..2026-10-21 exclusive. Every window starts identical full exposures and empty causal native memory. Indicators have last300 historical bars of warmup. No window chooses parameters for subsequent windows. No new independent holdout; future paper test required. ONDO has no2024 data; no fabricated2024 comparison.
+
+Missing native inputs: global market capitalization change, F&G, historical source-verified fundamentals are N/A, not0. Thus baseline is named V10.6_technical (exact unmodified native functions with available technical inputs and causally generated state); it cannot reconstruct full historic live production outputs.
+
+Post-hoc metrics never feed decisions: premature SELL = close14 days after full exit exceeds sale reference price, only matured exits; missed rise = largest high after exit before reentry or14 days, zero floor; correction captured = subsequent7-day low at least10% below exit reference, only matured7-day windows; profitable reentry = round-trip after all costs acquires more units per sold unit. Partial REDUCE is counted separately, not mislabeled full SELL. Maximum drawdown measured on all portfolio observations, not sum/average of coin drawdowns. Independent sleeves total actual simultaneous portfolio. These metrics are descriptive; rise after exit is not proof the original decision was irrational.
