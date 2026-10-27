@@ -31,6 +31,20 @@ def latest_public_rule_state():
     return selected
 
 
+def comparable_morning(previous,snapshot,now):
+    """Refuse legacy/identical/unverifiable references; never call one sample two observations."""
+    from datetime import datetime
+    from v11.shadow_pair import fingerprint,BL
+    if not previous:return None
+    context=previous.get('_context',{})
+    try:
+        at=datetime.fromisoformat(context['at'])
+        hours=(now-at).total_seconds()/3600
+        valid=at.tzinfo is not None and at.astimezone(BL).date()==now.astimezone(BL).date() and 8<=hours<=16
+        return previous if valid and context.get('fingerprint') and context['fingerprint']!=fingerprint(snapshot) else None
+    except (KeyError,TypeError,ValueError):return None
+
+
 def run():
     if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':return pilot.run()
     original_read=pilot.PublicJournal.read
@@ -48,6 +62,7 @@ def run():
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
         def enrich(snap,fund,now,kind,previous=None):
+            previous=comparable_morning(previous,snap,now) if kind=='evening' else None
             text,quotes,evaluations=integration.render(legacy,snap,fund,now,kind,state,previous,fear)
             directory=os.getenv('V111_DIAGNOSTICS_DIR')
             if directory:

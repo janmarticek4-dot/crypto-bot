@@ -192,3 +192,17 @@ class DiagnosticRepairTests(unittest.TestCase):
         now=datetime(2026,10,26,tzinfo=timezone.utc)
         event=dict(scheduled=True,event_at='2026-10-28T14:00:00+00:00',title='Metropolitan Area Employment',url='https://www.bls.gov',categories=['employment'])
         self.assertNotIn('Metropolitan',' '.join(event_lines({'events':[event]},now.timestamp())))
+
+class TemporalDeliveryTests(unittest.TestCase):
+    def test_same_snapshot_and_legacy_reference_refused(self):
+        from v11.shadow_pair import fingerprint
+        snap=IntegrationTests().data();now=datetime(2026,10,27,19,tzinfo=timezone.utc)
+        previous={'_context':{'at':'2026-10-27T06:00:00+00:00','fingerprint':fingerprint(snap)}}
+        self.assertIsNone(delivery.comparable_morning(previous,snap,now))
+        self.assertIsNone(delivery.comparable_morning({'SOL':{'price':1}},snap,now))
+        previous['_context']['fingerprint']='earlier-distinct-source-observation'
+        self.assertIs(delivery.comparable_morning(previous,snap,now),previous)
+    def test_future_or_other_day_reference_refused(self):
+        now=datetime(2026,10,27,19,tzinfo=timezone.utc);snap=IntegrationTests().data()
+        for at in ('2026-10-28T06:00:00+00:00','2026-10-26T06:00:00+00:00','2026-10-27T19:00:00+00:00'):
+            self.assertIsNone(delivery.comparable_morning({'_context':{'at':at,'fingerprint':'different'}},snap,now))

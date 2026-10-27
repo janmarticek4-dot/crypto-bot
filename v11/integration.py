@@ -99,8 +99,9 @@ def render_detailed(legacy,snapshot,fundamentals,now,kind,state,previous=None,fe
             'Držba N/A — skutočné pozície sa nenačítavajú.',
             '', 'TECHNICKÁ PRÍLOHA',*appendix]
     from .fundamental_analysis import analyze
+    from .shadow_pair import fingerprint
     evidence=analyze(fundamentals,now)
-    quotes['_context']=dict(at=now.isoformat(),event_ids=[e['id'] for e in evidence['evidence'] if e['material']], source_freshness=[dict(source=s.get('source'),status=s.get('status'),freshness=s.get('freshness')) for s in fundamentals.get('sources',[])])
+    quotes['_context']=dict(at=now.isoformat(),fingerprint=fingerprint(snapshot),event_ids=[e['id'] for e in evidence['evidence'] if e['material']], source_freshness=[dict(source=s.get('source'),status=s.get('status'),freshness=s.get('freshness')) for s in fundamentals.get('sources',[])])
     text='\n'.join(lines);require_public_data(text);require_public_data(quotes)
     return text,quotes,evaluations
 
@@ -132,8 +133,9 @@ def render(legacy,snapshot,fundamentals,now,kind,state,previous=None,fear=None):
         trend_score_10=evaluations[s].get('trend_score'),rule_engine='v10.6-original')
         for s in legacy.PORTFOLIO for c in [snapshot['coins'].get(s,{})]}
     from .fundamental_analysis import analyze
+    from .shadow_pair import fingerprint
     evidence=analyze(fundamentals,now)
-    quotes['_context']=dict(at=now.isoformat(),event_ids=[e['id'] for e in evidence['evidence'] if e['material']],
+    quotes['_context']=dict(at=now.isoformat(),fingerprint=fingerprint(snapshot),event_ids=[e['id'] for e in evidence['evidence'] if e['material']],
         source_freshness=[dict(source=s.get('source'),status=s.get('status'),freshness=s.get('freshness')) for s in fundamentals.get('sources',[])])
     require_public_data(text);require_public_data(quotes)
     return text,quotes,evaluations
