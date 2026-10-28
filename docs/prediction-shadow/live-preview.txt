@@ -1,0 +1,58 @@
+EXPERIMENTÁLNY VÝSKUM — NEAKTÍVNE; NIE POTVRDENÉ SIGNÁLY
+28.10.2026 06:40 UTC
+Nové nákupy: WAIT. Súkromné držby sa v tomto teste nenačítavajú.
+Pásma sú historické koncové scenáre, nie očakávané maximum/minimum ani kalibrované intervaly. Istota NÍZKA.
+OVERENÉ PODKLADY (nepreukazujú príčinu pohybu):
+Bitcoin nears $81,000 ahead of Fed decision as ZEC jumps 8% | 2026-10-28T04:15:20+00:00 | https://www.coindesk.com/markets/2026/10/28/bitcoin-nears-usd81-000-ahead-of-fed-decision-as-zec-jumps-8
+
+SOL — $102.13 | WAIT
+slabý; predbežný obrat; objem 0.95×; RS/BTC7d -1.7%.
+24 h (od uzavretej 4h ceny $102.03): DO STRANY, $98.77–$105.21 (-3.2% až +3.1%); trend a momentum bez zhody.
+48–72 h (od uzavretej 4h ceny $102.03): DO STRANY, $97.14–$108.14 (-4.8% až +6.0%); trend a momentum bez zhody.
+7–14 dní (od uzavretej 4h ceny $102.03): DO STRANY, $89.17–$121.32 (-12.6% až +18.9%); trend a momentum bez zhody.
+Nový významný projektový fundament nepotvrdený; pokrytie čiastočné.
+Potvrdenie: uzavretie 4h nad 102.8 a objem aspoň 1,2× minulý priemer. Podpora $99.16; hlbší pokles nepotvrdený. Zóna $99.16–$100.56 iba na sledovanie.
+
+TAO — $257.40 | WAIT
+slabý; obrat nepotvrdený; objem 1.08×; RS/BTC7d -3.0%.
+24 h (od uzavretej 4h ceny $258.30): RAST, $242.70–$272.52 (-6.0% až +5.5%); zhoda trendu a momenta.
+48–72 h (od uzavretej 4h ceny $258.30): RAST, $236.32–$289.73 (-8.5% až +12.2%); zhoda trendu a momenta.
+7–14 dní (od uzavretej 4h ceny $258.30): RAST, $225.46–$349.43 (-12.7% až +35.3%); zhoda trendu a momenta.
+Nový významný projektový fundament nepotvrdený; pokrytie čiastočné.
+Potvrdenie: najprv vytvoriť overiteľnú rezistenciu a nový retest. Podpora $244.30; hlbší pokles nepotvrdený. Zóna $244.30–$249.19 iba na sledovanie.
+
+FET — $0.1804 | WAIT
+slabý; predbežný obrat; objem 0.55×; RS/BTC7d -5.5%.
+24 h (od uzavretej 4h ceny $0.1825): DO STRANY, $0.1695–$0.1967 (-7.1% až +7.8%); trend a momentum bez zhody.
+48–72 h (od uzavretej 4h ceny $0.1825): DO STRANY, $0.1635–$0.21 (-10.4% až +15.1%); trend a momentum bez zhody.
+7–14 dní (od uzavretej 4h ceny $0.1825): DO STRANY, $0.1422–$0.2632 (-22.1% až +44.2%); trend a momentum bez zhody.
+Nový významný projektový fundament nepotvrdený; pokrytie čiastočné.
+Potvrdenie: uzavretie 4h nad 0.1833 a objem aspoň 1,2× minulý priemer. Podpora $0.1707; hlbší pokles nepotvrdený. Zóna $0.1707–$0.1751 iba na sledovanie.
+
+AAVE — $135.19 | WAIT
+slabý; obrat nepotvrdený; objem 0.97×; RS/BTC7d -11.0%.
+24 h (od uzavretej 4h ceny $135.36): DO STRANY, $128.24–$143.53 (-5.3% až +6.0%); trend a momentum bez zhody.
+48–72 h (od uzavretej 4h ceny $135.36): DO STRANY, $125.17–$150.25 (-7.5% až +11.0%); trend a momentum bez zhody.
+7–14 dní (od uzavretej 4h ceny $135.36): DO STRANY, $111.90–$178.69 (-17.3% až +32.0%); trend a momentum bez zhody.
+Nový významný projektový fundament nepotvrdený; pokrytie čiastočné.
+Potvrdenie: uzavretie 4h nad 139 a objem aspoň 1,2× minulý priemer. Podpora $129.51; hlbší pokles nepotvrdený. Zóna $129.51–$132.42 iba na sledovanie.
+
+ONDO — $0.418 | WAIT
+slabý; predbežný obrat; objem 0.90×; RS/BTC7d -5.3%.
+24 h (od uzavretej 4h ceny $0.4201): DO STRANY, $0.3968–$0.4464 (-5.5% až +6.3%); trend a momentum bez zhody.
+48–72 h (od uzavretej 4h ceny $0.4201): DO STRANY, $0.388–$0.4857 (-7.6% až +15.6%); trend a momentum bez zhody.
+7–14 dní (od uzavretej 4h ceny $0.4201): DO STRANY, $0.3603–$0.6406 (-14.2% až +52.5%); trend a momentum bez zhody.
+Nový významný projektový fundament nepotvrdený; pokrytie čiastočné.
+Potvrdenie: uzavretie 4h nad 0.4243 a objem aspoň 1,2× minulý priemer. Podpora $0.3972; hlbší pokles nepotvrdený. Zóna $0.3972–$0.4061 iba na sledovanie.
+
+RENDER — $1.689 | WAIT
+slabý; obrat nepotvrdený; objem 0.75×; RS/BTC7d -5.9%.
+24 h (od uzavretej 4h ceny $1.707): DO STRANY, $1.62–$1.813 (-5.1% až +6.2%); trend a momentum bez zhody.
+48–72 h (od uzavretej 4h ceny $1.707): DO STRANY, $1.575–$1.961 (-7.8% až +14.9%); trend a momentum bez zhody.
+7–14 dní (od uzavretej 4h ceny $1.707): DO STRANY, $1.485–$2.419 (-13.0% až +41.7%); trend a momentum bez zhody.
+Nový významný projektový fundament nepotvrdený; pokrytie čiastočné.
+Potvrdenie: uzavretie 4h nad 1.771 a objem aspoň 1,2× minulý priemer. Podpora $1.656; hlbší pokles nepotvrdený. Zóna $1.656–$1.689 iba na sledovanie.
+
+Poradie na ďalšie sledovanie: SOL, FET, ONDO, TAO, AAVE, RENDER. Heuristické skupiny dôkazov, nie pomer overeného výnosu/rizika.
+Nová významná udalosť alebo prieraz úrovne ruší scenár; nepreukazuje automaticky BUY/SELL. Makro výsledok lepší/horší než overené očakávanie: posúdiť priaznivý/nepriaznivý variant, smer ani veľkosť dopadu nepotvrdené.
+Zmena od predchádzajúcej analýzy N/A bez časovo overenej referencie. Objem a kapitalizácia nie sú čisté toky.

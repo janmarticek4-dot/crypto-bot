@@ -1,0 +1,282 @@
+{
+  "summary": {
+    "collected_at": "2026-10-28T06:37:23.074784+00:00",
+    "completed_at": "2026-10-28T06:37:25.899090+00:00",
+    "market_complete": true,
+    "endpoints": 33,
+    "current": 4,
+    "protected_files_unchanged": true,
+    "telegram_enabled": false,
+    "real_positions_loaded": false,
+    "orders_enabled": false,
+    "commit": null,
+    "branch": null
+  },
+  "sources": [
+    {
+      "source_id": null,
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://apps.bea.gov/rss/rss.xml",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.bls.gov/feed/bls_latest.rss",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.bls.gov/schedule/news_release/bls.ics",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.bea.gov/rss/rss.xml",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.cftc.gov/RSS/RSSGP/rssgp.xml",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.bls.gov/schedule/news_release/current_year.ics",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.ecb.europa.eu/rss/blog.html",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.sec.gov/news/pressreleases.rss",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://governance.aave.com/latest.rss",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://blog.ondo.finance/rss/",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.sec.gov/newsroom/press-releases/rss.xml",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "status": "OK_NO_RECENT_RELEVANT_ITEMS",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://github.com/fetchai/fetchd/releases.atom",
+      "status": "STALE",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://github.com/aave/aip/commits/main.atom",
+      "status": "STALE",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://cointelegraph.com/rss",
+      "status": "OK_CURRENT",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://github.com/opentensor/subtensor/releases.atom",
+      "status": "OK_NO_RECENT_RELEVANT_ITEMS",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://github.com/rendernetwork/RNPs/commits/main.atom",
+      "status": "OK_CURRENT",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "status": "OK_CURRENT",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://github.com/anza-xyz/agave/releases.atom",
+      "status": "OK_CURRENT",
+      "http_status": null,
+      "error_layer": null,
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/protocol/aave",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/tvl/aave",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/v2/historicalChainTvl/Solana",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/protocol/ondo-finance",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/summary/fees/aave?dataType=dailyFees",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/summary/fees/aave?dataType=dailyRevenue",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://api.llama.fi/overview/fees/Solana?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://home.treasury.gov/resource-center-data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value_month=202610",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2,DGS10&cosd=2026-10-18",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    },
+    {
+      "source_id": null,
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL,PCEPI,UNRATE,PAYEMS&cosd=2025-06-15",
+      "status": "NETWORK_BLOCKED",
+      "http_status": 403,
+      "error_layer": "network_tunnel",
+      "error_code": null
+    }
+  ],
+  "note": "Codex execution environment, not a fresh GitHub-hosted runner test; availability is not coverage."
+}

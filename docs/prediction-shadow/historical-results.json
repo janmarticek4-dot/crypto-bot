@@ -1,0 +1,746 @@
+{
+  "SOL": {
+    "status": "RESEARCH_ONLY",
+    "start": 1778774400000,
+    "end": 1793145600000,
+    "split": 1788840000000,
+    "results": {
+      "24 h": {
+        "development": {
+          "n": 79,
+          "band_endpoint_coverage": 0.8734177215189873,
+          "models": {
+            "point": {
+              "mae_pct": 2.081400706537179,
+              "direction_accuracy": 0.26582278481012656
+            },
+            "flat": {
+              "mae_pct": 1.9118304975866773,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 2.1756955765867843,
+              "direction_accuracy": 0.46835443037974683
+            }
+          }
+        },
+        "test": {
+          "n": 49,
+          "band_endpoint_coverage": 0.7959183673469388,
+          "models": {
+            "point": {
+              "mae_pct": 2.4355806319590156,
+              "direction_accuracy": 0.22448979591836735
+            },
+            "flat": {
+              "mae_pct": 2.1704582210183485,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 2.4869929729127933,
+              "direction_accuracy": 0.5714285714285714
+            }
+          }
+        }
+      },
+      "48–72 h": {
+        "development": {
+          "n": 77,
+          "band_endpoint_coverage": 0.8831168831168831,
+          "models": {
+            "point": {
+              "mae_pct": 4.31034508087341,
+              "direction_accuracy": 0.2857142857142857
+            },
+            "flat": {
+              "mae_pct": 3.7172253875456676,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 5.093528007984498,
+              "direction_accuracy": 0.4675324675324675
+            }
+          }
+        },
+        "test": {
+          "n": 47,
+          "band_endpoint_coverage": 0.8085106382978723,
+          "models": {
+            "point": {
+              "mae_pct": 3.89556202206532,
+              "direction_accuracy": 0.23404255319148937
+            },
+            "flat": {
+              "mae_pct": 3.3549485551588103,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 4.225962811166702,
+              "direction_accuracy": 0.5531914893617021
+            }
+          }
+        }
+      },
+      "7–14 dní": {
+        "development": {
+          "n": 66,
+          "band_endpoint_coverage": 0.6666666666666666,
+          "models": {
+            "point": {
+              "mae_pct": 12.690600079643787,
+              "direction_accuracy": 0.3333333333333333
+            },
+            "flat": {
+              "mae_pct": 11.076868042002843,
+              "direction_accuracy": 0.015151515151515152
+            },
+            "continuation": {
+              "mae_pct": 19.953319140722765,
+              "direction_accuracy": 0.5151515151515151
+            }
+          }
+        },
+        "test": {
+          "n": 36,
+          "band_endpoint_coverage": 0.75,
+          "models": {
+            "point": {
+              "mae_pct": 13.157819080293095,
+              "direction_accuracy": 0.2222222222222222
+            },
+            "flat": {
+              "mae_pct": 11.31161394973971,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 20.301042319262127,
+              "direction_accuracy": 0.5
+            }
+          }
+        }
+      }
+    },
+    "independent_validation": false,
+    "source": "Binance public spot OHLCV 4h; last 1000 closed bars; no survivorship correction"
+  },
+  "TAO": {
+    "status": "RESEARCH_ONLY",
+    "start": 1778774400000,
+    "end": 1793145600000,
+    "split": 1788840000000,
+    "results": {
+      "24 h": {
+        "development": {
+          "n": 79,
+          "band_endpoint_coverage": 0.8860759493670886,
+          "models": {
+            "point": {
+              "mae_pct": 2.696375445203783,
+              "direction_accuracy": 0.25316455696202533
+            },
+            "flat": {
+              "mae_pct": 2.273618664310691,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 2.5954396836993037,
+              "direction_accuracy": 0.4936708860759494
+            }
+          }
+        },
+        "test": {
+          "n": 49,
+          "band_endpoint_coverage": 0.673469387755102,
+          "models": {
+            "point": {
+              "mae_pct": 4.73946327204396,
+              "direction_accuracy": 0.1836734693877551
+            },
+            "flat": {
+              "mae_pct": 4.138178380094825,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 4.81949617747788,
+              "direction_accuracy": 0.42857142857142855
+            }
+          }
+        }
+      },
+      "48–72 h": {
+        "development": {
+          "n": 77,
+          "band_endpoint_coverage": 0.8701298701298701,
+          "models": {
+            "point": {
+              "mae_pct": 4.656234532241386,
+              "direction_accuracy": 0.2857142857142857
+            },
+            "flat": {
+              "mae_pct": 4.02286595028135,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 5.302012860018283,
+              "direction_accuracy": 0.44155844155844154
+            }
+          }
+        },
+        "test": {
+          "n": 47,
+          "band_endpoint_coverage": 0.723404255319149,
+          "models": {
+            "point": {
+              "mae_pct": 7.490638201665618,
+              "direction_accuracy": 0.2127659574468085
+            },
+            "flat": {
+              "mae_pct": 6.064667310056373,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 7.839108204727157,
+              "direction_accuracy": 0.5106382978723404
+            }
+          }
+        }
+      },
+      "7–14 dní": {
+        "development": {
+          "n": 66,
+          "band_endpoint_coverage": 0.7727272727272727,
+          "models": {
+            "point": {
+              "mae_pct": 10.421279140392183,
+              "direction_accuracy": 0.3181818181818182
+            },
+            "flat": {
+              "mae_pct": 7.140887810140779,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 18.48337909753341,
+              "direction_accuracy": 0.4696969696969697
+            }
+          }
+        },
+        "test": {
+          "n": 36,
+          "band_endpoint_coverage": 0.7222222222222222,
+          "models": {
+            "point": {
+              "mae_pct": 21.158561726897357,
+              "direction_accuracy": 0.2222222222222222
+            },
+            "flat": {
+              "mae_pct": 16.043534080966708,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 35.93741136445459,
+              "direction_accuracy": 0.5
+            }
+          }
+        }
+      }
+    },
+    "independent_validation": false,
+    "source": "Binance public spot OHLCV 4h; last 1000 closed bars; no survivorship correction"
+  },
+  "FET": {
+    "status": "RESEARCH_ONLY",
+    "start": 1778774400000,
+    "end": 1793145600000,
+    "split": 1788840000000,
+    "results": {
+      "24 h": {
+        "development": {
+          "n": 79,
+          "band_endpoint_coverage": 0.8860759493670886,
+          "models": {
+            "point": {
+              "mae_pct": 2.9862975620191077,
+              "direction_accuracy": 0.26582278481012656
+            },
+            "flat": {
+              "mae_pct": 2.8841870904911038,
+              "direction_accuracy": 0.012658227848101266
+            },
+            "continuation": {
+              "mae_pct": 3.4393942866574383,
+              "direction_accuracy": 0.4936708860759494
+            }
+          }
+        },
+        "test": {
+          "n": 49,
+          "band_endpoint_coverage": 0.7142857142857143,
+          "models": {
+            "point": {
+              "mae_pct": 5.833083304526009,
+              "direction_accuracy": 0.20408163265306123
+            },
+            "flat": {
+              "mae_pct": 4.687284681147138,
+              "direction_accuracy": 0.02040816326530612
+            },
+            "continuation": {
+              "mae_pct": 6.035656547199537,
+              "direction_accuracy": 0.46938775510204084
+            }
+          }
+        }
+      },
+      "48–72 h": {
+        "development": {
+          "n": 77,
+          "band_endpoint_coverage": 0.8701298701298701,
+          "models": {
+            "point": {
+              "mae_pct": 5.904207875179666,
+              "direction_accuracy": 0.23376623376623376
+            },
+            "flat": {
+              "mae_pct": 5.5135964731116385,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 7.636343800409874,
+              "direction_accuracy": 0.5454545454545454
+            }
+          }
+        },
+        "test": {
+          "n": 47,
+          "band_endpoint_coverage": 0.7021276595744681,
+          "models": {
+            "point": {
+              "mae_pct": 9.072580321680116,
+              "direction_accuracy": 0.3191489361702128
+            },
+            "flat": {
+              "mae_pct": 7.388146805471381,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 9.846772113328367,
+              "direction_accuracy": 0.5957446808510638
+            }
+          }
+        }
+      },
+      "7–14 dní": {
+        "development": {
+          "n": 66,
+          "band_endpoint_coverage": 0.7727272727272727,
+          "models": {
+            "point": {
+              "mae_pct": 13.155280076562924,
+              "direction_accuracy": 0.30303030303030304
+            },
+            "flat": {
+              "mae_pct": 10.590346543128964,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 28.65110593993715,
+              "direction_accuracy": 0.5909090909090909
+            }
+          }
+        },
+        "test": {
+          "n": 36,
+          "band_endpoint_coverage": 0.4444444444444444,
+          "models": {
+            "point": {
+              "mae_pct": 25.38470863323011,
+              "direction_accuracy": 0.2777777777777778
+            },
+            "flat": {
+              "mae_pct": 22.745861837308123,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 43.18097416593954,
+              "direction_accuracy": 0.5
+            }
+          }
+        }
+      }
+    },
+    "independent_validation": false,
+    "source": "Binance public spot OHLCV 4h; last 1000 closed bars; no survivorship correction"
+  },
+  "AAVE": {
+    "status": "RESEARCH_ONLY",
+    "start": 1778774400000,
+    "end": 1793145600000,
+    "split": 1788840000000,
+    "results": {
+      "24 h": {
+        "development": {
+          "n": 79,
+          "band_endpoint_coverage": 0.7974683544303798,
+          "models": {
+            "point": {
+              "mae_pct": 3.279705417924542,
+              "direction_accuracy": 0.27848101265822783
+            },
+            "flat": {
+              "mae_pct": 3.1127272682508327,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 3.5978498863472743,
+              "direction_accuracy": 0.5569620253164557
+            }
+          }
+        },
+        "test": {
+          "n": 49,
+          "band_endpoint_coverage": 0.6122448979591837,
+          "models": {
+            "point": {
+              "mae_pct": 4.50885974120934,
+              "direction_accuracy": 0.2857142857142857
+            },
+            "flat": {
+              "mae_pct": 3.9794740494018606,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 4.582372934542718,
+              "direction_accuracy": 0.4897959183673469
+            }
+          }
+        }
+      },
+      "48–72 h": {
+        "development": {
+          "n": 77,
+          "band_endpoint_coverage": 0.8571428571428571,
+          "models": {
+            "point": {
+              "mae_pct": 6.557737952155403,
+              "direction_accuracy": 0.2597402597402597
+            },
+            "flat": {
+              "mae_pct": 5.652957289616983,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 8.602369995432044,
+              "direction_accuracy": 0.4675324675324675
+            }
+          }
+        },
+        "test": {
+          "n": 47,
+          "band_endpoint_coverage": 0.723404255319149,
+          "models": {
+            "point": {
+              "mae_pct": 6.225351134052831,
+              "direction_accuracy": 0.3617021276595745
+            },
+            "flat": {
+              "mae_pct": 5.575586696584936,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 7.3879650326423105,
+              "direction_accuracy": 0.574468085106383
+            }
+          }
+        }
+      },
+      "7–14 dní": {
+        "development": {
+          "n": 66,
+          "band_endpoint_coverage": 0.7272727272727273,
+          "models": {
+            "point": {
+              "mae_pct": 17.741161764244385,
+              "direction_accuracy": 0.25757575757575757
+            },
+            "flat": {
+              "mae_pct": 14.257498787781731,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 35.43026197021116,
+              "direction_accuracy": 0.48484848484848486
+            }
+          }
+        },
+        "test": {
+          "n": 36,
+          "band_endpoint_coverage": 0.7777777777777778,
+          "models": {
+            "point": {
+              "mae_pct": 19.863721519841484,
+              "direction_accuracy": 0.3333333333333333
+            },
+            "flat": {
+              "mae_pct": 18.41701605038007,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 29.89072797191607,
+              "direction_accuracy": 0.4722222222222222
+            }
+          }
+        }
+      }
+    },
+    "independent_validation": false,
+    "source": "Binance public spot OHLCV 4h; last 1000 closed bars; no survivorship correction"
+  },
+  "ONDO": {
+    "status": "RESEARCH_ONLY",
+    "start": 1778774400000,
+    "end": 1793145600000,
+    "split": 1788840000000,
+    "results": {
+      "24 h": {
+        "development": {
+          "n": 79,
+          "band_endpoint_coverage": 0.9367088607594937,
+          "models": {
+            "point": {
+              "mae_pct": 3.234846185143039,
+              "direction_accuracy": 0.22784810126582278
+            },
+            "flat": {
+              "mae_pct": 2.8496984716201075,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 3.401742110837953,
+              "direction_accuracy": 0.43037974683544306
+            }
+          }
+        },
+        "test": {
+          "n": 49,
+          "band_endpoint_coverage": 0.7959183673469388,
+          "models": {
+            "point": {
+              "mae_pct": 4.448294223744124,
+              "direction_accuracy": 0.1836734693877551
+            },
+            "flat": {
+              "mae_pct": 3.8834011957429753,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 4.849580455441516,
+              "direction_accuracy": 0.42857142857142855
+            }
+          }
+        }
+      },
+      "48–72 h": {
+        "development": {
+          "n": 77,
+          "band_endpoint_coverage": 0.9090909090909091,
+          "models": {
+            "point": {
+              "mae_pct": 5.99328587407416,
+              "direction_accuracy": 0.2597402597402597
+            },
+            "flat": {
+              "mae_pct": 5.1124847484597,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 7.307381343370406,
+              "direction_accuracy": 0.5194805194805194
+            }
+          }
+        },
+        "test": {
+          "n": 47,
+          "band_endpoint_coverage": 0.7446808510638298,
+          "models": {
+            "point": {
+              "mae_pct": 8.482233096696277,
+              "direction_accuracy": 0.14893617021276595
+            },
+            "flat": {
+              "mae_pct": 6.847863897368933,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 10.175578721740953,
+              "direction_accuracy": 0.425531914893617
+            }
+          }
+        }
+      },
+      "7–14 dní": {
+        "development": {
+          "n": 66,
+          "band_endpoint_coverage": 0.6363636363636364,
+          "models": {
+            "point": {
+              "mae_pct": 13.310520331299653,
+              "direction_accuracy": 0.21212121212121213
+            },
+            "flat": {
+              "mae_pct": 9.810806800648551,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 26.50454770010911,
+              "direction_accuracy": 0.45454545454545453
+            }
+          }
+        },
+        "test": {
+          "n": 36,
+          "band_endpoint_coverage": 0.5277777777777778,
+          "models": {
+            "point": {
+              "mae_pct": 23.859483535196485,
+              "direction_accuracy": 0.2222222222222222
+            },
+            "flat": {
+              "mae_pct": 20.57148871327994,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 39.49762993083446,
+              "direction_accuracy": 0.5277777777777778
+            }
+          }
+        }
+      }
+    },
+    "independent_validation": false,
+    "source": "Binance public spot OHLCV 4h; last 1000 closed bars; no survivorship correction"
+  },
+  "RENDER": {
+    "status": "RESEARCH_ONLY",
+    "start": 1778774400000,
+    "end": 1793145600000,
+    "split": 1788840000000,
+    "results": {
+      "24 h": {
+        "development": {
+          "n": 79,
+          "band_endpoint_coverage": 0.9240506329113924,
+          "models": {
+            "point": {
+              "mae_pct": 2.286206990888052,
+              "direction_accuracy": 0.22784810126582278
+            },
+            "flat": {
+              "mae_pct": 2.045860916356575,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 2.353010764462554,
+              "direction_accuracy": 0.5189873417721519
+            }
+          }
+        },
+        "test": {
+          "n": 49,
+          "band_endpoint_coverage": 0.7142857142857143,
+          "models": {
+            "point": {
+              "mae_pct": 4.239606510369389,
+              "direction_accuracy": 0.24489795918367346
+            },
+            "flat": {
+              "mae_pct": 3.7789669155560794,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 4.438917457853964,
+              "direction_accuracy": 0.46938775510204084
+            }
+          }
+        }
+      },
+      "48–72 h": {
+        "development": {
+          "n": 77,
+          "band_endpoint_coverage": 0.961038961038961,
+          "models": {
+            "point": {
+              "mae_pct": 4.110272489251574,
+              "direction_accuracy": 0.3116883116883117
+            },
+            "flat": {
+              "mae_pct": 3.3847535241856814,
+              "direction_accuracy": 0.012987012987012988
+            },
+            "continuation": {
+              "mae_pct": 4.638548727835255,
+              "direction_accuracy": 0.6103896103896104
+            }
+          }
+        },
+        "test": {
+          "n": 47,
+          "band_endpoint_coverage": 0.6595744680851063,
+          "models": {
+            "point": {
+              "mae_pct": 7.329718517406,
+              "direction_accuracy": 0.2765957446808511
+            },
+            "flat": {
+              "mae_pct": 6.065956544243137,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 8.012500951616907,
+              "direction_accuracy": 0.44680851063829785
+            }
+          }
+        }
+      },
+      "7–14 dní": {
+        "development": {
+          "n": 66,
+          "band_endpoint_coverage": 0.7878787878787878,
+          "models": {
+            "point": {
+              "mae_pct": 10.230848600400474,
+              "direction_accuracy": 0.25757575757575757
+            },
+            "flat": {
+              "mae_pct": 7.738077507934047,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 16.439764995765834,
+              "direction_accuracy": 0.5454545454545454
+            }
+          }
+        },
+        "test": {
+          "n": 36,
+          "band_endpoint_coverage": 0.5,
+          "models": {
+            "point": {
+              "mae_pct": 22.25342951268167,
+              "direction_accuracy": 0.19444444444444445
+            },
+            "flat": {
+              "mae_pct": 18.08884916826528,
+              "direction_accuracy": 0
+            },
+            "continuation": {
+              "mae_pct": 34.611215506624035,
+              "direction_accuracy": 0.4722222222222222
+            }
+          }
+        }
+      }
+    },
+    "independent_validation": false,
+    "source": "Binance public spot OHLCV 4h; last 1000 closed bars; no survivorship correction"
+  }
+}
