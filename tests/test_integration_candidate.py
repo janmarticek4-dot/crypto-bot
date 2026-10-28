@@ -167,7 +167,7 @@ class DiagnosticRepairTests(unittest.TestCase):
     def test_detailed_tvl_has_larger_but_bounded_payload(self):
         from v11 import fundamentals
         from unittest.mock import MagicMock
-        for url,expected in [('https://api.llama.fi/protocol/aave',8_000_001),('https://www.bls.gov/feed/bls_latest.rss',2_000_001)]:
+        for url,expected in [('https://api.llama.fi/protocol/aave',32_000_001),('https://www.bls.gov/feed/bls_latest.rss',2_000_001)]:
             response=MagicMock();response.__enter__.return_value.geturl.return_value=url;response.__enter__.return_value.read.return_value=b'{}'
             with patch.object(fundamentals.urllib.request,'urlopen',return_value=response):fundamentals.fetch(dict(url=url))
             response.__enter__.return_value.read.assert_called_once_with(expected)

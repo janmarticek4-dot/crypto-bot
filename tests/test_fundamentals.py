@@ -117,3 +117,13 @@ class ReplacementSelectionTests(unittest.TestCase):
         for name in ('decrypt','theblock'):
             self.assertFalse(next(x for x in f.SOURCES if x['id']==name)['official'])
         self.assertIn('bea_calendar',[x['id'] for x in f.SOURCES])
+
+    def test_payload_over_new_cap_still_rejected_without_parsing(self):
+        from unittest.mock import patch,MagicMock
+        for url,limit in [('https://api.llama.fi/protocol/aave',32000000),('https://example.org/news',2000000)]:
+            raw=MagicMock();raw.__len__.return_value=limit+1
+            response=MagicMock();response.geturl.return_value=url;response.read.return_value=raw
+            with patch.object(f.urllib.request,'urlopen') as opening:
+                opening.return_value.__enter__.return_value=response
+                with self.assertRaises(f.SourcePolicyError) as err:f.fetch(dict(url=url))
+            self.assertEqual(err.exception.reason_code,'PAYLOAD_LIMIT_EXCEEDED')
