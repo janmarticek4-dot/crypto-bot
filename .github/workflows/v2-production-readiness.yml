@@ -8,6 +8,7 @@ on:
       - v11/prediction_runtime.py
       - v11/integrated_report.py
       - v11/telegram_text.py
+      - scripts/public_prediction_store.py
       - scripts/v2_context.py
       - scripts/v2_production_preview.py
       - tests/test_production_v2.py

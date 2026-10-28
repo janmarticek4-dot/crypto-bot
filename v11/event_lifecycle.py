@@ -30,7 +30,8 @@ def parse_statement(raw,url,now):
     match=re.fullmatch(r'https://www\.federalreserve\.gov/newsevents/pressreleases/monetary(\d{8})a\.htm',url)
     if not match:raise ValueError('Not an official statement URL')
     day=datetime.strptime(match[1],'%Y%m%d').date();parser=Paragraphs();parser.feed(raw.decode('utf-8'))
-    plain=re.sub('<[^>]+>',' ',raw.decode('utf-8'));plain=re.sub(r'\s+',' ',unescape(plain))
+    clean=re.sub(r'<(?:script|style)\b[^>]*>.*?</(?:script|style)>','',raw.decode('utf-8'),flags=re.I|re.S)
+    plain=re.sub('<[^>]+>',' ',clean);plain=re.sub(r'\s+',' ',unescape(plain))
     if not re.search(r'Federal Open Market Committee',plain) or not re.search(r'federal funds rate',plain,re.I):raise ValueError('Statement schema missing')
     expected=day.strftime('%B')+f' {day.day}, {day.year}'
     if expected not in plain:raise ValueError('Publication date mismatch')
@@ -51,11 +52,18 @@ def parse_statement(raw,url,now):
     if values and not 0<=values[0]<=values[1]<=30:raise ValueError('Invalid official rate interval')
     vote=next((p for p in parser.paragraphs if re.search(r'Voting for .*were|Voting for .*was',p,re.I)),None)
     index=parser.paragraphs.index(decision)
-    comments=[p for p in parser.paragraphs[max(0,index-3):index] if re.search(r'inflation|employment|economic activity',p,re.I)][-2:]
+    comments=[p for p in parser.paragraphs[max(0,index-3):index+4] if p!=decision and re.search(r'inflation|employment|economic activity',p,re.I) and 'Voting' not in p][:2]
+    if vote is None:
+        vote=next((p for p in parser.paragraphs[max(0,index-2):index+8] if re.search(r'\bvote[ds]?\b|\bvoting\b|\bunanimous(?:ly)?\b',p,re.I)),None)
+    if vote is None:
+        found=re.search(r'((?:Voting for|The vote was|The decision was|The Committee voted)[^<>]{0,900})',plain,re.I)
+        vote=found[1].strip() if found else None
+    position=plain.find(decision)
+    excerpt=plain[max(0,position-800):position+2000] if position>=0 else ' '.join(parser.paragraphs[max(0,index-2):index+5])
     return dict(id='fomc-'+day.isoformat(),event_date=day.isoformat(),title='Fed/FOMC – rozhodnutie',status='RELEASED',
         scheduled_at=published.isoformat() if published else None,published_at=published.isoformat() if published else None,
         retrieved_at=now.isoformat(),source='Federal Reserve',url=url,verified=True,rate_range=values,
-        decision=decision,voting=vote,comments=comments,expectation=None,surprise=None,reaction={},
+        decision=decision,voting=vote,comments=comments,statement_excerpt=excerpt[:2800],expectation=None,surprise=None,reaction={},
         interpretation='Smer dopadu bez overeného konsenzu nepotvrdený; rozhodnutie samo nedokazuje príčinu pohybu.')
 
 def reaction(snapshot,published):
@@ -148,8 +156,10 @@ def lines(fund,now):
         at=fundamentals.timestamp(item.get('published_at'));rates=item.get('rate_range')
         out.append('FED '+item['status']+' — '+item['event_date']+(at.astimezone(BL).strftime(' %H:%M Bratislava') if at else ', čas publikácie N/A')+'.')
         out.append('Oficiálne cieľové pásmo: '+(f'{rates[0]:g}–{rates[1]:g} %.' if rates else 'N/A; číselný rozsah nebolo možné bezpečne extrahovať.'))
-        if item.get('voting'):out.append('Hlasovanie: '+item['voting'][:280])
+        if item.get('voting'):out.append('Hlasovanie podľa komuniké: '+item['voting'][:350])
+        else:out.append('Hlasovanie: N/A — dostupná extrakcia ho nepotvrdila.')
         if item.get('comments'):out.append('Komuniké Fedu: '+item['comments'][0][:260])
+        else:out.append('Podrobný komentár Fedu: N/A — nepodarilo sa bezpečne extrahovať.')
         out.append('Konsenzus/prekvapenie N/A. '+item['interpretation'])
         changes=item.get('reaction',{})
         if changes:

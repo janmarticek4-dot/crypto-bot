@@ -83,3 +83,13 @@ class ProductionV2Tests(unittest.TestCase):
         self.assertEqual(releases[0]['status'],'RELEASED');self.assertIsNone(releases[0]['surprise'])
         fund['events'][0]['url']='https://unverified.example/cpi'
         self.assertEqual(e.economic_releases(fund,AFTER,lambda s:raw)[0],[])
+    def test_comments_after_decision_and_other_voting_format(self):
+        raw=HTML.replace(b'Voting for the monetary policy action were Synthetic Member A; Synthetic Member B. Voting against this action was Synthetic Member C.',b'The decision was unanimous.').replace(b'</p>\n<p>The decision',b'</p><p>Economic activity continued at a moderate pace in this synthetic fixture.</p>\n<p>The decision')
+        result=e.parse_statement(raw,URL,AFTER)
+        self.assertIn('unanimous',result['voting']);self.assertTrue(result['comments'])
+    def test_missing_public_prediction_journal_never_resets(self):
+        import urllib.error
+        from scripts.public_prediction_store import PublicPredictionStore
+        with patch.dict(os.environ,{'GITHUB_REPOSITORY':'example/public','GH_TOKEN':'synthetic'}):store=PublicPredictionStore()
+        with patch.object(store,'request',side_effect=urllib.error.HTTPError('https://api.github.com',404,'missing',{},None)):
+            with self.assertRaisesRegex(RuntimeError,'refusing reset'):store.read()

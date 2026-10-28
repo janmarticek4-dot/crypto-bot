@@ -19,7 +19,7 @@ class PublicPredictionStore:
     def read(self):
         try:value=self.request('GET','contents/'+PATH+'?ref=main')
         except urllib.error.HTTPError as e:
-            if e.code==404:self.sha=None;return journal.load([])
+            if e.code==404:raise RuntimeError('Existing public research journal missing; refusing reset')
             raise
         self.sha=value['sha'];encoded=value.get('content')
         if value.get('encoding')!='base64':encoded=self.request('GET','git/blobs/'+self.sha)['content']
