@@ -61,3 +61,59 @@ class OfficialProjectFeeds(unittest.TestCase):
         source=next(x for x in f.SOURCES if x['id']=='sol_agave')
         raw=b'<feed><entry><title>v1.2</title><updated>2026-10-21T08:00:00Z</updated><link href="https://github.com/other/repo/releases/tag/v1.2"/></entry></feed>'
         self.assertEqual(f.parse_feed(raw,source,NOW),[])
+
+
+class ReplacementSelectionTests(unittest.TestCase):
+    def feed(self,source,date,title='Consumer Price Index release'):
+        return ('<rss><channel><item><title>'+title+'</title><link>'+source['url']+'/release</link><pubDate>'+date+'</pubDate></item></channel></rss>').encode()
+    def selection(self,primary_raw,backup_raw):
+        from unittest.mock import patch
+        primary=dict(id='primary',url='https://primary.example/feed',official=True,coverage=['CPI'])
+        backup=dict(id='backup',url='https://backup.example/feed',official=False,coverage=['CPI'])
+        def fetch(s):
+            raw=primary_raw if s['url']==primary['url'] else backup_raw if s['url']==backup['url'] else OSError('not requested')
+            if isinstance(raw,Exception):raise raw
+            return raw
+        with patch.object(f,'SOURCES',[primary]),patch.dict(f.FALLBACKS,{'primary':[backup]},clear=True):
+            return f.collect({},NOW,fetch)
+    def test_stale_primary_tries_current_backup_with_own_provenance(self):
+        primary=dict(url='https://primary.example/feed');backup=dict(url='https://backup.example/feed')
+        out=self.selection(self.feed(primary,'Thu, 01 Oct 2026 08:00:00 GMT'),self.feed(backup,'Wed, 21 Oct 2026 08:00:00 GMT'))
+        row=out['sources'][0]
+        self.assertEqual(row['selected_source'],'backup');self.assertFalse(row['official'])
+        self.assertEqual(out['events'][0]['source'],'backup')
+        self.assertEqual(row['attempts'][0]['freshness'],'STALE')
+    def test_empty_primary_tries_backup(self):
+        out=self.selection(b'<rss><channel/></rss>',self.feed(dict(url='https://backup.example/feed'),'Wed, 21 Oct 2026 08:00:00 GMT'))
+        self.assertEqual(out['sources'][0]['selected_source'],'backup')
+    def test_quiet_valid_primary_remains_available_when_backup_fails(self):
+        out=self.selection(b'<rss><channel/></rss>',OSError('fixture'))
+        self.assertEqual(out['sources'][0]['status'],'OK')
+        self.assertEqual(out['sources'][0]['selected_source'],'primary')
+        self.assertEqual(out['sources'][0]['attempts'][-1]['status'],'N/A')
+        self.assertEqual(out['events'],[])
+
+    def test_shared_secondary_downloaded_once_per_collection(self):
+        from unittest.mock import patch
+        from collections import Counter
+        counts=Counter();url='https://primary.example/feed'
+        sources=[dict(id=k,url=url,official=True,coverage=['CPI']) for k in ('a','b')]
+        def fetch(source):
+            counts[source['url']]+=1
+            if source['url']!=url:raise OSError('fixture')
+            return self.feed(dict(url=url),'Wed, 21 Oct 2026 08:00:00 GMT')
+        with patch.object(f,'SOURCES',sources),patch.dict(f.FALLBACKS,{},clear=True):
+            f.collect({},NOW,fetch)
+        self.assertEqual(counts[url],1)
+    def test_larger_aave_limit_is_bounded_and_endpoint_specific(self):
+        from unittest.mock import patch,MagicMock
+        for url,limit in [('https://api.llama.fi/protocol/aave',32000000),('https://api.llama.fi/protocol/other',8000000),('https://example.org/news',2000000)]:
+            response=MagicMock();response.geturl.return_value=url;response.read.return_value=b'{}'
+            with patch.object(f.urllib.request,'urlopen') as opening:
+                opening.return_value.__enter__.return_value=response
+                self.assertEqual(f.fetch(dict(url=url)),b'{}')
+            response.read.assert_called_once_with(limit+1)
+    def test_new_secondary_registry_never_claims_official_status(self):
+        for name in ('decrypt','theblock'):
+            self.assertFalse(next(x for x in f.SOURCES if x['id']==name)['official'])
+        self.assertIn('bea_calendar',[x['id'] for x in f.SOURCES])

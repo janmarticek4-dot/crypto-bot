@@ -1,5 +1,6 @@
 """Dated, attributed public-source events. No AI-created news or probabilities."""
 import concurrent.futures
+import threading
 import hashlib
 import json
 import math
@@ -18,6 +19,7 @@ SOURCES=[
     dict(id='fed',url='https://www.federalreserve.gov/feeds/press_all.xml',official=True,coverage=['Fed']),
     dict(id='bls',url='https://www.bls.gov/feed/bls_latest.rss',official=True,coverage=['CPI','employment']),
     dict(id='bls_calendar',url='https://www.bls.gov/schedule/news_release/bls.ics',official=True,coverage=['CPI','employment'],format='ics'),
+    dict(id='bea_calendar',url='https://www.bea.gov/news/schedule/ics/online-calendar-subscription.ics',publisher_host='bea.gov',official=True,coverage=['PCE','GDP'],format='ics'),
     dict(id='bea',url='https://apps.bea.gov/rss/rss.xml',publisher_host='bea.gov',official=True,coverage=['PCE']),
     dict(id='ecb',url='https://www.ecb.europa.eu/rss/press.html',official=True,coverage=['Fed','regulation']),
     dict(id='cftc',url='https://www.cftc.gov/RSS/RSSGP/rssgp.xml',official=True,coverage=['regulation']),
@@ -28,6 +30,8 @@ SOURCES=[
     dict(id='tao_subtensor',url='https://github.com/opentensor/subtensor/releases.atom',official=True,publisher_path='/opentensor/subtensor/',coverage=['project'],symbol='TAO',kind='software_release_notice'),
     dict(id='fet_fetchd',url='https://github.com/fetchai/fetchd/releases.atom',official=True,publisher_path='/fetchai/fetchd/',coverage=['project'],symbol='FET',kind='software_release_notice'),
     dict(id='render_rnp',url='https://github.com/rendernetwork/RNPs/commits/main.atom',official=False,coverage=['project'],symbol='RENDER',kind='governance_repository_change'),
+    dict(id='decrypt',url='https://decrypt.co/feed',official=False,coverage=['regulation','hack','project','geopolitics']),
+    dict(id='theblock',url='https://www.theblock.co/rss.xml',official=False,coverage=['regulation','hack','project','geopolitics']),
     dict(id='coindesk',url='https://www.coindesk.com/arc/outboundfeeds/rss/',official=False,coverage=['regulation','hack','project']),
     dict(id='cointelegraph',url='https://cointelegraph.com/rss',official=False,coverage=['regulation','hack','project']),
 ]
@@ -35,13 +39,25 @@ SOURCES=[
 FALLBACKS={
  'bea':[dict(id='bea_www',url='https://www.bea.gov/rss/rss.xml',official=True,publisher_host='bea.gov',coverage=['PCE'])],
  'fed':[dict(id='fed_monetary',url='https://www.federalreserve.gov/feeds/press_monetary.xml',official=True,coverage=['Fed'])],
- 'bls_calendar':[dict(id='bls_year_calendar',url='https://www.bls.gov/schedule/news_release/current_year.ics',official=True,coverage=['CPI','employment'],format='ics')],
  'ecb':[dict(id='ecb_blog',url='https://www.ecb.europa.eu/rss/blog.html',official=True,coverage=['Fed'],kind='central_bank_blog_not_decision')],
- 'sec':[dict(id='sec_new_path',url='https://www.sec.gov/newsroom/press-releases/rss.xml',official=True,coverage=['regulation'])],
- 'aave':[dict(id='aave_aip',url='https://github.com/aave/aip/commits/main.atom',official=False,publisher_path='/aave/aip/',coverage=['project'],symbol='AAVE',kind='governance_repository_change')],
+ 'sec':[dict(id='sec_secondary',url='https://www.theblock.co/rss.xml',official=False,coverage=['regulation'],title_filter=r'\bSEC\b|securities and exchange',kind='secondary_regulatory_report')],
  'ondo':[dict(id='ondo_secondary',url='https://www.coindesk.com/arc/outboundfeeds/rss/',official=False,coverage=['project','regulation'],symbol='ONDO',title_filter=r'\bondo\b',kind='secondary_project_report')],
 }
-FUNDAMENTAL_TITLE=r'govern|proposal|tokeniz|unlock|emission|upgrade|launch|partner|regulat|enforcement|lawsuit|hack|exploit|treasury|treasuries|adoption'
+# News backups are explicitly secondary, never a replacement for an official
+# result, on-chain measurement, or proof of project adoption.
+for _source_id,_symbol,_filter in (
+    ('aave','AAVE',r'\baave\b'),('ondo','ONDO',r'\bondo\b'),
+    ('sol_agave','SOL',r'\bsolana\b'),('tao_subtensor','TAO',r'\bbittensor\b'),
+    ('fet_fetchd','FET',r'fetch\.ai|artificial superintelligence alliance|\bFET\b'),
+    ('render_rnp','RENDER',r'render network|\bRENDER\b')):
+    FALLBACKS.setdefault(_source_id,[]).extend([
+        dict(id=_source_id+'_secondary_'+_provider,url=_url,official=False,
+             coverage=['project','regulation','hack'],symbol=_symbol,title_filter=_filter,
+             kind='secondary_project_report')
+        for _provider,_url in [('theblock','https://www.theblock.co/rss.xml'),
+                               ('decrypt','https://decrypt.co/feed')]])
+
+FUNDAMENTAL_TITLE=r'govern|proposal|tokeniz|unlock|emission|upgrade|launch|partner|regulat|enforcement|lawsuit|hack|exploit|treasury|treasuries|adoption|\betf\b|approval|fees?|revenue|usage|incident|network outage'
 
 PATTERNS={
  'Fed':r'monetary policy decisions|\bfomc\b|federal reserve|monetary policy|\bfed\b|interest[- ]rates?',
@@ -236,7 +252,8 @@ def fetch(source):
         publisher=source.get('publisher_host',initial)
         if urllib.parse.urlsplit(r.geturl()).scheme!='https' or (final!=initial and final!=publisher and not final.endswith('.'+publisher)):raise SourcePolicyError('UNEXPECTED_REDIRECT')
         # Detailed TVL histories are larger than RSS. Keep both paths bounded.
-        limit=8_000_000 if initial=='api.llama.fi' and urllib.parse.urlsplit(source['url']).path.startswith('/protocol/') else 2_000_000
+        path=urllib.parse.urlsplit(source['url']).path
+        limit=32_000_000 if initial=='api.llama.fi' and path=='/protocol/aave' else 8_000_000 if initial=='api.llama.fi' and path.startswith('/protocol/') else 2_000_000
         raw=r.read(limit+1)
         if len(raw)>limit:raise SourcePolicyError('PAYLOAD_LIMIT_EXCEEDED')
         return raw
@@ -248,11 +265,21 @@ def collect(state,now=None,fetcher=fetch):
     cached_at=timestamp(old.get('fetched_at'))
     if cached_at and 0<=(now-cached_at).total_seconds()<15*60:return old
     events=[];statuses=[]
+    requests={};request_lock=threading.Lock()
+    def fetch_once(candidate):
+        key=(candidate['url'],candidate.get('publisher_host'))
+        with request_lock:
+            pending=requests.get(key);owner=pending is None
+            if owner:pending=requests[key]=concurrent.futures.Future()
+        if owner:
+            try:pending.set_result(fetcher(candidate))
+            except Exception as exc:pending.set_exception(exc)
+        return pending.result()
     def one(source):
-        attempts=[]
+        attempts=[];first_valid=None
         for candidate in [source,*FALLBACKS.get(source['id'],[])]:
             try:
-                raw=fetcher(candidate)
+                raw=fetch_once(candidate)
                 fmt=candidate.get('format')
                 if fmt=='ics' and b'BEGIN:VCALENDAR' not in raw and b'BEGIN:VEVENT' not in raw:raise ValueError('Unrecognized calendar schema')
                 if fmt=='fomc_html' and not re.search(rb'20\d{2}\s+FOMC Meetings',raw):raise ValueError('Unrecognized FOMC calendar schema')
@@ -266,16 +293,22 @@ def collect(state,now=None,fetcher=fetch):
                     dates=[d for d in dates if d and d<=now]
                     newest=max(dates) if dates else None
                 freshness='CURRENT_RELEVANT' if items else 'STALE' if newest and now-newest>timedelta(hours=72) else 'NO_RECENT_RELEVANT_ITEMS'
+                attempts[-1].update(freshness=freshness,latest_publication_at=newest.isoformat() if newest else None)
                 for item in items:item['retrieved_at']=now.isoformat()
-                return items,dict(source=source['id'],url=candidate['url'],selected_source=candidate['id'],
+                selected=items,dict(source=source['id'],url=candidate['url'],selected_source=candidate['id'],
                     official=candidate['official'],symbol=source.get('symbol'),coverage=candidate.get('coverage',[]),kind=candidate.get('kind','news'),fallback=candidate is not source,
                     freshness=freshness,latest_publication_at=newest.isoformat() if newest else None,
                     status='OK',events=len(items),checked_at=now.isoformat(),attempts=attempts)
+                if items:return selected
+                # HTTP 200 with no current relevant events must not suppress a
+                # useful fallback. Retain valid quiet primary if all backups fail.
+                if first_valid is None:first_valid=selected
             except Exception as exc:
                 code=getattr(exc,'code',None)
                 tunnel='Tunnel connection failed: 403' in str(getattr(exc,'reason',''))
                 attempts.append(dict(source=candidate['id'],url=candidate['url'],status='N/A',error_type=type(exc).__name__,
                     http_status=403 if tunnel else code,error_code=getattr(exc,'reason_code',None) if isinstance(exc,SourcePolicyError) else None,error_layer='response_policy' if isinstance(exc,SourcePolicyError) else 'network_tunnel' if tunnel else 'http_origin_or_gateway' if code else 'transport_or_parse'))
+        if first_valid is not None:return first_valid
         last=attempts[-1]
         return [],dict(source=source['id'],symbol=source.get('symbol'),coverage=source.get('coverage',[]),url=source['url'],status='N/A',error_type=last['error_type'],
             http_status=last['http_status'],error_layer=last['error_layer'],attempts=attempts,checked_at=now.isoformat())

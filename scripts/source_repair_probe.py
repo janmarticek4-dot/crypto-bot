@@ -8,6 +8,7 @@ from v11 import fundamentals as f
 from v11.state_policy import require_public_data
 
 CANDIDATES=[
+ dict(id='aave_aggregate_tvl',url='https://api.llama.fi/protocol/aave',symbol='AAVE'),
  dict(id='ondo_blog_alt',url='https://ondo.finance/blog/rss.xml',official=True,symbol='ONDO',coverage=['project']),
  dict(id='ondo_blog_www',url='https://www.ondo.finance/blog/rss.xml',official=True,symbol='ONDO',coverage=['project']),
  dict(id='sol_news',url='https://solana.com/news/rss.xml',official=True,symbol='SOL',coverage=['project']),

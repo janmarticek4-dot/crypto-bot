@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - v11/fundamentals.py
+      - tests/test_fundamentals.py
       - v11/event_lifecycle.py
       - v11/prediction_runtime.py
       - v11/integrated_report.py
