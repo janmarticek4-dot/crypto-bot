@@ -50,7 +50,7 @@ def comparison(old,current):
         return dict(status='N/A',reason='Referencia je rovnaká, stará alebo časovo neoveriteľná.')
     g=current['global_data'];og=old.get('global_data',{})
     dominance=g.get('dominance');prior=og.get('dominance')
-    result=dict(status='COMPARED',previous_at=a.isoformat(),global_cap_pct=delta(g.get('cap'),og.get('cap')),global_volume_pct=delta(g.get('volume'),og.get('volume')),
+    result=dict(status='COMPARED',previous_at=a.isoformat(),global_cap_pct=delta(g.get('cap'),og.get('cap')),global_volume_pct=delta(g.get('volume'),og.get('volume')) if number(g.get('volume')) and g['volume']>0 else None,
                 dominance_pp=dominance-prior if number(dominance) and number(prior) else None,coins={},metrics={},economics={})
     for s,c in current['coins'].items():
         p=old.get('coins',{}).get(s,{})

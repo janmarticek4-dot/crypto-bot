@@ -93,3 +93,31 @@ class ProductionV2Tests(unittest.TestCase):
         with patch.dict(os.environ,{'GITHUB_REPOSITORY':'example/public','GH_TOKEN':'synthetic'}):store=PublicPredictionStore()
         with patch.object(store,'request',side_effect=urllib.error.HTTPError('https://api.github.com',404,'missing',{},None)):
             with self.assertRaisesRegex(RuntimeError,'refusing reset'):store.read()
+
+    def test_native_presentation_only_changes_outgoing_text(self):
+        from scripts import native_presentation as native
+        with patch.object(native.legacy, 'telegram_send') as sender:
+            original = native.legacy.telegram_send
+            def action():
+                native.legacy.telegram_send('Risk: verified https://example.org/evidence')
+                return 'unchanged native result'
+            with patch.object(native.legacy, 'main', side_effect=action):
+                self.assertEqual(native.run(), 'unchanged native result')
+            self.assertIs(native.legacy.telegram_send, original)
+            sender.assert_called_once_with('Risk: verified')
+    def test_native_presentation_restores_sender_after_failure(self):
+        from scripts import native_presentation as native
+        with patch.object(native.legacy, 'telegram_send') as original:
+            with patch.object(native.legacy, 'main', side_effect=RuntimeError('fixture')):
+                with self.assertRaises(RuntimeError):native.run()
+            self.assertIs(native.legacy.telegram_send, original)
+
+    def test_missing_global_volume_not_reported_as_total_collapse(self):
+        snap=sample();current=model(snap)['observation'];previous=copy.deepcopy(current)
+        previous['at']=(NOW-timedelta(hours=1)).isoformat()
+        previous['fingerprint']='a'*64
+        previous['global_data']['volume']=1000000
+        current['global_data']['volume']=0
+        self.assertIsNone(analyst.comparison(previous,current)['global_volume_pct'])
+        current['global_data']['volume']=800000
+        self.assertAlmostEqual(analyst.comparison(previous,current)['global_volume_pct'],-20)
