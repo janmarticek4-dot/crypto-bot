@@ -62,12 +62,16 @@ def parse_flows(raw,symbol,now):
     asset='Bitcoin' if symbol=='BTC' else 'Ethereum' if symbol=='ETH' else None
     if not asset or not re.search(asset+r'\s+ETF Flow',text,re.I) or not re.search(r'US\$\s*m(?:illion)?\b',text,re.I):raise ValueError('ETF identity or USD-million unit missing')
     if ('IBIT' if symbol=='BTC' else 'ETHA') not in text or not any('Total' in row for row in reader.rows):raise ValueError('ETF table header missing')
+    widths={len(row) for row in reader.rows if ('IBIT' if symbol=='BTC' else 'ETHA') in row}
+    if len(widths)!=1:raise ValueError('Ambiguous ETF column schema')
+    width=next(iter(widths))
     rows={}
     for row in reader.rows:
         if not 4<=len(row)<=40:continue
         try:day=datetime.strptime(row[0],'%d %b %Y').date()
         except ValueError:continue
         if not 0<=(now.date()-day).days<=30:continue
+        if len(row)!=width:raise ValueError('ETF row has missing or extra columns')
         values=[flow_number(v) for v in row[1:]];total=values[-1]
         if total is None:continue
         parts=values[:-1];complete=all(v is not None for v in parts)

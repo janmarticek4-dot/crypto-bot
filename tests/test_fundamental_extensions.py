@@ -29,6 +29,8 @@ class ExtendedFundamentalTests(unittest.TestCase):
             with self.assertRaises(ValueError):x.flow_number(text)
     def test_flow_total_mismatch_rejected(self):
         with self.assertRaises(ValueError):x.parse_flows(table([['27 Oct 2026','3','4','70']]),'BTC',NOW)
+    def test_misaligned_table_cannot_be_a_complete_zero_row(self):
+        with self.assertRaises(ValueError):x.parse_flows(table([['27 Oct 2026','0.0','0.0','0.0','0.0']]),'BTC',NOW)
     def test_flow_unit_required(self):
         with self.assertRaises(ValueError):x.parse_flows(table([['27 Oct 2026','3','4','7']],unit='unknown'),'BTC',NOW)
     def test_flow_asset_identity_required(self):
