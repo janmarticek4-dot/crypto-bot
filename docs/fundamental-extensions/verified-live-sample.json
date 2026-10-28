@@ -1,0 +1,129 @@
+{
+  "flows": {
+    "BTC": {
+      "date": "2026-10-27",
+      "net_flow_usd": 176000000.0,
+      "previous_date": "2026-10-26",
+      "previous_net_flow_usd": 110300000.0,
+      "latest_incomplete_date": "2026-10-28"
+    },
+    "ETH": {
+      "date": "2026-10-27",
+      "net_flow_usd": -60200000.0,
+      "previous_date": "2026-10-26",
+      "previous_net_flow_usd": -88600000.0,
+      "latest_incomplete_date": "2026-10-28"
+    }
+  },
+  "forecasts": [
+    {
+      "title": "Advance GDP q/q",
+      "event_at": "2026-10-29T12:30:00+00:00",
+      "forecast": "3.2%",
+      "previous": "1.5%",
+      "official_schedule": "MATCHED"
+    },
+    {
+      "title": "Core PCE Price Index m/m",
+      "event_at": "2026-10-29T12:30:00+00:00",
+      "forecast": "0.3%",
+      "previous": "0.2%",
+      "official_schedule": "MATCHED"
+    },
+    {
+      "title": "Advance GDP Price Index q/q",
+      "event_at": "2026-10-29T12:30:00+00:00",
+      "forecast": "3.2%",
+      "previous": "6.2%",
+      "official_schedule": "MATCHED"
+    },
+    {
+      "title": "Unemployment Claims",
+      "event_at": "2026-10-29T12:30:00+00:00",
+      "forecast": "198K",
+      "previous": "194K",
+      "official_schedule": "UNCONFIRMED"
+    },
+    {
+      "title": "Employment Cost Index q/q",
+      "event_at": "2026-10-30T12:30:00+00:00",
+      "forecast": "0.8%",
+      "previous": "0.9%",
+      "official_schedule": "UNCONFIRMED"
+    },
+    {
+      "title": "Chicago PMI",
+      "event_at": "2026-10-30T13:45:00+00:00",
+      "forecast": "55.8",
+      "previous": "58.8",
+      "official_schedule": "UNCONFIRMED"
+    }
+  ],
+  "unlocks": [
+    {
+      "symbol": "ONDO",
+      "event_date": "2027-01-18",
+      "amount": null,
+      "event_at": null,
+      "status": "PROVIDER_SCHEDULE_NOT_ONCHAIN_CONFIRMED"
+    },
+    {
+      "symbol": "FET",
+      "event_date": "2026-11-28",
+      "amount": null,
+      "event_at": null,
+      "status": "PROVIDER_SCHEDULE_NOT_ONCHAIN_CONFIRMED"
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "SOL_dex_volume",
+      "value": 1582952703.6299996,
+      "unit": "USD/day",
+      "period": "2026-10-27T00:00:00+00:00",
+      "previous_value": 2071067618.21
+    },
+    {
+      "metric": "SOL_stablecoin_supply",
+      "value": 15784290458.369999,
+      "unit": "USD stock",
+      "period": "2026-10-28T00:00:00+00:00",
+      "previous_value": 15763445683
+    },
+    {
+      "metric": "SOL_circulating_supply",
+      "value": 589928188.2368486,
+      "unit": "SOL",
+      "period": null,
+      "previous_value": null
+    },
+    {
+      "metric": "TAO_subnet_liquidity",
+      "value": 467401663,
+      "unit": "USD stock",
+      "period": "2026-10-28T21:58:47+00:00",
+      "previous_value": 460998288
+    },
+    {
+      "metric": "RENDER_job_fees",
+      "value": 145242.0,
+      "unit": "USD/day",
+      "period": "2026-10-27T00:00:00+00:00",
+      "previous_value": 148346.0
+    },
+    {
+      "metric": "FET_native_inflation",
+      "value": 3.0,
+      "unit": "% annualized protocol parameter",
+      "period": null,
+      "previous_value": null
+    },
+    {
+      "metric": "SOL_native_inflation",
+      "value": 3.5825058070128564,
+      "unit": "% annualized protocol parameter",
+      "period": null,
+      "previous_value": null
+    }
+  ]
+}
