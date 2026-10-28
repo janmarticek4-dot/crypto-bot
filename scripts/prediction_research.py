@@ -204,6 +204,9 @@ def run(reuse=False,reuse_histories=False):
         records=[r for r in records if r['id'] in existing] # no new forecast for an old rerun outside retention
     observations,endpoint_errors=collect_endpoints(api,old,now_ms)
     updated=journal.update(old,records,vintage,observations,now_ms)
+    from v11.prediction_runtime import package
+    updated['runtime_package']=package(results,now_ms)
+    journal.load(updated)
     evidence=analyze(fund,now)
     preview=['VÝSKUM V2 — NEAKTÍVNE, nie potvrdené odporúčania',now.astimezone(BL).strftime('%d.%m.%Y %H:%M Bratislava'),
         'Nové nákupy WAIT; súkromné držby sa nenačítavajú. Istota NÍZKA. Kalibrované pravdepodobnosti N/A.']

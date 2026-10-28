@@ -91,6 +91,7 @@ def outlook(coin,tf):
 def relevant_events(fund,now):
     out=[]
     for e in analyze(fund,now)['evidence']:
+        if e['id'] in fund.get('event_lifecycle',{}).get('superseded_ids',[]):continue
         if not e['material']:continue
         cats=set(e['categories']);title=e['title']
         macro=bool(cats&{'Fed','CPI','PCE','employment','GDP'})
@@ -118,6 +119,7 @@ def prepare(snapshot,fund,now,quotes,legacy_evaluations,old=None):
     forecasts={s:{'24–72 h':outlook(snapshot['coins'].get(s,{}),'4h'),'7–14 dní':outlook(snapshot['coins'].get(s,{}),'1d')} for s in ('BTC',*COINS)}
     scheduled=[]
     for e in fund.get('events',[]):
+        if e.get('lifecycle') in ('SUPERSEDED','RELEASED','REACTION','AWAITING_VERIFICATION'):continue
         if not e.get('scheduled') or not set(e.get('categories',[]))&{'Fed','CPI','PCE','employment','GDP'}:continue
         if re.search(r'metropolitan|county|state employment|regional',e.get('title',''),re.I):continue
         at=timestamp(e.get('event_at'));day=e.get('event_date')

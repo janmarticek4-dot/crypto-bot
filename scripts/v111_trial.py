@@ -6,6 +6,7 @@ import math
 import os
 from pathlib import Path
 import re
+import time
 import sys
 import urllib.request
 import urllib.error
@@ -123,9 +124,12 @@ class PublicJournal:
 
 
 def send(text):
+    from v11.telegram_text import without_links
+    text=without_links(text)
     token=os.environ['TELEGRAM_TOKEN'];chat=os.environ['TELEGRAM_CHAT_ID']
     # Exactly one HTTP attempt per part. Timeout is uncertain, never retried.
-    for part in chunks(text):
+    for index,part in enumerate(chunks(text)):
+        if index:time.sleep(1.1)
         req=urllib.request.Request('https://api.telegram.org/bot'+token+'/sendMessage',
             data=json.dumps({'chat_id':chat,'text':part,'disable_web_page_preview':True}).encode(),headers={'Content-Type':'application/json'})
         with urllib.request.urlopen(req,timeout=25) as response:
@@ -149,7 +153,11 @@ def run(manual_key=None):
         previous=next((entry.get('quotes') for slot,entry in sorted(state['slots'].items(),reverse=True) if slot.endswith('-usa') and entry.get('status')=='sent'),None)
         text=us.render(context,now,target,previous,(now-started).total_seconds())
         fundamental=fundamentals.collect({},now)
-        upcoming=[e for e in fundamental.get('events',[]) if e.get('scheduled')]
+        if os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
+            from v11 import event_lifecycle
+            fundamental=event_lifecycle.collect(fundamental,now)
+            text+='\n'+'\n'.join(event_lifecycle.lines(fundamental,now))
+        upcoming=[e for e in fundamental.get('events',[]) if e.get('scheduled') and e.get('lifecycle','UPCOMING')=='UPCOMING']
         text+='\nNajbližšie plánované: '+(' | '.join(e['title'][:80]+'; '+(fundamentals.timestamp(e['event_at']).astimezone(BL).strftime('%d.%m. %H:%M Bratislava') if e.get('event_at') else e.get('event_date','N/A')+' čas N/A')+'; '+e['url'] for e in upcoming[:2]) or 'N/A v dostupných zdrojoch.')
         text+='\n'+macro_context.lines(macro_context.collect({},now))[0]
         require_public_data(text)

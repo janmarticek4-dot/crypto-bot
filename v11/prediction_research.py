@@ -101,14 +101,22 @@ def label_data(data,h,end):
     y=np.log(data['close'][idx+h]/data['close'][idx])/(data['sigma'][idx]*math.sqrt(h))
     return idx,y
 
-def fit_predict(x,y,current):
+def fit_state(x,y):
     if len(y)<80:return None
     mean=np.mean(x,axis=0);std=np.std(x,axis=0);std=np.where(std>1e-8,std,1.)
     z=np.clip((x-mean)/std,-5,5);z=np.c_[np.ones(len(z)),z]
     target=np.clip(y,-5,5)
     penalty=np.eye(z.shape[1])*RIDGE;penalty[0,0]=1e-6
     beta=np.linalg.solve(z.T@z+penalty,z.T@target)
-    return float(np.r_[1.,np.clip((current-mean)/std,-5,5)]@beta)
+    return dict(mean=mean.tolist(),std=std.tolist(),beta=beta.tolist())
+
+def predict_state(state,current):
+    z=np.clip((current-np.array(state['mean']))/np.array(state['std']),-5,5)
+    return float(np.r_[1.,z]@np.array(state['beta']))
+
+def fit_predict(x,y,current):
+    state=fit_state(x,y)
+    return predict_state(state,current) if state is not None else None
 
 def validate_vintage(item):
     required={'symbol','feature','value','available_at','published_at','retrieved_at','source_url','vintage_id'}
@@ -147,7 +155,7 @@ def pit_features(vintages,symbol,at,project=False):
     if not any(found[:len(MACRO)]) or (project and not any(found[len(MACRO):])):return None
     return np.array(values)
 
-def point_models(data,i,h,vol_limit,vintages=(),symbol='SOL'):
+def point_models(data,i,h,vol_limit,vintages=(),symbol='SOL',fit_models=True):
     c=data['close'];s=data['sigma'][i]*math.sqrt(h)
     if not np.isfinite(s) or s<=0 or not np.all(np.isfinite(data['features'][i])):return {}
     trend=(c[i]/c[i-20]-1)*h/20
@@ -161,6 +169,7 @@ def point_models(data,i,h,vol_limit,vintages=(),symbol='SOL'):
     adaptive=.1*np.clip(momentum,-s,s)
     if mode in ('SIDEWAYS','HIGH_VOLATILITY','CRISIS_PROXY'):adaptive=0.
     out=dict(flat=0.,trend=float(np.log1p(max(-.95,trend))),legacy_v1=float(np.log1p(old)),regime_momentum=float(adaptive))
+    if not fit_models:return out
     idx,y=label_data(data,h,i+1);idx=idx[-WINDOW:];y=y[-WINDOW:]
     if len(idx):
         q=fit_predict(data['features'][idx],y,data['features'][i])
@@ -270,10 +279,14 @@ def experiment(rows,btc,symbol,vintages=()):
             tolerance_factor=threshold,calibration_counts={m:len(v) for m,v in calibration.items()},interval_method='10/90% normalized forward-error quantiles from training only, frozen; not a probability forecast')
         points=point_models(data,n-1,h,vol_limit,vintages,symbol);scale=data['sigma'][-1]*math.sqrt(h)
         if selected and selected in points and selected in offsets:
+            fit=None
+            if selected=='ridge_technical':
+                fit_idx,fit_y=label_data(data,h,n)
+                fit=fit_state(data['features'][fit_idx[-WINDOW:]],fit_y[-WINDOW:])
             q=points[selected];lo,hi=offsets[selected];p=data['close'][-1]
             live[label]=dict(model=selected,point=float(p*math.exp(q)),low=float(p*math.exp(q+lo*scale)),high=float(p*math.exp(q+hi*scale)),price=float(p),
                 log_return=q,trend_log_return=points['trend'],input_features=[float(v) for v in data['features'][-1]],volatility_4h=float(data['sigma'][-1]),direction=direction(q,threshold*scale),tolerance_pct=math.expm1(threshold*scale)*100,confidence='NÍZKA',probabilities=None,
-                alt_up=float(p*math.exp(q+hi*scale)),alt_down=float(p*math.exp(q+lo*scale)),regime=regime(data,n-1,vol_limit))
+                runtime_state=dict(model=selected,volatility_limit=vol_limit,tolerance_factor=threshold,offsets=[lo,hi],ridge=fit),alt_up=float(p*math.exp(q+hi*scale)),alt_down=float(p*math.exp(q+lo*scale)),regime=regime(data,n-1,vol_limit))
         all_records.extend(records)
     if not result:raise ValueError('NO_DATA: no eligible training horizons')
     return dict(version=VERSION,status='RESEARCH_ONLY',independent_validation=False,source_start=rows[0]['timestamp'],source_end=rows[-1]['timestamp'],

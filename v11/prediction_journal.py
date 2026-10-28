@@ -43,8 +43,13 @@ def validate_record(row):
 
 def load(value):
     if isinstance(value,list):value=dict(schema=SCHEMA,predictions=value,input_vintages=[],totals={})
-    if not isinstance(value,dict) or set(value)!={'schema','predictions','input_vintages','totals'} or value['schema']!=SCHEMA:raise ValueError('Invalid journal schema')
+    value=copy.deepcopy(value)
+    if isinstance(value,dict) and 'runtime_package' not in value:value['runtime_package']=None
+    if not isinstance(value,dict) or set(value)!={'schema','predictions','input_vintages','totals','runtime_package'} or value['schema']!=SCHEMA:raise ValueError('Invalid journal schema')
     if not isinstance(value['predictions'],list) or len(value['predictions'])>600 or not isinstance(value['input_vintages'],list) or len(value['input_vintages'])>10000:raise ValueError('Journal limit exceeded')
+    if value['runtime_package'] is not None:
+        from .prediction_runtime import validate
+        validate(value['runtime_package'])
     totals=value['totals']
     fields={'n','direction_hits','band_hits','error_sum_pct','flat_error_sum_pct','trend_error_sum_pct','trend_n'}
     if not isinstance(totals,dict) or len(totals)>18:raise ValueError('Invalid lifetime totals')

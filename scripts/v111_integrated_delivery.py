@@ -77,13 +77,24 @@ def run():
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
         def enrich(snap,fund,now,kind,previous=None):
+            display=os.getenv('V2_REPORT_ENABLED','false').lower()=='true'
+            if display:
+                from v11 import event_lifecycle
+                fund=event_lifecycle.collect(fund,now,snap)
             previous=previous if v112 else comparable_morning(previous,snap,now) if kind=='evening' else None
             text,quotes,evaluations=integration.render(legacy,snap,fund,now,kind,state,previous,fear)
             if v112:
                 from v11 import analyst
                 model=analyst.prepare(snap,fund,now,quotes,evaluations,previous)
+                if display:
+                    from scripts.v2_context import enrich as add_predictions
+                    try:add_predictions(snap,fund,now,model)
+                    except Exception as exc:model.update(experimental_predictions={},prediction_diagnostics={'prediction_error':type(exc).__name__})
                 holder['model']=model
-                text=analyst.final_text(model,snap,now,kind)
+                if display:
+                    from v11.integrated_report import render
+                    text=render(model,snap,now,kind)
+                else:text=analyst.final_text(model,snap,now,kind)
                 quotes['_v112_observation']=model['observation']
             directory=os.getenv('V111_DIAGNOSTICS_DIR')
             if directory:
@@ -102,7 +113,12 @@ def run():
         pilot.render=enrich
         if v112:
             from v11 import analyst
-            pilot.personalize=lambda inventory,snap,now,kind:analyst.final_text(holder['model'],snap,now,kind,inventory)
+            def private_render(inventory,snap,now,kind):
+                if os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
+                    from v11.integrated_report import render
+                    return render(holder['model'],snap,now,kind,inventory)
+                return analyst.final_text(holder['model'],snap,now,kind,inventory)
+            pilot.personalize=private_render
         return invoke() # same canonical slot and CAS-before-send owner
     finally:
         pilot.render=original_render
