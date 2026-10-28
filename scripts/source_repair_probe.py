@@ -39,7 +39,8 @@ def run():
  for r in rows:
   report.append('| '+' | '.join(str(x) for x in (r['source'],r['status'],r.get('http_status') or r.get('error_code') or r.get('error_type') or '',r.get('publication_at') or 'N/A',r.get('relevant_items','N/A')))+' |')
   minimal={k:r.get(k) for k in ('source','status','http_status','error_code','error_layer','publication_at','relevant_items','bytes')}
-  print('::notice title=Source repair::'+json.dumps(minimal))
+ # Compact first notice stays below GitHub's annotation length/count limits.
+ print('::notice title=Source repair summary::'+json.dumps([[r['source'],r['status'],r.get('http_status') or r.get('error_code')] for r in rows],separators=(',',':')))
  (out/'REPORT.md').write_text('\n'.join(report)+'\n')
 
 if __name__=='__main__':run()
