@@ -33,7 +33,7 @@ def observation(snapshot,fund,now,quotes):
     obs=dict(schema='public-analysis-v112',at=now.isoformat(),fingerprint=fingerprint(snapshot),global_data=copy.deepcopy(snapshot.get('global_data',{})),
         coins={s:dict(price=c.get('price') if not c.get('stale',True) and number(c.get('price')) and c['price']>0 else None,market_cap=c.get('market_cap'),volume_24h=c.get('volume_24h'),
                 technical_score=quotes.get(s,{}).get('trend_score_10'),legacy_action=quotes.get(s,{}).get('action'),risk_points=quotes.get(s,{}).get('risk_points'),
-                support_broken=c.get('frames',{}).get('4h',{}).get('support_broken')) for s,c in snapshot.get('coins',{}).items() if s in (*COINS,'BTC')},
+                circulating_supply=c.get('circulating_supply'),total_supply=c.get('total_supply'),max_supply=c.get('max_supply'),metadata_at=c.get('metadata_at'),support_broken=c.get('frames',{}).get('4h',{}).get('support_broken')) for s,c in snapshot.get('coins',{}).items() if s in (*COINS,'BTC')},
         metrics={s:dict(value=v.get('value'),at=v.get('at')) for s,v in fund.get('metrics',{}).items()},economics=economics,event_ids=[e['id'] for e in relevant_events(fund,now)])
     obs['fingerprint']=digest(dict(market=obs['fingerprint'],global_data=obs['global_data'],metrics=obs['metrics'],economics=economics,event_ids=obs['event_ids']))
     require_public_data(obs);return obs
@@ -54,7 +54,7 @@ def comparison(old,current):
                 dominance_pp=dominance-prior if number(dominance) and number(prior) else None,coins={},metrics={},economics={})
     for s,c in current['coins'].items():
         p=old.get('coins',{}).get(s,{})
-        result['coins'][s]=dict(price_pct=delta(c.get('price'),p.get('price')),cap_pct=delta(c.get('market_cap'),p.get('market_cap')),volume_pct=delta(c.get('volume_24h'),p.get('volume_24h')),trend_before=p.get('technical_score'),trend_now=c.get('technical_score'),legacy_before=p.get('legacy_action'),legacy_now=c.get('legacy_action'),risk_before=p.get('risk_points'),risk_now=c.get('risk_points'))
+        result['coins'][s]=dict(price_pct=delta(c.get('price'),p.get('price')),cap_pct=delta(c.get('market_cap'),p.get('market_cap')),volume_pct=delta(c.get('volume_24h'),p.get('volume_24h')),circulating_supply_pct=delta(c.get('circulating_supply'),p.get('circulating_supply')),trend_before=p.get('technical_score'),trend_now=c.get('technical_score'),legacy_before=p.get('legacy_action'),legacy_now=c.get('legacy_action'),risk_before=p.get('risk_points'),risk_now=c.get('risk_points'))
     for s,m in current['metrics'].items():
         p=old.get('metrics',{}).get(s,{})
         result['metrics'][s]=dict(change_pct=delta(m.get('value'),p.get('value')) if p.get('at')!=m.get('at') else None,at=m.get('at'),prior_at=p.get('at'))
@@ -150,6 +150,9 @@ def prepare(snapshot,fund,now,quotes,legacy_evaluations,old=None):
             if change is not None and v.get('period')!=v.get('previous_period'):
                 activity.append(dict(symbol=s,metric=metric,change_pct=change,period=v.get('period'),previous_period=v.get('previous_period'),url=v.get('url')))
     model['data_quality']=dict(current_price_count=sum(not snapshot['coins'].get(s,{}).get('stale',True) and number(snapshot['coins'].get(s,{}).get('price')) and snapshot['coins'][s]['price']>0 for s in COINS),primary_official_current_sources=sum(bool(s.get('official')) and not s.get('fallback') and s.get('freshness')=='CURRENT_RELEVANT' for s in fund.get('sources',[])),provider_asof_unknown_metrics=[s for s,m in fund.get('metrics',{}).items() if not m.get('at')],liquidity_depth=None,verified_etf_flows=None,rate_consensus=None,confidence='kvalitatívna, obmedzená pokrytím; nie kalibrovaná pravdepodobnosť',unavailable_dimensions=['overené ETF toky','likvidácie derivátov','hĺbka orderbooku','DXY','sadzbový konsenzus','úplná geopolitika','projektoví aktívni používatelia','úplný token-unlock kalendár'])
+    extensions=fund.get('extensions',{})
+    model['data_quality'].update(reported_etf_flows=bool(extensions.get('etf_flows')),calendar_forecasts=len(extensions.get('consensus',[])),reported_unlocks=len(extensions.get('unlocks',[])),scoped_extra_metrics=len(extensions.get('project_metrics',{})))
+    model['data_quality']['unavailable_dimensions']=[('nezávislé a globálne úplné ETF toky' if item=='overené ETF toky' else item) for item in model['data_quality']['unavailable_dimensions']]
     model['project_activity']=sorted(activity,key=lambda v:abs(v['change_pct']),reverse=True)
     model['comparison']=comparison(old,obs)
     require_public_data(model);return model

@@ -245,7 +245,15 @@ class SourcePolicyError(ValueError):
 
 
 def fetch(source):
-    req=urllib.request.Request(source['url'],headers={'User-Agent':'CryptoBotResearch/11.0 (public-source calendar reader)'})
+    headers={'User-Agent':'CryptoBotResearch/11.2 (public-source analytical reader)'}
+    body=None
+    if source.get('rpc_method'):
+        method=source['rpc_method']
+        if source['url']!='https://api.mainnet-beta.solana.com' or method not in ('getSupply','getInflationRate'):raise SourcePolicyError('RPC_METHOD_NOT_ALLOWED')
+        payload=dict(jsonrpc='2.0',id=1,method=method)
+        if method=='getSupply':payload['params']=[dict(commitment='finalized',excludeNonCirculatingAccountsList=True)]
+        body=json.dumps(payload).encode();headers['Content-Type']='application/json'
+    req=urllib.request.Request(source['url'],data=body,headers=headers)
     with urllib.request.urlopen(req,timeout=8) as r:
         initial=urllib.parse.urlsplit(source['url']).hostname.removeprefix('www.')
         final=urllib.parse.urlsplit(r.geturl()).hostname.removeprefix('www.')
@@ -359,6 +367,11 @@ def collect(state,now=None,fetcher=fetch):
     economics=collect_economics(fetcher,now)
     result=dict(project_economics=economics,metrics=metrics,metric_sources=metric_statuses,fetched_at=now.isoformat(),events=sorted(unique.values(),key=lambda x:(not x['scheduled'],x['event_at'] or x.get('event_date') or x['published_at'] or ''))[:200],sources=statuses,
                 unavailable=['overený projektový token-unlock kalendár','priame potvrdenie incidentu z primárneho zdroja','potvrdenie skutočnej aktivácie upgrade na sieti'])
+    from .fundamental_extensions import collect as collect_extensions
+    try:
+        from .fundamental_extensions import verify_calendar
+        result['extensions']=verify_calendar(collect_extensions(now,fetcher=fetcher),result['events'])
+    except Exception as exc:result['extensions']=dict(sources=[dict(status='N/A',error_type=type(exc).__name__)])
     state['fundamentals_v11']=result
     return result
 

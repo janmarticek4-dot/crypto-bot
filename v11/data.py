@@ -75,11 +75,11 @@ def collect(api, full=True):
         age=time.time()-stamp/1000 if stamp else time.time()-meta_stamp.timestamp() if meta_stamp else None
         data=dict(price=price,frames={},raw={},market_cap=meta.get('market_cap'),volume_24h=meta.get('total_volume'),
                   market_cap_change_24h=meta.get('market_cap_change_percentage_24h'),
-                  circulating_supply=meta.get('circulating_supply'),change_24h=api.safe_float(ticker.get('priceChangePercent')) if use_ticker else meta.get('price_change_percentage_24h'),
+                  total_supply=meta.get('total_supply'),max_supply=meta.get('max_supply'),circulating_supply=meta.get('circulating_supply'),change_24h=api.safe_float(ticker.get('priceChangePercent')) if use_ticker else meta.get('price_change_percentage_24h'),
                   stale=age is None or age>900 or age < -60,price_source='Binance' if stamp else 'CoinGecko',age_seconds=age,
                   metadata_at=meta.get('last_updated'),errors=[])
         if not meta_stamp or not -60<=time.time()-meta_stamp.timestamp()<=900:
-            for key in ('market_cap','volume_24h','market_cap_change_24h','circulating_supply'):
+            for key in ('market_cap','volume_24h','market_cap_change_24h','circulating_supply','total_supply','max_supply'):
                 data[key]=None
         intervals=('1h','4h','1d','1w') if full else ('4h',)
         for interval in intervals:

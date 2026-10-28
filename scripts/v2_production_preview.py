@@ -45,6 +45,14 @@ def run(reuse=False):
         predictions={s:len(v) for s,v in model.get('experimental_predictions',{}).items()},parts={k:len(chunks(v)) for k,v in reports.items()})
     require_public_data(audit);(OUT/'audit.json').write_text(json.dumps(audit,ensure_ascii=False,allow_nan=False))
     assert audit['protected_unchanged']
+    extensions=fund.get('extensions',{})
+    summary=dict(flows={symbol:{k:item.get(k) for k in ('date','net_flow_usd','previous_date','previous_net_flow_usd','latest_incomplete_date')} for symbol,item in extensions.get('etf_flows',{}).items()},
+        forecasts=[{k:item.get(k) for k in ('title','event_at','forecast','previous','official_schedule')} for item in extensions.get('consensus',[])],
+        unlocks=[{k:item.get(k) for k in ('symbol','event_date','amount','event_at','status')} for item in extensions.get('unlocks',[])],
+        metrics=[dict(metric=key,value=item['value'],unit=item.get('unit'),period=item.get('period'),previous_value=item.get('previous_value')) for key,item in extensions.get('project_metrics',{}).items()])
+    require_public_data(summary)
+    (OUT/'extension-audit.json').write_text(json.dumps(summary,ensure_ascii=False,allow_nan=False))
+    print('::notice title=Extended fundamentals validated::'+json.dumps(summary,ensure_ascii=False,separators=(',',':')))
     print('::notice title=Production V2 readiness::'+json.dumps(audit,ensure_ascii=False))
     return audit
 

@@ -157,6 +157,8 @@ def run(manual_key=None):
             from v11 import event_lifecycle
             fundamental=event_lifecycle.collect(fundamental,now)
             text+='\n'+'\n'.join(event_lifecycle.lines(fundamental,now))
+            from v11 import fundamental_extensions
+            text+='\n'+'\n'.join(fundamental_extensions.lines(fundamental.get('extensions',{}),now))
         upcoming=[e for e in fundamental.get('events',[]) if e.get('scheduled') and e.get('lifecycle','UPCOMING')=='UPCOMING']
         text+='\nNajbližšie plánované: '+(' | '.join(e['title'][:80]+'; '+(fundamentals.timestamp(e['event_at']).astimezone(BL).strftime('%d.%m. %H:%M Bratislava') if e.get('event_at') else e.get('event_date','N/A')+' čas N/A')+'; '+e['url'] for e in upcoming[:2]) or 'N/A v dostupných zdrojoch.')
         text+='\n'+macro_context.lines(macro_context.collect({},now))[0]

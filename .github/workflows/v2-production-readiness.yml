@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - v11/fundamental_extensions.py
+      - tests/test_fundamental_extensions.py
       - v11/fundamentals.py
       - tests/test_fundamentals.py
       - v11/event_lifecycle.py

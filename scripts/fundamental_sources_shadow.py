@@ -39,6 +39,30 @@ def inspect(raw,source,now):
     """Separate HTTP retrieval, schema, freshness and relevance; no raw bodies stored."""
     url=source['url'];host=urlsplit(url).hostname;fmt=source.get('format')
     out=dict(format=fmt or 'rss_atom',latest_observation=None,publication_at=None,publication_status='N/A',relevant_items=0)
+    from v11 import fundamental_extensions as ext
+    if host=='farside.co.uk':
+        symbol='BTC' if 'btc' in url or 'bitcoin' in url else 'ETH'
+        value=ext.parse_flows(raw,symbol,now)
+        out.update(format='html_etf_table',schema_valid=True,status='OK_CURRENT',latest_observation=value,provides='provider-reported reconciled US spot ETF flows, USD; complete rows only',freshness='complete date at most 5 calendar days; not an issuer audit')
+        return out
+    unlock_symbol=next((symbol for symbol,(page,name) in ext.UNLOCK_PAGES.items() if page==url),None)
+    if unlock_symbol:
+        value=ext.parse_unlock(raw,unlock_symbol,now)
+        out.update(format='public_unlock_faq',schema_valid=True,status='OBSERVED_SCHEDULE_UNCONFIRMED',latest_observation=value,provides='provider-reported next date only; quantity/timezone/project confirmation unavailable',freshness='retrieval known, source publication/revisions unknown')
+        return out
+    if url==ext.CALENDAR:
+        values=ext.parse_forecasts(raw,now)
+        out.update(format='json_forecasts',schema_valid=True,status='OK_CURRENT' if values else 'OK_NO_UPCOMING_PARSED_EVENTS',relevant_items=len(values),provides='third-party forecasts captured before release; not CME FedWatch or official results',freshness='future events within 14 days; no post-event hindsight')
+        return out
+    if url==ext.STABLE or url==ext.DEX or 'bittensor-dtao' in url or 'rest-fetchhub.fetch.ai' in url or source.get('rpc_method'):
+        if url==ext.STABLE:value=ext.parse_stablecoins(raw,now)
+        elif url==ext.DEX:value=ext.parse_daily(raw,now)
+        elif 'bittensor-dtao' in url:value=ext.parse_tvl(raw,now)
+        elif 'rest-fetchhub.fetch.ai' in url:value=ext.parse_inflation(raw,'FET',now)
+        elif source['rpc_method']=='getSupply':value=ext.parse_supply(raw,now)
+        else:value=ext.parse_inflation(raw,'SOL',now)
+        out.update(format='json_scoped_metric',schema_valid=True,status='OK_CURRENT' if value else 'NO_RECENT_VALID_OBSERVATIONS',latest_observation=value,provides='scope-specific public observation, not capital flow or token unlock',freshness='dated provider period or explicitly retrieval-only RPC observation')
+        return out
     if fmt in ('ics','fomc_html'):
         if fmt=='ics':
             if b'BEGIN:VCALENDAR' not in raw or b'END:VCALENDAR' not in raw:raise ValueError('ICS_SCHEMA_MISSING')
@@ -112,7 +136,7 @@ class Probe:
     def fetch(self,source):
         started=time.monotonic()
         matching=next(((s,k) for s,k,u in project_metrics.SOURCES if u==source['url']),None)
-        record=dict(source=source.get('id') or ('_'.join(matching) if matching else urlsplit(source['url']).path),url=source['url'],symbol=source.get('symbol') or (matching[0] if matching else None),
+        record=dict(source=source.get('id') or source.get('rpc_method') or ('_'.join(matching) if matching else urlsplit(source['url']).path),url=source['url'],symbol=source.get('symbol') or (matching[0] if matching else None),
                     retrieved_at=datetime.now(timezone.utc).isoformat(),retrieval='FAILED',schema_valid=False,
                     provides='N/A — zdroj nedostupný; zamýšľaný obsah nie je potvrdený',http_status=None)
         try:

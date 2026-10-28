@@ -10,6 +10,9 @@ def render(model,snapshot,now,kind,inventory=None):
     head,body=base.split('ODPORÚČANIA:',1)
     header=head.splitlines();lines=header[:2]+['MAKRO A AKTUÁLNE UDALOSTI:']
     lines+=event_lifecycle.lines(model.get('_current_fundamentals',{}),now)
+    from . import fundamental_extensions as ext
+    extensions=model.get('_current_fundamentals',{}).get('extensions',{})
+    lines+=ext.lines(extensions,now)
     lines+=header[2:]
     lines+=['','EXPERIMENTÁLNE – PRESNOSŤ NEOVERENÁ. Istota NÍZKA; bez kalibrovaných pravdepodobností. Scenáre nemenia obchodné odporúčania.']
     predictions=model.get('experimental_predictions',{})
@@ -28,6 +31,7 @@ def render(model,snapshot,now,kind,inventory=None):
         if e:lines.append(f"Fundament: {e['title']} ({e['published_at'][:10]}), {e['impact']}.")
         elif activity:lines.append(f"Fundament: {activity['metric']} {analyst.pct(activity['change_pct'])} vs predošlé obdobie; nie čistý prílev ani potvrdenie rastu tokenu.")
         else:lines.append('Fundament: nový významný impulz nepotvrdený; pokrytie čiastočné.')
+        lines+=ext.project_lines(symbol,extensions,c,now)
         for label,short in [('24 h','24 h'),('48–72 h','72 h'),('7–14 dní','14 dní')]:
             f=predictions.get(symbol,{}).get(label)
             if not f:lines.append('Predikcia '+short+': N/A — model alebo aktuálne vstupy nedostupné.');continue
