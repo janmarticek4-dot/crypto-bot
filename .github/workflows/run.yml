@@ -1,4 +1,4 @@
-name: Crypto AI Bot V10.6
+name: Crypto AI Bot V11.2
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       manual_v111_analysis:
-        description: "Ručná analýza V11.1 — kompletný aktuálny report do Telegramu"
+        description: "Ručná analýza V11.2 — aktuálny report s experimentálnym V2"
         required: false
         default: false
         type: boolean
@@ -75,7 +75,7 @@ jobs:
           V111_TRIAL_ENABLED: ${{ vars.V111_TRIAL_ENABLED || 'true' }}
         run: |
           python scripts/state_public_guard.py --record-schema "$RUNNER_TEMP/v111-state-schema.json"
-          python main.py
+          python scripts/native_presentation.py
       - name: Save bot state
         if: always() && !cancelled()
         run: |
@@ -122,10 +122,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      # User-approved immutable release, 28 Oct 2026; legacy V112_APPROVED_SOURCE retained only for rollback.
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && vars.V112_APPROVED_SOURCE == 'feab545852a159c5f61d9b18af16279aebcd77d9' && 'feab545852a159c5f61d9b18af16279aebcd77d9' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'd79926d3685d2664c26256442a6a47238d08a16d' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -147,7 +148,9 @@ jobs:
           V11_RULES_VALIDATED: 'false'
           V111_INTEGRATION_ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
           V111_DIAGNOSTICS_DIR: analytical-diagnostics
-          V112_ANALYTICS_ENABLED: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && vars.V112_APPROVED_SOURCE == 'feab545852a159c5f61d9b18af16279aebcd77d9' }}
+          V112_ANALYTICS_ENABLED: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' }}
+          V2_REPORT_ENABLED: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' }}
+          OPENBLAS_NUM_THREADS: '1'
           V111_MANUAL_ANALYSIS: ${{ github.event_name == 'workflow_dispatch' && inputs.manual_v111_analysis == true }}
           PRIVATE_ADVISORY_ENABLED: ${{ vars.PROD_STATE_REPOSITORY != '' && secrets.PROD_STATE_TOKEN != '' && secrets.PROD_STATE_ENCRYPTION_KEY != '' }}
           PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
@@ -174,6 +177,7 @@ jobs:
           retention-days: 7
 
   us-source-validation:
+    environment: production-advisory
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -190,11 +194,32 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - name: Live public US and fundamentals source validation (no Telegram)
         run: python scripts/check_us_live_sources.py
+      - name: Verify actual approved analytical checkout without delivery
+        uses: actions/checkout@v4
+        with:
+          path: verified-release
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'd79926d3685d2664c26256442a6a47238d08a16d' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          persist-credentials: false
+      - name: Record effective production source (no Telegram)
+        env:
+          V112_ACTIVE: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' }}
+        run: |
+          python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          source=subprocess.check_output(['git','-C','verified-release','rev-parse','HEAD'],text=True).strip()
+          value=dict(source=source,v112_active=os.getenv('V112_ACTIVE')=='true',experimental_display=True,telegram_sent=False)
+          Path('us-source-diagnostics/deployment.json').write_text(json.dumps(value))
+          print('::notice title=Verified production V2 source::'+json.dumps(value))
+          assert value['v112_active'] and source=='d79926d3685d2664c26256442a6a47238d08a16d','Existing V11.2 flags must be enabled; production source was not activated'
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: us-source-validation-${{ github.run_id }}
-          path: us-source-diagnostics/report.json
+          path: |
+            us-source-diagnostics/report.json
+            us-source-diagnostics/deployment.json
           retention-days: 7
           if-no-files-found: warn
 

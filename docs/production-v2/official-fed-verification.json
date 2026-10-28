@@ -1,0 +1,70 @@
+{
+  "release": {
+    "id": "fomc-2026-10-28",
+    "event_date": "2026-10-28",
+    "title": "Fed/FOMC – rozhodnutie",
+    "status": "REACTION",
+    "scheduled_at": "2026-10-28T18:00:00+00:00",
+    "published_at": "2026-10-28T18:00:00+00:00",
+    "retrieved_at": "2026-10-28T20:46:43.577094+00:00",
+    "source": "Federal Reserve",
+    "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+    "verified": true,
+    "rate_range": [
+      3.75,
+      4
+    ],
+    "decision": "The Committee decided to maintain the target range for the federal funds rate at 3-3/4 to 4 percent, in support of the Federal Reserve's dual mandate. The Committee is continuing its policy of maintaining ample reserves in the banking system.",
+    "voting": "The Federal Open Market Committee approved the following statement for release by a 10 – 2 vote:",
+    "comments": [
+      "Economic activity is expanding at a strong pace. While uncertainty remains elevated owing, in part, to geopolitical developments, domestic spending has been resilient. Productivity growth is strong, and capital investment is robust. Job gains have kept pace with the workforce, and the unemployment rate has changed little.",
+      "Inflation remains elevated. The accumulation of more information will help the Committee determine the policy stance appropriate to ensure a timely return of inflation to the Committee's 2 percent goal. The Committee will deliver price stability."
+    ],
+    "reaction": {
+      "BTC": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 0.8970812642739023
+      },
+      "AAVE": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 3.9802880970432053
+      },
+      "TAO": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 2.7305104867431984
+      },
+      "FET": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 3.6191536748329423
+      },
+      "SOL": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 1.367168289564269
+      },
+      "ONDO": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 2.7288094663124873
+      },
+      "RENDER": {
+        "before_at": 1793210400000,
+        "after_at": 1793217600000,
+        "change_pct": 4.106280193236711
+      }
+    },
+    "interpretation": "Smer dopadu bez overeného konsenzu nepotvrdený; rozhodnutie samo nedokazuje príčinu pohybu.",
+    "reaction_provenance": "Readiness 40765227415, earlier retrieval; not identical timestamps to readiness 40766094413"
+  },
+  "verification_runs": [
+    40765227415,
+    40766094413
+  ],
+  "preview_market_time": "2026-10-28T20:53:45.505985+00:00",
+  "telegram_sent": false,
+  "private_inventory_loaded": false
+}

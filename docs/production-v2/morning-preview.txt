@@ -1,0 +1,88 @@
+📊 CRYPTO AI BOT V11.2 — RÁNO
+28.10.2026 21:53 Bratislava
+MAKRO A AKTUÁLNE UDALOSTI:
+FED REACTION — 2026-10-28 19:00 Bratislava.
+Oficiálne cieľové pásmo: 3.75–4 %.
+Hlasovanie podľa komuniké: The Federal Open Market Committee approved the following statement for release by a 10 – 2 vote:
+Komuniké Fedu: Economic activity is expanding at a strong pace. While uncertainty remains elevated owing, in part, to geopolitical developments, domestic spending has been resilient. Productivity growth is strong, and capital investment is robust. Job gains have kept pace wi
+Konsenzus/prekvapenie N/A. Smer dopadu bez overeného konsenzu nepotvrdený; rozhodnutie samo nedokazuje príčinu pohybu.
+Ceny medzi hodinovými uzavretiami okolo zverejnenia: BTC +0.9%, AAVE +4.0%, TAO +2.7%, FET +3.6%, SOL +1.4%, ONDO +2.7%, RENDER +4.1%. Časový súbeh nie je dôkaz príčiny.
+Akcie/DXY/výnosy: reakcia od času rozhodnutia N/A bez porovnateľných kotácií.
+TRH: Korekcia
+BTC $81,147 (+0.4%); kap. $2.73T (-2.2% za24h); dominancia 59.5%.
+ČO SA DEJE:
+Od 28.10. 20:40: zmiešaný vývoj. Kap. -0.5%, objem24h N/A, dominancia -0.01 p. b..
+Podporu prelomilo 0/6 mincí, objemový predajný signál 0/6; silnejších než BTC za7d: 0/6.
+PREČO — príčina cenového pohybu nie je potvrdená:
+• 2026-10-28 Fed leaves interest rates unchanged, as expected: relevantné pre sadzby a ochotu riskovať; obojsmerný; smer bez výsledku voči konsenzu nepotvrdený. Zdroj coindesk:
+• 2026-10-28 Mirae Asset Securities issues tokenized notes on Solana: potenciálna zmena projektového alebo regulačného rizika; smer nepotvrdený. Zdroj cointelegraph:
+VÝHĽAD BTC:
+24–72 h: rastový sklon (4h: cena nad EMA50, momentum kladné). Alternatíva: Uzavretie 4h nad $81,823; riziko: Uzavretie 4h pod $79,369. Prehodnotiť pri EMA50 $81,100 na 4h.
+7–14 dní: smer neistý / slabý trend (1d: cena nad EMA50, momentum záporné). Alternatíva: Uzavretie 1d nad $85,598; riziko: Uzavretie 1d pod $79,221. Prehodnotiť pri EMA50 $80,805 na 1d.
+
+EXPERIMENTÁLNE – PRESNOSŤ NEOVERENÁ. Istota NÍZKA; bez kalibrovaných pravdepodobností. Scenáre nemenia obchodné odporúčania.
+
+SOL $102.31 (+1.2% za24h, od minule +0.0%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $99.16.
+Trend 4h slabý/neúplný, 1d pod EMA50 alebo N/A; sila 20 ADX
+Objem 2.38× priemer; RS/BTC7d -1.5%.
+Fundament: Mirae Asset Securities issues tokenized notes on Solana (2026-10-28), smer nepotvrdený.
+24 h: DO STRANY, $99.03–$105.51 (-3.2% až +3.1%).
+72 h: DO STRANY, $96.29–$109.01 (-5.9% až +6.6%).
+14 dní: DO STRANY, $91.74–$115.89 (-10.3% až +13.3%).
+Riziko pod $99.16: uzavretie a potvrdenie predajného tlaku menia výhľad.
+Alternatíva rastu: uzavretie 4h nad $103.69 s objemom a udržaním novej podpory.
+
+TAO $258.20 (+1.9% za24h, od minule +0.5%) — WAIT (nový nákup): Trend treba potvrdiť štruktúrou a objemom; nový vstup zatiaľ nepotvrdený.
+Trend 4h rastový, 1d pod EMA50 alebo N/A; sila 21 ADX
+Objem 1.84× priemer; RS/BTC7d -2.3%.
+Fundament: nový významný impulz nepotvrdený; pokrytie čiastočné.
+24 h: DO STRANY, $246.94–$270.88 (-4.4% až +4.9%).
+72 h: RAST, $242.57–$294.03 (-6.1% až +13.9%).
+14 dní: DO STRANY, $212.82–$318.04 (-17.6% až +23.2%).
+Riziko pod $245.00: uzavretie a potvrdenie predajného tlaku menia výhľad.
+Alternatíva rastu: uzavretie 4h nad $259.70 s objemom a udržaním novej podpory.
+
+FET $0.1848 (+2.4% za24h, od minule +0.3%) — WAIT (nový nákup): Trend treba potvrdiť štruktúrou a objemom; nový vstup zatiaľ nepotvrdený.
+Trend 4h rastový, 1d pod EMA50 alebo N/A; sila 24 ADX
+Objem 1.91× priemer; RS/BTC7d -2.5%.
+Fundament: nový významný impulz nepotvrdený; pokrytie čiastočné.
+24 h: DO STRANY, $0.1732–$0.1949 (-6.3% až +5.5%).
+72 h: DO STRANY, $0.1643–$0.2024 (-11.1% až +9.5%).
+14 dní: RAST, $0.1758–$0.2893 (-4.9% až +56.5%).
+Riziko pod $0.1707: uzavretie a potvrdenie predajného tlaku menia výhľad.
+Potvrdenie rastu: nová rezistencia/retest N/A; samotný odraz nestačí.
+
+AAVE $135.53 (+2.2% za24h, od minule +0.1%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $129.51.
+Trend 4h slabý/neúplný, 1d pod EMA50 alebo N/A; sila 23 ADX
+Objem 1.27× priemer; RS/BTC7d -10.0%.
+Fundament: nový významný impulz nepotvrdený; pokrytie čiastočné.
+24 h: DO STRANY, $129.85–$141.57 (-4.2% až +4.5%).
+72 h: RAST, $128.39–$150.82 (-5.3% až +11.3%).
+14 dní: RAST, $120.05–$171.58 (-11.4% až +26.6%).
+Riziko pod $129.51: uzavretie a potvrdenie predajného tlaku menia výhľad.
+Alternatíva rastu: uzavretie 4h nad $139.02 s objemom a udržaním novej podpory.
+
+ONDO $0.4209 (+1.2% za24h, od minule +0.0%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $0.3972.
+Trend 4h slabý/neúplný, 1d pod EMA50 alebo N/A; sila 16 ADX
+Objem 1.32× priemer; RS/BTC7d -5.8%.
+Fundament: nový významný impulz nepotvrdený; pokrytie čiastočné.
+24 h: DO STRANY, $0.3975–$0.4436 (-5.6% až +5.4%).
+72 h: DO STRANY, $0.3786–$0.4543 (-10.1% až +7.9%).
+14 dní: DO STRANY, $0.337–$0.4565 (-19.9% až +8.5%).
+Riziko pod $0.3972: uzavretie a potvrdenie predajného tlaku menia výhľad.
+Alternatíva rastu: uzavretie 4h nad $0.4247 s objemom a udržaním novej podpory.
+
+RENDER $1.702 (+0.7% za24h, od minule +0.2%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $1.65.
+Trend 4h slabý/neúplný, 1d pod EMA50 alebo N/A; sila 23 ADX
+Objem 2.00× priemer; RS/BTC7d -7.1%.
+Fundament: nový významný impulz nepotvrdený; pokrytie čiastočné.
+24 h: DO STRANY, $1.608–$1.804 (-5.5% až +6.0%).
+72 h: DO STRANY, $1.531–$1.881 (-10.1% až +10.5%).
+14 dní: DO STRANY, $1.405–$2.034 (-17.5% až +19.5%).
+Riziko pod $1.65: uzavretie a potvrdenie predajného tlaku menia výhľad.
+Alternatíva rastu: uzavretie 4h nad $1.771 s objemom a udržaním novej podpory.
+
+PRÍLEŽITOSŤ: žiadna potvrdená; nenakupovať iba preto, že cena klesla.
+RIZIKO: nepotvrdené zlepšenie štruktúry a neúplné udalostné pokrytie.
+ZÁVER: nové nákupy zatiaľ WAIT. Držba sa v tomto verejnom náhľade neposudzuje; osobný predajný pokyn nevzniká.
+Technické signály V10.6 sú v diagnostike; nepredstavujú potvrdenú predikciu ani osobný predajný pokyn.
