@@ -1,0 +1,186 @@
+{
+  "research_run": "https://github.com/janmarticek4-dot/crypto-bot/actions/runs/40705360099",
+  "status": "SUCCESS",
+  "analytical_review_run": "https://github.com/janmarticek4-dot/crypto-bot/actions/runs/40705360101",
+  "analytical_review_status": "SUCCESS",
+  "code_commit": "2678d7bbb25e0adeab9e506808f651cd5b9afd35",
+  "local_offline_tests": 215,
+  "evidence": "public GitHub Actions run status and privacy-checked audit annotation",
+  "artifact_name": "prediction-research-40705360099",
+  "artifact_digest": "sha256:118adadf6dc18370381a9cde4f907e2038fc4065d5a268ffda30f33beccf126a",
+  "audit": {
+    "version": "research-v2-20261028",
+    "current_sources": 15,
+    "endpoints": 33,
+    "independent_validation": false,
+    "production_enabled": false,
+    "paper_matured": 0,
+    "sources": [
+      {
+        "source": "fed",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "fomc_calendar",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "cftc",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "bea",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "bls",
+        "status": "OK_NO_RECENT_RELEVANT_ITEMS",
+        "layer": null
+      },
+      {
+        "source": "bls_calendar",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "sec",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "ecb",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "ondo",
+        "status": "HTTP_ERROR",
+        "layer": "origin_or_gateway"
+      },
+      {
+        "source": "fet_fetchd",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "ondo_secondary",
+        "status": "OK_NO_RECENT_RELEVANT_ITEMS",
+        "layer": null
+      },
+      {
+        "source": "tao_subtensor",
+        "status": "OK_NO_RECENT_RELEVANT_ITEMS",
+        "layer": null
+      },
+      {
+        "source": "render_rnp",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "aave",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "cointelegraph",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "coindesk",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "sol_agave",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "/protocol/aave",
+        "status": "SOURCE_POLICY_ERROR",
+        "layer": "response_policy"
+      },
+      {
+        "source": "/tvl/aave",
+        "status": "OBSERVED_ASOF_UNKNOWN",
+        "layer": null
+      },
+      {
+        "source": "/v2/historicalChainTvl/Solana",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "/protocol/ondo-finance",
+        "status": "NO_RECENT_VALID_OBSERVATIONS",
+        "layer": null
+      },
+      {
+        "source": "AAVE_fees",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "AAVE_revenue",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "SOL_fees",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "/resource-center-data-chart-center/interest-rates/pages/xml",
+        "status": "TRANSPORT_ERROR",
+        "layer": "timeout"
+      },
+      {
+        "source": "/graph/fredgraph.csv",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "/graph/fredgraph.csv",
+        "status": "OK_CURRENT",
+        "layer": null
+      },
+      {
+        "source": "bea_www",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "fed_monetary",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "bls_year_calendar",
+        "status": "HTTP_ERROR",
+        "layer": "origin_or_gateway"
+      },
+      {
+        "source": "ecb_blog",
+        "status": "STALE",
+        "layer": null
+      },
+      {
+        "source": "sec_new_path",
+        "status": "HTTP_ERROR",
+        "layer": "origin_or_gateway"
+      },
+      {
+        "source": "aave_aip",
+        "status": "STALE",
+        "layer": null
+      }
+    ]
+  }
+}

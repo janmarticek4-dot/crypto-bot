@@ -13,3 +13,4 @@ Výsledok: **zatiaľ nepreukázaná spoľahlivá výhoda; neaktivovať**.
 - [Workflow a bezpečné paper overovanie](OPERATIONS.md)
 - [Testy a ochrana produkcie](VERIFICATION.md)
 - [Prečo nebol overený starý Artifact](ARTIFACT_ACCESS.md)
+- [Úspešné GitHub behy a runner zdroje](GITHUB_VERIFICATION.json)

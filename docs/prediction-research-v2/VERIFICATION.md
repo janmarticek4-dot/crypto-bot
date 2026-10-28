@@ -24,3 +24,13 @@
 - GitHub-hosted nový test spustí až normálny push výskumných zmien. Jeho výsledok
   sa nepovažuje za známy v čase tohto lokálneho záznamu; nezávislé budúce
   predikčné výsledky sú zatiaľ N/A.
+
+## Následná GitHub kontrola po pushi
+
+- V11.1 Analytical Release Review, run 40705360101: **SUCCESS**.
+- Prediction Research Shadow, run 40705360099: **SUCCESS**, Artifact vytvorený.
+- Verejná auditná anotácia: 15 aktuálnych zdrojov / 33 pokusov, produkčné
+  aktivovanie false, nezávislé potvrdenie false, dozreté paper výsledky 0.
+- Podklady: GITHUB_VERIFICATION.json. Toto overuje čistý runner a zber;
+  neznamená preukázanú presnosť predikcií. Cenové tabuľky v tomto adresári
+  pochádzajú z explicitne datovaného lokálneho výskumu, nie z neprečítaného ZIPu.

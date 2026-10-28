@@ -44,3 +44,17 @@ Momentálne žiadna historická ablácia technika/makro/projekty nemá dostatoč
 |/resource-center-data-chart-center/interest-rates/pages/xml|NETWORK_BLOCKED|network_tunnel|403|
 |/graph/fredgraph.csv|NETWORK_BLOCKED|network_tunnel|403|
 |/graph/fredgraph.csv|NETWORK_BLOCKED|network_tunnel|403|
+
+## Overenie na GitHub-hosted runneri
+
+Beh [40705360099](https://github.com/janmarticek4-dot/crypto-bot/actions/runs/40705360099)
+prešiel: **15 aktuálnych z 33 pokusov**. FOMC/BLS kalendáre, ECB, CFTC, FRED
+a vybrané projektové metriky sa načítali. Treasury malo timeout, FRED záloha
+fungovala. Fed/BEA/SEC RSS boli staré; BLS feed nemal novú relevantnú položku.
+ONDO zdroj mal HTTP chybu a historické metriky nemali nové platné pozorovania.
+AAVE veľký endpoint prekročil politiku veľkosti; malá záloha vrátila hodnotu bez
+overiteľného času merania, teda nie potvrdené aktuálne TVL.
+
+Rozdiel oproti lokálnym 4/33 potvrdzuje obmedzenia siete pracovného prostredia.
+Počet dostupných/current zdrojov nie je percento významných správ ani dôkaz
+prediktívneho prínosu fundamentov. Presné stavy sú v GITHUB_VERIFICATION.json.
