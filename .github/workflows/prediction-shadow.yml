@@ -1,5 +1,16 @@
 name: Prediction Research Shadow
 on:
+  push:
+    branches: [main]
+    paths:
+      - v11/prediction_research.py
+      - v11/prediction_journal.py
+      - scripts/prediction_research.py
+      - tests/test_prediction_research.py
+      - requirements-research.txt
+      - .github/workflows/prediction-shadow.yml
+  schedule:
+    - cron: '25 10 * * *'
   workflow_dispatch:
     inputs:
       persist_public_research_journal:
@@ -13,6 +24,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   research:
+    if: github.event_name != 'schedule' || (vars.PREDICTION_PAPER_ENABLED == 'true' && vars.PREDICTION_PAPER_APPROVED_VERSION == 'research-v2-20261028')
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -20,6 +32,7 @@ jobs:
       TELEGRAM_TOKEN: ''
       TELEGRAM_CHAT_ID: ''
       GROQ_API_KEY: ''
+      OPENBLAS_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,20 +40,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install -r requirements.txt
+      - run: python -m pip install -r requirements.txt -r requirements-research.txt
       - run: python scripts/test_integration_offline.py
-      - run: python scripts/prediction_shadow.py
+      - run: python scripts/prediction_research.py
       - name: Enforce public-only output boundary before upload
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           from v11.state_policy import require_public_data
-          from v11.prediction_shadow import journal_update
+          from v11.prediction_journal import load
           root=Path('shadow-output/prediction')
           for path in root.glob('*.json'):
               require_public_data(json.loads(path.read_text()))
-          journal_update(json.loads((root/'public-predictions.json').read_text()),[],{},0)
+          load(json.loads((root/'public-predictions.json').read_text()))
+          PY
+      - name: Publish minimal public audit verdict
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('shadow-output/prediction/diagnostics.json').read_text())
+          source=x['source_summary']
+          print('::notice title=Prediction research audit::'+json.dumps(dict(version=x['version'],current_sources=source['current'],endpoints=source['endpoints'],independent_validation=False,production_enabled=False,paper_matured=x['paper_matured'],sources=[dict(source=r.get('source'),status=r.get('status'),layer=r.get('error_layer')) for r in json.loads(Path('shadow-output/prediction/source-diagnostics.json').read_text())])))
           PY
       - uses: actions/upload-artifact@v4
         with:
@@ -49,7 +71,7 @@ jobs:
           retention-days: 14
   public-journal:
     needs: research
-    if: inputs.persist_public_research_journal && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (inputs.persist_public_research_journal || (github.event_name == 'schedule' && (vars.PREDICTION_PAPER_ENABLED == 'true' && vars.PREDICTION_PAPER_APPROVED_VERSION == 'research-v2-20261028')))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -63,9 +85,9 @@ jobs:
           script: |
             const fs = require('fs');
             const data = JSON.parse(fs.readFileSync('research/public-predictions.json', 'utf8'));
-            if (!Array.isArray(data) || data.length > 600) throw new Error('Invalid journal');
-            const allowed = new Set(['id','symbol','created','due','price','point','low','high','direction','continuation','result']);
-            for (const row of data) {
+            if (data.schema !== 'prediction-research-journal-v2' || !Array.isArray(data.predictions) || data.predictions.length > 600 || !Array.isArray(data.input_vintages) || data.input_vintages.length > 10000) throw new Error('Invalid journal');
+            const allowed = new Set(['id','symbol','created','due','price','point','low','high','direction','continuation','result','model_version','model','source_digest','btc_digest','requested_hours','tolerance_log','source_cutoff','source_close','source_mode','inputs']);
+            for (const row of data.predictions) {
               if (Object.keys(row).some(k => !allowed.has(k))) throw new Error('Unexpected field');
               if (!['SOL','TAO','FET','AAVE','ONDO','RENDER'].includes(row.symbol)) throw new Error('Unexpected symbol');
             }
@@ -76,7 +98,9 @@ jobs:
             try {
               const response = (await github.rest.repos.getContent({...context.repo,path,ref:'main'})).data;
               sha = response.sha;
-              previous = crypto.createHash('sha256').update(Buffer.from(response.content,'base64')).digest('hex');
+              const encoded = response.encoding === 'base64' ? response.content :
+                (await github.rest.git.getBlob({...context.repo,file_sha:response.sha})).data.content;
+              previous = crypto.createHash('sha256').update(Buffer.from(encoded,'base64')).digest('hex');
             }
             catch (e) { if (e.status !== 404) throw e; }
             if (previous !== expected) throw new Error('Concurrent journal change refused');

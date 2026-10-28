@@ -1,0 +1,53 @@
+VÝSKUM V2 — NEAKTÍVNE, nie potvrdené odporúčania
+28.10.2026 15:20 Bratislava
+Nové nákupy WAIT; súkromné držby sa nenačítavajú. Istota NÍZKA. Kalibrované pravdepodobnosti N/A.
+
+SOL — $100.82 | WAIT
+24 h: DO STRANY — $97.80–$104.57 (-3.0% až +3.7%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+48–72 h: DO STRANY — $94.71–$107.15 (-6.1% až +6.3%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+7–14 dní: DO STRANY — $89.44–$114.86 (-11.3% až +13.9%). Model regime_momentum; nejde o preukázaný najpravdepodobnejší smer.
+Dôvod: slabý, predbežný obrat; objem 1.55× priemeru.
+Alternatíva: prerazenie rezistencie podporí rast; strata podpory $99.16 mení výhľad. uzavretie 4h nad 102.8 a objem aspoň 1,2× minulý priemer.
+Fundament: Mirae Asset Securities issues tokenized notes on Solana (2026-10-28T11:05:33+00:00); smer nepotvrdený. https://cointelegraph.com/news/mirae-asset-securities-tokenized-notes-solana
+
+TAO — $251.50 | WAIT
+24 h: DO STRANY — $240.17–$263.98 (-4.5% až +5.0%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+48–72 h: DO STRANY — $231.18–$272.73 (-8.1% až +8.4%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+7–14 dní: DO STRANY — $220.46–$296.90 (-12.3% až +18.1%). Model regime_momentum; nejde o preukázaný najpravdepodobnejší smer.
+Dôvod: slabý, obrat nepotvrdený; objem 0.93× priemeru.
+Alternatíva: prerazenie rezistencie podporí rast; strata podpory $245.00 mení výhľad. uzavretie 4h nad 259.7 a objem aspoň 1,2× minulý priemer.
+Nový významný projektový fundament nepotvrdený. Fundamentálny prínos modelu zatiaľ neoverený.
+
+FET — $0.1793 | WAIT
+24 h: DO STRANY — $0.1686–$0.1901 (-6.0% až +6.0%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+48–72 h: DO STRANY — $0.1596–$0.197 (-11.0% až +9.9%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+7–14 dní: DO STRANY — $0.1515–$0.2051 (-15.5% až +14.4%). Model regime_momentum; nejde o preukázaný najpravdepodobnejší smer.
+Dôvod: slabý, predbežný obrat; objem 1.25× priemeru.
+Alternatíva: prerazenie rezistencie podporí rast; strata podpory $0.1707 mení výhľad. uzavretie 4h nad 0.1837 a objem aspoň 1,2× minulý priemer.
+Nový významný projektový fundament nepotvrdený. Fundamentálny prínos modelu zatiaľ neoverený.
+
+AAVE — $131.43 | WAIT
+24 h: DO STRANY — $126.22–$137.08 (-4.0% až +4.3%). Model regime_momentum; nejde o preukázaný najpravdepodobnejší smer.
+48–72 h: DO STRANY — $122.14–$140.82 (-7.1% až +7.1%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+7–14 dní: RAST — $115.69–$166.73 (-12.0% až +26.9%). Model ridge_technical; nejde o preukázaný najpravdepodobnejší smer.
+Dôvod: slabý, obrat nepotvrdený; objem 1.01× priemeru.
+Alternatíva: prerazenie rezistencie podporí rast; strata podpory $129.51 mení výhľad. uzavretie 4h nad 139 a objem aspoň 1,2× minulý priemer.
+Nový významný projektový fundament nepotvrdený. Fundamentálny prínos modelu zatiaľ neoverený.
+
+ONDO — $0.4133 | WAIT
+24 h: DO STRANY — $0.3856–$0.4405 (-6.7% až +6.6%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+48–72 h: DO STRANY — $0.3634–$0.4534 (-12.1% až +9.7%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+7–14 dní: DO STRANY — $0.3155–$0.4562 (-23.7% až +10.4%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+Dôvod: slabý, obrat nepotvrdený; objem 0.89× priemeru.
+Alternatíva: prerazenie rezistencie podporí rast; strata podpory $0.3972 mení výhľad. uzavretie 4h nad 0.4243 a objem aspoň 1,2× minulý priemer.
+Nový významný projektový fundament nepotvrdený. Fundamentálny prínos modelu zatiaľ neoverený.
+
+RENDER — $1.657 | WAIT
+24 h: DO STRANY — $1.559–$1.764 (-5.9% až +6.5%). Model flat; nejde o preukázaný najpravdepodobnejší smer.
+48–72 h: DO STRANY — $1.475–$1.858 (-11.0% až +12.1%). Model ridge_technical; nejde o preukázaný najpravdepodobnejší smer.
+7–14 dní: DO STRANY — $1.377–$2.052 (-16.9% až +23.8%). Model ridge_technical; nejde o preukázaný najpravdepodobnejší smer.
+Dôvod: slabý, obrat nepotvrdený; objem 0.95× priemeru.
+Alternatíva: prerazenie rezistencie podporí rast; strata podpory $1.656 mení výhľad. uzavretie 4h nad 1.771 a objem aspoň 1,2× minulý priemer.
+Nový významný projektový fundament nepotvrdený. Fundamentálny prínos modelu zatiaľ neoverený.
+
+Modely nie sú produkčne overené. Dôležitá nová udalosť ruší platnosť scenára; žiadny automatický BUY/SELL.

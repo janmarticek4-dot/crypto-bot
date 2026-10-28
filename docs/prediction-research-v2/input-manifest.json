@@ -1,0 +1,52 @@
+{
+  "methodology": "research-v2-20261028",
+  "model_code_digest": "40ae3db9ce463249c5cba80ffc5f963a905a42464685fb9fa89db6257737e307",
+  "numpy": "2.5.4",
+  "python": "3.12.14",
+  "started": 1793197169150,
+  "created": 1793197216228,
+  "histories": {
+    "BTC": {
+      "digest": "bab633acf89b5780487d925c8e9d2136cee18b4819102c5216aa6d89b1e4179d",
+      "n": 5000,
+      "first": 1721188800000,
+      "last": 1793174400000
+    },
+    "SOL": {
+      "digest": "03c2f70c1e500119932764cc55f2efed8b1c415a459898b4df725b3d471e212b",
+      "n": 5000,
+      "first": 1721188800000,
+      "last": 1793174400000
+    },
+    "TAO": {
+      "digest": "389baa0f610cdaa7a4f85e475573c7ea82a9348b666ae873bd8c86780e91a576",
+      "n": 5000,
+      "first": 1721188800000,
+      "last": 1793174400000
+    },
+    "FET": {
+      "digest": "855dcf8b7d0ba0abb645fd06285c6697c16c62ab030297654494be46d6829e32",
+      "n": 5000,
+      "first": 1721188800000,
+      "last": 1793174400000
+    },
+    "AAVE": {
+      "digest": "780781e14b8dbf736b42ede7f895f53a025013d35c18e7d259d6c17cdc981ff2",
+      "n": 5000,
+      "first": 1721188800000,
+      "last": 1793174400000
+    },
+    "ONDO": {
+      "digest": "e895f1a3047f058bdc789850b8f0650f161baddc61d42d6bf1154e0d49bb604f",
+      "n": 3390,
+      "first": 1744372800000,
+      "last": 1793174400000
+    },
+    "RENDER": {
+      "digest": "155f90e77fea826ee016cbd20bd1da26d17fee3f4a402319f5c2f61f7226a03e",
+      "n": 4945,
+      "first": 1721980800000,
+      "last": 1793174400000
+    }
+  }
+}

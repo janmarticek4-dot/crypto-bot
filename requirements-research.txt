@@ -1,0 +1,2 @@
+# Research workflow only; no production dependency changes.
+numpy>=1.26,<3
