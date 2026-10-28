@@ -126,7 +126,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'd79926d3685d2664c26256442a6a47238d08a16d' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'fb5daf326321ee38a994a4636708a76810801b95' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -198,7 +198,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: verified-release
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'd79926d3685d2664c26256442a6a47238d08a16d' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'fb5daf326321ee38a994a4636708a76810801b95' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - name: Record effective production source (no Telegram)
         env:
@@ -211,7 +211,7 @@ jobs:
           value=dict(source=source,v112_active=os.getenv('V112_ACTIVE')=='true',experimental_display=True,telegram_sent=False)
           Path('us-source-diagnostics/deployment.json').write_text(json.dumps(value))
           print('::notice title=Verified production V2 source::'+json.dumps(value))
-          assert value['v112_active'] and source=='d79926d3685d2664c26256442a6a47238d08a16d','Existing V11.2 flags must be enabled; production source was not activated'
+          assert value['v112_active'] and source=='fb5daf326321ee38a994a4636708a76810801b95','Existing V11.2 flags must be enabled; production source was not activated'
           PY
       - uses: actions/upload-artifact@v4
         if: always()
