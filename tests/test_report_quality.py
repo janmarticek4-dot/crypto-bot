@@ -76,6 +76,11 @@ class VerdictTests(unittest.TestCase):
         entry=dict(status='RELEASED',event_date='2026-10-28',published_at='2026-10-28T18:00:00+00:00',rate_range=[1,1.25],decision='The Committee decided to lower the target range. The Committee is maintaining ample reserves.',comments=[],reaction={})
         text=' '.join(ev.lines({'event_lifecycle':{'releases':[entry]}},datetime(2026,10,28,20,tzinfo=timezone.utc)))
         self.assertIn('znížil',text);self.assertNotIn('ponechal',text)
+    def test_important_global_incident_not_lost_when_shortening(self):
+        m=model();m['evidence']=[dict(title='Synthetic exchange withdrawals suspended after incident',published_at=NOW.isoformat(),source='synthetic',categories=['hack'],impact='riziko vyžaduje potvrdenie')]
+        text=integrated_report.render(m,sample(),NOW,'morning')
+        self.assertIn('withdrawals suspended',text);self.assertIn('riziko vyžaduje potvrdenie',text)
+        self.assertNotIn('https://',text)
     def test_metadata_contains_no_position_data(self):
         text=integrated_report.render(model(),sample(),NOW,'morning',INVENTORY)
         metadata=rv.contract(text,0)

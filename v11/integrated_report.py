@@ -16,6 +16,8 @@ def render(model,snapshot,now,kind,inventory=None):
     if compared:lines.append(compared)
     fund=model.get('_current_fundamentals',{});extensions=fund.get('extensions',{})
     macro=event_lifecycle.lines(fund,now)+ext.lines(extensions,now,event_limit=2)
+    critical=[e for e in model.get('evidence',[]) if set(e.get('categories',[]))&{'hack','geopolitics','regulation'}]
+    for item in critical[:2]:macro.append('Dôležitá správa '+item['published_at'][:10]+' ('+item['source']+'): '+item['title'][:120]+' — '+item['impact']+'.')
     if macro:lines+=['','MAKRO / UDALOSTI:',*macro]
     lines+=['','V2: EXPERIMENTÁLNE – PRESNOSŤ NEOVERENÁ; nízka istota, bez percentuálnych pravdepodobností.']
     if count<18:lines.append('Časť výstupov V2 je N/A; nahrádzajú ich označené technické scenáre, nie výstupy modelu.')
