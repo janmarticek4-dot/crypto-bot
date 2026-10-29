@@ -239,6 +239,8 @@ def run(manual_key=None):
     if pending_observation is not None and kind!='usa':
         require_public_data(pending_observation)
         state['last_analysis_v112']=pending_observation
+        from v11.trend_reversal import remember
+        remember(state,pending_observation,kind)
     if kind!='usa' and not manual_key:
         for forecast in state.get('analysis_forecasts_v11',[]):
             if forecast['id'].startswith(slot+'|'):forecast['delivery_confirmed']=True

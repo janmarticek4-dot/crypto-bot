@@ -41,7 +41,11 @@ def render(model,snapshot,now,kind,inventory=None):
         support=t.get('support');resistance=t.get('resistance');invalid=model['coins'].get(symbol,{}).get('invalidates')
         s=analyst.price(support) if analyst.number(support) and analyst.number(p) and support<p else 'predošlá pri/nad cenou; ďalšia nepotvrdená' if analyst.number(support) and analyst.number(p) else 'N/A'
         r='rast potvrdiť uzavretím nad '+analyst.price(resistance)+' s objemom' if analyst.number(resistance) and analyst.number(p) and resistance>p else 'nová rastová hranica nepotvrdená'
-        lines.append('Hranice: podpora '+s+'; '+r+'.'+((' Neplatnosť vstupného scenára pod '+analyst.price(invalid)+'.') if analyst.number(invalid) else ''))
+        if 'trend_reversal' in model:
+            from .reversal_report import coin_line
+            lines.append(coin_line(symbol,model))
+        else:
+            lines.append('Hranice: podpora '+s+'; '+r+'.'+((' Neplatnosť vstupného scenára pod '+analyst.price(invalid)+'.') if analyst.number(invalid) else ''))
         activity=next((v for v in model.get('project_activity',[]) if v['symbol']==symbol and abs(v['change_pct'])>=10),None)
         if activity:lines.append(f"Fundament: {('poplatky' if activity['metric']=='fees' else 'príjmy')} protokolu {analyst.pct(activity['change_pct'])} vs predošlé obdobie; nie čistý prílev kapitálu.")
         extra=ext.project_lines(symbol,extensions,c,now)
@@ -58,5 +62,11 @@ def render(model,snapshot,now,kind,inventory=None):
     if extras:lines+=['','ĎALŠIE POZÍCIE / WATCHLIST:',*extras]
     tail='\n'.join(line for line in body.splitlines() if line.startswith('ZÁVER:') or line.startswith('Technické signály') or (line.startswith('PRÍLEŽITOSŤ:') and 'Kandidát' in line))
     lines+=['',tail,'Kontrola: pri potvrdení hraníc alebo po najbližšej významnej udalosti; plánované reporty pokračujú.']
-    if kind=='evening' and now.weekday()==6 and model.get('paper_weekly'):lines+=['PAPER: '+model['paper_weekly']]
-    return without_links('\n'.join(lines))
+    review=model.get('prediction_review',{})
+    if 'matured' in review:lines.append('PAPER: '+str(review['matured'])+' dozretých V2 prognóz v zachovanom denníku; smer a chyba oproti referenciám sú v diagnostike. Bez kalibrovaných pravdepodobností.')
+    elif kind=='evening' and now.weekday()==6 and model.get('paper_weekly'):lines+=['PAPER: '+model['paper_weekly']]
+    text=without_links('\n'.join(lines))
+    if 'trend_reversal' in model:
+        from .reversal_report import guard
+        text,_=guard(text,base,model,snapshot)
+    return text

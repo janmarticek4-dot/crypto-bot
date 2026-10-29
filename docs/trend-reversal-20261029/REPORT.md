@@ -1,0 +1,31 @@
+# Trend Reversal Detector — analytical integration, 29 October 2026
+
+## Scope and frozen rules
+
+This is an explanatory classification, not a newly approved trading strategy. Existing main.py, v11/strategy.py, personal HOLD/REDUCE rules, fees, approval gates, USA format, private state, Secrets and schedules remain unchanged. BUY CONFIRMED and BUY PULLBACK are technical candidate labels only, explicitly separate from the authoritative WAIT/BUY/HOLD action lines. V2 predictions cannot change this detector or create a trade. No automatic size or trade is produced. Incomplete capital/risk/spread data cannot authorize a partial purchase.
+
+One price-structure group combines BTC closed 4h/daily EMA/structure evidence; EMA, drawdown and weak trend are not separately counted. The other categories are capitalization across dated observations, directional candle-volume activity and confirmed alt breadth. These are evidence categories, not a claim of statistical independence. Macro statements retain verified timestamps/context but a headline or an unverified consensus does not supply a directional vote or a cause of price movement.
+
+Fixed explanatory choices, not return-optimized: 2 closed 4h confirmation bars; resistance fixed from the preceding 20 bars; higher highs/lows in three consecutive four-bar blocks; EMA20/50 (EMA200 retained diagnostically); candle-volume ratio at least 1.1 versus 20 preceding bars, with positive candle-volume balance and price follow-through; confirmed 4h structure in at least four of six alts is only ONE breadth category; cap increase at least 0.1 percentage point resolution between fresh observations. Tiny positive changes displayed as +0.0% are not a cap confirmation. No parameter search, selected best historical variant or activation of entry/exit rules occurred.
+
+CORRECTION means continuing closed-candle weakness plus declining cap evidence. RECOVERY_ATTEMPT recognizes a rebound without calling it BUY. REVERSAL_CONFIRMING needs BTC 4h structure plus cap, directional volume and breadth, even if daily BTC is not yet bullish. UPTREND_CONFIRMED additionally requires daily BTC structure, all categories in a prior delivered confirming/uptrend observation and a genuinely NEW closed 4h candle. Repeated reports within one candle cannot manufacture stability. Insufficient data produces explicit uncertainty, not a fabricated correction or confirmed trend. "Confirmed" remains an analytical technical condition, not a return guarantee.
+
+## References and privacy
+
+The main report compares the latest, morning and evening references separately. Legacy delivered slots preserve six public coin quotes, but not BTC/global cap or a reversal classification. Only their available price/technical comparisons are used; missing old cap/trend is N/A. Complete observations are saved only AFTER confirmed delivery in `analysis_history_v112`, bounded to 14 scheduled +16 other records. Existing `last_analysis_v112` and canonical sent/attempting/uncertain semantics remain intact; no portfolio or actual cost/quantity enters public history. Existing main observations are not reset, backfilled or overwritten by tests.
+
+The report begins with state, authoritative actions, 24h breadth, since-analysis changes, improvements/deteriorations, missing evidence and separate BTC/SOL/TAO triggers. Each coin keeps its original action, independent technical entry/invalidity levels and all three V2 bands. A pure final guard repairs contradictory derived breadth/time/causal comments, downgrades unsupported full confirmation and refuses altered authoritative actions. It never promotes a candidate to BUY or changes a held-position rule.
+
+V2 review reads the separate immutable forward-paper journal: previous/current forecast, matured outcome/error and directional hits against flat and trend baselines. Not-yet-due or not-yet-observed outcomes are excluded. Existing schema and research writer stay compatible. The review is bounded retained overlapping evidence, not calibrated probabilities; no journal/model fitting change is made by the report.
+
+## Tests and historical limits
+
+333 offline integration tests pass. New tests cover false rebounds, genuine confirming/uptrend scenarios, continued decline, missing/gapped/NaN/future/stale inputs, zero directional-volume confirmation despite rising rolling volume, old/missing cap, repeated same-candle observations, reference priority/privacy/bounds, unchanged authoritative actions, distinct coin levels, macro/V2 independence, ambiguous time intervals and outcome maturity/baselines. Existing US, timezone, privacy, monitoring, dedup and 18-prediction tests remain included.
+
+Historical technical diagnostics use existing genuine Binance USDT 4h data and UTC daily bars resampled only from six closed bars. Available spans: SOL/TAO/FET/AAVE 17.07.2024–28.10.2026; ONDO 11.04.2025–28.10.2026 (2024 NO_DATA); RENDER 26.07.2024–28.10.2026. A daily-spaced diagnostic origin uses only its prefix; future bars label subsequent 24/72-hour outcomes, never features. Appended unclosed bars do not change the origin profile. All dates are UTC candle availability dates, not independent validation periods. Years 2024–2026 were already examined.
+
+Local origins / false rebound labels (RECOVERY_ATTEMPT followed by negative 24h close): SOL 771/173; TAO 771/191; FET 771/177; AAVE 771/166; ONDO 503/114; RENDER 762/196. These are overlapping classifier observations, NOT trade counts, success probabilities or strategy returns. See HISTORICAL.md and exact provenance/outcomes in historical-diagnostics.json. Full historical global-cap and point-in-time macro/analysis history are NO_DATA, so full multi-market reversal accuracy and economic advantage over HOLD remain UNPROVEN. New BUY rules must remain off; collect prospective analytical observations first.
+
+## Safe activation and rollback
+
+Backup `backup/before-trend-reversal-20261029` points to 1336602, including the user's successful manual 18-forecast receipt. Candidate must pass clean GitHub-hosted tests, historical diagnostic and live main-report preview before the immutable delivery-source pin changes. Daily paper schedule and USA formatter stay unchanged. Rollback reverts only the eventual activation pin commit to 8bed9b1; never reset main or replace state/journals/Secrets. No test Telegram is sent.

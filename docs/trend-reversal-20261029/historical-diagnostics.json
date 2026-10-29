@@ -1,0 +1,407 @@
+{
+  "version": "reversal-evidence-v1",
+  "parameters_optimized": false,
+  "new_trading_rules_activated": false,
+  "independent_validation": false,
+  "historical_global_cap": "NO_DATA",
+  "historical_macro_vintages": "NO_DATA",
+  "scope": "Asset technical classifier only. Full multi-market detector cannot be historically validated without point-in-time cap/analysis/macro observations. 2024–2026 already examined; overlapping outcomes are not independent. No strategy returns or predictive advantage claimed.",
+  "results": {
+    "SOL": {
+      "status": "DIAGNOSTIC_ONLY",
+      "source": "Binance public USDT 4h OHLCV; UTC daily bars resampled from six closed 4h bars",
+      "first": "2024-07-17T12:00:00+00:00",
+      "last": "2026-10-28T20:00:00+00:00",
+      "bars": 5000,
+      "input_digest": "2cea5457e0703a6c829b9f000c60e22d1d684e5c69ad6410a49ad776e7148e21",
+      "years": {
+        "2024": {
+          "observations": 108,
+          "CORRECTION": 57,
+          "continuing_decline": 24,
+          "RECOVERY_ATTEMPT": 49,
+          "false_rebound": 24,
+          "large_rise_not_confirmed_at_origin": 20,
+          "REVERSAL_CONFIRMING": 2,
+          "future_deep_drop": 9
+        },
+        "2025": {
+          "observations": 365,
+          "RECOVERY_ATTEMPT": 152,
+          "large_rise_not_confirmed_at_origin": 53,
+          "REVERSAL_CONFIRMING": 15,
+          "CORRECTION": 195,
+          "continuing_decline": 97,
+          "false_rebound": 81,
+          "future_deep_drop": 75,
+          "UPTREND_CONFIRMED": 3
+        },
+        "2026": {
+          "observations": 298,
+          "CORRECTION": 150,
+          "RECOVERY_ATTEMPT": 139,
+          "REVERSAL_CONFIRMING": 9,
+          "false_rebound": 68,
+          "continuing_decline": 70,
+          "future_deep_drop": 25,
+          "large_rise_not_confirmed_at_origin": 23
+        }
+      },
+      "examples": {
+        "continuing_decline": {
+          "at": "2024-09-15T16:00:00+00:00",
+          "state": "CORRECTION",
+          "price": 135.76,
+          "next_24h_pct": -3.1673541543900896,
+          "next_72h_pct": -5.959045374189742,
+          "max_72h_pct": 0.04419563936357562,
+          "min_72h_pct": -6.401001767825576
+        },
+        "false_rebound": {
+          "at": "2024-09-17T16:00:00+00:00",
+          "state": "RECOVERY_ATTEMPT",
+          "price": 134.67,
+          "next_24h_pct": -5.197891141308375,
+          "next_72h_pct": 9.809163139526266,
+          "max_72h_pct": 13.239771292789793,
+          "min_72h_pct": -5.643424667706243
+        }
+      },
+      "prefix_invariance_checks": 3
+    },
+    "TAO": {
+      "status": "DIAGNOSTIC_ONLY",
+      "source": "Binance public USDT 4h OHLCV; UTC daily bars resampled from six closed 4h bars",
+      "first": "2024-07-17T12:00:00+00:00",
+      "last": "2026-10-28T20:00:00+00:00",
+      "bars": 5000,
+      "input_digest": "905151dd6374e9f51ca0d7469b8af9fc6a53cb102c31c4e9b2a68f3b0a76f19b",
+      "years": {
+        "2024": {
+          "observations": 108,
+          "CORRECTION": 64,
+          "continuing_decline": 32,
+          "future_deep_drop": 33,
+          "large_rise_not_confirmed_at_origin": 41,
+          "RECOVERY_ATTEMPT": 40,
+          "false_rebound": 24,
+          "UPTREND_CONFIRMED": 3,
+          "confirmed_followthrough": 1,
+          "REVERSAL_CONFIRMING": 1
+        },
+        "2025": {
+          "observations": 365,
+          "RECOVERY_ATTEMPT": 162,
+          "large_rise_not_confirmed_at_origin": 101,
+          "CORRECTION": 192,
+          "false_rebound": 89,
+          "future_deep_drop": 109,
+          "continuing_decline": 104,
+          "REVERSAL_CONFIRMING": 11
+        },
+        "2026": {
+          "observations": 298,
+          "RECOVERY_ATTEMPT": 132,
+          "large_rise_not_confirmed_at_origin": 63,
+          "REVERSAL_CONFIRMING": 8,
+          "CORRECTION": 155,
+          "false_rebound": 78,
+          "continuing_decline": 75,
+          "future_deep_drop": 45,
+          "UPTREND_CONFIRMED": 3
+        }
+      },
+      "examples": {
+        "continuing_decline": {
+          "at": "2024-09-15T16:00:00+00:00",
+          "state": "CORRECTION",
+          "price": 323.9,
+          "next_24h_pct": -10.960172892868169,
+          "next_72h_pct": -4.970669959864149,
+          "max_72h_pct": 3.426983636924974,
+          "min_72h_pct": -12.874343933312748
+        },
+        "false_rebound": {
+          "at": "2024-09-17T16:00:00+00:00",
+          "state": "RECOVERY_ATTEMPT",
+          "price": 326.1,
+          "next_24h_pct": -5.611775528978846,
+          "next_72h_pct": 27.046918123275066,
+          "max_72h_pct": 33.0880098129408,
+          "min_72h_pct": -6.041091689665756
+        },
+        "confirmed_followthrough": {
+          "at": "2024-09-20T16:00:00+00:00",
+          "state": "UPTREND_CONFIRMED",
+          "price": 414.3,
+          "next_24h_pct": 6.541153753318851,
+          "next_72h_pct": 30.267921795800156,
+          "max_72h_pct": 40.64687424571567,
+          "min_72h_pct": -4.899831040308955
+        }
+      },
+      "prefix_invariance_checks": 3
+    },
+    "FET": {
+      "status": "DIAGNOSTIC_ONLY",
+      "source": "Binance public USDT 4h OHLCV; UTC daily bars resampled from six closed 4h bars",
+      "first": "2024-07-17T12:00:00+00:00",
+      "last": "2026-10-28T20:00:00+00:00",
+      "bars": 5000,
+      "input_digest": "13a600559b2d52862c47bff392746a4b06841c38e938687ac1ef48e2f9ca6adb",
+      "years": {
+        "2024": {
+          "observations": 108,
+          "CORRECTION": 66,
+          "continuing_decline": 35,
+          "future_deep_drop": 33,
+          "large_rise_not_confirmed_at_origin": 35,
+          "RECOVERY_ATTEMPT": 40,
+          "false_rebound": 26,
+          "REVERSAL_CONFIRMING": 2
+        },
+        "2025": {
+          "observations": 365,
+          "RECOVERY_ATTEMPT": 149,
+          "large_rise_not_confirmed_at_origin": 93,
+          "REVERSAL_CONFIRMING": 12,
+          "CORRECTION": 204,
+          "continuing_decline": 113,
+          "future_deep_drop": 122,
+          "false_rebound": 81
+        },
+        "2026": {
+          "observations": 298,
+          "RECOVERY_ATTEMPT": 136,
+          "large_rise_not_confirmed_at_origin": 64,
+          "CORRECTION": 150,
+          "REVERSAL_CONFIRMING": 10,
+          "future_deep_drop": 65,
+          "false_rebound": 70,
+          "continuing_decline": 77,
+          "UPTREND_CONFIRMED": 2
+        }
+      },
+      "examples": {
+        "continuing_decline": {
+          "at": "2024-09-15T16:00:00+00:00",
+          "state": "CORRECTION",
+          "price": 1.386,
+          "next_24h_pct": -5.627705627705614,
+          "next_72h_pct": -4.689754689754688,
+          "max_72h_pct": 0.721500721500723,
+          "min_72h_pct": -10.750360750360732
+        },
+        "false_rebound": {
+          "at": "2024-09-17T16:00:00+00:00",
+          "state": "RECOVERY_ATTEMPT",
+          "price": 1.363,
+          "next_24h_pct": -3.0814380044020595,
+          "next_72h_pct": 17.828319882611886,
+          "max_72h_pct": 20.322817314746878,
+          "min_72h_pct": -4.1085840058694085
+        }
+      },
+      "prefix_invariance_checks": 3
+    },
+    "AAVE": {
+      "status": "DIAGNOSTIC_ONLY",
+      "source": "Binance public USDT 4h OHLCV; UTC daily bars resampled from six closed 4h bars",
+      "first": "2024-07-17T12:00:00+00:00",
+      "last": "2026-10-28T20:00:00+00:00",
+      "bars": 5000,
+      "input_digest": "fd862dc281bc3575e3a51005dc8e6b7e381a843511ed1d67629124b3575afd0f",
+      "years": {
+        "2024": {
+          "observations": 108,
+          "RECOVERY_ATTEMPT": 43,
+          "false_rebound": 17,
+          "CORRECTION": 60,
+          "large_rise_not_confirmed_at_origin": 33,
+          "REVERSAL_CONFIRMING": 4,
+          "continuing_decline": 27,
+          "future_deep_drop": 26,
+          "UPTREND_CONFIRMED": 1,
+          "confirmed_followthrough": 1
+        },
+        "2025": {
+          "observations": 365,
+          "RECOVERY_ATTEMPT": 148,
+          "large_rise_not_confirmed_at_origin": 69,
+          "false_rebound": 75,
+          "future_deep_drop": 90,
+          "CORRECTION": 207,
+          "continuing_decline": 113,
+          "REVERSAL_CONFIRMING": 8,
+          "UPTREND_CONFIRMED": 2
+        },
+        "2026": {
+          "observations": 298,
+          "RECOVERY_ATTEMPT": 133,
+          "large_rise_not_confirmed_at_origin": 43,
+          "CORRECTION": 154,
+          "continuing_decline": 75,
+          "false_rebound": 74,
+          "future_deep_drop": 41,
+          "REVERSAL_CONFIRMING": 10,
+          "UPTREND_CONFIRMED": 1
+        }
+      },
+      "examples": {
+        "false_rebound": {
+          "at": "2024-09-15T16:00:00+00:00",
+          "state": "RECOVERY_ATTEMPT",
+          "price": 147.08,
+          "next_24h_pct": -3.4471036170791503,
+          "next_72h_pct": -8.505575197171622,
+          "max_72h_pct": 0.46913244492792217,
+          "min_72h_pct": -8.797933097633958
+        },
+        "continuing_decline": {
+          "at": "2024-09-25T16:00:00+00:00",
+          "state": "CORRECTION",
+          "price": 165.86,
+          "next_24h_pct": 1.8991920897142078,
+          "next_72h_pct": -0.5667430362956916,
+          "max_72h_pct": 4.895695164596625,
+          "min_72h_pct": -1.6881707464126428
+        },
+        "confirmed_followthrough": {
+          "at": "2024-12-03T16:00:00+00:00",
+          "state": "UPTREND_CONFIRMED",
+          "price": 242.14,
+          "next_24h_pct": 7.55348145700836,
+          "next_72h_pct": 11.171223259271512,
+          "max_72h_pct": 14.528785000412991,
+          "min_72h_pct": -5.8395969273973725
+        }
+      },
+      "prefix_invariance_checks": 3
+    },
+    "ONDO": {
+      "status": "DIAGNOSTIC_ONLY",
+      "source": "Binance public USDT 4h OHLCV; UTC daily bars resampled from six closed 4h bars",
+      "first": "2025-04-11T12:00:00+00:00",
+      "last": "2026-10-28T20:00:00+00:00",
+      "bars": 3392,
+      "input_digest": "87053ba9e26557971a71769e7c12e31cb01714f543d427d2096e5008445b927f",
+      "years": {
+        "2025": {
+          "observations": 205,
+          "REVERSAL_CONFIRMING": 5,
+          "future_deep_drop": 43,
+          "CORRECTION": 118,
+          "continuing_decline": 62,
+          "RECOVERY_ATTEMPT": 82,
+          "false_rebound": 44,
+          "large_rise_not_confirmed_at_origin": 33
+        },
+        "2026": {
+          "observations": 298,
+          "RECOVERY_ATTEMPT": 129,
+          "large_rise_not_confirmed_at_origin": 60,
+          "CORRECTION": 154,
+          "continuing_decline": 83,
+          "future_deep_drop": 48,
+          "false_rebound": 70,
+          "REVERSAL_CONFIRMING": 14,
+          "UPTREND_CONFIRMED": 1,
+          "confirmed_followthrough": 1
+        }
+      },
+      "examples": {
+        "continuing_decline": {
+          "at": "2025-06-12T16:00:00+00:00",
+          "state": "CORRECTION",
+          "price": 0.838,
+          "next_24h_pct": -5.918854415274466,
+          "next_72h_pct": -6.18138424821002,
+          "max_72h_pct": 2.482100238663487,
+          "min_72h_pct": -10.405727923627683
+        },
+        "false_rebound": {
+          "at": "2025-06-13T16:00:00+00:00",
+          "state": "RECOVERY_ATTEMPT",
+          "price": 0.7884,
+          "next_24h_pct": -0.5073566717402334,
+          "next_72h_pct": 4.591577879249109,
+          "max_72h_pct": 5.923389142567226,
+          "min_72h_pct": -2.536783358701167
+        },
+        "confirmed_followthrough": {
+          "at": "2026-05-08T16:00:00+00:00",
+          "state": "UPTREND_CONFIRMED",
+          "price": 0.4253,
+          "next_24h_pct": -0.822948506936283,
+          "next_72h_pct": 1.9750764166470702,
+          "max_72h_pct": 14.671996237949681,
+          "min_72h_pct": -5.501998589231139
+        }
+      },
+      "prefix_invariance_checks": 3
+    },
+    "RENDER": {
+      "status": "DIAGNOSTIC_ONLY",
+      "source": "Binance public USDT 4h OHLCV; UTC daily bars resampled from six closed 4h bars",
+      "first": "2024-07-26T08:00:00+00:00",
+      "last": "2026-10-28T20:00:00+00:00",
+      "bars": 4947,
+      "input_digest": "5ccfabb8d19b8c3070de4a84fb162e3b56fbd8d77513716349999e7b80f27252",
+      "years": {
+        "2024": {
+          "observations": 99,
+          "CORRECTION": 51,
+          "large_rise_not_confirmed_at_origin": 26,
+          "RECOVERY_ATTEMPT": 47,
+          "continuing_decline": 27,
+          "future_deep_drop": 19,
+          "false_rebound": 24,
+          "REVERSAL_CONFIRMING": 1
+        },
+        "2025": {
+          "observations": 365,
+          "CORRECTION": 178,
+          "large_rise_not_confirmed_at_origin": 72,
+          "RECOVERY_ATTEMPT": 177,
+          "false_rebound": 98,
+          "continuing_decline": 93,
+          "future_deep_drop": 114,
+          "REVERSAL_CONFIRMING": 9,
+          "UPTREND_CONFIRMED": 1
+        },
+        "2026": {
+          "observations": 298,
+          "RECOVERY_ATTEMPT": 134,
+          "large_rise_not_confirmed_at_origin": 57,
+          "REVERSAL_CONFIRMING": 17,
+          "CORRECTION": 146,
+          "future_deep_drop": 42,
+          "false_rebound": 74,
+          "continuing_decline": 82,
+          "UPTREND_CONFIRMED": 1
+        }
+      },
+      "examples": {
+        "continuing_decline": {
+          "at": "2024-09-29T12:00:00+00:00",
+          "state": "CORRECTION",
+          "price": 6.436,
+          "next_24h_pct": 1.5226848974518203,
+          "next_72h_pct": -9.912989434431319,
+          "max_72h_pct": 5.950901180857682,
+          "min_72h_pct": -13.533250466128022
+        },
+        "false_rebound": {
+          "at": "2024-10-01T12:00:00+00:00",
+          "state": "RECOVERY_ATTEMPT",
+          "price": 6.644,
+          "next_24h_pct": -12.733293196869354,
+          "next_72h_pct": -16.22516556291391,
+          "max_72h_pct": 0.9632751354605729,
+          "min_72h_pct": -24.307645996387716
+        }
+      },
+      "prefix_invariance_checks": 3
+    }
+  }
+}

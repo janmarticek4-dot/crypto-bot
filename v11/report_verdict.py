@@ -30,6 +30,9 @@ def interpretation(model,snapshot):
 
 
 def verdict(model,snapshot,body,inventory=None):
+    if 'trend_reversal' in model:
+        from .reversal_report import intro
+        return intro(model,snapshot,body,inventory)
     change=snapshot.get('global_data',{}).get('change')
     label='KOREKCIA' if analyst.number(change) and change<0 else 'RAST' if analyst.number(change) and change>0 else 'KONSOLIDÁCIA' if analyst.number(change) else 'N/A — nedostatok údajov'
     parsed=actions(body);new=[(s,a) for s,a,c in parsed if c=='nový nákup'];held=[(s,a) for s,a,c in parsed if c=='držba']

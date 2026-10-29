@@ -70,6 +70,7 @@ def run():
     def strict_read(journal):
         value=original_read(journal)
         if not value.get('slots'):raise RuntimeError('Existing delivery journal missing/empty; refusing a reset')
+        holder['journal']=value
         return value
     try:
         pilot.PublicJournal.read=strict_read
@@ -92,6 +93,8 @@ def run():
                     from scripts.v2_context import enrich as add_predictions
                     try:add_predictions(snap,fund,now,model)
                     except Exception as exc:model.update(experimental_predictions={},prediction_diagnostics={'prediction_error':type(exc).__name__})
+                from v11 import trend_reversal
+                trend_reversal.attach(model,snap,fund,now,holder.get('journal',{}))
                 holder['model']=model
                 if display:
                     from v11.integrated_report import render
@@ -99,6 +102,8 @@ def run():
                     from v11.report_verdict import contract
                     from v11.prediction_runtime import current_predictions
                     model.setdefault('prediction_diagnostics',{})['report_contract']=contract(text,sum(len(v) for v in current_predictions(model,int(now.timestamp()*1000)).values()))
+                    from v11.reversal_report import guard
+                    _,model['report_consistency']=guard(text,analyst.final_text(model,snap,now,kind),model,snap)
                 else:text=analyst.final_text(model,snap,now,kind)
                 quotes['_v112_observation']=model['observation']
             directory=os.getenv('V111_DIAGNOSTICS_DIR')
@@ -157,6 +162,7 @@ def run():
                 result=contract(text,len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY) ',text)))
                 try:source=subprocess.check_output(['git','rev-parse','HEAD'],text=True,stderr=subprocess.DEVNULL).strip()
                 except (OSError,subprocess.SubprocessError):source=None
+                if 'trend_reversal' in holder.get('model',{}):result.update(trend_reversal_state=holder['model']['trend_reversal'].get('state'),reversal_consistency_checked=True)
                 result.update(workflow_run=os.getenv('GITHUB_RUN_ID'),source=source)
                 return result
             pilot.delivery_metadata=metadata

@@ -39,10 +39,14 @@ def run(reuse=False):
     previous=json.loads((ROOT/'trial-public/v111-delivery.json').read_text()).get('last_analysis_v112')
     model=analyst.prepare(snap,fund,now,quotes,evaluations,previous)
     enrich(snap,fund,now,model,persist=False,store=ReadOnlyStore())
+    from v11 import trend_reversal
+    trend_reversal.attach(model,snap,fund,now,json.loads((ROOT/'trial-public/v111-delivery.json').read_text()))
     reports={kind:render(model,snap,now,kind) for kind in ('morning','evening')}
     from v11.report_verdict import contract
     current=prediction_runtime.current_predictions(model,int(now.timestamp()*1000))
     count=sum(len(v) for v in current.values())
+    from v11.reversal_report import guard
+    model['report_consistency']={k:guard(t,analyst.final_text(model,snap,now,k),model,snap)[1] for k,t in reports.items()}
     contracts={k:contract(t,count) for k,t in reports.items()}
     for details in contracts.values():assert details['verdict_first'] and details['urls_absent']
     if os.getenv('REQUIRE_V2_PREDICTIONS')=='1':assert count==18,model.get('prediction_diagnostics')
@@ -50,7 +54,7 @@ def run(reuse=False):
     proof=dict(predictions=count,per_coin={s:len(v) for s,v in current.items()},contracts=contracts,
         generated_at=details.get('generated_at'),package_created=details.get('package_created'),package_age_ms=details.get('package_age_ms'),
         snapshot_age_ms=details.get('snapshot_age_ms'),missing_predictions=details.get('missing_predictions',{}),
-        parts={k:len(chunks(v)) for k,v in reports.items()},telegram_sent=False)
+        parts={k:len(chunks(v)) for k,v in reports.items()},reversal_state=model.get('trend_reversal',{}).get('state'),consistency_checks=model['report_consistency'],new_buy_sell_activated=False,telegram_sent=False)
     print('::notice title=Live report contract::'+json.dumps(proof))
     (OUT/'live-contract.json').write_text(json.dumps(proof,ensure_ascii=False,allow_nan=False))
     for kind,text in reports.items():

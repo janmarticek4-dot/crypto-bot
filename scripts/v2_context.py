@@ -43,4 +43,8 @@ def enrich(snapshot,fund,now,model,persist=True,store=None):
     details['missing_predictions']={s:{h:details.get('coin_errors',{}).get(s) or details.get('horizon_errors',{}).get(s,{}).get(h) or
         ('INFERENCE_FAILED_SEE_PREDICTION_REASON' if details.get('prediction_error') else 'MODEL_OUTPUT_UNAVAILABLE')
         for h in runtime.HORIZONS if h not in available[s]} for s in runtime.COINS if len(available[s])<len(runtime.HORIZONS)}
+    from v11.prediction_review import review
+    try:model['prediction_review']=review(state or {},available,int(now.timestamp()*1000))
+    except (KeyError,TypeError,ValueError,OverflowError) as exc:
+        model['prediction_review']={'status':'N/A','error':type(exc).__name__}
     return model
