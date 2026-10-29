@@ -34,6 +34,8 @@ def validate(value):
 
 def predict(snapshot,value,now_ms,diagnostics=None):
     validate(value)
+    if diagnostics is not None:
+        diagnostics.update(generated_at=now_ms,package_age_ms=now_ms-value['created'],horizon_errors={})
     if not 0<=now_ms-value['created']<=48*3600000:raise ValueError('Runtime package stale/future')
     stamp=snapshot.get('at')
     if not r.finite(stamp):raise ValueError('Invalid snapshot clock')
@@ -59,6 +61,9 @@ def predict(snapshot,value,now_ms,diagnostics=None):
         if not 0<=now_ms-source_close<=STEP:reject(symbol,'LAST_CLOSED_CANDLE_STALE_OR_FUTURE');continue
         if item['asof']>source_close:reject(symbol,'PACKAGE_AHEAD_OF_SNAPSHOT');continue
         if now_ms-item['asof']>48*3600000:reject(symbol,'MODEL_OBSERVATION_EXPIRED');continue
+        if diagnostics is not None:
+            missing={h:'MODEL_HORIZON_MISSING' for h in HORIZONS if h not in item['states']}
+            if missing:diagnostics['horizon_errors'][symbol]=missing
         for label,state in item['states'].items():
             h=HORIZONS[label];scale=float(data['sigma'][i])*math.sqrt(h)
             if not math.isfinite(scale) or scale<=0:reject(symbol,'NO_FINITE_VOLATILITY');continue
@@ -68,10 +73,32 @@ def predict(snapshot,value,now_ms,diagnostics=None):
             if q is None or not math.isfinite(q):reject(symbol,'MODEL_OUTPUT_MISSING');continue
             p=coin['price'];lo,hi=state['offsets'];tolerance=state['tolerance_factor']*scale
             out[symbol][label]=dict(model=kind,price=p,point=p*math.exp(q),low=p*math.exp(q+lo*scale),high=p*math.exp(q+hi*scale),
+                generated_at=now_ms,valid_until=min(now_ms+900000,int(stamp*1000)+900000,source_close+STEP,value['created']+48*3600000,item['asof']+48*3600000),model_asof=item['asof'],
                 direction=r.direction(q,tolerance),confidence='NÍZKA',probabilities=None,low_pct=math.expm1(q+lo*scale)*100,high_pct=math.expm1(q+hi*scale)*100,
                 input_features=data['features'][i].tolist(),volatility_4h=float(data['sigma'][i]),regime=r.regime(data,i,state['volatility_limit']),
                 tolerance_log=tolerance,trend_price=p*math.exp(points['trend']),source_close=source_close,input_digest=r.digest(coin['raw']['4h']),btc_digest=r.digest(btc['raw']['4h']))
     require_public_data(out);return out
+
+
+def current_predictions(model,now_ms):
+    """Never present cached, unclocked or expired output as a new forecast.
+
+    This is a display freshness window, not the 24/72/336-hour target horizon.
+    Forecasts in the separate immutable paper journal retain their original dates.
+    """
+    out={}
+    for symbol in COINS:
+        usable={}
+        for label,item in model.get('experimental_predictions',{}).get(symbol,{}).items():
+            if label not in HORIZONS or not isinstance(item,dict):continue
+            created=item.get('generated_at');until=item.get('valid_until')
+            if not all(r.finite(x) for x in (created,until)):continue
+            if not created<=now_ms<=until or until-created>900000:continue
+            if not all(r.finite(item.get(k)) for k in ('low','high','low_pct','high_pct')):continue
+            if item['low']<=0 or item['high']<item['low']:continue
+            usable[label]=item
+        out[symbol]=usable
+    return out
 
 def records(predictions,now_ms,run_id,code_digest):
     out=[]

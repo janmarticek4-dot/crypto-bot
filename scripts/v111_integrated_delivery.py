@@ -97,7 +97,8 @@ def run():
                     from v11.integrated_report import render
                     text=render(model,snap,now,kind)
                     from v11.report_verdict import contract
-                    model.setdefault('prediction_diagnostics',{})['report_contract']=contract(text,sum(len(v) for v in model.get('experimental_predictions',{}).values()))
+                    from v11.prediction_runtime import current_predictions
+                    model.setdefault('prediction_diagnostics',{})['report_contract']=contract(text,sum(len(v) for v in current_predictions(model,int(now.timestamp()*1000)).values()))
                 else:text=analyst.final_text(model,snap,now,kind)
                 quotes['_v112_observation']=model['observation']
             directory=os.getenv('V111_DIAGNOSTICS_DIR')
@@ -139,14 +140,21 @@ def run():
                     return brief(holder['us_context'],holder['model'],snap,holder['us_fund'],now,inventory)
                 if os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
                     from v11.integrated_report import render
-                    return render(holder['model'],snap,now,kind,inventory)
+                    # Private storage is read after the attempting CAS. Recheck
+                    # forecast freshness at final rendering, not the old clock
+                    # from before those bounded network requests.
+                    delivery_now=pilot.datetime.now(pilot.timezone.utc)
+                    return render(holder['model'],snap,delivery_now,kind,inventory)
                 return analyst.final_text(holder['model'],snap,now,kind,inventory)
             pilot.personalize=private_render
         if v112 and os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
             def metadata(text):
                 import subprocess
                 from v11.report_verdict import contract
-                result=contract(text,sum(len(v) for v in holder.get('model',{}).get('experimental_predictions',{}).values()))
+                # Count what the final rendered text actually contains, not a
+                # possibly expired in-memory model. No private text is persisted.
+                import re
+                result=contract(text,len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY) ',text)))
                 try:source=subprocess.check_output(['git','rev-parse','HEAD'],text=True,stderr=subprocess.DEVNULL).strip()
                 except (OSError,subprocess.SubprocessError):source=None
                 result.update(workflow_run=os.getenv('GITHUB_RUN_ID'),source=source)

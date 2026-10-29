@@ -3,12 +3,13 @@ import re
 from . import analyst,event_lifecycle,fundamental_extensions as ext,report_verdict as rv
 from .telegram_text import without_links
 from .fundamental_analysis import ALIASES
+from .prediction_runtime import current_predictions
 
 
 def render(model,snapshot,now,kind,inventory=None):
     base=analyst.final_text(model,snapshot,now,kind,inventory)
     head,body=base.split('ODPORÚČANIA:',1);header=head.splitlines()
-    predictions=model.get('experimental_predictions',{});count=sum(len(v) for v in predictions.values())
+    predictions=current_predictions(model,int(now.timestamp()*1000));count=sum(len(v) for v in predictions.values())
     lines=rv.verdict(model,snapshot,body,inventory)+['',*header[:2]]
     market=next((line for line in header if line.startswith('BTC ')),None)
     if market:lines.append(market)

@@ -13,7 +13,7 @@ def audit(archive,context):
             return json.loads(z.read(found[0]))
         model=read('v112_analysis.json');snap=read('market_snapshot.json')
     diagnostics=model.get('prediction_diagnostics',{})
-    allowed={'prediction_error','prediction_reason','public_store','package_created','records','paper_saved','paper_error','snapshot_age_ms','coin_errors','report_contract','package_source','package_attempts'}
+    allowed={'prediction_error','prediction_reason','public_store','public_store_http_status','package_created','records','paper_saved','paper_error','snapshot_age_ms','coin_errors','report_contract','package_source','package_attempts','generated_at','package_age_ms','horizon_errors','available_predictions','missing_predictions'}
     out=dict(context,at=model.get('observation',{}).get('at'),snapshot_at=snap.get('at'),prediction_diagnostics={k:v for k,v in diagnostics.items() if k in allowed},
              predictions={s:len(v) for s,v in model.get('experimental_predictions',{}).items()},coins={})
     import datetime

@@ -12,7 +12,9 @@ def enrich(snapshot,fund,now,model,persist=True,store=None):
     try:
         store=store or PublicPredictionStore()
         state=store.read()
-    except Exception as exc:model['prediction_diagnostics']['public_store']=type(exc).__name__
+    except Exception as exc:
+        model['prediction_diagnostics']['public_store']=type(exc).__name__
+        if isinstance(getattr(exc,'code',None),int):model['prediction_diagnostics']['public_store_http_status']=exc.code
     value=state.get('runtime_package') if state else None
     model['prediction_diagnostics']['package_source']='public-journal' if value is not None else 'bundled-frozen'
     if value is None:
@@ -35,4 +37,10 @@ def enrich(snapshot,fund,now,model,persist=True,store=None):
     except Exception as exc:
         model['prediction_diagnostics']['prediction_error']=type(exc).__name__
         if isinstance(exc,ValueError):model['prediction_diagnostics']['prediction_reason']=str(exc)[:180]
+    details=model['prediction_diagnostics']
+    available=runtime.current_predictions(model,int(now.timestamp()*1000))
+    details['available_predictions']={s:len(v) for s,v in available.items()}
+    details['missing_predictions']={s:{h:details.get('coin_errors',{}).get(s) or details.get('horizon_errors',{}).get(s,{}).get(h) or
+        ('INFERENCE_FAILED_SEE_PREDICTION_REASON' if details.get('prediction_error') else 'MODEL_OUTPUT_UNAVAILABLE')
+        for h in runtime.HORIZONS if h not in available[s]} for s in runtime.COINS if len(available[s])<len(runtime.HORIZONS)}
     return model

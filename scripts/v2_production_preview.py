@@ -41,15 +41,27 @@ def run(reuse=False):
     enrich(snap,fund,now,model,persist=False,store=ReadOnlyStore())
     reports={kind:render(model,snap,now,kind) for kind in ('morning','evening')}
     from v11.report_verdict import contract
-    count=sum(len(v) for v in model.get('experimental_predictions',{}).values())
+    current=prediction_runtime.current_predictions(model,int(now.timestamp()*1000))
+    count=sum(len(v) for v in current.values())
     contracts={k:contract(t,count) for k,t in reports.items()}
     for details in contracts.values():assert details['verdict_first'] and details['urls_absent']
     if os.getenv('REQUIRE_V2_PREDICTIONS')=='1':assert count==18,model.get('prediction_diagnostics')
-    print('::notice title=Live report contract::'+json.dumps(dict(predictions=count,contracts=contracts,parts={k:len(chunks(v)) for k,v in reports.items()},telegram_sent=False)))
+    details=model.get('prediction_diagnostics',{})
+    proof=dict(predictions=count,per_coin={s:len(v) for s,v in current.items()},contracts=contracts,
+        generated_at=details.get('generated_at'),package_created=details.get('package_created'),package_age_ms=details.get('package_age_ms'),
+        snapshot_age_ms=details.get('snapshot_age_ms'),missing_predictions=details.get('missing_predictions',{}),
+        parts={k:len(chunks(v)) for k,v in reports.items()},telegram_sent=False)
+    print('::notice title=Live report contract::'+json.dumps(proof))
+    (OUT/'live-contract.json').write_text(json.dumps(proof,ensure_ascii=False,allow_nan=False))
     for kind,text in reports.items():
         assert 'https://' not in text and 'http://' not in text and 'www.' not in text
         require_public_data(text);(OUT/(kind+'.txt')).write_text(text)
         assert all(units(part)<=3800 for part in chunks(text))
+        if kind=='morning':
+            # Public market preview only: never load or publish private inventory.
+            blocks=[text[i:i+1700] for i in range(0,len(text),1700)]
+            for i,block in enumerate(blocks):
+                print('::notice title=Morning public preview::'+json.dumps(dict(preview_part=i+1,preview_parts=len(blocks),text=block),ensure_ascii=False))
     require_public_data(model)
     (OUT/'public-analysis.json').write_text(json.dumps(model,ensure_ascii=False,allow_nan=False))
     audit=dict(releases=fund['event_lifecycle']['releases'],attempts=fund['event_lifecycle']['attempts'],
