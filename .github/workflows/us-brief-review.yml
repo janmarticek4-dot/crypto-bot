@@ -1,0 +1,40 @@
+name: USA Brief Review
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - v11/us_brief.py
+      - scripts/us_brief_preview.py
+      - tests/test_us_brief.py
+      - .github/workflows/us-brief-review.yml
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      GROQ_API_KEY: ''
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt -r requirements-research.txt
+      - run: python scripts/test_integration_offline.py
+      - run: python scripts/us_brief_preview.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: usa-brief-review-${{ github.run_id }}
+          path: |
+            shadow-output/us-brief/USA.txt
+            shadow-output/us-brief/model.json
+            shadow-output/us-brief/source-diagnostics.json
+          retention-days: 14

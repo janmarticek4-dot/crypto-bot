@@ -23,6 +23,7 @@ PATH='trial-public/v111-delivery.json'
 # Optional presentation hook; never persisted and unused by V11.1.
 personalize=None
 delivery_metadata=None
+usa_prepare=None
 
 
 def phase(now):
@@ -152,17 +153,20 @@ def run(manual_key=None):
         now=datetime.now(timezone.utc);us.refresh(context,now)
         target='BRATISLAVA_'+now.astimezone(BL).date().isoformat()+'_15:00'
         previous=next((entry.get('quotes') for slot,entry in sorted(state['slots'].items(),reverse=True) if slot.endswith('-usa') and entry.get('status')=='sent'),None)
-        text=us.render(context,now,target,previous,(now-started).total_seconds())
         fundamental=fundamentals.collect({},now)
-        if os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
+        if callable(usa_prepare):
+            api=ShadowAPI();original=data.COINS
+            try:
+                data.COINS={s:original[s] for s in SYMBOLS};snap=data.collect(api,full=True)
+            finally:data.COINS=original
+            now=datetime.now(timezone.utc);us.refresh(context,now)
             from v11 import event_lifecycle
-            fundamental=event_lifecycle.collect(fundamental,now)
-            text+='\n'+'\n'.join(event_lifecycle.lines(fundamental,now))
-            from v11 import fundamental_extensions
-            text+='\n'+'\n'.join(fundamental_extensions.lines(fundamental.get('extensions',{}),now))
-        upcoming=[e for e in fundamental.get('events',[]) if e.get('scheduled') and e.get('lifecycle','UPCOMING')=='UPCOMING']
-        text+='\nNajbližšie plánované: '+(' | '.join(e['title'][:80]+'; '+(fundamentals.timestamp(e['event_at']).astimezone(BL).strftime('%d.%m. %H:%M Bratislava') if e.get('event_at') else e.get('event_date','N/A')+' čas N/A')+'; '+e['url'] for e in upcoming[:2]) or 'N/A v dostupných zdrojoch.')
-        text+='\n'+macro_context.lines(macro_context.collect({},now))[0]
+            fundamental=event_lifecycle.collect(fundamental,now,snap)
+            now=datetime.now(timezone.utc);us.refresh(context,now)
+            reference=state.get('last_analysis_v112')
+            text=usa_prepare(context,snap,fundamental,now,reference)
+        else:
+            text=us.render(context,now,target,previous,(now-started).total_seconds())
         require_public_data(text)
         quotes={'at':context['crypto']['global_at'].isoformat() if context['crypto']['global_at'] else None,
                 'dominance':context['crypto']['dominance'],
@@ -204,7 +208,7 @@ def run(manual_key=None):
         records=state['slots']
         records[key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
-    if kind!='usa' and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
+    if (kind!='usa' or callable(usa_prepare)) and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
         private_stage='storage_or_inventory'
         try:
             from v11.advisory_portfolio import load,advice

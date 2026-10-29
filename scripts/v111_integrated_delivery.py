@@ -63,6 +63,7 @@ def run():
     original_render=pilot.render
     original_personalize=pilot.personalize
     original_metadata=pilot.delivery_metadata
+    original_usa=pilot.usa_prepare
     v112=os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true'
     holder={}
     original_remember=pilot.forecast_audit.remember
@@ -74,7 +75,7 @@ def run():
         pilot.PublicJournal.read=strict_read
         # Evaluate prior delivered forecasts only; do not create/promote a V11 model.
         pilot.forecast_audit.remember=lambda *args,**kwargs: None
-        if not manual_key and pilot.phase(pilot.datetime.now(pilot.timezone.utc)) not in ('morning','evening'):return invoke()
+        if not manual_key and pilot.phase(pilot.datetime.now(pilot.timezone.utc)) not in (('morning','evening','usa') if v112 else ('morning','evening')):return invoke()
         state=latest_public_rule_state() # fail closed, no reset or legacy-state write
         fear=legacy.get_fear_greed() # same existing read-only provider
         def enrich(snap,fund,now,kind,previous=None):
@@ -113,10 +114,29 @@ def run():
                     require_public_data(value)
                     (target/name).write_text(value if isinstance(value,str) else json.dumps(value,ensure_ascii=False,allow_nan=False))
             return text,quotes
+        if v112:
+            def usa_prepare(context,snap,fund,now,previous):
+                from v11 import analyst
+                from v11.us_brief import render as brief
+                _,quotes,evaluations=integration.render(legacy,snap,fund,now,'usa',state,previous,fear)
+                model=analyst.prepare(snap,fund,now,quotes,evaluations,previous)
+                holder.update(model=model,us_context=context,us_fund=fund)
+                # Only public evidence, never final personalized text, enters artifacts.
+                directory=os.getenv('V111_DIAGNOSTICS_DIR')
+                if directory:
+                    from v11.state_policy import require_public_data
+                    require_public_data(model)
+                    target=Path(directory);target.mkdir(parents=True,exist_ok=True)
+                    (target/'v112_analysis.json').write_text(json.dumps(model,ensure_ascii=False,allow_nan=False))
+                return brief(context,model,snap,fund,now)
+            pilot.usa_prepare=usa_prepare
         pilot.render=enrich
         if v112:
             from v11 import analyst
             def private_render(inventory,snap,now,kind):
+                if kind=='usa':
+                    from v11.us_brief import render as brief
+                    return brief(holder['us_context'],holder['model'],snap,holder['us_fund'],now,inventory)
                 if os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
                     from v11.integrated_report import render
                     return render(holder['model'],snap,now,kind,inventory)
@@ -137,6 +157,7 @@ def run():
         pilot.render=original_render
         pilot.personalize=original_personalize
         pilot.delivery_metadata=original_metadata
+        pilot.usa_prepare=original_usa
         pilot.PublicJournal.read=original_read
         pilot.forecast_audit.remember=original_remember
 
