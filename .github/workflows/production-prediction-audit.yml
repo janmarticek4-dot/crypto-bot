@@ -55,7 +55,7 @@ jobs:
       - uses: actions/github-script@v7
         env:
           PRODUCTION_RUN: ${{ needs.select.outputs.run_id }}
-          EXPECTED_SOURCE: '1ce162d6d1cd6f91499e3869bce92171bfe9342b'
+          EXPECTED_SOURCE: 'a4a1e9c08d78e783347dc286f8f847a8dbb8bcec'
         with:
           script: |
             const fs=require('fs');
