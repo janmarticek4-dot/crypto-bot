@@ -1,0 +1,11 @@
+# USA prehľad – 29.10.2026
+
+Presentation-only integration: approved V10.6 technical engine and existing V11.2 personal assessment are unchanged. The former USA branch dumped all quotes and appended whole macro/extensions blocks; it also deliberately skipped private personalization. The new five-section brief interprets fresh cash indices/futures separately, never calls daily changes "since open", demands coherent BTC/capitalization/alt breadth before labeling growth/correction, and reports uncertainty for conflict/missing data. Three information bullets, two watch items, URL-free and <=2000 characters. No forced padding to 1500 when fewer verified facts exist.
+
+Personal actions are taken from the same `analyst.final_text` result as full reports. SOL/TAO are never assumed held without safely loaded inventory. Private loading remains after the existing attempting CAS; no holdings in public models/artifacts. Normal sent/uncertain/attempting dedup is unchanged. USA neither appends a prediction observation nor consumes morning/evening references; it reads the latest public reference for comparison only.
+
+The current public preview uses live observations from 29 October, not a reconstruction of 15:00. It does not load private state, send Telegram, call paid AI, or write bot_state/public delivery journals. Sources, model and report are retained in `USA Brief Review` artifacts. Missing US quotes stay unknown; technical forecasts are explicitly conditional. Upcoming events must have a verified future timestamp. Past events cannot be labeled upcoming. Unavailable consensus is not invented.
+
+298 offline integration tests pass, including new direction-conflict, alt breadth, stale quotes/snapshot, exact personal-action parity, no inventory mutation/leak, full-quote+Fed length budget, and past/future event tests. Existing timezone, US holiday, dedup and monitoring tests remain included. Native main.py, production state and Secrets are unchanged.
+
+Activation requires a separate explicit source-pin commit after runner preview/regression passes; until then production remains on immutable 1ce162d6. Rollback is reverting only that future pin commit, never resetting main/state. Backup tag `backup/before-us-brief-20261029` points to 7e06b1d.

@@ -54,3 +54,20 @@ class BriefTests(unittest.TestCase):
     def test_native_rules_not_called_by_renderer(self):
         with patch('main.evaluate_coin',side_effect=AssertionError('new rules')) if hasattr(__import__('main'),'evaluate_coin') else patch('main.main',side_effect=AssertionError('side effect')):
             self.text()
+    def test_scheduled_past_never_presented_as_future(self):
+        event=dict(scheduled=True,event_at=(NOW-timedelta(hours=1)).isoformat(),categories=['CPI'],source='BLS',lifecycle='UPCOMING')
+        text=render(self.context,self.model,self.snap,{'events':[event]},NOW)
+        self.assertNotIn('CPI USA',text)
+        event['event_at']=(NOW+timedelta(hours=2)).isoformat()
+        text=render(self.context,self.model,self.snap,{'events':[event]},NOW)
+        self.assertIn('CPI USA',text);self.assertIn('Bratislava (BLS)',text)
+        self.assertLessEqual(len(text),2000)
+    def test_macro_result_full_quotes_and_holdings_fit_budget(self):
+        self.context['market']['phase']='AFTER OPEN'
+        for q in self.context['quotes'].values():q.update(change=-1.23,price=100,at=NOW,status='oneskorený zdroj')
+        release=dict(status='RELEASED',event_date='2026-10-27',published_at=NOW.isoformat(),decision='decided to maintain',rate_range=[4.25,4.5],reaction={},comments=[])
+        text=render(self.context,self.model,self.snap,{'event_lifecycle':{'releases':[release]}},NOW)
+        self.assertIn('Fed ',text);self.assertIn('ponechal',text);self.assertLessEqual(len(text),2000)
+    def test_stale_snapshot_does_not_reuse_old_price_boundaries(self):
+        self.snap['at']=(NOW-timedelta(hours=1)).timestamp()
+        text=self.text();self.assertNotIn('BTC podpora $',text);self.assertIn('smer nemožno spoľahlivo určiť',text)

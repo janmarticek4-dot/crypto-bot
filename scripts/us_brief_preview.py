@@ -28,6 +28,7 @@ def run():
     require_public_data(diagnostics)
     (target/'source-diagnostics.json').write_text(json.dumps(diagnostics,ensure_ascii=False,default=lambda d:d.isoformat(),allow_nan=False))
     print(text)
+    print("::notice title=USA public preview::"+json.dumps(dict(text=text),ensure_ascii=False))
     print('::notice title=US brief contract::'+json.dumps(dict(characters=len(text),urls_absent='http' not in text,telegram_sent=False,private_loaded=False,phase=context['market']['phase'])))
 
 if __name__=='__main__':run()
