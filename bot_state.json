@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-29T22:20:35.291638+01:00",
+  "last_run": "2026-10-29T23:07:58.834075+01:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2459,8 +2459,16 @@
     "risk_pts": 1
   },
   "crash_monitor": {
-    "last_checked_at": "2026-10-29T21:20:35.291623+00:00",
-    "last_result": "quiet_not_confirmed"
+    "last_checked_at": "2026-10-29T22:07:58.833990+00:00",
+    "last_result": "alert_sent",
+    "last_alert_ts": "2026-10-29T22:07:58.834027+00:00",
+    "last_alert_event": "Binance, the world’s largest crypto exchange, confirmed a multi‑billion‑dollar hack with outflows estimated between $5.7 bn and $5.8 bn, affecting its hot wallets and causing immediate price drops across major assets.",
+    "last_alert_titles": [
+      "binance investigates potential multibillion dollar hack",
+      "binance loses 5 7 billion in largest crypto hack to date"
+    ],
+    "last_alert_expected_drawdown_pct": 12.0,
+    "last_alert_confidence_pct": 85.0
   },
   "last_us_outlook": "2026-10-26T15:00:26.177842+01:00"
 }
