@@ -72,6 +72,10 @@ class VerdictTests(unittest.TestCase):
         self.assertIn('ponechal',text);self.assertIn('3,75–4 %',text);self.assertIn('10:2',text)
         self.assertIn('inflácia podľa Fedu',text);self.assertNotIn('Economic activity',text);self.assertNotIn('The Committee',text)
         self.assertEqual(entry,before)
+    def test_rate_cut_not_confused_with_maintaining_reserves(self):
+        entry=dict(status='RELEASED',event_date='2026-10-28',published_at='2026-10-28T18:00:00+00:00',rate_range=[1,1.25],decision='The Committee decided to lower the target range. The Committee is maintaining ample reserves.',comments=[],reaction={})
+        text=' '.join(ev.lines({'event_lifecycle':{'releases':[entry]}},datetime(2026,10,28,20,tzinfo=timezone.utc)))
+        self.assertIn('znížil',text);self.assertNotIn('ponechal',text)
     def test_metadata_contains_no_position_data(self):
         text=integrated_report.render(model(),sample(),NOW,'morning',INVENTORY)
         metadata=rv.contract(text,0)

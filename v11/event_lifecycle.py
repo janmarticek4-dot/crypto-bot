@@ -162,7 +162,9 @@ def lines(fund,now):
             out.append(label+' zverejnené '+stamp+'.'+number+' Rozdiel voči vopred overenému konsenzu N/A.')
             continue
         rates=item.get('rate_range');decision=item.get('decision','')
-        verb='ponechal' if re.search(r'maintain|unchanged',decision,re.I) else 'znížil' if re.search(r'lower|reduce',decision,re.I) else 'zvýšil' if re.search(r'raise|increase',decision,re.I) else 'zverejnil'
+        action=re.search(r'\b(?:decided|voted)\s+to\s+(maintain|keep|leave|lower|reduce|cut|raise|increase)\b',decision,re.I)
+        word=action[1].lower() if action else None
+        verb='ponechal' if word in ('maintain','keep','leave') else 'znížil' if word in ('lower','reduce','cut') else 'zvýšil' if word in ('raise','increase') else 'zverejnil'
         rate=(f'{rates[0]:g}–{rates[1]:g}'.replace('.',',')+' %') if rates else 'N/A'
         voting=item.get('voting') or '';vote=re.search(r'(\d+)\s*[–-]\s*(\d+)\s+vote',voting,re.I)
         suffix=f' Hlasovanie {vote[1]}:{vote[2]}.' if vote else ' Jednomyseľne.' if re.search(r'unanimous',voting,re.I) else ''
