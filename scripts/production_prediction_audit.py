@@ -40,7 +40,7 @@ def audit(archive,context):
     receipt=context.get('receipt') or {}
     if context.get('audit_trigger')=='workflow_run':
         validation=receipt.get('report_validation') or {}
-        checks=dict(delivery_confirmed=receipt.get('status')=='sent',same_run=validation.get('workflow_run')==str(context['run_id']),source_matches=validation.get('source')==context.get('source')==context.get('expected_source'),verdict_first=validation.get('verdict_first') is True,urls_absent=validation.get('urls_absent') is True,version=validation.get('format_version')=='verdict-v1',predictions_or_explicit_fallback=validation.get('v2_count')==18 or validation.get('technical_fallback_labeled') is True)
+        checks=dict(delivery_confirmed=receipt.get('status')=='sent',same_run=validation.get('workflow_run')==str(context['run_id']),source_matches=validation.get('source')==context.get('source')==context.get('expected_source'),verdict_first=validation.get('verdict_first') is True,urls_absent=validation.get('urls_absent') is True,version=validation.get('format_version') in ('verdict-v1','brief-v2'),predictions_or_explicit_fallback=validation.get('v2_count')==18 or validation.get('technical_fallback_labeled') is True)
         replay=out.get('historical_replay',{}).get('counts',{})
         if sum(replay.values())==18 and count<18:checks['model_availability_matches_replay']=False
         out['scheduled_delivery_checks']=checks

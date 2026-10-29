@@ -60,17 +60,26 @@ def coin_line(symbol,model):
     plan=('Technický kandidát '+candidate+'; realizácia/čisté R:R neoverené, nový nákup WAIT. ' if candidate else 'Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad '+level+' s objemom. ')
     return 'Obrat: '+trend+'. '+plan+'Podpora/invalidácia '+support+'.'
 
-def guard(text,baseline,model,snapshot):
+def safe_state(r):
+    state=r.get('state');f=r.get('failure_evidence',{})
+    if state=='UPTREND_CONFIRMED' and (not all(r.get('groups',{}).get(k) for k in ('btc_structure','capitalization','directional_volume','breadth')) or not r.get('stable')):return None
+    if state=='RECOVERY_ATTEMPT' and f.get('broad_deterioration'):return None
+    if state=='RECOVERY_FAILED' and not (f.get('broad_deterioration') and f.get('separated_observations') and (f.get('selling_proxy') or f.get('weak_buying_proxy') or f.get('closed_level_lost'))):return None
+    return state
+
+def guard(text,baseline,model,snapshot,now=None):
     # Actions are authoritative upstream outputs, never repaired by the detector.
     if actions(text)!=actions(baseline):raise ValueError('Report action mismatch; new trade instruction refused')
     values=[c.get('change_24h') for s,c in snapshot.get('coins',{}).items() if s in tr.COINS and not c.get('stale',True)]
     all_up=len(values)==6 and all(tr.finite(v) and v>0 for v in values)
     fixed=text;reasons=[]
-    r=model.get('trend_reversal',{});state=r.get('state')
-    if state=='UPTREND_CONFIRMED' and (not all(r.get('groups',{}).get(k) for k in ('btc_structure','capitalization','directional_volume','breadth')) or not r.get('stable')):state=None
-    expected='📌 INVESTIČNÝ VERDIKT: '+tr.LABELS.get(state,'NEISTOTA — nedostatočné potvrdenia')
-    if not fixed.startswith(expected):
-        fixed=re.sub(r'^📌 INVESTIČNÝ VERDIKT:.*$',expected,fixed,count=1,flags=re.M);reasons.append('UNSUPPORTED_VERDICT_REPAIRED')
+    r=model.get('trend_reversal',{});state=safe_state(r)
+    if now is not None and not 0<=now.timestamp()-snapshot.get('at',0)<=900:state=None
+    compact=fixed.startswith('📊 CRYPTO AI BOT —')
+    labels=dict(tr.LABELS,UPTREND_CONFIRMED='POTVRDENÝ RAST') if compact else tr.LABELS
+    expected=('🌐 TRH: ' if compact else '📌 INVESTIČNÝ VERDIKT: ')+labels.get(state,'NEISTOTA' if compact else 'NEISTOTA — nedostatočné potvrdenia')
+    if (expected not in fixed.splitlines()) if compact else not fixed.startswith(expected):
+        fixed=re.sub(r'^🌐 TRH:.*$' if compact else r'^📌 INVESTIČNÝ VERDIKT:.*$',expected,fixed,count=1,flags=re.M);reasons.append('UNSUPPORTED_VERDICT_REPAIRED')
     patterns=[]
     if all_up:patterns.append((r'^.*(?:plošný pokles altcoinov|všetky altcoiny klesajú|všetkých šesť altcoinov klesá).*$', 'Za 24h rastie 6/6 sledovaných mincí; potvrdenie trendu sa hodnotí oddelene.','BREADTH_COMMENT_CONTRADICTION'))
     patterns.append((r'^Od [^\n]*(?:za\s*24\s*h|24-hodinová výkonnosť).*$','Časové porovnanie neoverené; 24h vývoj nie je zmena od predchádzajúcej analýzy.','AMBIGUOUS_TIME_BASIS'))

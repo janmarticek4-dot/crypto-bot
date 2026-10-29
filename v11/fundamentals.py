@@ -65,7 +65,7 @@ PATTERNS={
  'PCE':r'personal consumption|personal income and outlays|\bpce\b',
  'GDP':r'gross domestic product|\bgdp\b',
  'employment':r'employment situation|nonfarm|unemployment|payroll',
- 'regulation':r'\bsec\b|regulat|lawsuit|securities and exchange|enforcement|digital euro',
+ 'regulation':r'\bsec\b|\bcftc\b|commodity futures trading|regulat|lawsuit|securities and exchange|enforcement|digital euro',
  'unlock':r'token unlock|vesting|token release',
  'geopolitics':r'\bwar\b|military conflict|\bsanctions\b|\btariffs\b|energy shock',
  'hack':r'hack|exploit|security breach|depeg|bankruptcy|insolven|withdrawals suspended',

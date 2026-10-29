@@ -6,7 +6,7 @@ from .fundamental_analysis import ALIASES
 from .prediction_runtime import current_predictions
 
 
-def render(model,snapshot,now,kind,inventory=None):
+def render_detailed(model,snapshot,now,kind,inventory=None):
     base=analyst.final_text(model,snapshot,now,kind,inventory)
     head,body=base.split('ODPORÚČANIA:',1);header=head.splitlines()
     predictions=current_predictions(model,int(now.timestamp()*1000));count=sum(len(v) for v in predictions.values())
@@ -70,3 +70,10 @@ def render(model,snapshot,now,kind,inventory=None):
         from .reversal_report import guard
         text,_=guard(text,base,model,snapshot)
     return text
+
+
+def render(model,snapshot,now,kind,inventory=None):
+    if 'trend_reversal' in model:
+        from .compact_main import render as compact
+        return compact(model,snapshot,now,kind,inventory)
+    return render_detailed(model,snapshot,now,kind,inventory)

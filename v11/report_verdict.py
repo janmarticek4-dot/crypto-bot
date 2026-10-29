@@ -60,6 +60,7 @@ def fallback(model,snapshot,symbol,horizon,now):
 
 
 def contract(text,count):
-    return dict(format_version=FORMAT,verdict_first=text.startswith('📌 INVESTIČNÝ VERDIKT:'),
+    brief=text.startswith('📊 CRYPTO AI BOT —') and any(line.startswith('🌐 TRH:') for line in text.splitlines()[:4])
+    return dict(format_version='brief-v2' if brief else FORMAT,verdict_first=brief or text.startswith('📌 INVESTIČNÝ VERDIKT:'),
                 urls_absent=not bool(re.search(r'https?://|www\.',text,re.I)),
                 v2_count=count,technical_fallback_labeled='náhradný technický scenár' in text.lower())

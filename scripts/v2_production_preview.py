@@ -41,7 +41,12 @@ def run(reuse=False):
     enrich(snap,fund,now,model,persist=False,store=ReadOnlyStore())
     from v11 import trend_reversal
     trend_reversal.attach(model,snap,fund,now,json.loads((ROOT/'trial-public/v111-delivery.json').read_text()))
+    from v11 import event_notices
+    model['event_notices']=event_notices.plan(fund,json.loads((ROOT/'trial-public/v111-delivery.json').read_text()),now)
     reports={kind:render(model,snap,now,kind) for kind in ('morning','evening')}
+    from v11.integrated_report import render_detailed
+    detailed=render_detailed(model,snap,now,'morning')
+    (OUT/'morning-detailed.txt').write_text(detailed)
     from v11.report_verdict import contract
     current=prediction_runtime.current_predictions(model,int(now.timestamp()*1000))
     count=sum(len(v) for v in current.values())
@@ -54,7 +59,7 @@ def run(reuse=False):
     proof=dict(predictions=count,per_coin={s:len(v) for s,v in current.items()},contracts=contracts,
         generated_at=details.get('generated_at'),package_created=details.get('package_created'),package_age_ms=details.get('package_age_ms'),
         snapshot_age_ms=details.get('snapshot_age_ms'),missing_predictions=details.get('missing_predictions',{}),
-        parts={k:len(chunks(v)) for k,v in reports.items()},reversal_state=model.get('trend_reversal',{}).get('state'),consistency_checks=model['report_consistency'],new_buy_sell_activated=False,telegram_sent=False)
+        parts={k:len(chunks(v)) for k,v in reports.items()},reversal_state=model.get('trend_reversal',{}).get('state'),consistency_checks=model['report_consistency'],v2_mechanism=model.get('prediction_review',{}).get('mechanism'),paper_matured=model.get('prediction_review',{}).get('matured'),length_comparison=dict(detailed=len(detailed),compact=len(reports['morning']),reduction_pct=round((1-len(reports['morning'])/len(detailed))*100,1)),new_buy_sell_activated=False,telegram_sent=False)
     print('::notice title=Live report contract::'+json.dumps(proof))
     (OUT/'live-contract.json').write_text(json.dumps(proof,ensure_ascii=False,allow_nan=False))
     for kind,text in reports.items():

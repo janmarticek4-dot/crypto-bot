@@ -106,7 +106,7 @@ class ReportTests(unittest.TestCase):
     def test_intro_recovery_and_actions_preserved(self):
         snap=snapshot('bounce','down');m=assess(snap);base=analyst.final_text(m,snap,NOW,'morning',INVENTORY)
         text=integrated_report.render(m,snap,NOW,'morning',INVENTORY)
-        self.assertIn('INVESTIČNÝ VERDIKT: POKUS O OBRAT',text);self.assertIn('rastie 6/6',text)
+        self.assertIn('🌐 TRH: POKUS O OBRAT',text);self.assertIn('rastie 6/6',text)
         self.assertEqual(rr.actions(text),rr.actions(base));self.assertNotIn('https://',text)
     def test_guard_repairs_breadth_and_unverified_cause_without_action_changes(self):
         snap=snapshot();m=assess(snap);base=analyst.final_text(m,snap,NOW,'morning')

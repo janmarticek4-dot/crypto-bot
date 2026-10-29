@@ -25,4 +25,7 @@ def review(state,current,now_ms):
             output[s][h]=dict(previous=prev,current=latest,matured=len(done),direction_hits=hits,flat_direction_hits=flat,trend_direction_hits=trend,trend_baseline_n=trend_n,
                 mean_absolute_error_pct=sum(errors)/len(errors) if errors else None,calibrated_probability=None)
             total+=len(done)
-    return dict(coins=output,matured=total,scope='bounded retained forward-paper records; overlapping observations are not independent',independent_validation=False)
+    names=__import__('collections').Counter(f.get('model','unknown') for group in current.values() for f in group.values())
+    mechanism=dict(model_counts=dict(names),flat_outputs=names.get('flat',0),flat_is_same_as_no_price_change_baseline=True,
+        quote_rebases_price_bands=True,nonflat_features='closed OHLCV; no fitting during delivery',utility='UNPROVEN_WITHOUT_MATURED_OUT_OF_SAMPLE_COMPARISON')
+    return dict(coins=output,matured=total,mechanism=mechanism,scope='bounded retained forward-paper records; overlapping observations are not independent',independent_validation=False)

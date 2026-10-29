@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
     paths:
+      - v11/event_notices.py
+      - v11/event_notice_seed.json
+      - v11/compact_main.py
+      - tests/test_smart_brief.py
       - v11/trend_reversal.py
       - v11/reversal_report.py
       - v11/prediction_review.py
@@ -26,6 +30,7 @@ on:
       - .github/workflows/v2-production-readiness.yml
 permissions:
   contents: read
+  actions: read
 jobs:
   readiness:
     runs-on: ubuntu-latest
@@ -47,6 +52,38 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -r requirements.txt -r requirements-research.txt
       - run: python scripts/test_integration_offline.py
+      - name: Read actual old-format sent event evidence (public only)
+        id: event_seed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            if(fs.existsSync('v11/event_notice_seed.json')){core.setOutput('downloaded','false');return;}
+            core.setOutput('downloaded','true');
+            const get=async(path,ref='main')=>{
+              const r=(await github.rest.repos.getContent({...context.repo,path,ref})).data;
+              const v=r.encoding==='base64'?r.content:(await github.rest.git.getBlob({...context.repo,file_sha:r.sha})).data.content;
+              return JSON.parse(Buffer.from(v,'base64').toString('utf8'));
+            };
+            const journal=await get('trial-public/v111-delivery.json');
+            const allowed=new Set(['68805b3a5b6331251ad3deb6dd4eaebac6244df0','8bed9b1839c55d249b1eca1df7b6eef9c22ea491']);
+            const records=[...Object.values(journal.slots||{}),...Object.values(journal.manual_slots||{})].filter(r=>r.status==='sent'&&allowed.has(r.report_validation?.source)).sort((a,b)=>b.at.localeCompare(a.at));
+            const row=records[0];if(!row)throw new Error('No eligible actual receipt');
+            const run_id=Number(row.report_validation.workflow_run);
+            const run=(await github.rest.actions.getWorkflowRun({...context.repo,run_id})).data;
+            fs.writeFileSync('event-seed-reference.json',JSON.stringify(await get('trial-public/v111-delivery.json',run.head_sha)));
+            const job=(await github.rest.actions.listJobsForWorkflowRun({...context.repo,run_id})).data.jobs.find(j=>j.name==='v111-analytical-pilot');
+            const logs=await github.rest.actions.downloadJobLogsForWorkflowRun({...context.repo,job_id:job.id});
+            const text=typeof logs.data==='string'?logs.data:Buffer.from(logs.data).toString('utf8');
+            const source=text.match(/git log -1 --format=%H[\s\S]{0,180}?\b([a-f0-9]{40})\b/)?.[1];
+            if(source!==row.report_validation.source)throw new Error('Actual source mismatch');
+            const artifact=(await github.rest.actions.listWorkflowRunArtifacts({...context.repo,run_id})).data.artifacts.find(a=>a.name===`v111-analytical-diagnostics-${run_id}`&&!a.expired);
+            if(!artifact||artifact.size_in_bytes>30000000)throw new Error('Public evidence unavailable');
+            const zip=await github.rest.actions.downloadArtifact({...context.repo,artifact_id:artifact.id,archive_format:'zip'});
+            fs.writeFileSync('event-seed-input.zip',Buffer.from(zip.data));
+            fs.writeFileSync('event-seed-context.json',JSON.stringify({run_id,source,status:row.status,at:row.at}));
+      - if: steps.event_seed.outputs.downloaded == 'true'
+        run: python scripts/event_notice_seed.py event-seed-input.zip event-seed-context.json
       - run: python scripts/trend_reversal_review.py
       - run: python scripts/v2_production_preview.py
       - uses: actions/upload-artifact@v4
@@ -55,4 +92,5 @@ jobs:
           path: |
             shadow-output/production-v2/
             shadow-output/reversal-review/
+            v11/event_notice_seed.json
           retention-days: 14

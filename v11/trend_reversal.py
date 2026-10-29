@@ -9,7 +9,7 @@ from .fundamentals import timestamp
 from .state_policy import require_public_data
 
 COINS=('SOL','TAO','FET','AAVE','ONDO','RENDER')
-LABELS={'CORRECTION':'KOREKCIA','RECOVERY_ATTEMPT':'POKUS O OBRAT','REVERSAL_CONFIRMING':'OBRAT SA POTVRDZUJE','UPTREND_CONFIRMED':'RASTOVÝ TREND POTVRDENÝ'}
+LABELS={'CORRECTION':'KOREKCIA','RECOVERY_FAILED':'ODRAZ ZLYHÁVA','RECOVERY_ATTEMPT':'POKUS O OBRAT','REVERSAL_CONFIRMING':'OBRAT SA POTVRDZUJE','UPTREND_CONFIRMED':'RASTOVÝ TREND POTVRDENÝ'}
 VERSION='reversal-evidence-v1'
 STEPS={'4h':14400000,'1d':86400000}
 
@@ -154,19 +154,38 @@ def analyze(snapshot,fund,now,refs,current):
         if e.get('status') in ('RELEASED','REACTION') and at and timedelta(0)<=now-at<=timedelta(hours=72):
             releases.append(dict(at=at.isoformat(),url=e.get('url'),status=e['status'],directional_impact='UNVERIFIED_WITHOUT_COMPARABLE_EXPECTATION_AND_REACTION'))
     sufficient=btc_ok and len(valid)==6 and 0<=age<=900
-    recovery=bool(btc_ok and btc['four']['rebound'] and (groups['capitalization'] or prior.get('status')=='COMPARED' and sum((c['price_pct'] or 0)>0 for c in prior.get('coins',{}).values())>=4))
+    moves=[c.get('price_pct') for c in prior.get('coins',{}).values() if finite(c.get('price_pct'))]
+    old_btc=(refs.get('latest') or {}).get('coins',{}).get('BTC',{}).get('price')
+    btc_change=change(snapshot['coins'].get('BTC',{}).get('price'),old_btc)
+    falling=sum(v<0 for v in moves)
+    deterioration=bool(cap_valid and finite(cap_delta) and cap_delta<=-.1 and finite(btc_change) and btc_change<0 and len(moves)==6 and falling>=4)
+    pressure_known=btc_ok and finite(btc['four']['volume_ratio'])
+    weak_buying=pressure_known and not btc['four']['buy_volume'] and buys<=2
+    selling=bool(btc_ok and (btc['four']['sell_volume'] or sum(profiles[s]['four']['sell_volume'] for s in valid)>=3))
+    prior_at=timestamp((refs.get('latest') or {}).get('at'))
+    separated=bool(prior_at and timedelta(hours=1)<=now-prior_at<=timedelta(hours=36))
+    closed_level_lost=bool(btc_ok and not btc['four']['bull'] and snapshot['coins']['BTC']['price']<min(btc['four']['close'],btc['four']['ema20']) and trend_up<=2)
+    failed=bool(deterioration and separated and previous.get('state') in ('RECOVERY_ATTEMPT','REVERSAL_CONFIRMING','RECOVERY_FAILED') and
+        not groups['btc_structure'] and (selling or weak_buying or closed_level_lost))
+    # A positive trailing 12h candle change cannot override newer broad losses.
+    recovery=bool(btc_ok and btc['four']['rebound'] and not deterioration and
+        (groups['capitalization'] or prior.get('status')=='COMPARED' and sum(v>0 for v in moves)>=4 and finite(btc_change) and btc_change>0 and cap_valid and finite(cap_delta) and cap_delta>=0))
     state=None
     if sufficient:
-        if all(groups.values()) and stable:state='UPTREND_CONFIRMED'
+        if failed:state='RECOVERY_FAILED'
+        elif deterioration:state='CORRECTION'
+        elif all(groups.values()) and stable:state='UPTREND_CONFIRMED'
         elif btc['four']['bull'] and groups['capitalization'] and groups['directional_volume'] and groups['breadth']:state='REVERSAL_CONFIRMING'
         elif recovery:state='RECOVERY_ATTEMPT'
         elif not btc['four']['rebound'] and (finite(cap_delta) and cap_delta<0 or finite(cap_now.get('change')) and cap_now['change']<0):state='CORRECTION'
-        else:state='RECOVERY_ATTEMPT' if btc['four']['rebound'] else None
+    failure_evidence=dict(broad_deterioration=deterioration,btc_since_reference_pct=btc_change,cap_since_reference_pct=cap_delta,
+        alts_lower_since_reference=falling,known_alt_comparisons=len(moves),selling_proxy=selling,weak_buying_proxy=weak_buying,closed_level_lost=closed_level_lost,
+        prior_recovery=previous.get('state'),separated_observations=separated)
     missing=[name for name,value in groups.items() if not value]
     if not stable:missing.append('multi_analysis_stability')
-    old_state=previous.get('state');order=list(LABELS)
+    old_state=previous.get('state');order=['CORRECTION','RECOVERY_FAILED','RECOVERY_ATTEMPT','REVERSAL_CONFIRMING','UPTREND_CONFIRMED']
     proximity='bližšie k technickému potvrdeniu' if state in order and old_state in order and order.index(state)>order.index(old_state) else 'ďalej od technického potvrdenia' if state in order and old_state in order and order.index(state)<order.index(old_state) else 'zmenu vzdialenosti nemožno potvrdiť'
-    out=dict(version=VERSION,state=state,quality='AVAILABLE' if sufficient else 'INSUFFICIENT',groups=groups,missing=missing,stable=stable,
+    out=dict(version=VERSION,state=state,failure_evidence=failure_evidence,quality='AVAILABLE' if sufficient else 'INSUFFICIENT',groups=groups,missing=missing,stable=stable,
         source_close=btc['four']['source_close'] if btc_ok else None,coins=profiles,comparisons=compared,
         breadth=dict(covered=len(valid),rising_24h=breadth_up,change_24h_covered=sum(finite(snapshot['coins'][s].get('change_24h')) for s in valid),confirmed_4h=trend_up,stronger_than_btc_7d=stronger,relative_strength_covered=sum(finite(snapshot['coins'][s].get('relative_strength_btc_7d')) for s in valid)),
         proximity=proximity,macro=dict(verified_releases=releases,impact='not a cause or a trade trigger'),

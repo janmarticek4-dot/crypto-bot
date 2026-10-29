@@ -207,6 +207,9 @@ def run(manual_key=None):
         state['slots']={k:v for k,v in state['slots'].items() if k[:10]>=(now.astimezone(BL).date().isoformat()[:8]+'01')}
         records=state['slots']
         records[key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
+    if pending_observation is not None:
+        planned=pending_observation.get('event_notices_pending',{})
+        records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url')} for row in planned.get('selected',[])]
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if (kind!='usa' or callable(usa_prepare)) and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
         private_stage='storage_or_inventory'
@@ -238,6 +241,9 @@ def run(manual_key=None):
     records[key]['status']='sent'
     if pending_observation is not None and kind!='usa':
         require_public_data(pending_observation)
+        from v11.event_notices import commit as commit_notices
+        planned=pending_observation.pop('event_notices_pending',None)
+        if planned is not None:commit_notices(state,planned,datetime.now(timezone.utc))
         state['last_analysis_v112']=pending_observation
         from v11.trend_reversal import remember
         remember(state,pending_observation,kind)

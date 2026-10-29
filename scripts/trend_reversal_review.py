@@ -68,7 +68,7 @@ def run():
     require_public_data(report);(OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     lines=['# Reversal classifier diagnostics — not a trading backtest',report['scope'],'', '| Coin | Year | Samples | Correction | Recovery | Confirming | Uptrend | False rebounds (24h<0) |','|---|---|---:|---:|---:|---:|---:|---:|']
     for s,result in results.items():
-        for year,c in result.get('years',{}).items():lines.append('| '+' | '.join(map(str,[s,year,c.get('observations',0),*(c.get(k,0) for k in tr.LABELS),c.get('false_rebound',0)]))+' |')
+        for year,c in result.get('years',{}).items():lines.append('| '+' | '.join(map(str,[s,year,c.get('observations',0),*(c.get(k,0) for k in ('CORRECTION','RECOVERY_ATTEMPT','REVERSAL_CONFIRMING','UPTREND_CONFIRMED')),c.get('false_rebound',0)]))+' |')
         if result['status']=='NO_DATA':lines.append('| '+s+' | NO_DATA | | | | | | |')
     (OUT/'REPORT.md').write_text('\n'.join(lines))
     print('::notice title=Reversal historical diagnostics::'+json.dumps(dict(status={s:r['status'] for s,r in results.items()},independent_validation=False,new_trading_rules_activated=False)))
