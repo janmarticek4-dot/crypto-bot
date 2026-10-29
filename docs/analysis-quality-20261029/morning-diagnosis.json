@@ -1,0 +1,66 @@
+{
+  "run_id": 40827329123,
+  "workflow_head": "b5a9a7ec28cfeec407a3689be4a41e3c1e4bed8b",
+  "source": "59c5a774fc27c51a7ec374df09593697c225c624",
+  "conclusion": "success",
+  "event": "schedule",
+  "telegram_sent_by_audit": false,
+  "at": "2026-10-29T06:08:43.651541+00:00",
+  "snapshot_at": 1793254123.6515152,
+  "prediction_diagnostics": {
+    "prediction_error": "ValueError"
+  },
+  "predictions": {},
+  "coins": {
+    "BTC": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    },
+    "SOL": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    },
+    "TAO": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    },
+    "FET": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    },
+    "AAVE": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    },
+    "ONDO": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    },
+    "RENDER": {
+      "stale": false,
+      "bars": 299,
+      "first": 1788940800000,
+      "last": 1793232000000,
+      "preparation": "OK"
+    }
+  },
+  "snapshot_clock_delta_ms": -0.51513671875
+}

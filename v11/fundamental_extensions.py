@@ -262,12 +262,12 @@ def collect(now,fetcher=fetch):
     require_public_data(out);return out
 
 
-def lines(value,now):
+def lines(value,now,event_limit=3):
     out=[]
     for symbol,item in value.get('etf_flows',{}).items():
         out.append(f"{symbol} ETF, {item['date']}: {item['net_flow_usd']/1e6:+,.1f} mil. USD čistý tok (Farside, úplný riadok poskytovateľa)."+
             (f" {item['latest_incomplete_date']}: údaje ešte neúplné." if item.get('latest_incomplete_date') else ''))
-    for row in value.get('consensus',[])[:3]:
+    for row in value.get('consensus',[])[:event_limit]:
         at=timestamp(row['event_at'])
         if at and at>now and row.get('official_schedule')!='CONFLICT':out.append(f"{at.astimezone(BL):%d.%m. %H:%M} Bratislava — {row['title']}: prognóza kalendára {row['forecast']}, predchádzajúce {row.get('previous') or 'N/A'} (Forex Factory; metodika prieskumu N/A).")
     for item in value.get('unlocks',[]):

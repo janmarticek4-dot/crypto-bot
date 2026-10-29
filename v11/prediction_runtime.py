@@ -32,26 +32,40 @@ def validate(value):
             elif fit is not None:raise ValueError('Unexpected fitted state')
     require_public_data(value);return value
 
-def predict(snapshot,value,now_ms):
+def predict(snapshot,value,now_ms,diagnostics=None):
     validate(value)
     if not 0<=now_ms-value['created']<=48*3600000:raise ValueError('Runtime package stale/future')
-    if not 0<=now_ms-snapshot.get('at',0)*1000<=900000:raise ValueError('Snapshot stale/future')
+    stamp=snapshot.get('at')
+    if not r.finite(stamp):raise ValueError('Invalid snapshot clock')
+    # Both clocks use integer milliseconds. Truncating only now made valid
+    # microsecond snapshots appear up to 0.999 ms in the future in production.
+    age=now_ms-int(stamp*1000)
+    if diagnostics is not None:diagnostics.update(snapshot_age_ms=age,coin_errors={})
+    if not 0<=age<=900000:raise ValueError('Snapshot stale/future')
+    def reject(symbol,reason):
+        if diagnostics is not None:diagnostics['coin_errors'][symbol]=reason
     btc=snapshot['coins'].get('BTC',{});out={}
     for symbol in COINS:
         coin=snapshot['coins'].get(symbol,{});item=value['coins'].get(symbol)
         out[symbol]={}
-        if not item or coin.get('stale',True) or not r.finite(coin.get('price')) or coin['price']<=0 or btc.get('stale',True):continue
+        if not item:reject(symbol,'MODEL_STATE_MISSING');continue
+        if coin.get('stale',True) or not r.finite(coin.get('price')) or coin['price']<=0:reject(symbol,'CURRENT_COIN_QUOTE_MISSING_OR_STALE');continue
+        if btc.get('stale',True):reject(symbol,'CURRENT_BTC_QUOTE_MISSING_OR_STALE');continue
         try:data=r.prepare(coin['raw']['4h'],btc['raw']['4h'])
-        except (ValueError,KeyError):continue
-        i=len(data['rows'])-1;source_close=data['rows'][-1]['timestamp']+STEP
-        if not 0<=now_ms-source_close<=STEP or item['asof']>source_close or now_ms-item['asof']>48*3600000:continue
+        except (ValueError,KeyError) as exc:reject(symbol,'INVALID_OR_UNALIGNED_CLOSED_CANDLES: '+str(exc)[:100]);continue
+        i=len(data['rows'])-1
+        if not r.np.all(r.np.isfinite(data['features'][i])):reject(symbol,'INVALID_OR_UNWARMED_FEATURES');continue
+        source_close=data['rows'][-1]['timestamp']+STEP
+        if not 0<=now_ms-source_close<=STEP:reject(symbol,'LAST_CLOSED_CANDLE_STALE_OR_FUTURE');continue
+        if item['asof']>source_close:reject(symbol,'PACKAGE_AHEAD_OF_SNAPSHOT');continue
+        if now_ms-item['asof']>48*3600000:reject(symbol,'MODEL_OBSERVATION_EXPIRED');continue
         for label,state in item['states'].items():
             h=HORIZONS[label];scale=float(data['sigma'][i])*math.sqrt(h)
-            if not math.isfinite(scale) or scale<=0:continue
+            if not math.isfinite(scale) or scale<=0:reject(symbol,'NO_FINITE_VOLATILITY');continue
             kind=state['model'];points=r.point_models(data,i,h,state['volatility_limit'],fit_models=False)
             if kind=='ridge_technical':q=float(r.np.clip(r.predict_state(state['ridge'],data['features'][i]),-3,3)*scale)
             else:q=points.get(kind)
-            if q is None:continue
+            if q is None or not math.isfinite(q):reject(symbol,'MODEL_OUTPUT_MISSING');continue
             p=coin['price'];lo,hi=state['offsets'];tolerance=state['tolerance_factor']*scale
             out[symbol][label]=dict(model=kind,price=p,point=p*math.exp(q),low=p*math.exp(q+lo*scale),high=p*math.exp(q+hi*scale),
                 direction=r.direction(q,tolerance),confidence='NÍZKA',probabilities=None,low_pct=math.expm1(q+lo*scale)*100,high_pct=math.expm1(q+hi*scale)*100,

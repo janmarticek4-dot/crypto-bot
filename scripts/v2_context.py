@@ -14,12 +14,14 @@ def enrich(snapshot,fund,now,model,persist=True,store=None):
         state=store.read()
     except Exception as exc:model['prediction_diagnostics']['public_store']=type(exc).__name__
     value=state.get('runtime_package') if state else None
+    model['prediction_diagnostics']['package_source']='public-journal' if value is not None else 'bundled-frozen'
     if value is None:
         try:value=json.loads((ROOT/'v11/frozen_prediction_package.json').read_text())
         except (OSError,ValueError):value=None
     try:
         if value is None:raise ValueError('No approved research package')
-        forecasts=runtime.predict(snapshot,value,int(now.timestamp()*1000))
+        model['prediction_diagnostics']['package_created']=value.get('created')
+        forecasts=runtime.predict(snapshot,value,int(now.timestamp()*1000),model['prediction_diagnostics'])
         model['experimental_predictions']=forecasts
         code=hashlib.sha256((ROOT/'v11/prediction_runtime.py').read_bytes()).hexdigest()
         rows=runtime.records(forecasts,int(now.timestamp()*1000),os.getenv('GITHUB_RUN_ID') or now.isoformat(),code)
@@ -30,5 +32,7 @@ def enrich(snapshot,fund,now,model,persist=True,store=None):
         if state:
             totals=state.get('totals',{});n=sum(t['n'] for t in totals.values())
             model['paper_weekly']=f'{n} vyhodnotených papierových prognóz; vzorka je malá alebo prekrývajúca sa, nejde o kalibrovanú úspešnosť.' if n else 'Zatiaľ 0 dozretých prognóz; úspešnosť N/A.'
-    except Exception as exc:model['prediction_diagnostics']['prediction_error']=type(exc).__name__
+    except Exception as exc:
+        model['prediction_diagnostics']['prediction_error']=type(exc).__name__
+        if isinstance(exc,ValueError):model['prediction_diagnostics']['prediction_reason']=str(exc)[:180]
     return model

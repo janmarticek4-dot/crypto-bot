@@ -22,6 +22,7 @@ BL=ZoneInfo('Europe/Bratislava')
 PATH='trial-public/v111-delivery.json'
 # Optional presentation hook; never persisted and unused by V11.1.
 personalize=None
+delivery_metadata=None
 
 
 def phase(now):
@@ -178,6 +179,9 @@ def run(manual_key=None):
         fund['macro_context']=macro_context.collect({},now)
         economic=macro_context.economic_observations(now)
         fund['economic_observations']=economic
+        # Forecast origin and slot validity use collection completion, not the
+        # timestamp from before slow fundamental/API requests.
+        now=datetime.now(timezone.utc)
         if not manual_key:
             history=state.setdefault('macro_observation_history_v1',[])
             history.append(economic);state['macro_observation_history_v1']=history[-100:]
@@ -220,6 +224,10 @@ def run(manual_key=None):
     if manual_key:
         if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':text=text.replace('— RUČNÁ','— RUČNÁ | '+manual_key,1)
         else:text='RUČNÁ ANALÝZA V11.1 | '+manual_key+'\n'+text
+    if kind!='usa' and callable(delivery_metadata):
+        meta=delivery_metadata(text)
+        require_public_data(meta)
+        records[key]['report_validation']=meta
     try:send(text)
     except Exception:
         records[key]['status']='uncertain';journal.save(state);raise

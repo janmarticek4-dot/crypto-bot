@@ -147,25 +147,38 @@ def collect(fund,now,snapshot=None,fetcher=None):
     return value
 
 def lines(fund,now):
-    lifecycle=fund.get('event_lifecycle',{});current=[e for e in lifecycle.get('releases',[]) if e['status']!='SUPERSEDED']
+    current=[e for e in fund.get('event_lifecycle',{}).get('releases',[]) if e['status']!='SUPERSEDED']
     out=[]
     for item in current[:2]:
+        at=fundamentals.timestamp(item.get('published_at'))
+        stamp=at.astimezone(BL).strftime('%d.%m. %H:%M Bratislava') if at else item['event_date']+' čas N/A'
         if item.get('kind')=='economic_release':
-            out.extend([item['title']+' – RELEASED ('+item['published_at'][:16]+').',item['result_excerpt'],'Overená publikácia, konsenzus/prekvapenie a presná cenová reakcia N/A.'])
+            cats=item.get('categories',[]);label=next((name for key,name in [('GDP','HDP USA'),('PCE','PCE inflácia'),('CPI','Spotrebiteľská inflácia'),('employment','Trh práce USA')] if key in cats),'Ekonomické údaje')
+            # Original English release stays in diagnostics. Never manufacture
+            # a numerical result if its measure/unit cannot be parsed safely.
+            text=item.get('result_excerpt','')
+            result=re.search(r'real gross domestic product.*?\b(increased|decreased) at an annual rate of ([0-9]+(?:\.[0-9]+)?) percent',text,re.I)
+            number=(' Reálny rast '+('+' if result[1].lower()=='increased' else '−')+result[2].replace('.',',')+' % anualizovane.') if result and 'GDP' in cats else ' Číselný výsledok bez bezpečného štruktúrovania N/A.'
+            out.append(label+' zverejnené '+stamp+'.'+number+' Rozdiel voči vopred overenému konsenzu N/A.')
             continue
-        at=fundamentals.timestamp(item.get('published_at'));rates=item.get('rate_range')
-        out.append('FED '+item['status']+' — '+item['event_date']+(at.astimezone(BL).strftime(' %H:%M Bratislava') if at else ', čas publikácie N/A')+'.')
-        out.append('Oficiálne cieľové pásmo: '+(f'{rates[0]:g}–{rates[1]:g} %.' if rates else 'N/A; číselný rozsah nebolo možné bezpečne extrahovať.'))
-        if item.get('voting'):out.append('Hlasovanie podľa komuniké: '+item['voting'][:350])
-        else:out.append('Hlasovanie: N/A — dostupná extrakcia ho nepotvrdila.')
-        if item.get('comments'):out.append('Komuniké Fedu: '+item['comments'][0][:260])
-        else:out.append('Podrobný komentár Fedu: N/A — nepodarilo sa bezpečne extrahovať.')
-        out.append('Konsenzus/prekvapenie N/A. '+item['interpretation'])
-        changes=item.get('reaction',{})
-        if changes:
-            out.append('Ceny medzi hodinovými uzavretiami okolo zverejnenia: '+', '.join(f"{s} {v['change_pct']:+.1f}%" for s,v in changes.items())+'. Časový súbeh nie je dôkaz príčiny.')
-        else:out.append('Reakcia od overeného času zverejnenia N/A; chýbajú porovnateľné časové body.')
-        out.append('Akcie/DXY/výnosy: reakcia od času rozhodnutia N/A bez porovnateľných kotácií.')
+        rates=item.get('rate_range');decision=item.get('decision','')
+        verb='ponechal' if re.search(r'maintain|unchanged',decision,re.I) else 'znížil' if re.search(r'lower|reduce',decision,re.I) else 'zvýšil' if re.search(r'raise|increase',decision,re.I) else 'zverejnil'
+        rate=(f'{rates[0]:g}–{rates[1]:g}'.replace('.',',')+' %') if rates else 'N/A'
+        voting=item.get('voting') or '';vote=re.search(r'(\d+)\s*[–-]\s*(\d+)\s+vote',voting,re.I)
+        suffix=f' Hlasovanie {vote[1]}:{vote[2]}.' if vote else ' Jednomyseľne.' if re.search(r'unanimous',voting,re.I) else ''
+        out.append('Fed '+stamp+': '+verb+' cieľové sadzby '+rate+'.'+suffix)
+        comments=' '.join(item.get('comments',[]));notes=[]
+        if re.search(r'inflation remains elevated',comments,re.I):notes.append('inflácia podľa Fedu ostáva zvýšená')
+        if re.search(r'economic activity is expanding at a strong pace',comments,re.I):notes.append('ekonomika rastie silným tempom')
+        if re.search(r'geopolitical',comments,re.I):notes.append('geopolitická neistota pretrváva')
+        if notes:out.append('Kontext: '+', '.join(notes)+'.')
+        out.append('Prekvapenie voči vopred overenému konsenzu N/A; samotné rozhodnutie nepotvrdzuje rast ani pokračovanie poklesu.')
+        changes=item.get('reaction',{});btc=changes.get('BTC')
+        if btc:
+            end=datetime.fromtimestamp(btc['after_at']/1000,timezone.utc).astimezone(BL).strftime('%d.%m. %H:%M')
+            out.append(f"BTC medzi hodinovým uzavretím okolo zverejnenia a {end}: {btc['change_pct']:+.1f}%. Časový súbeh nie je dôkaz príčiny.")
+        else:out.append('Cenová reakcia od času zverejnenia N/A; chýbajú porovnateľné údaje.')
+        out.append('24–72h: o obrate rozhodne potvrdenie BTC a objemov; reakcia dolára a výnosov bez porovnateľných kotácií nepotvrdená.')
     if not current:
         due=[e for e in fund.get('events',[]) if e.get('scheduled') and e.get('lifecycle') in ('AWAITING_VERIFICATION','TIME_UNVERIFIED')]
         if due:out.append('Dnešné/uplynulé udalosti: výsledok N/A — čaká na oficiálne overenie; nejde o potvrdené budúce udalosti.')

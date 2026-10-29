@@ -62,6 +62,7 @@ def run():
     original_read=pilot.PublicJournal.read
     original_render=pilot.render
     original_personalize=pilot.personalize
+    original_metadata=pilot.delivery_metadata
     v112=os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true'
     holder={}
     original_remember=pilot.forecast_audit.remember
@@ -94,6 +95,8 @@ def run():
                 if display:
                     from v11.integrated_report import render
                     text=render(model,snap,now,kind)
+                    from v11.report_verdict import contract
+                    model.setdefault('prediction_diagnostics',{})['report_contract']=contract(text,sum(len(v) for v in model.get('experimental_predictions',{}).values()))
                 else:text=analyst.final_text(model,snap,now,kind)
                 quotes['_v112_observation']=model['observation']
             directory=os.getenv('V111_DIAGNOSTICS_DIR')
@@ -119,10 +122,21 @@ def run():
                     return render(holder['model'],snap,now,kind,inventory)
                 return analyst.final_text(holder['model'],snap,now,kind,inventory)
             pilot.personalize=private_render
+        if v112 and os.getenv('V2_REPORT_ENABLED','false').lower()=='true':
+            def metadata(text):
+                import subprocess
+                from v11.report_verdict import contract
+                result=contract(text,sum(len(v) for v in holder.get('model',{}).get('experimental_predictions',{}).values()))
+                try:source=subprocess.check_output(['git','rev-parse','HEAD'],text=True,stderr=subprocess.DEVNULL).strip()
+                except (OSError,subprocess.SubprocessError):source=None
+                result.update(workflow_run=os.getenv('GITHUB_RUN_ID'),source=source)
+                return result
+            pilot.delivery_metadata=metadata
         return invoke() # same canonical slot and CAS-before-send owner
     finally:
         pilot.render=original_render
         pilot.personalize=original_personalize
+        pilot.delivery_metadata=original_metadata
         pilot.PublicJournal.read=original_read
         pilot.forecast_audit.remember=original_remember
 

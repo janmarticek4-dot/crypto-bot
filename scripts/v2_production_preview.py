@@ -1,5 +1,5 @@
 """Full production-format dry run. No Telegram, private storage or research write."""
-import json,sys
+import json,sys,os
 from pathlib import Path
 from datetime import datetime,timezone
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
@@ -16,8 +16,14 @@ OUT=ROOT/'shadow-output/production-v2'
 
 class ReadOnlyStore:
     def read(self):
-        value=prediction_journal.load([])
-        value['runtime_package']=json.loads((ROOT/'v11/frozen_prediction_package.json').read_text())
+        # Same public package selection as delivery, with read-only credentials
+        # and no append path. A frozen preview must not expire while daily paper
+        # has already published a fresh package.
+        if os.getenv('GH_TOKEN') and os.getenv('GITHUB_REPOSITORY'):
+            from scripts.public_prediction_store import PublicPredictionStore
+            value=PublicPredictionStore().read()
+        else:value=prediction_journal.load(json.loads((ROOT/'public-analytics/prediction-shadow.json').read_text()))
+        if not value.get('runtime_package'):value['runtime_package']=json.loads((ROOT/'v11/frozen_prediction_package.json').read_text())
         return value
     def append(self,*a):raise AssertionError('Preview cannot write')
 
@@ -34,6 +40,12 @@ def run(reuse=False):
     model=analyst.prepare(snap,fund,now,quotes,evaluations,previous)
     enrich(snap,fund,now,model,persist=False,store=ReadOnlyStore())
     reports={kind:render(model,snap,now,kind) for kind in ('morning','evening')}
+    from v11.report_verdict import contract
+    count=sum(len(v) for v in model.get('experimental_predictions',{}).values())
+    contracts={k:contract(t,count) for k,t in reports.items()}
+    for details in contracts.values():assert details['verdict_first'] and details['urls_absent']
+    if os.getenv('REQUIRE_V2_PREDICTIONS')=='1':assert count==18,model.get('prediction_diagnostics')
+    print('::notice title=Live report contract::'+json.dumps(dict(predictions=count,contracts=contracts,parts={k:len(chunks(v)) for k,v in reports.items()},telegram_sent=False)))
     for kind,text in reports.items():
         assert 'https://' not in text and 'http://' not in text and 'www.' not in text
         require_public_data(text);(OUT/(kind+'.txt')).write_text(text)

@@ -7,6 +7,10 @@ on:
         default: '40827329123'
         required: true
         type: string
+  workflow_run:
+    workflows: [Crypto AI Bot V11.2]
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths: ['.github/workflows/production-prediction-audit.yml','scripts/production_prediction_audit.py']
@@ -14,7 +18,26 @@ permissions:
   contents: read
   actions: read
 jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.select.outputs.run_id }}
+      report: ${{ steps.select.outputs.report }}
+    steps:
+      - uses: actions/github-script@v7
+        id: select
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id || inputs.production_run || '40827329123' }}
+        with:
+          script: |
+            const run_id=Number(process.env.RUN_ID);
+            if(!Number.isSafeInteger(run_id)) throw new Error('Invalid run');
+            const data=(await github.rest.actions.listWorkflowRunArtifacts({...context.repo,run_id})).data.artifacts;
+            core.setOutput('run_id',String(run_id));
+            core.setOutput('report',data.some(a=>a.name===`v111-analytical-diagnostics-${run_id}`&&!a.expired));
   audit:
+    needs: select
+    if: needs.select.outputs.report == 'true'
     runs-on: ubuntu-latest
     env:
       BOT_DISABLE_TELEGRAM: '1'
@@ -31,12 +54,12 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - uses: actions/github-script@v7
         env:
-          PRODUCTION_RUN: ${{ inputs.production_run || '40827329123' }}
+          PRODUCTION_RUN: ${{ needs.select.outputs.run_id }}
+          EXPECTED_SOURCE: '' # Filled with the tested immutable source at activation.
         with:
           script: |
             const fs=require('fs');
             const run_id=Number(process.env.PRODUCTION_RUN);
-            if (!Number.isSafeInteger(run_id)) throw new Error('Invalid run');
             const run=(await github.rest.actions.getWorkflowRun({...context.repo,run_id})).data;
             const artifacts=(await github.rest.actions.listWorkflowRunArtifacts({...context.repo,run_id})).data.artifacts;
             const artifact=artifacts.find(a=>a.name===`v111-analytical-diagnostics-${run_id}`);
@@ -52,9 +75,22 @@ jobs:
               const match=text.match(/git log -1 --format=%H[\s\S]{0,180}?\b([a-f0-9]{40})\b/);
               if(match)source=match[1];
             }
-            fs.writeFileSync('production-context.json',JSON.stringify({run_id,workflow_head:run.head_sha,source,conclusion:run.conclusion,event:run.event,telegram_sent_by_audit:false}));
+            async function publicJson(path,ref){
+              const item=(await github.rest.repos.getContent({...context.repo,path,ref})).data;
+              const content=item.encoding==='base64'?item.content:(await github.rest.git.getBlob({...context.repo,file_sha:item.sha})).data.content;
+              return JSON.parse(Buffer.from(content,'base64').toString('utf8'));
+            }
+            const original=await publicJson('public-analytics/prediction-shadow.json',run.head_sha);
+            const pkg=original.runtime_package || (source?await publicJson('v11/frozen_prediction_package.json',source):null);
+            if(pkg)fs.writeFileSync('production-runtime-package.json',JSON.stringify(pkg));
+            const journal=await publicJson('trial-public/v111-delivery.json','main');
+            const record=Object.values(journal.slots||{}).find(r=>r.report_validation?.workflow_run===String(run_id)) || Object.values(journal.manual_slots||{}).find(r=>r.report_validation?.workflow_run===String(run_id));
+            // Whitelist public operational metadata only, never quote/holdings text.
+            const receipt=record?{status:record.status,report_validation:record.report_validation}:null;
+            fs.writeFileSync('production-context.json',JSON.stringify({run_id,workflow_head:run.head_sha,source,conclusion:run.conclusion,event:run.event,audit_trigger:context.eventName,expected_source:process.env.EXPECTED_SOURCE,receipt,telegram_sent_by_audit:false}));
       - run: python scripts/production_prediction_audit.py production-diagnostics.zip production-context.json
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: production-prediction-audit-${{ github.run_id }}
           path: production-audit/
