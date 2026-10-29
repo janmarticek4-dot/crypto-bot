@@ -35,7 +35,8 @@ def audit(archive,context):
             out['historical_replay']=dict(counts={s:len(v) for s,v in replay.items()},diagnostics=details,stored_as_paper=False,independent_validation=False)
         except (ValueError,KeyError) as exc:out['historical_replay']=dict(error=type(exc).__name__,reason=str(exc)[:180],stored_as_paper=False)
     count=sum(out['predictions'].values())
-    out['quality']='COMPLETE_V2' if count==18 else 'DEGRADED_EXPLICIT_TECHNICAL_FALLBACK'
+    labeled=diagnostics.get('report_contract',{}).get('technical_fallback_labeled') is True
+    out['quality']='COMPLETE_V2' if count==18 else 'DEGRADED_EXPLICIT_TECHNICAL_FALLBACK' if labeled else 'DEGRADED_NO_VERIFIED_FALLBACK'
     receipt=context.get('receipt') or {}
     if context.get('audit_trigger')=='workflow_run':
         validation=receipt.get('report_validation') or {}

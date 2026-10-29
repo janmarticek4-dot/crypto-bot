@@ -78,3 +78,20 @@ rerun or private-data upload. GitHub can delay scheduled starts.
 Rollback: revert only the activation workflow-pin commit with normal git revert
 and push, returning to the preceding 59c5a77 source. Do not reset main or overwrite
 bot_state.json, delivery journal, public paper journal, private state or Secrets.
+
+## Final verification / activation
+
+Candidate immutable source: 92365801208bf4b1aa39aa3a1c1947193c79cad0.
+285 offline tests passed locally and in GitHub Analytical Release Review
+40885112617. Live readiness 40885112787 produced all 18 forecasts, verdict-first
+morning/evening reports, no URLs and two logical Telegram parts each, with no
+delivery. Original morning replay 40885112804 produced 18 outputs from the same
+archived input and original package after the clock fix; never saved as paper
+observations or claimed independent validation.
+
+The existing run.yml and daily research pins are switched to that tested source.
+Production Prediction Diagnostics is enabled read-only after actual full reports,
+using the same expected source. No user Secrets/Variables need changing.
+A source-validation push run proves the active checkout without a Telegram test.
+The next scheduled full delivery remains pending until its actual execution; the
+automatic post-delivery audit will prove or reject its contract then.

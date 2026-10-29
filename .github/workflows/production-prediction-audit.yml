@@ -55,7 +55,7 @@ jobs:
       - uses: actions/github-script@v7
         env:
           PRODUCTION_RUN: ${{ needs.select.outputs.run_id }}
-          EXPECTED_SOURCE: '' # Filled with the tested immutable source at activation.
+          EXPECTED_SOURCE: '92365801208bf4b1aa39aa3a1c1947193c79cad0'
         with:
           script: |
             const fs=require('fs');
