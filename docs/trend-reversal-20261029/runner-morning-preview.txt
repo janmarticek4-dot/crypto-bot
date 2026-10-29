@@ -1,0 +1,63 @@
+📌 INVESTIČNÝ VERDIKT: POKUS O OBRAT
+AKCIA: POČKAŤ s novými nákupmi. držba bezpečne neoverená.
+Za 24h rastie 6/6 mincí; potvrdený 4h profil 0/6; silnejších než BTC za7d 1/6. Odraz nie je potvrdený trend.
+Od 29.10. 16:44: zlepšilo nepotvrdené; zhoršilo kap. -0.4%, nižšie ceny SOL, TAO, FET, AAVE, RENDER, ceny 1/6 vyššie.
+RÁNO 29.10. 07:08: odvtedy vyššie ceny 6/6; stará kapitalizácia neoverená.
+VEČER 28.10. 20:40: odvtedy vyššie ceny 3/6; stará kapitalizácia neoverená.
+POTVRDENÉ: objem rastových sviečok (proxy). zmenu vzdialenosti nemožno potvrdiť.
+ČO CHÝBA: štruktúra BTC 4h/1d, rast kapitalizácie medzi meraniami, šírka potvrdených trendov.
+24–72 h: technický scenár — rastový sklon. Alternatíva: Uzavretie 4h nad $81,823; riziko Uzavretie 4h pod $79,451.
+7–14 dní: technický scenár — smer neistý / slabý trend.
+SPÚŠŤAČE: BTC $81,823 (2×4h + objem); SOL $103.85 (2×4h + objem); TAO $262.40 (2×4h + objem).
+
+📊 CRYPTO AI BOT V11.2 — RÁNO
+29.10.2026 17:25 Bratislava
+BTC $81,435 (+1.2%); kap. $2.74T (-1.4% za24h); dominancia 59.5%.
+Od 29.10. 16:44: zhoršuje sa. Kap. -0.4%, objem24h +3.4%, dominancia -0.06 p. b..
+
+MAKRO / UDALOSTI:
+Fed 28.10. 19:00 Bratislava: ponechal cieľové sadzby 3,75–4 %. Hlasovanie 10:2.
+Kontext: inflácia podľa Fedu ostáva zvýšená, ekonomika rastie silným tempom, geopolitická neistota pretrváva.
+Prekvapenie voči vopred overenému konsenzu N/A; samotné rozhodnutie nepotvrdzuje rast ani pokračovanie poklesu.
+BTC medzi hodinovým uzavretím okolo zverejnenia a 29.10. 17:00: +1.1%. Časový súbeh nie je dôkaz príčiny.
+24–72h: o obrate rozhodne potvrdenie BTC a objemov; reakcia dolára a výnosov bez porovnateľných kotácií nepotvrdená.
+HDP USA zverejnené 29.10. 13:30 Bratislava. Reálny rast +3,4 % anualizovane. Rozdiel voči vopred overenému konsenzu N/A.
+BTC ETF, 2026-10-28: +137.3 mil. USD čistý tok (Farside, úplný riadok poskytovateľa). 2026-10-29: údaje ešte neúplné.
+ETH ETF, 2026-10-28: -21.4 mil. USD čistý tok (Farside, úplný riadok poskytovateľa). 2026-10-29: údaje ešte neúplné.
+30.10. 13:30 Bratislava — Employment Cost Index q/q: prognóza kalendára 0.8%, predchádzajúce 0.9% (Forex Factory; metodika prieskumu N/A).
+30.10. 14:45 Bratislava — Chicago PMI: prognóza kalendára 55.8, predchádzajúce 58.8 (Forex Factory; metodika prieskumu N/A).
+ETF tok nie je dôkaz príčiny pohybu BTC/altcoinov; úplnosť všetkých svetových ETF nepotvrdená.
+
+V2: EXPERIMENTÁLNE – PRESNOSŤ NEOVERENÁ; nízka istota, bez percentuálnych pravdepodobností.
+
+SOL $102.23 (+1.3% za24h, od minule -0.1%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $99.16.
+V2: 24h DO STRANY $98.73–$105.94 (-3.4%/+3.6%) | 72h DO STRANY $95.95–$109.01 (-6.1%/+6.6%) | 14d DO STRANY $90.64–$115.98 (-11.3%/+13.5%)
+Obrat: 4h odraz, 1d nepotvrdený; cena od minule -0.1% (nie zmena 24h). Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad $103.85 s objemom. Podpora/invalidácia $99.16.
+Fundament: poplatky protokolu -10.8% vs predošlé obdobie; nie čistý prílev kapitálu.
+
+TAO $257.10 (+1.9% za24h, od minule -0.3%) — WAIT (nový nákup): Trend treba potvrdiť štruktúrou a objemom; nový vstup zatiaľ nepotvrdený.
+V2: 24h DO STRANY $245.07–$269.68 (-4.7%/+4.9%) | 72h DO STRANY $238.57–$281.01 (-7.2%/+9.3%) | 14d DO STRANY $212.12–$299.54 (-17.5%/+16.5%)
+Obrat: 4h odraz, 1d nepotvrdený; cena od minule -0.3% (nie zmena 24h). Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad $262.40 s objemom. Podpora/invalidácia $245.00.
+
+FET $0.1831 (+1.4% za24h, od minule -0.7%) — WAIT (nový nákup): Trend treba potvrdiť štruktúrou a objemom; nový vstup zatiaľ nepotvrdený.
+V2: 24h DO STRANY $0.1715–$0.1934 (-6.3%/+5.6%) | 72h DO STRANY $0.162–$0.2007 (-11.5%/+9.6%) | 14d DO STRANY $0.1418–$0.206 (-22.6%/+12.5%)
+Obrat: 4h odraz, 1d nepotvrdený; cena od minule -0.7% (nie zmena 24h). Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad $0.1883 s objemom. Podpora/invalidácia $0.1707.
+
+AAVE $136.38 (+3.3% za24h, od minule -0.3%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $128.54.
+V2: 24h DO STRANY $130.11–$143.32 (-4.6%/+5.1%) | 72h DO STRANY $125.76–$149.37 (-7.8%/+9.5%) | 14d DO STRANY $112.08–$162.55 (-17.8%/+19.2%)
+Obrat: 4h odraz, 1d nepotvrdený; cena od minule -0.3% (nie zmena 24h). Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad $138.77 s objemom. Podpora/invalidácia $128.54.
+Fundament 2026-10-28: Projektová/regulačná udalosť; ekonomický dopad zatiaľ nepotvrdený.
+
+ONDO $0.4296 (+3.4% za24h, od minule +0.4%) — WAIT (nový nákup): Trend treba potvrdiť štruktúrou a objemom; nový vstup zatiaľ nepotvrdený.
+V2: 24h DO STRANY $0.4055–$0.4529 (-5.6%/+5.4%) | 72h DO STRANY $0.386–$0.464 (-10.1%/+8.0%) | 14d DO STRANY $0.3467–$0.474 (-19.3%/+10.3%)
+Obrat: 4h odraz, 1d nepotvrdený; cena od minule +0.4% (nie zmena 24h). Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad $0.4305 s objemom. Podpora/invalidácia $0.3992.
+
+RENDER $1.696 (+1.9% za24h, od minule -0.2%) — WAIT (nový nákup): Odraz ešte nepotvrdil obrat trendu; sleduj podporu $1.612.
+V2: 24h DO STRANY $1.599–$1.799 (-5.7%/+6.1%) | 72h DO STRANY $1.521–$1.879 (-10.3%/+10.8%) | 14d DO STRANY $1.402–$2.051 (-17.3%/+20.9%)
+Obrat: 4h odraz, 1d nepotvrdený; cena od minule -0.2% (nie zmena 24h). Nový nákup WAIT; potvrdiť 2 uzavretia 4h nad $1.771 s objemom. Podpora/invalidácia $1.612.
+Odhad poplatkov za výpočty: $0.01 mil. (-96.4% vs predošlé meranie); meranie 2026-10-28.
+
+ZÁVER: nové nákupy zatiaľ WAIT. Držba sa v tomto verejnom náhľade neposudzuje; osobný predajný pokyn nevzniká.
+Technické signály V10.6 sú v diagnostike; nepredstavujú potvrdenú predikciu ani osobný predajný pokyn.
+Kontrola: pri potvrdení hraníc alebo po najbližšej významnej udalosti; plánované reporty pokračujú.
+PAPER: 0 dozretých V2 prognóz v zachovanom denníku; smer a chyba oproti referenciám sú v diagnostike. Bez kalibrovaných pravdepodobností.

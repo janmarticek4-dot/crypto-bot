@@ -1,0 +1,12 @@
+{
+  "status": {
+    "SOL": "DIAGNOSTIC_ONLY",
+    "TAO": "DIAGNOSTIC_ONLY",
+    "FET": "DIAGNOSTIC_ONLY",
+    "AAVE": "DIAGNOSTIC_ONLY",
+    "ONDO": "DIAGNOSTIC_ONLY",
+    "RENDER": "DIAGNOSTIC_ONLY"
+  },
+  "independent_validation": false,
+  "new_trading_rules_activated": false
+}

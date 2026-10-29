@@ -1,0 +1,57 @@
+{
+  "predictions": 18,
+  "per_coin": {
+    "SOL": 3,
+    "TAO": 3,
+    "FET": 3,
+    "AAVE": 3,
+    "ONDO": 3,
+    "RENDER": 3
+  },
+  "contracts": {
+    "morning": {
+      "format_version": "verdict-v1",
+      "verdict_first": true,
+      "urls_absent": true,
+      "v2_count": 18,
+      "technical_fallback_labeled": false
+    },
+    "evening": {
+      "format_version": "verdict-v1",
+      "verdict_first": true,
+      "urls_absent": true,
+      "v2_count": 18,
+      "technical_fallback_labeled": false
+    }
+  },
+  "generated_at": 1793291129297,
+  "package_created": 1793272230644,
+  "package_age_ms": 18898653,
+  "snapshot_age_ms": 37056,
+  "missing_predictions": {},
+  "parts": {
+    "morning": 2,
+    "evening": 2
+  },
+  "reversal_state": "RECOVERY_ATTEMPT",
+  "consistency_checks": {
+    "morning": {
+      "passed": true,
+      "corrected_comments": [],
+      "actions_unchanged": true,
+      "time_basis_checked": true,
+      "causal_claims_checked": true,
+      "return_probabilities_invented": false
+    },
+    "evening": {
+      "passed": true,
+      "corrected_comments": [],
+      "actions_unchanged": true,
+      "time_basis_checked": true,
+      "causal_claims_checked": true,
+      "return_probabilities_invented": false
+    }
+  },
+  "new_buy_sell_activated": false,
+  "telegram_sent": false
+}
