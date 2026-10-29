@@ -31,7 +31,9 @@ def render(context,model,snapshot,fund,now,inventory=None):
     else:items.append('Aktuálny smer amerických akcií nepotvrdený; '+('riadna seansa ešte nezačala.' if phase=='PREOPEN' else 'spoľahlivé porovnateľné kotácie chýbajú.'))
     if coherent:
         items.append('Krypto za 24 h: BTC '+analyst.pct(b)+', kapitalizácia '+analyst.pct(cap)+'. '+('Altcoiny väčšinovo zaostávajú za BTC; široký obrat nepotvrdený.' if sum(x<b for x in alts)>len(alts)/2 else 'Sleduj, či pohyb potvrdí širší trh.')+' Nie je to meranie reakcie po otvorení USA ani čistého toku kapitálu.')
-    releases=event_lifecycle.lines(fund,now)
+    notices=model.get('event_notices')
+    if notices is not None and notices.get('selected'):items.append(notices['selected'][0]['text'])
+    releases=event_lifecycle.lines(fund,now) if notices is None else []
     if releases:
         # Structured Slovak result and conditional impact; full source text stays diagnostic.
         selected=[s for s in releases if s.startswith(('Fed ','HDP USA','PCE inflácia','Spotrebiteľská inflácia','Trh práce USA'))]
@@ -39,6 +41,7 @@ def render(context,model,snapshot,fund,now,inventory=None):
     upcoming=[]
     for event in fund.get('events',[]):
         at=timestamp(event.get('event_at'))
+        if notices is not None and not any(n.get('state')=='UPCOMING' and timestamp(n.get('event_at'))==at for n in notices.get('selected',[])):continue
         if event.get('scheduled') and event.get('lifecycle','UPCOMING')=='UPCOMING' and at and 0<(at-now).total_seconds()<=72*3600:
             upcoming.append((at,event))
     upcoming.sort(key=lambda row:row[0])

@@ -187,3 +187,16 @@ class MigrationTests(unittest.TestCase):
     def test_fundamental_section_limit_three(self):
         events=[story(str(i),'SEC approves synthetic Bitcoin ETF product '+str(i)) for i in range(5)]
         self.assertLessEqual(len(en.plan({'events':events}, {},NOW)['selected']),3)
+
+class SharedUSNoticeTests(unittest.TestCase):
+    def test_us_keeps_layout_but_suppresses_old_fed_when_not_new(self):
+        from tests.test_us_outlook import snapshot as us_snapshot
+        from v11.us_brief import render
+        snap=fixtures.snapshot();m=fixtures.assess(snap);context=us_snapshot(NOW)
+        m['event_notices']={'selected':[]}
+        text=render(context,m,snap,fund(),NOW)
+        self.assertNotIn('cieľové sadzby',text)
+        self.assertIn('ČO ROBIŤ:',text);self.assertIn('ČO SLEDOVAŤ:',text)
+        self.assertLessEqual(len(text),2000)
+        m['event_notices']=en.plan(fund(),{},NOW,limit=1)
+        self.assertIn('cieľové sadzby',render(context,m,snap,fund(),NOW))

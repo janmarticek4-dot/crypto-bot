@@ -1,0 +1,84 @@
+{
+  "provenance": {
+    "run_id": 40937096418,
+    "source": "68805b3a5b6331251ad3deb6dd4eaebac6244df0",
+    "status": "sent",
+    "at": "2026-10-29T19:08:44.966385+00:00"
+  },
+  "records": {
+    "macro:Fed:https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm": {
+      "id": "macro:Fed:https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+      "state": "RESULT",
+      "published_at": "2026-10-28T18:00:00+00:00",
+      "event_at": null,
+      "semantic": "7335699628e2edb9af6edcb0741d55573a1c4d32492a8a57c0a6fb4f1a67b6de",
+      "title": "Fed 28.10. 19:00 Bratislava: ponechal cieľové sadzby 3,75–4 %. Hlasovanie 10:2.",
+      "categories": [
+        "Fed"
+      ],
+      "symbols": [],
+      "kind": "official_release",
+      "fact_parts": {
+        "rate_range": "91d5847a21bc0bf5fd337b8cbe68e4a52c9cfa9d710b5b5110b0d887ce72a479",
+        "decision": "74c99a1b7546e2c69f47eacedf637d7990432a3dc1dbe0b03a4ed175af7e6060",
+        "voting": "6c6646472d2ad01a63c6daf409b71c17bd658beb6c8a57bf11eeeb976c1ecff5",
+        "economic_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "last_announced_at": "2026-10-29T19:08:44.966385+00:00"
+    },
+    "macro:GDP:https://www.bea.gov/news/2026/gdp-advance-estimate-3rd-quarter-2026": {
+      "id": "macro:GDP:https://www.bea.gov/news/2026/gdp-advance-estimate-3rd-quarter-2026",
+      "state": "RESULT",
+      "published_at": "2026-10-29T12:30:00+00:00",
+      "event_at": null,
+      "semantic": "64907175734de0c59254f42f3cf710fd5d88205fa23453b1d4a4aba1b278acab",
+      "title": "HDP USA zverejnené 29.10. 13:30 Bratislava. Reálny rast +3,4 % anualizovane. Rozdiel voči vopred overenému konsenzu N/A.",
+      "categories": [
+        "GDP"
+      ],
+      "symbols": [],
+      "kind": "official_release",
+      "fact_parts": {
+        "rate_range": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "decision": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "voting": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "economic_values": "c4a994347d61531fb69e339eafcf7e04a4da56d81be84bc565f15e3295cc193e"
+      },
+      "last_announced_at": "2026-10-29T19:08:44.966385+00:00"
+    },
+    "etf:BTC:2026-10-28": {
+      "id": "etf:BTC:2026-10-28",
+      "state": "FLOW",
+      "published_at": null,
+      "observed_at": "2026-10-29T19:08:09.142252+00:00",
+      "event_at": null,
+      "semantic": "31d87194d8813cc3039f1f0c28c878881b8e88f05dcf288b25d91155c07a2eb3",
+      "title": "BTC spot ETF 2026-10-28",
+      "categories": [
+        "ETF"
+      ],
+      "symbols": [
+        "BTC"
+      ],
+      "kind": "flow",
+      "last_announced_at": "2026-10-29T19:08:44.966385+00:00"
+    }
+  },
+  "original_report_replay": {
+    "original_state": "RECOVERY_ATTEMPT",
+    "corrected_state": "CORRECTION",
+    "evidence": {
+      "broad_deterioration": true,
+      "btc_since_reference_pct": -1.0195396457023165,
+      "cap_since_reference_pct": -1.0465804607959206,
+      "alts_lower_since_reference": 6,
+      "known_alt_comparisons": 6,
+      "selling_proxy": false,
+      "weak_buying_proxy": false,
+      "closed_level_lost": false,
+      "prior_recovery": null,
+      "separated_observations": true
+    },
+    "independent_validation": false
+  }
+}

@@ -129,6 +129,9 @@ def run():
                 from v11.us_brief import render as brief
                 _,quotes,evaluations=integration.render(legacy,snap,fund,now,'usa',state,previous,fear)
                 model=analyst.prepare(snap,fund,now,quotes,evaluations,previous)
+                from v11 import event_notices
+                model['event_notices']=event_notices.plan(fund,holder.get('journal',{}),now,limit=1)
+                context['_event_plan']=model['event_notices']
                 holder.update(model=model,us_context=context,us_fund=fund)
                 # Only public evidence, never final personalized text, enters artifacts.
                 directory=os.getenv('V111_DIAGNOSTICS_DIR')

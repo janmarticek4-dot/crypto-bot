@@ -20,6 +20,8 @@ def run():
     previous=json.loads(Path('trial-public/v111-delivery.json').read_text()).get('last_analysis_v112')
     _,quotes,ev=integration.render(legacy,snap,fund,now,'usa',integration.read_rule_state(Path('bot_state.json')),previous)
     model=analyst.prepare(snap,fund,now,quotes,ev,previous)
+    from v11 import event_notices
+    model['event_notices']=event_notices.plan(fund,json.loads(Path('trial-public/v111-delivery.json').read_text()),now,limit=1)
     text=render(context,model,snap,fund,now)
     (target/'USA.txt').write_text(text)
     (target/'model.json').write_text(json.dumps(model,ensure_ascii=False,allow_nan=False))

@@ -146,6 +146,7 @@ def run(manual_key=None):
     journal=PublicJournal();state=journal.read();key=manual_key or now.astimezone(BL).date().isoformat()+'-'+kind
     records=state.setdefault('manual_slots',{}) if manual_key else state['slots']
     if key in records:return 0
+    pending_notices=None
     if kind=='usa':
         from us_context import report as us
         started=datetime.now(timezone.utc)
@@ -172,6 +173,7 @@ def run(manual_key=None):
                 'dominance':context['crypto']['dominance'],
                 'us_data':{symbol:{'status':q['status'],'price':q['price'],'at':q['at'].isoformat() if q['at'] else None,'kind':q['kind']} for symbol,q in context['quotes'].items()},
                 'sources':context['sources'],'phase':context['market']['phase']}
+        pending_notices=context.pop('_event_plan',None)
         print('US pilot source status: '+json.dumps({'quotes':{k:v['status'] for k,v in quotes['us_data'].items()},'sources':context['sources'],'phase':quotes['phase']}))
     else:
         api=ShadowAPI();original=data.COINS
@@ -208,8 +210,9 @@ def run(manual_key=None):
         records=state['slots']
         records[key]={'status':'attempting','at':now.isoformat(),'quotes':quotes}
     if pending_observation is not None:
-        planned=pending_observation.get('event_notices_pending',{})
-        records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url')} for row in planned.get('selected',[])]
+        pending_notices=pending_observation.get('event_notices_pending')
+    if pending_notices is not None:
+        records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url')} for row in pending_notices.get('selected',[])]
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if (kind!='usa' or callable(usa_prepare)) and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
         private_stage='storage_or_inventory'
@@ -239,11 +242,12 @@ def run(manual_key=None):
     except Exception:
         records[key]['status']='uncertain';journal.save(state);raise
     records[key]['status']='sent'
+    if pending_notices is not None:
+        from v11.event_notices import commit as commit_notices
+        commit_notices(state,pending_notices,datetime.now(timezone.utc))
     if pending_observation is not None and kind!='usa':
         require_public_data(pending_observation)
-        from v11.event_notices import commit as commit_notices
-        planned=pending_observation.pop('event_notices_pending',None)
-        if planned is not None:commit_notices(state,planned,datetime.now(timezone.utc))
+        pending_observation.pop('event_notices_pending',None)
         state['last_analysis_v112']=pending_observation
         from v11.trend_reversal import remember
         remember(state,pending_observation,kind)

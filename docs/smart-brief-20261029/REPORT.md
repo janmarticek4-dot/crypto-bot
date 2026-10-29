@@ -26,6 +26,16 @@ The inspected package has 11 flat outputs, 6 regime-momentum models and 1 techni
 
 ## Validation / activation
 
-359 offline tests pass before candidate review, including successful reversal, failed bounce despite old positive candles/lagging volume, continuing correction, normal pullback in an uptrend, missing/contradictory data, lifecycle restart/cross-source copies/revisions, past/future calendar, uncertain delivery, corrupt ledger, actual send ownership, source filtering, 18 outputs and target shortening with action parity. Existing causal/timezone/US/private-state tests remain included.
+360 offline tests pass before final candidate review, including successful reversal, failed bounce despite old positive candles/lagging volume, continuing correction, normal pullback in an uptrend, missing/contradictory data, lifecycle restart/cross-source copies/revisions, past/future calendar, uncertain delivery, corrupt ledger, actual send ownership, source filtering, 18 outputs and target shortening with action parity. Existing causal/timezone/US/private-state tests remain included.
 
 Backup: backup/before-smart-brief-20261029 -> fd6a3b5. Run clean CI, real-input preview and verified announcement migration before changing the existing immutable source pin. No test Telegram, trading permission, new strategy, production state replacement, Secret edit or force/reset is authorized. Rollback only reverts the eventual activation pin to 68805b3; it does not reset journals or portfolio. brief-v2 is accepted by the existing post-delivery audit alongside older versioned receipts. Future actual delivery is verified only after it happens.
+
+## Initial runner proof and exact migration
+
+Readiness 40957245498 and clean regression 40957245632 succeeded on candidate 4161112. The live brief retained 18 directions, fit one message and was 2305 vs 5751 characters (59.9% shorter). It classified the current broad reversal as RECOVERY_FAILED; all action-parity, time-basis and causal-comment checks passed.
+
+The runner verified actual old-format production run 40937096418 / source 68805b3 / sent 29.10.2026 19:08:44 UTC. Its archived public release/ETF facts produce the bundled event_notice_seed.json with confirmed Fed, GDP and the reported BTC ETF observation. Replaying that ORIGINAL evening snapshot with its ORIGINAL pre-run references now yields CORRECTION instead of RECOVERY_ATTEMPT; it does not fabricate an earlier recovery state where the old public history did not record one. This is a regression replay, not independent predictive validation.
+
+The same confirmed-announcement ledger now covers the existing USA path, limited to the one event actually shown there. It preserves the USA layout, cash/futures/session logic and the canonical owner. It cannot consume facts that were not displayed, and does not replace last_analysis_v112 or create a full-model forecast observation for a USA slot. Future CI uses the immutable verified seed without depending on forever-available legacy artifacts.
+
+A concurrent automatic bot_state.json update (4da8073) was preserved by a normal merge; no force-push/reset or state replacement occurred.
