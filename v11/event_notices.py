@@ -50,6 +50,7 @@ def release_notice(item,now):
 def news_relevance(e,now):
     title=e['title'];cats=set(e['categories']);at=timestamp(e.get('published_at'))
     if not e.get('material'):return False,'LOW_MATERIALITY'
+    if at and now-at>timedelta(hours=24):return False,'OLD_NEWS_WITHOUT_NEW_FACT'
     if 'hack' in cats:
         exposed=re.search(r'exchange|protocol|bridge|wallet|DeFi|withdrawal|smart contract|private key|stolen crypto|crypto funds|solana|aave|bittensor|render network|fetch.ai|coinbase|binance|bybit|kraken|OKX',title,re.I)
         if not exposed:return False,'NO_CONFIRMED_CRYPTO_EXPOSURE'
@@ -151,7 +152,7 @@ def _plan(fund,journal,now,limit=3):
         # Same-run provider copies are deduplicated too.
         if row['kind']=='news' and any(x['kind']=='news' and same_notice(row,x) for x in selected):continue
         selected.append(row)
-    selected.sort(key=lambda r:({'RESULT':0,'NEWS':1,'FLOW':1,'UPCOMING':2}[r['state']],r.get('published_at') or r.get('observed_at','')))
+    selected.sort(key=lambda r:({'RESULT':0,'NEWS':1,'FLOW':1,'UPCOMING':2}[r['state']],-(timestamp(r.get('published_at') or r.get('observed_at')).timestamp() if timestamp(r.get('published_at') or r.get('observed_at')) else 0)))
     return dict(selected=selected[:limit],suppressed=suppressed,seeded_records=len(previous),version='event-notices-v1')
 
 def plan(fund,journal,now,limit=3):

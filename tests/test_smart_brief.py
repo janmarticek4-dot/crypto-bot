@@ -200,3 +200,11 @@ class SharedUSNoticeTests(unittest.TestCase):
         self.assertLessEqual(len(text),2000)
         m['event_notices']=en.plan(fund(),{},NOW,limit=1)
         self.assertIn('cieľové sadzby',render(context,m,snap,fund(),NOW))
+
+class RecencyTests(unittest.TestCase):
+    def test_old_unmodified_news_not_used_and_newest_relevant_fact_has_priority(self):
+        older=story('old','SEC approves synthetic Bitcoin ETF product 1',NOW-timedelta(hours=25))
+        self.assertFalse(en.plan({'events':[older]}, {},NOW)['selected'])
+        a=story('a','SEC approves synthetic Bitcoin ETF product 2',NOW-timedelta(hours=4))
+        b=story('b','SEC approves synthetic Bitcoin ETF product 3',NOW-timedelta(minutes=15))
+        self.assertEqual(en.plan({'events':[a,b]}, {},NOW,limit=1)['selected'][0]['id'],'news:b')
