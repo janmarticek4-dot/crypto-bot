@@ -1,0 +1,61 @@
+name: Production Prediction Diagnostics
+on:
+  workflow_dispatch:
+    inputs:
+      production_run:
+        description: Existing production run ID to inspect without sending
+        default: '40827329123'
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths: ['.github/workflows/production-prediction-audit.yml','scripts/production_prediction_audit.py']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - uses: actions/github-script@v7
+        env:
+          PRODUCTION_RUN: ${{ inputs.production_run || '40827329123' }}
+        with:
+          script: |
+            const fs=require('fs');
+            const run_id=Number(process.env.PRODUCTION_RUN);
+            if (!Number.isSafeInteger(run_id)) throw new Error('Invalid run');
+            const run=(await github.rest.actions.getWorkflowRun({...context.repo,run_id})).data;
+            const artifacts=(await github.rest.actions.listWorkflowRunArtifacts({...context.repo,run_id})).data.artifacts;
+            const artifact=artifacts.find(a=>a.name===`v111-analytical-diagnostics-${run_id}`);
+            if(!artifact || artifact.expired || artifact.size_in_bytes>30000000) throw new Error('Public diagnostics unavailable');
+            const zip=await github.rest.actions.downloadArtifact({...context.repo,artifact_id:artifact.id,archive_format:'zip'});
+            fs.writeFileSync('production-diagnostics.zip',Buffer.from(zip.data));
+            const jobs=(await github.rest.actions.listJobsForWorkflowRun({...context.repo,run_id})).data.jobs;
+            const job=jobs.find(j=>j.name==='v111-analytical-pilot');
+            let source=null;
+            if(job){
+              const logs=await github.rest.actions.downloadJobLogsForWorkflowRun({...context.repo,job_id:job.id});
+              const text=typeof logs.data==='string'?logs.data:Buffer.from(logs.data).toString('utf8');
+              const match=text.match(/git log -1 --format=%H[\s\S]{0,180}?\b([a-f0-9]{40})\b/);
+              if(match)source=match[1];
+            }
+            fs.writeFileSync('production-context.json',JSON.stringify({run_id,workflow_head:run.head_sha,source,conclusion:run.conclusion,event:run.event,telegram_sent_by_audit:false}));
+      - run: python scripts/production_prediction_audit.py production-diagnostics.zip production-context.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-prediction-audit-${{ github.run_id }}
+          path: production-audit/
+          retention-days: 14
