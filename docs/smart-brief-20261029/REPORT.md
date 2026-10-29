@@ -47,3 +47,11 @@ The failed-recovery episode retains its original clock across subsequent failed 
 First-result announcements can include an observed, causally timestamped BTC hourly-close reaction when supplied by the existing collector. Other market reactions or survey surprises are not invented; a changing reaction timestamp alone never creates another announcement.
 
 A recovery attempt additionally needs actual BTC and at least four alt prices improving over the SAME reference interval with non-declining cap. Cap growth in unrelated parts of the market cannot by itself turn deteriorating watched coins into a recovery verdict.
+
+## Final verified production candidate
+
+Runtime source: 1878eae2c629ee5153fd896cc6a138fdb61def6f. Clean CI 40959900847 passed 364 tests; readiness 40959900933 passed historical diagnostics and live current inputs. The public morning/evening formats each show all 18 V2 directions, no URLs and unchanged authoritative actions. Actual live collection 29.10.2026 22:43 Bratislava: RECOVERY_FAILED, 2356 vs5752 characters (59.0% shorter), one Telegram part; snapshot age26215ms and package age37959468ms (~10.54h). No test Telegram, private inventory loading or real-state write occurred in this preview.
+
+USA layout/session regression and live review 40958319183 also succeeded (1149 characters, CLOSED, no Telegram). Its only behavior change is sharing the delivered-fact filter, so old results do not return as new macro information. The immutable source pin and post-delivery audit expectation are advanced only after these checks. Existing V11.2 flags and Secrets need no edits. Daily research remains separately scheduled and pinned to its existing source.
+
+Actual future main delivery remains unverified until the next scheduled/manual run; the existing post-delivery audit accepts brief-v2 and verifies its real sent receipt. Roll back by reverting only this activation pin commit to68805b3, not resetting main or changing bot_state/portfolio/delivery/paper data. The dynamic notification ledger is persisted by the next successful existing sender; the immutable seed already prevents known old Fed/GDP/ETF facts from reappearing on the first new report.
