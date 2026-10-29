@@ -126,7 +126,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'a4a1e9c08d78e783347dc286f8f847a8dbb8bcec' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '8bed9b1839c55d249b1eca1df7b6eef9c22ea491' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -198,7 +198,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: verified-release
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && 'a4a1e9c08d78e783347dc286f8f847a8dbb8bcec' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '8bed9b1839c55d249b1eca1df7b6eef9c22ea491' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - name: Record effective production source (no Telegram)
         env:
@@ -211,8 +211,30 @@ jobs:
           value=dict(source=source,v112_active=os.getenv('V112_ACTIVE')=='true',experimental_display=True,telegram_sent=False)
           Path('us-source-diagnostics/deployment.json').write_text(json.dumps(value))
           print('::notice title=Verified production V2 source::'+json.dumps(value))
-          assert value['v112_active'] and source=='a4a1e9c08d78e783347dc286f8f847a8dbb8bcec','Existing V11.2 flags must be enabled; production source was not activated'
+          assert value['v112_active'] and source=='8bed9b1839c55d249b1eca1df7b6eef9c22ea491','Existing V11.2 flags must be enabled; production source was not activated'
           PY
+      - name: Verify existing private advisory context read-only (no values or Telegram)
+        working-directory: verified-release
+        env:
+          BOT_DISABLE_TELEGRAM: '1'
+          CONFIGURED: ${{ vars.PROD_STATE_REPOSITORY != '' && secrets.PROD_STATE_TOKEN != '' && secrets.PROD_STATE_ENCRYPTION_KEY != '' }}
+          PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
+          PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
+          PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
+        run: |
+          python - <<'PYREAD'
+          import json,os
+          value=dict(configured=os.getenv('CONFIGURED')=='true',read_verified=False,telegram_sent=False,state_written=False)
+          if value['configured']:
+              try:
+                  from v11.advisory_portfolio import load
+                  load()  # Existing read/validation only; never log decrypted values.
+                  value['read_verified']=True
+              except Exception as exc:
+                  value['error']=type(exc).__name__
+          print('::notice title=Private advisory read-only verification::'+json.dumps(value))
+          if not value['read_verified']:raise SystemExit('Private context unavailable; no state or Secrets were modified')
+          PYREAD
       - uses: actions/upload-artifact@v4
         if: always()
         with:
