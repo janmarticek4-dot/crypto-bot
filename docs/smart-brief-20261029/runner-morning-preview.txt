@@ -1,8 +1,8 @@
 📊 CRYPTO AI BOT — RANNÁ ANALÝZA
-29.10. 22:43 Bratislava
+29.10. 22:48 Bratislava
 🌐 TRH: ODRAZ ZLYHÁVA
 Predchádzajúci odraz stratil silu. Od poslednej analýzy klesli BTC, kapitalizácia aj väčšina sledovaných mincí; širší rastový trend nie je potvrdený. Za 24h rastie 0/6 mincí.
-BTC $79,405 | kap. $2.68T (-4.8% za24h).
+BTC $79,064 | kap. $2.68T (-4.8% za24h).
 
 🎯 ODPORÚČANIE
 Držba bez bezpečne načítanej evidencie neposúdená; nejde o pokyn predať.
@@ -14,22 +14,22 @@ Nové nákupy: ČAKAŤ na potvrdenie vstupu a nákladov.
 
 💰 KRYPTOMENY
 V2 experimentálne, nízka istota; intervaly a vyhodnotenie sú v diagnostike.
-SOL $97.59 — WAIT (nový nákup): Vstup ešte nepotvrdený.
+SOL $97.12 — WAIT (nový nákup): Vstup ešte nepotvrdený.
 Stará podpora $99.16 je pri/nad cenou; preveriť prerazenie.
 V2: 24h DO STRANY | 72h DO STRANY | 14d DO STRANY.
-TAO $240.60 — WAIT (nový nákup): Vstup ešte nepotvrdený.
+TAO $238.20 — WAIT (nový nákup): Vstup ešte nepotvrdený.
 Stará podpora $245.00 je pri/nad cenou; preveriť prerazenie.
 V2: 24h DO STRANY | 72h DO STRANY | 14d DO STRANY.
-FET $0.1678 — WAIT (nový nákup): Vstup ešte nepotvrdený.
+FET $0.1659 — WAIT (nový nákup): Vstup ešte nepotvrdený.
 Stará podpora $0.1707 je pri/nad cenou; preveriť prerazenie.
 V2: 24h DO STRANY | 72h DO STRANY | 14d DO STRANY.
-AAVE $126.43 — WAIT (nový nákup): Vstup ešte nepotvrdený.
+AAVE $125.31 — WAIT (nový nákup): Vstup ešte nepotvrdený.
 Stará podpora $128.54 je pri/nad cenou; preveriť prerazenie.
 V2: 24h DO STRANY | 72h DO STRANY | 14d DO STRANY.
-ONDO $0.3958 — WAIT (nový nákup): Vstup ešte nepotvrdený.
+ONDO $0.3921 — WAIT (nový nákup): Vstup ešte nepotvrdený.
 Stará podpora $0.3992 je pri/nad cenou; preveriť prerazenie.
 V2: 24h DO STRANY | 72h DO STRANY | 14d DO STRANY.
-RENDER $1.584 — WAIT (nový nákup): Vstup ešte nepotvrdený.
+RENDER $1.571 — WAIT (nový nákup): Vstup ešte nepotvrdený.
 Stará podpora $1.612 je pri/nad cenou; preveriť prerazenie.
 V2: 24h DO STRANY | 72h DO STRANY | 14d DO STRANY.
 
