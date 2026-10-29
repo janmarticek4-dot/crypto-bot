@@ -26,7 +26,7 @@ The inspected package has 11 flat outputs, 6 regime-momentum models and 1 techni
 
 ## Validation / activation
 
-363 offline tests pass before final candidate review, including successful reversal, failed bounce despite old positive candles/lagging volume, continuing correction, normal pullback in an uptrend, missing/contradictory data, lifecycle restart/cross-source copies/revisions, past/future calendar, uncertain delivery, corrupt ledger, actual send ownership, source filtering, 18 outputs and target shortening with action parity. Existing causal/timezone/US/private-state tests remain included.
+364 offline tests pass before final candidate review, including successful reversal, failed bounce despite old positive candles/lagging volume, continuing correction, normal pullback in an uptrend, missing/contradictory data, lifecycle restart/cross-source copies/revisions, past/future calendar, uncertain delivery, corrupt ledger, actual send ownership, source filtering, 18 outputs and target shortening with action parity. Existing causal/timezone/US/private-state tests remain included.
 
 Backup: backup/before-smart-brief-20261029 -> fd6a3b5. Run clean CI, real-input preview and verified announcement migration before changing the existing immutable source pin. No test Telegram, trading permission, new strategy, production state replacement, Secret edit or force/reset is authorized. Rollback only reverts the eventual activation pin to 68805b3; it does not reset journals or portfolio. brief-v2 is accepted by the existing post-delivery audit alongside older versioned receipts. Future actual delivery is verified only after it happens.
 
@@ -45,3 +45,5 @@ Final relevance ordering is newest-first within significance class; unchanged ne
 The failed-recovery episode retains its original clock across subsequent failed observations and expires after 36 hours. A stale failed label cannot perpetually renew itself; further weakness becomes continuing correction unless a new measured recovery begins.
 
 First-result announcements can include an observed, causally timestamped BTC hourly-close reaction when supplied by the existing collector. Other market reactions or survey surprises are not invented; a changing reaction timestamp alone never creates another announcement.
+
+A recovery attempt additionally needs actual BTC and at least four alt prices improving over the SAME reference interval with non-declining cap. Cap growth in unrelated parts of the market cannot by itself turn deteriorating watched coins into a recovery verdict.

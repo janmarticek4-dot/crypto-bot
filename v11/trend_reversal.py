@@ -171,7 +171,7 @@ def analyze(snapshot,fund,now,refs,current):
         not groups['btc_structure'] and (selling or weak_buying or closed_level_lost))
     # A positive trailing 12h candle change cannot override newer broad losses.
     recovery=bool(btc_ok and btc['four']['rebound'] and not deterioration and
-        (groups['capitalization'] or prior.get('status')=='COMPARED' and sum(v>0 for v in moves)>=4 and finite(btc_change) and btc_change>0 and cap_valid and finite(cap_delta) and cap_delta>=0))
+        (prior.get('status')=='COMPARED' and sum(v>0 for v in moves)>=4 and finite(btc_change) and btc_change>0 and cap_valid and finite(cap_delta) and cap_delta>=0))
     state=None
     if sufficient:
         if failed:state='RECOVERY_FAILED'

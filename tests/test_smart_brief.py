@@ -225,3 +225,10 @@ class ReactionTests(unittest.TestCase):
         j={};en.commit(j,p,NOW)
         r['reaction']['BTC'].update(after_at=int(NOW.timestamp()*1000),change_pct=2)
         self.assertFalse(en.plan(f,j,NOW)['selected'])
+
+class ConflictingRecoveryTests(unittest.TestCase):
+    def test_cap_growth_alone_cannot_override_btc_and_all_watched_coins_falling(self):
+        snap=fixtures.snapshot('bounce','down',volume=False);old=fixtures.old(snap,cap=900)
+        for coin in old['coins'].values():coin['price']*=1.1
+        m=fixtures.model(snap);tr.attach(m,snap,{},NOW,{'last_analysis_v112':old})
+        self.assertNotEqual(m['trend_reversal']['state'],'RECOVERY_ATTEMPT')
