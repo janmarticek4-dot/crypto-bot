@@ -208,3 +208,11 @@ class RecencyTests(unittest.TestCase):
         a=story('a','SEC approves synthetic Bitcoin ETF product 2',NOW-timedelta(hours=4))
         b=story('b','SEC approves synthetic Bitcoin ETF product 3',NOW-timedelta(minutes=15))
         self.assertEqual(en.plan({'events':[a,b]}, {},NOW,limit=1)['selected'][0]['id'],'news:b')
+
+class EpisodeExpiryTests(unittest.TestCase):
+    def test_failed_state_does_not_keep_renewing_an_old_recovery(self):
+        snap=fixtures.snapshot('bounce','down',volume=False);old=fixtures.old(snap,cap=1200)
+        old['reversal'].update(state='RECOVERY_FAILED',episode_at=(NOW-timedelta(hours=48)).isoformat())
+        for c in old['coins'].values():c['price']*=1.1
+        m=fixtures.model(snap);tr.attach(m,snap,{},NOW,{'last_analysis_v112':old})
+        self.assertEqual(m['trend_reversal']['state'],'CORRECTION')

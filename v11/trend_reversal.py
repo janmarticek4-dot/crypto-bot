@@ -165,7 +165,9 @@ def analyze(snapshot,fund,now,refs,current):
     prior_at=timestamp((refs.get('latest') or {}).get('at'))
     separated=bool(prior_at and timedelta(hours=1)<=now-prior_at<=timedelta(hours=36))
     closed_level_lost=bool(btc_ok and not btc['four']['bull'] and snapshot['coins']['BTC']['price']<min(btc['four']['close'],btc['four']['ema20']) and trend_up<=2)
-    failed=bool(deterioration and separated and previous.get('state') in ('RECOVERY_ATTEMPT','REVERSAL_CONFIRMING','RECOVERY_FAILED') and
+    origin=timestamp(previous.get('episode_at')) or prior_at
+    episode_recent=bool(origin and prior_at and origin<=prior_at and timedelta(0)<=now-origin<=timedelta(hours=36))
+    failed=bool(episode_recent and deterioration and separated and previous.get('state') in ('RECOVERY_ATTEMPT','REVERSAL_CONFIRMING','RECOVERY_FAILED') and
         not groups['btc_structure'] and (selling or weak_buying or closed_level_lost))
     # A positive trailing 12h candle change cannot override newer broad losses.
     recovery=bool(btc_ok and btc['four']['rebound'] and not deterioration and
@@ -180,12 +182,13 @@ def analyze(snapshot,fund,now,refs,current):
         elif not btc['four']['rebound'] and (finite(cap_delta) and cap_delta<0 or finite(cap_now.get('change')) and cap_now['change']<0):state='CORRECTION'
     failure_evidence=dict(broad_deterioration=deterioration,btc_since_reference_pct=btc_change,cap_since_reference_pct=cap_delta,
         alts_lower_since_reference=falling,known_alt_comparisons=len(moves),selling_proxy=selling,weak_buying_proxy=weak_buying,closed_level_lost=closed_level_lost,
-        prior_recovery=previous.get('state'),separated_observations=separated)
+        prior_recovery=previous.get('state'),separated_observations=separated,episode_recent=episode_recent)
     missing=[name for name,value in groups.items() if not value]
     if not stable:missing.append('multi_analysis_stability')
     old_state=previous.get('state');order=['CORRECTION','RECOVERY_FAILED','RECOVERY_ATTEMPT','REVERSAL_CONFIRMING','UPTREND_CONFIRMED']
     proximity='bližšie k technickému potvrdeniu' if state in order and old_state in order and order.index(state)>order.index(old_state) else 'ďalej od technického potvrdenia' if state in order and old_state in order and order.index(state)<order.index(old_state) else 'zmenu vzdialenosti nemožno potvrdiť'
-    out=dict(version=VERSION,state=state,failure_evidence=failure_evidence,quality='AVAILABLE' if sufficient else 'INSUFFICIENT',groups=groups,missing=missing,stable=stable,
+    episode_at=(origin.isoformat() if origin and previous.get('state') in ('RECOVERY_ATTEMPT','REVERSAL_CONFIRMING') else now.isoformat()) if state in ('RECOVERY_ATTEMPT','REVERSAL_CONFIRMING') else origin.isoformat() if origin and state=='RECOVERY_FAILED' else None
+    out=dict(version=VERSION,state=state,episode_at=episode_at,failure_evidence=failure_evidence,quality='AVAILABLE' if sufficient else 'INSUFFICIENT',groups=groups,missing=missing,stable=stable,
         source_close=btc['four']['source_close'] if btc_ok else None,coins=profiles,comparisons=compared,
         breadth=dict(covered=len(valid),rising_24h=breadth_up,change_24h_covered=sum(finite(snapshot['coins'][s].get('change_24h')) for s in valid),confirmed_4h=trend_up,stronger_than_btc_7d=stronger,relative_strength_covered=sum(finite(snapshot['coins'][s].get('relative_strength_btc_7d')) for s in valid)),
         proximity=proximity,macro=dict(verified_releases=releases,impact='not a cause or a trade trigger'),
@@ -199,6 +202,6 @@ def attach(model,snapshot,fund,now,journal):
     except (KeyError,TypeError,ValueError,OverflowError) as exc:
         result=dict(version=VERSION,state=None,quality='INSUFFICIENT',error=type(exc).__name__,activation='ANALYTICAL_ONLY_NO_NEW_BUY_SELL')
     model['trend_reversal']=result
-    model['observation']['reversal']=dict(state=result.get('state'),groups=result.get('groups',{}),source_close=result.get('source_close'),
+    model['observation']['reversal']=dict(state=result.get('state'),episode_at=result.get('episode_at'),groups=result.get('groups',{}),source_close=result.get('source_close'),
         coins={s:p.get('state') for s,p in result.get('coins',{}).items() if s in COINS})
     return result

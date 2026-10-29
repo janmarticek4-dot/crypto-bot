@@ -64,7 +64,7 @@ def safe_state(r):
     state=r.get('state');f=r.get('failure_evidence',{})
     if state=='UPTREND_CONFIRMED' and (not all(r.get('groups',{}).get(k) for k in ('btc_structure','capitalization','directional_volume','breadth')) or not r.get('stable')):return None
     if state=='RECOVERY_ATTEMPT' and f.get('broad_deterioration'):return None
-    if state=='RECOVERY_FAILED' and not (f.get('broad_deterioration') and f.get('separated_observations') and (f.get('selling_proxy') or f.get('weak_buying_proxy') or f.get('closed_level_lost'))):return None
+    if state=='RECOVERY_FAILED' and not (f.get('episode_recent') is not False and f.get('broad_deterioration') and f.get('separated_observations') and (f.get('selling_proxy') or f.get('weak_buying_proxy') or f.get('closed_level_lost'))):return None
     return state
 
 def guard(text,baseline,model,snapshot,now=None):
