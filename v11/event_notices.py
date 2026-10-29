@@ -25,7 +25,11 @@ def same_notice(a,b):
     aa=timestamp(a.get('published_at'));bb=timestamp(b.get('published_at'))
     if not aa or not bb or abs((aa-bb).total_seconds())>72*3600:return False
     # Reuse semantic/process checks without mistaking a delayed copy for a new event.
-    return same_event(a,dict(b,published_at=a['published_at']))
+    def normal(title):
+        title=re.sub(r'\bapproves\b','approved',title,flags=re.I)
+        title=re.sub(r'\bdenies\b','denied',title,flags=re.I)
+        return title
+    return same_event(dict(a,title=normal(a['title'])),dict(b,title=normal(b['title']),published_at=a['published_at']))
 
 def macro_type(item):
     if item.get('kind')!='economic_release':return 'Fed'
@@ -59,6 +63,7 @@ def news_relevance(e,now):
     if 'hack' in cats:
         exposed=re.search(r'exchange|protocol|bridge|wallet|DeFi|withdrawal|smart contract|private key|stolen crypto|crypto funds|solana|aave|bittensor|render network|fetch.ai|coinbase|binance|bybit|kraken|OKX',title,re.I)
         if not exposed:return False,'NO_CONFIRMED_CRYPTO_EXPOSURE'
+    if 'regulation' in cats and re.search(r'expected|could|might|await|pending|weighs|considers|to approve',title,re.I) and not re.search(r'\bapproves\b|(?<!-)\bapproved\b|\bdenies\b|\bdenied\b|\bfiled\b|\bcharged\b|\bruled\b',title,re.I):return False,'EXPECTED_REGULATORY_OUTCOME_NOT_A_DECISION'
     if 'regulation' in cats and not re.search(r'approv|deni|reject|lawsuit|enforce|settlement|\bban\b|\border\b|ruling|charges|licen[cs]|legislation|sanction|new rules|court',title,re.I):return False,'COMMENTARY_NOT_REGULATORY_ACTION'
     if 'Fed' in cats and not re.search(r'speech|remarks|testimony|(?:Powell|governor|chair).*(?:says|said|warns|signals)',title,re.I):return False,'NO_NEW_PRIMARY_POLICY_FACT'
     if cats&{'CPI','PCE','GDP','employment'} and not re.search(r'\b(released|release|revised|revision|report)\b',title,re.I):return False,'ECONOMIC_COMMENTARY_NOT_NEW_RESULT'
@@ -102,7 +107,7 @@ def candidates(fund,now):
             'Projektová alebo ekonomická správa; ekonomický dopad zatiaľ nepotvrdený.')
         if re.search(r'ETF',title,re.I):
             asset='BTC' if re.search(r'bitcoin|\bBTC\b',title,re.I) else 'ETH' if re.search(r'ethereum|ether|\bETH\b',title,re.I) else 'krypto'
-            stage='hlásené schválenie' if re.search(r'approv|passes',title,re.I) else 'hlásené zamietnutie' if re.search(r'denies|denied|reject',title,re.I) else 'nová správa'
+            stage='hlásené schválenie' if re.search(r'\bapproves\b|(?<!-)\bapproved\b|\bpasses\b',title,re.I) else 'hlásené zamietnutie' if re.search(r'denies|denied|reject',title,re.I) else 'nová správa'
             summary=stage+' '+asset+' ETF; primárne rozhodnutie a následné toky treba overiť.'
         elif re.search(r'tokeniz',title,re.I):summary='Správa o tokenizovaných aktívach; realizovaný objem a dopyt po tokene neoverené.'
         elif 'Fed' in cats:summary='Nové vyjadrenie Fedu; význam pre očakávania sadzieb a rizikové aktíva treba potvrdiť.'

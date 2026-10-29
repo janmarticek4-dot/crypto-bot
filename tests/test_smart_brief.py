@@ -232,3 +232,12 @@ class ConflictingRecoveryTests(unittest.TestCase):
         for coin in old['coins'].values():coin['price']*=1.1
         m=fixtures.model(snap);tr.attach(m,snap,{},NOW,{'last_analysis_v112':old})
         self.assertNotEqual(m['trend_reversal']['state'],'RECOVERY_ATTEMPT')
+
+class RegulatoryFactTests(unittest.TestCase):
+    def test_expected_approval_is_not_reported_as_approval(self):
+        for title in ('SEC approval expected for synthetic Bitcoin ETF','SEC could approve synthetic Bitcoin ETF','SEC weighs approval for synthetic Bitcoin ETF'):
+            self.assertFalse(en.plan({'events':[story('x',title)]}, {},NOW)['selected'])
+    def test_tense_change_in_provider_copy_is_not_a_new_approval(self):
+        j={};en.commit(j,en.plan({'events':[story()]}, {},NOW),NOW)
+        other=story('new','SEC approved synthetic spot Bitcoin ETF',source='secondary')
+        self.assertFalse(en.plan({'events':[other]},j,NOW)['selected'])

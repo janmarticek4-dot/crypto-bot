@@ -26,7 +26,7 @@ The inspected package has 11 flat outputs, 6 regime-momentum models and 1 techni
 
 ## Validation / activation
 
-364 offline tests pass before final candidate review, including successful reversal, failed bounce despite old positive candles/lagging volume, continuing correction, normal pullback in an uptrend, missing/contradictory data, lifecycle restart/cross-source copies/revisions, past/future calendar, uncertain delivery, corrupt ledger, actual send ownership, source filtering, 18 outputs and target shortening with action parity. Existing causal/timezone/US/private-state tests remain included.
+366 offline tests pass before final candidate review, including successful reversal, failed bounce despite old positive candles/lagging volume, continuing correction, normal pullback in an uptrend, missing/contradictory data, lifecycle restart/cross-source copies/revisions, past/future calendar, uncertain delivery, corrupt ledger, actual send ownership, source filtering, 18 outputs and target shortening with action parity. Existing causal/timezone/US/private-state tests remain included.
 
 Backup: backup/before-smart-brief-20261029 -> fd6a3b5. Run clean CI, real-input preview and verified announcement migration before changing the existing immutable source pin. No test Telegram, trading permission, new strategy, production state replacement, Secret edit or force/reset is authorized. Rollback only reverts the eventual activation pin to 68805b3; it does not reset journals or portfolio. brief-v2 is accepted by the existing post-delivery audit alongside older versioned receipts. Future actual delivery is verified only after it happens.
 
