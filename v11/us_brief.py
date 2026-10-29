@@ -21,6 +21,8 @@ def render(context,model,snapshot,fund,now,inventory=None):
     cash=[q for q in context['quotes'].values() if q['kind']=='index' and analyst.number(q.get('change')) and q.get('price') is not None and fresh(q.get('at'),now,QUOTE_MAX_AGE) and q.get('status')!='posledná uzavretá seansa']
     futures=[q for q in context['quotes'].values() if q['kind']=='future' and analyst.number(q.get('change')) and q.get('price') is not None and fresh(q.get('at'),now,QUOTE_MAX_AGE)]
     quotes=cash if phase in ('OPENING','AFTER OPEN') else futures if phase=='PREOPEN' else []
+    if quotes and ((label=='Rast' and all(q['change']<0 for q in quotes)) or (label=='Korekcia' and all(q['change']>0 for q in quotes))):
+        lines[0]='🇺🇸 VERDIKT TRHU: Neistota — Kryptotrh a americké kotácie majú protichodný smer.'
     if quotes:
         movement='rastú' if all(q['change']>0 for q in quotes) else 'klesajú' if all(q['change']<0 for q in quotes) else 'majú zmiešaný smer'
         values=', '.join(q['name']+' '+analyst.pct(q['change']) for q in quotes)

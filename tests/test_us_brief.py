@@ -71,3 +71,7 @@ class BriefTests(unittest.TestCase):
     def test_stale_snapshot_does_not_reuse_old_price_boundaries(self):
         self.snap['at']=(NOW-timedelta(hours=1)).timestamp()
         text=self.text();self.assertNotIn('BTC podpora $',text);self.assertIn('smer nemožno spoľahlivo určiť',text)
+    def test_opposite_us_equities_and_crypto_not_one_sided_verdict(self):
+        self.context['market']['phase']='AFTER OPEN'
+        for q in self.context['quotes'].values():q.update(change=1,price=100,at=NOW,status='oneskorený zdroj')
+        text=self.text();self.assertIn('VERDIKT TRHU: Neistota',text);self.assertIn('protichodný smer',text)
