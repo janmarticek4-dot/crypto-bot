@@ -44,8 +44,13 @@ def release_notice(item,now):
     text=lines({'event_lifecycle':{'releases':[item]}},now)
     first=text[0] if text else kind+': výsledok bezpečne neštruktúrovaný.'
     impact='Odchýlka voči vopred overenému konsenzu nepotvrdená; miernejší/prísnejší výsledok môže podporiť/brzdiť rizikové aktíva.'
+    reaction=item.get('reaction',{}).get('BTC',{})
+    observed=''
+    if all(type(reaction.get(k)) in (int,float) and __import__('math').isfinite(reaction[k]) for k in ('before_at','after_at','change_pct')) and reaction['before_at']<=at.timestamp()*1000<reaction['after_at']<=now.timestamp()*1000:
+        end=__import__('datetime').datetime.fromtimestamp(reaction['after_at']/1000,BL).strftime('%d.%m. %H:%M')
+        observed=f" BTC {reaction['change_pct']:+.1f}% od hodinového uzavretia okolo výsledku do {end}; časový súbeh nie je dôkaz príčiny."
     return dict(id=identity,state='RESULT',published_at=at.isoformat(),event_at=None,semantic=digest(fact),title=first,
-        categories=[kind],symbols=[],url=url,text=first+' '+impact,kind='official_release',fact_parts={k:digest(v) for k,v in fact.items()})
+        categories=[kind],symbols=[],url=url,text=first+' '+impact+observed,kind='official_release',fact_parts={k:digest(v) for k,v in fact.items()})
 
 def news_relevance(e,now):
     title=e['title'];cats=set(e['categories']);at=timestamp(e.get('published_at'))

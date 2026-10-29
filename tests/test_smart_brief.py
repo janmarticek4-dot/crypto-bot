@@ -216,3 +216,12 @@ class EpisodeExpiryTests(unittest.TestCase):
         for c in old['coins'].values():c['price']*=1.1
         m=fixtures.model(snap);tr.attach(m,snap,{},NOW,{'last_analysis_v112':old})
         self.assertEqual(m['trend_reversal']['state'],'CORRECTION')
+
+class ReactionTests(unittest.TestCase):
+    def test_observed_reaction_shown_once_without_becoming_new_fact_every_run(self):
+        f=fund();r=f['event_lifecycle']['releases'][0];at=int((NOW-timedelta(hours=2)).timestamp()*1000)
+        r['reaction']={'BTC':{'before_at':at,'after_at':at+3600000,'change_pct':1}}
+        p=en.plan(f,{},NOW);self.assertIn('BTC +1.0%',p['selected'][0]['text'])
+        j={};en.commit(j,p,NOW)
+        r['reaction']['BTC'].update(after_at=int(NOW.timestamp()*1000),change_pct=2)
+        self.assertFalse(en.plan(f,j,NOW)['selected'])
