@@ -77,7 +77,7 @@ class VerdictTests(unittest.TestCase):
         text=' '.join(ev.lines({'event_lifecycle':{'releases':[entry]}},datetime(2026,10,28,20,tzinfo=timezone.utc)))
         self.assertIn('znížil',text);self.assertNotIn('ponechal',text)
     def test_important_global_incident_not_lost_when_shortening(self):
-        m=model();m['evidence']=[dict(title='Synthetic exchange withdrawals suspended after incident',published_at=NOW.isoformat(),source='synthetic',categories=['hack'],impact='riziko vyžaduje potvrdenie')]
+        m=model();m['evidence']=[dict(title='Synthetic exchange withdrawals suspended after incident',published_at=NOW.isoformat(),source='synthetic',categories=['hack'],impact='riziko vyžaduje potvrdenie',significance='potenciálny bezpečnostný incident',url='https://example.invalid/synthetic-event')]
         text=integrated_report.render(m,sample(),NOW,'morning')
         self.assertIn('withdrawals suspended',text);self.assertIn('riziko vyžaduje potvrdenie',text)
         self.assertNotIn('https://',text)
