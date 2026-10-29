@@ -95,3 +95,14 @@ using the same expected source. No user Secrets/Variables need changing.
 A source-validation push run proves the active checkout without a Telegram test.
 The next scheduled full delivery remains pending until its actual execution; the
 automatic post-delivery audit will prove or reject its contract then.
+
+## Final macro / material-news safeguards
+
+Final immutable source: 1ce162d6d1cd6f91499e3869bce92171bfe9342b.
+287 tests passed. Readiness 40887726489 and regression/source review 40887726405
+both succeeded; the live reports again had all 18 predictions, verdict first,
+no URLs and two logical parts. The Fed verb is tied to the explicit rate action,
+so 'maintaining ample reserves' cannot incorrectly turn a rate cut into a hold.
+Material global incident/regulation/geopolitical evidence is kept when compacting
+the report; its stated uncertainty remains visible. No failed candidate was
+activated. Revert the latest pin activation to return to 9236580 if needed.

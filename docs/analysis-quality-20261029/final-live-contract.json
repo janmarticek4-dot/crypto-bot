@@ -1,0 +1,24 @@
+{
+  "predictions": 18,
+  "contracts": {
+    "morning": {
+      "format_version": "verdict-v1",
+      "verdict_first": true,
+      "urls_absent": true,
+      "v2_count": 18,
+      "technical_fallback_labeled": false
+    },
+    "evening": {
+      "format_version": "verdict-v1",
+      "verdict_first": true,
+      "urls_absent": true,
+      "v2_count": 18,
+      "technical_fallback_labeled": false
+    }
+  },
+  "parts": {
+    "morning": 2,
+    "evening": 2
+  },
+  "telegram_sent": false
+}
