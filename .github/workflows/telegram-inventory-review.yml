@@ -48,7 +48,7 @@ jobs:
           PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ADVISORY_TELEGRAM_USER_ID: ${{ secrets.ADVISORY_TELEGRAM_USER_ID }}
+          ADVISORY_TELEGRAM_USER_ID: ${{ secrets.ADVISORY_TELEGRAM_USER_ID || vars.ADVISORY_TELEGRAM_USER_ID }}
         run: |
           python - <<'PY'
           import os,json
