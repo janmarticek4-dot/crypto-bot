@@ -88,8 +88,8 @@ def transition(state,order,now):
             old=rows.get(symbol)
             if old and old['currency']!='USD':raise ValueError('EUR pozíciu nemožno meniť USD obchodom bez potvrdenej konverzie.')
             if op!='buy' and old is None:raise ValueError('Predaj vyžaduje evidovanú pozíciu.')
-            if old and old['quantity'] is None:raise ValueError('Najprv doplň skutočné množstvo pozície; nevypočítavam ho z odhadu.')
-            oldqty=dec(old['quantity']) if old else Decimal(0)
+            if old and old['quantity'] is None and op!='sell_all':raise ValueError('Najprv doplň skutočné množstvo pozície; nevypočítavam ho z odhadu.')
+            oldqty=dec(old['quantity']) if old and old['quantity'] is not None else None if old else Decimal(0)
             price=dec(order['price']) if order.get('price') else None
             fee=dec(order['fee'],True) if order.get('fee') is not None else None
             if op=='sell_all':qty=oldqty;gross=None;net=None
@@ -102,7 +102,7 @@ def transition(state,order,now):
                 else:qty=amount;gross=qty*price if price is not None else None
                 net=(gross+fee if op=='buy' else gross-fee) if gross is not None and fee is not None else None
                 if net is not None and net<0:raise ValueError('Poplatok prevyšuje hrubú hodnotu.')
-            remaining=oldqty+qty if op=='buy' else oldqty-qty
+            remaining=oldqty+qty if op=='buy' else Decimal(0) if op=='sell_all' else oldqty-qty
             if remaining<0:raise ValueError('Nemožno predať viac, než je evidované.')
             if op=='buy':
                 # Unknown paid fees => unknown all-in basis, never fabricate 1%.
@@ -111,7 +111,7 @@ def transition(state,order,now):
                 rows[symbol]=dict(symbol=symbol,quantity=fmt(remaining),average_cost=average,currency='USD')
             elif remaining==0:rows.pop(symbol)
             else:rows[symbol]=dict(old,quantity=fmt(remaining))
-            details.append(dict(symbol=symbol,quantity=fmt(qty),price=fmt(price) if price else None,
+            details.append(dict(symbol=symbol,quantity=fmt(qty) if qty is not None else None,price=fmt(price) if price else None,
                                 gross=fmt(gross) if gross is not None else None,fee=fmt(fee) if fee is not None else None,
                                 net=fmt(net) if net is not None else None,remaining=fmt(remaining)))
         book['positions']=list(rows.values());validate(book);tx['details']=details
@@ -122,7 +122,7 @@ def proposal_text(book,tx):
     if tx['op']=='cash':return 'Nastaviť deklarovanú hotovosť '+book['cash']+' USD?'
     lines=['Potvrď iba evidenciu už vykonaného obchodu (žiadna objednávka):']
     for d in tx['details']:
-        lines.append(f"{d['symbol']}: {'nákup' if tx['op']=='buy' else 'predaj'} {d['quantity']}; cena {d['price'] or 'nezadaná'} USD; hrubá hodnota {d['gross'] or 'neznáma'} USD; poplatok {d['fee'] if d['fee'] is not None else 'nezadaný'}; čistý {'výdavok' if tx['op']=='buy' else 'príjem'} {d['net'] or 'neúplný'} USD; zostane {d['remaining']}.")
+        lines.append(f"{d['symbol']}: {'nákup' if tx['op']=='buy' else 'predaj'} {d['quantity'] or 'celá pozícia, množstvo neznáme'}; cena {d['price'] or 'nezadaná'} USD; hrubá hodnota {d['gross'] or 'neznáma'} USD; poplatok {d['fee'] if d['fee'] is not None else 'nezadaný'}; čistý {'výdavok' if tx['op']=='buy' else 'príjem'} {d['net'] or 'neúplný'} USD; zostane {d['remaining']}.")
     lines.append('Hotovosť sa nemení automaticky. Neznámy poplatok znamená neúplný čistý výsledok/náklad.')
     return '\n'.join(lines)
 

@@ -153,3 +153,10 @@ class MissingSourceTests(unittest.TestCase):
         with patch.dict(script.os.environ,{'BOT_DISABLE_TELEGRAM':'1'}),patch.object(script.urllib.request,'urlopen') as network:
             with self.assertRaises(StateError):script.telegram('sendMessage',{})
             network.assert_not_called()
+
+class UnknownInitialQuantityTests(unittest.TestCase):
+    def test_full_sale_of_unknown_initial_quantity_not_invented(self):
+        state={'advisory_portfolio':{'positions':[dict(symbol='SOL',quantity=None,average_cost=None,currency='USD')],'cash':None}}
+        book,tx=t.transition(state,t.parse('/predal SOL'),10000)
+        self.assertEqual(book['positions'],[]);self.assertIsNone(tx['details'][0]['quantity']);self.assertIsNone(tx['details'][0]['gross'])
+        with self.assertRaises(ValueError):t.transition(state,t.parse('/predal SOL 1'),10000)
