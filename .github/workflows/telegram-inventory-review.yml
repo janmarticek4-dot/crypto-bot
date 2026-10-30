@@ -58,7 +58,9 @@ jobs:
           try:
               load()
               proof['encrypted_store_read']=True
-              proof['owner_configured']=bool(os.environ.get('ADVISORY_TELEGRAM_USER_ID') and os.environ.get('TELEGRAM_CHAT_ID'))
+              proof['owner_id_configured']=bool(os.environ.get('ADVISORY_TELEGRAM_USER_ID'))
+              proof['chat_id_configured']=bool(os.environ.get('TELEGRAM_CHAT_ID'))
+              proof['owner_configured']=proof['owner_id_configured'] and proof['chat_id_configured']
               proof['no_webhook']=not bool(telegram('getWebhookInfo',{}).get('result',{}).get('url'))
               try:
                   rows=resolve('SUI')
