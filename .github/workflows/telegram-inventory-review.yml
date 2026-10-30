@@ -69,7 +69,8 @@ jobs:
               except Exception:
                   proof['asset_search_available']=False
               print('::notice title=Inventory read-only readiness::'+json.dumps(proof))
-              if not all(proof.get(k) for k in ('encrypted_store_read','owner_configured','no_webhook')):raise ValueError()
+              if not proof['owner_configured']:print('::notice title=Setup required::ADVISORY_TELEGRAM_USER_ID missing; command polling must remain disabled.')
+              if not all(proof.get(k) for k in ('encrypted_store_read','no_webhook')):raise ValueError()
           except Exception:
               raise SystemExit('Private inventory readiness failed; private details suppressed. No state writes or messages.') from None
           PY
