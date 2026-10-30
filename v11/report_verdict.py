@@ -9,7 +9,7 @@ ACTIONS={'BUY NOW':'NAKÚPIŤ','BUY PULLBACK':'POČKAŤ NA POTVRDENÝ PULLBACK',
 def actions(body):
     result=[]
     for line in body.splitlines():
-        match=re.match(r'^([A-Z][A-Z0-9]*) .*?— (BUY NOW|BUY PULLBACK|WAIT|HOLD|REDUCE|SELL) \((držba|nový nákup)\):',line)
+        match=re.match(r'^([A-Z][A-Z0-9.-]{0,19}) .*?— (BUY NOW|BUY PULLBACK|WAIT|HOLD|REDUCE|SELL) \((držba|nový nákup)\):',line)
         if match:result.append(match.groups())
     return result
 

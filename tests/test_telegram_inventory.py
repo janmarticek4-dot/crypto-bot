@@ -160,3 +160,12 @@ class UnknownInitialQuantityTests(unittest.TestCase):
         book,tx=t.transition(state,t.parse('/predal SOL'),10000)
         self.assertEqual(book['positions'],[]);self.assertIsNone(tx['details'][0]['quantity']);self.assertIsNone(tx['details'][0]['gross'])
         with self.assertRaises(ValueError):t.transition(state,t.parse('/predal SOL 1'),10000)
+
+class AdditionalHoldingTests(unittest.TestCase):
+    def test_dynamic_holding_is_not_dropped_from_action_extraction(self):
+        from tests.test_analyst_v112 import sample,model,NOW
+        from v11 import analyst,report_verdict
+        snap=sample();m=model(snap)
+        inventory={'positions':[dict(symbol='SUI.X',quantity='2',average_cost='1',currency='USD')],'cash':None}
+        text=analyst.final_text(m,snap,NOW,'morning',inventory)
+        self.assertIn(('SUI.X','WAIT','držba'),report_verdict.actions(text))
