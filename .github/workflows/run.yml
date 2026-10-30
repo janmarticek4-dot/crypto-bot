@@ -8,6 +8,10 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
+      portfolio_commands:
+        description: "Spracovať príkazy portfólia (bez analýzy a bez obchodov)"
+        type: boolean
+        default: false
       advisory_import:
         description: Inicializovať iba používateľom zadanú súkromnú evidenciu z Environment Secretu?
         type: boolean
@@ -44,15 +48,16 @@ jobs:
       - name: Require approved V11.1 and one explicit manual action
         env:
           ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
+          PORTFOLIO: ${{ inputs.portfolio_commands || false }}
           IMPORT: ${{ inputs.advisory_import || false }}
           LEGACY: ${{ inputs.manual_analysis || false }}
           DEEP: ${{ inputs.manual_deep_search || false }}
         run: |
           test "$GITHUB_REF" = 'refs/heads/main' || { echo 'Vyberte vetvu main.'; exit 1; }
           test "$ENABLED" = 'true' || { echo 'Schválená integrácia V11.1 nie je zapnutá.'; exit 1; }
-          test "$IMPORT:$LEGACY:$DEEP" = 'false:false:false' || { echo 'Pre ručnú V11.1 ponechajte ostatné ručné možnosti vypnuté.'; exit 1; }
+          test "$PORTFOLIO:$IMPORT:$LEGACY:$DEEP" = 'false:false:false:false' || { echo 'Pre ručnú V11.1 ponechajte ostatné ručné možnosti vypnuté.'; exit 1; }
   crypto-bot:
-    if: github.event_name != 'push' && inputs.advisory_import != true && inputs.manual_v111_analysis != true
+    if: github.event_name != 'push' && inputs.advisory_import != true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -126,7 +131,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '5f56cec9e7854af8f7bf112126ddf7a688fe84f6' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '297a88840cf0f2a0c9d7fc45fe6e8df476742aa6' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -198,7 +203,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: verified-release
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '5f56cec9e7854af8f7bf112126ddf7a688fe84f6' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '297a88840cf0f2a0c9d7fc45fe6e8df476742aa6' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - name: Record effective production source (no Telegram)
         env:
@@ -211,7 +216,7 @@ jobs:
           value=dict(source=source,v112_active=os.getenv('V112_ACTIVE')=='true',experimental_display=True,telegram_sent=False)
           Path('us-source-diagnostics/deployment.json').write_text(json.dumps(value))
           print('::notice title=Verified production V2 source::'+json.dumps(value))
-          assert value['v112_active'] and source=='5f56cec9e7854af8f7bf112126ddf7a688fe84f6','Existing V11.2 flags must be enabled; production source was not activated'
+          assert value['v112_active'] and source=='297a88840cf0f2a0c9d7fc45fe6e8df476742aa6','Existing V11.2 flags must be enabled; production source was not activated'
           PY
       - name: Verify existing private advisory context read-only (no values or Telegram)
         working-directory: verified-release
@@ -246,7 +251,7 @@ jobs:
           if-no-files-found: warn
 
   private-advisory-updates:
-    if: github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
+    if: github.ref == 'refs/heads/main' && vars.PRIVATE_INVENTORY_COMMANDS_ENABLED != 'false' && ((github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.portfolio_commands == true && inputs.manual_v111_analysis != true && inputs.manual_analysis != true && inputs.advisory_import != true))
     environment: production-advisory
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -255,24 +260,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
+          ref: 297a88840cf0f2a0c9d7fc45fe6e8df476742aa6
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install -r requirements-state-integration.txt
+      - run: python -m pip install 'cryptography>=43,<51'
+      - name: Verify approved private-command source
+        run: test "$(git rev-parse HEAD)" = "297a88840cf0f2a0c9d7fc45fe6e8df476742aa6"
+      - name: Owner enrollment gate (no Telegram or state access)
+        id: owner
+        env:
+          OWNER: ${{ secrets.ADVISORY_TELEGRAM_USER_ID || vars.ADVISORY_TELEGRAM_USER_ID }}
+        run: |
+          if [ -n "$OWNER" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo '::notice title=Portfolio commands inactive::Set ADVISORY_TELEGRAM_USER_ID in production-advisory. No updates consumed, no private state changes.'
+          fi
       - name: Record owner-declared inventory only (no market orders)
+        if: steps.owner.outputs.ready == 'true'
         env:
           PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
           PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
           PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ADVISORY_TELEGRAM_USER_ID: ${{ secrets.ADVISORY_TELEGRAM_USER_ID }}
+          ADVISORY_TELEGRAM_USER_ID: ${{ secrets.ADVISORY_TELEGRAM_USER_ID || vars.ADVISORY_TELEGRAM_USER_ID }}
         run: python scripts/private_advisory_updates.py
 
   initialize-private-advisory:
-    if: github.event_name == 'workflow_dispatch' && inputs.advisory_import == true && inputs.manual_v111_analysis != true
+    if: github.event_name == 'workflow_dispatch' && inputs.advisory_import == true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true
     environment: production-advisory
     runs-on: ubuntu-latest
     timeout-minutes: 5

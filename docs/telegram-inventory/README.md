@@ -34,3 +34,14 @@ Bezpečnostný workflow vykonáva offline simulácie, read-only kontrolu existuj
 Najskôr uložiť kód, spustiť `Telegram Inventory Safety Review`, potom pripnúť schválený plný SHA do existujúceho `private-advisory-updates` a analytickej časti `run.yml` (nový čítač musí podporovať Decimal reťazce a dynamické symboly). Nemenia sa Secrets, obchodné pravidlá, monitoring ani harmonogramy. Analytické nasadenie sa overí existujúcim read-only source validation.
 
 Návrat: vypnúť iba príjem príkazov (`PRIVATE_INVENTORY_COMMANDS_ENABLED=false` ako repository variable; nový job rešpektuje), zachovať kompatibilný nový čítač súkromného stavu. **Nevracať starý priamy poller ani starý validátor po prvom novom zápise**. Šifrovaný stav nevracať/resetovať automaticky; prípadnú obnovu riešiť existujúcou explicitnou CAS obnovou.
+
+
+## Overenie 30. 10. 2026
+
+Offline regresie: **393 testov**, vrátane nových testov potvrdení, viacnásobného predaja, presných desatinných výpočtov, váženého priemeru, poplatkov, nejednoznačnej identity, zlyhania zdroja, neautorizovaných správ, duplicít, expirácie, CAS konfliktu, šifrovaných záloh a zmeny HOLD → WAIT po predaji. Všetky vstupy testov sú syntetické. Neskúšal sa skutočný zápis/obchod ani reálna Telegram odpoveď.
+
+GitHub-hosted overenie potvrdilo čítanie existujúceho zašifrovaného stavu, nastavený chat, neprítomnosť webhooku, vyhľadávanie SUI aj jeho čerstvú cenu. **Chýba `ADVISORY_TELEGRAM_USER_ID`**, preto sa príjem príkazov pri chýbajúcom ID preskočí ešte pred getUpdates alebo zápisom. Analýzy sa tým nevypínajú. Bezpečnostný test rozlišuje úspešné offline testy od chýbajúceho prevádzkového nastavenia.
+
+Na zapnutie: GitHub → tento repozitár → **Settings → Environments → production-advisory → Add environment secret**. Názov `ADVISORY_TELEGRAM_USER_ID`, hodnota tvoje **osobné číselné Telegram user ID**, nie token ani používateľské meno. Ak existujúci chat je naozaj súkromný s tebou, osobné ID sa zhoduje s jeho kladným chat ID; nepreberaj ID skupiny ani bota. Kód vie použiť aj rovnomennú environment variable, ale Secret je vhodnejší. Hodnotu neposielaj do verejného issue/logu. Nemusíš vytvárať nový PAT ani repozitár. Po uložení sa príkazy automaticky povolia pri ďalšom plánovanom behu (ak `PRIVATE_INVENTORY_COMMANDS_ENABLED` nie je `false`). Potom začni `/pomoc` a `/portfolio`.
+
+Záložný bod: `backup/before-telegram-inventory-20261030` → `0388c90484e9149020c1a49406495aeabdf16b3d`. Medzitým pribudnutý produkčný stav `22f2700` bol zachovaný normálnym merge, nie resetom/force-push.
