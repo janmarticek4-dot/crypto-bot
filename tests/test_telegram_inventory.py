@@ -137,3 +137,19 @@ class EncryptedInventoryTests(unittest.TestCase):
         s['advisory_portfolio']=book
         new,_=t.transition(s,t.parse('/predal SOL 0.1'),10001)
         self.assertLess(t.dec(new['positions'][0]['quantity']),t.dec(book['positions'][0]['quantity']))
+
+class MissingSourceTests(unittest.TestCase):
+    def test_lookup_http_outage_returns_safe_reply(self):
+        from v11.secure_state import StateError
+        state={'advisory_portfolio':{'positions':[],'cash':None}}
+        update=dict(update_id=1,message={'text':'/kupil SUI 2 cena 1','date':10000,'chat':{'id':7,'type':'private'},'from':{'id':7}})
+        def unavailable(symbol):raise StateError('HTTP unavailable')
+        reply=t.process(state,update,7,7,10000,unavailable)
+        self.assertIn('nemožno',reply['text']);self.assertEqual(state['advisory_portfolio']['positions'],[])
+    def test_no_sender_during_disabled_test(self):
+        from unittest.mock import patch
+        from scripts import private_advisory_updates as script
+        from v11.secure_state import StateError
+        with patch.dict(script.os.environ,{'BOT_DISABLE_TELEGRAM':'1'}),patch.object(script.urllib.request,'urlopen') as network:
+            with self.assertRaises(StateError):script.telegram('sendMessage',{})
+            network.assert_not_called()

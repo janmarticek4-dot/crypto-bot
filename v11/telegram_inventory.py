@@ -9,6 +9,7 @@ import re
 import secrets
 from decimal import Decimal, InvalidOperation, localcontext
 from .advisory_portfolio import validate
+from .secure_state import StateError
 
 IDS = {'SOL':'solana','TAO':'bittensor','FET':'fetch-ai',
        'AAVE':'aave','ONDO':'ondo-finance','RENDER':'render-token','BTC':'bitcoin','ETH':'ethereum'}
@@ -215,7 +216,7 @@ def process(state,update,chat_id,user_id,now,resolver=None,quotes=None):
         text=proposal_text(proposed,tx)
         if asset:text+='\nToken: '+asset['id']+'. Cena '+('overená' if asset.get('price_available') else 'nedostupná/neoverená; automatická analytika nie je zaručená')+'.'
         return {'text':text,'reply_markup':{'inline_keyboard':[[{'text':'POTVRDIŤ','callback_data':'ok:'+pid},{'text':'ZRUŠIŤ','callback_data':'cancel:'+pid}]]}}
-    except (ValueError,TypeError,KeyError):
+    except (ValueError,TypeError,KeyError,StateError):
         # Controlled validation errors contain no keys/transport payloads.
         return {'text':'Záznam odmietnutý. '+_safe_error(order if 'order' in locals() else None,msg.get('text',''),state,resolver)}
 

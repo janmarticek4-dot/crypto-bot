@@ -14,6 +14,7 @@ from v11.telegram_inventory import process,IDS
 
 def telegram(method,payload):
     if method not in ('getUpdates','sendMessage','answerCallbackQuery','getWebhookInfo'):raise StateError('Operation refused')
+    if method in ('sendMessage','answerCallbackQuery') and os.getenv('BOT_DISABLE_TELEGRAM')=='1':raise StateError('Telegram sends disabled')
     req=urllib.request.Request('https://api.telegram.org/bot'+os.environ['TELEGRAM_TOKEN']+'/'+method,
         data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
     try:
