@@ -1,4 +1,5 @@
 """User-declared private inventory for advice, never orders or inferred fills."""
+from decimal import Decimal, InvalidOperation
 import base64
 import json
 import math
@@ -13,18 +14,24 @@ ALLOWED={'SOL','TAO','ONDO','RENDER','AAVE','FET','BTC','ETH'}
 
 
 def valid_number(value):
-    return type(value) in (int,float) and math.isfinite(value) and value>0
+    try:
+        return not isinstance(value,bool) and isinstance(value,(str,int,float)) and Decimal(str(value)).is_finite() and Decimal(str(value))>0
+    except (InvalidOperation,ValueError):return False
 
 
 def validate(value):
     if not isinstance(value,dict) or set(value)!={'positions','cash'}:raise StateError('Invalid private advisory schema')
-    if value['cash'] is not None and (type(value['cash']) not in (int,float) or not math.isfinite(value['cash']) or value['cash']<0):raise StateError('Invalid declared cash')
+    if value['cash'] is not None:
+        try:
+            cash=Decimal(str(value['cash']))
+            if isinstance(value['cash'],bool) or not cash.is_finite() or cash<0:raise ValueError()
+        except (InvalidOperation,ValueError):raise StateError('Invalid declared cash') from None
     if not isinstance(value['positions'],list):raise StateError('Invalid declared inventory')
     seen=set()
     for row in value['positions']:
         if not isinstance(row,dict) or set(row)!={'symbol','quantity','average_cost','currency'}:raise StateError('Invalid inventory row')
         symbol=row['symbol']
-        if symbol not in ALLOWED or symbol in seen:raise StateError('Invalid or duplicate inventory symbol')
+        if not isinstance(symbol,str) or not re.fullmatch(r'[A-Z][A-Z0-9.-]{0,19}',symbol) or symbol in seen:raise StateError('Invalid or duplicate inventory symbol')
         seen.add(symbol)
         if row['currency'] not in ('USD','EUR'):raise StateError('Unsupported declared currency')
         for key in ('quantity','average_cost'):
@@ -85,7 +92,7 @@ def advice(inventory,snapshot):
         elif position['currency']!='USD':
             out.append('Výsledok pozície N/A — chýba overený kurz meny nákupnej evidencie.')
         else:
-            gross=(coin['price']/position['average_cost']-1)*100
+            gross=(coin['price']/float(position['average_cost'])-1)*100
             out.append(f"Cena vs zadaný all-in náklad {gross:+.2f}%; nie čistý výsledok predaja. Predaj približne1% + neoverený spread.")
     if not inventory['positions']:out.append('Používateľ uviedol prázdnu evidenciu pozícií.')
     out.append('Predaj a spätný nákup len pri jasnej výhode po poplatkoch a neistote; hotovosť sa nedopĺňa predvolenou sumou.')

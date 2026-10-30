@@ -183,7 +183,7 @@ def final_text(model,snapshot,now,kind,inventory=None):
             except (KeyError,TypeError,ValueError):action='WAIT';reason='Držanú pozíciu nemožno bezpečne posúdiť; chýbajú údaje, nejde o potvrdené HOLD.'
             rows[s].update(action=action,context='held',reason=reason)
             if position['currency']=='USD' and position.get('average_cost') and position.get('quantity') and not c.get('stale',True) and number(rows[s].get('price')) and rows[s]['price']>0:
-                rows[s]['position_note']='vs evidovaná nákupná cena '+pct(delta(c['price'],position['average_cost']))+' (nie čistý predaj)'
+                rows[s]['position_note']='vs evidovaná nákupná cena '+pct(delta(c['price'],float(position['average_cost'])))+' (nie čistý predaj)'
             if not snapshot.get('complete') and action=='HOLD':rows[s]['reason']='Predbežné HOLD; neúplné trhové pokrytie, ochranný výstup nepotvrdený.'
     g=model['observation']['global_data'];btc=snapshot['coins'].get('BTC',{});comp=model['comparison']
     change=g.get('change');label='Korekcia' if number(change) and change<0 else 'Rast' if number(change) and change>0 else 'Konsolidácia / údaje obmedzené'

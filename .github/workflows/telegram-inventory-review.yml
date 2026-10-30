@@ -1,0 +1,73 @@
+name: Telegram Inventory Safety Review
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - v11/telegram_inventory.py
+      - v11/advisory_portfolio.py
+      - scripts/private_advisory_updates.py
+      - tests/test_telegram_inventory.py
+      - .github/workflows/telegram-inventory-review.yml
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      GROQ_API_KEY: ''
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt -r requirements-research.txt
+      - run: python scripts/test_integration_offline.py
+  private-read-only:
+    needs: offline
+    environment: production-advisory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'cryptography>=43,<51'
+      - name: Verify existing encrypted store and Telegram configuration, no updates or sends
+        env:
+          PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
+          PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
+          PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ADVISORY_TELEGRAM_USER_ID: ${{ secrets.ADVISORY_TELEGRAM_USER_ID }}
+        run: |
+          python - <<'PY'
+          import os,json
+          from v11.advisory_portfolio import load
+          from scripts.private_advisory_updates import telegram,resolve
+          proof=dict(source=os.environ['GITHUB_SHA'],state_written=False,telegram_sent=False)
+          try:
+              load()
+              proof['encrypted_store_read']=True
+              proof['owner_configured']=bool(os.environ.get('ADVISORY_TELEGRAM_USER_ID') and os.environ.get('TELEGRAM_CHAT_ID'))
+              proof['no_webhook']=not bool(telegram('getWebhookInfo',{}).get('result',{}).get('url'))
+              try:
+                  rows=resolve('SUI')
+                  proof['asset_search_available']=any(r['id']=='sui' for r in rows)
+                  proof['fresh_asset_quote_available']=any(r['id']=='sui' and r['price_available'] for r in rows)
+              except Exception:
+                  proof['asset_search_available']=False
+              print('::notice title=Inventory read-only readiness::'+json.dumps(proof))
+              if not all(proof.get(k) for k in ('encrypted_store_read','owner_configured','no_webhook')):raise ValueError()
+          except Exception:
+              raise SystemExit('Private inventory readiness failed; private details suppressed. No state writes or messages.') from None
+          PY
