@@ -31,6 +31,13 @@ def phase(now):
     return scheduled_phase(now)
 
 
+def late_note(text,scheduled,now):
+    note='⏱ Plánované '+scheduled.strftime('%H:%M')+' Bratislava; aktuálny zber '+now.astimezone(BL).strftime('%H:%M')+' (oneskorený beh).'
+    lines=text.splitlines()
+    lines.insert(min(2,len(lines)),note)
+    return '\n'.join(lines)
+
+
 def price(value):
     if value is None:return 'N/A'
     return f'${value:,.2f}' if abs(value)>=1 else f'${value:.6f}'.rstrip('0').rstrip('.')
@@ -211,7 +218,7 @@ def _run(manual_key=None):
         scheduled=target(now,kind)
         delay=max(0,int((now-scheduled).total_seconds()))
         if delay>900:
-            text='⏱ Plánované '+scheduled.strftime('%H:%M')+' Bratislava; aktuálny zber '+now.astimezone(BL).strftime('%H:%M')+' (oneskorený beh).\n'+text
+            text=late_note(text,scheduled,now)
         print('DELIVERY_TIMING '+json.dumps(dict(slot=key,target=scheduled.isoformat(),started_at=now.isoformat(),delay_seconds=delay)))
     require_public_data(quotes)
     pending_observation=quotes.pop('_v112_observation',None) if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' else None
@@ -243,8 +250,8 @@ def _run(manual_key=None):
                 print('V112 private context unavailable: '+private_stage+'/'+type(exc).__name__)
                 text+='\nPosúdenie držby sa nepodarilo bezpečne overiť; nejde o prázdne portfólio ani potvrdené HOLD.'
             else:text+='\nSúkromné portfólio N/A — úložisko alebo evidencia sa nedali bezpečne overiť; nie je to prázdne portfólio.'
-    if not manual_key and delay>900 and not text.startswith('⏱'):
-        text='⏱ Plánované '+scheduled.strftime('%H:%M')+' Bratislava; aktuálny zber '+now.astimezone(BL).strftime('%H:%M')+' (oneskorený beh).\n'+text
+    if not manual_key and delay>900 and '(oneskorený beh).' not in text:
+        text=late_note(text,scheduled,now)
     if manual_key:
         if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':text=text.replace('— RUČNÁ','— RUČNÁ | '+manual_key,1)
         else:text='RUČNÁ ANALÝZA V11.1 | '+manual_key+'\n'+text

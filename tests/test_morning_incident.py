@@ -99,3 +99,11 @@ class IncidentContextTests(unittest.TestCase):
         with patch.object(m,'run') as monitor,patch.object(wrapper.legacy,'main',side_effect=lambda:wrapper.legacy.run_safety_monitor()):
             wrapper.run();monitor.assert_called_once_with(wrapper.legacy)
         self.assertIs(wrapper.legacy.run_safety_monitor,original)
+
+class LateNoticeTests(unittest.TestCase):
+    def test_delay_notice_keeps_compact_verdict_contract(self):
+        from v11.report_verdict import contract
+        text='📊 CRYPTO AI BOT — RANNÁ ANALÝZA\n31.10. 09:47 Bratislava\n🌐 TRH: KOREKCIA\nSyntetický test.'
+        result=p.late_note(text,target(NOW,'morning'),NOW)
+        self.assertTrue(contract(result,18)['verdict_first']);self.assertEqual(contract(result,18)['format_version'],'brief-v2')
+        self.assertIn('Plánované 07:00',result)
