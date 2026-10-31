@@ -96,6 +96,8 @@ def run():
                 from v11 import trend_reversal
                 trend_reversal.attach(model,snap,fund,now,holder.get('journal',{}))
                 from v11 import event_notices
+                from v11.v113 import movement_review
+                model['movement_review']=movement_review(snap,fund)
                 model['event_notices']=event_notices.plan(fund,holder.get('journal',{}),now)
                 model['observation']['event_notices_pending']=model['event_notices']
                 holder['model']=model
@@ -165,7 +167,7 @@ def run():
                 # Count what the final rendered text actually contains, not a
                 # possibly expired in-memory model. No private text is persisted.
                 import re
-                result=contract(text,len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY)(?=\s|[.;]|$)',text)))
+                result=contract(text,len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY|REFERENCIA|NEURČENÉ)(?=\s|[.;]|$)',text)))
                 try:source=subprocess.check_output(['git','rev-parse','HEAD'],text=True,stderr=subprocess.DEVNULL).strip()
                 except (OSError,subprocess.SubprocessError):source=None
                 if 'trend_reversal' in holder.get('model',{}):

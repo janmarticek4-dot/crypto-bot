@@ -96,7 +96,7 @@ class CompactTests(unittest.TestCase):
         text=integrated_report.render(m,snap,NOW,'morning',INVENTORY)
         old=integrated_report.render_detailed(m,snap,NOW,'morning',INVENTORY)
         baseline=analyst.final_text(m,snap,NOW,'morning',INVENTORY)
-        self.assertEqual(rv.actions(text),rv.actions(baseline));self.assertEqual(text.count('DO STRANY'),18)
+        self.assertEqual(rv.actions(text),rv.actions(baseline));self.assertEqual(len(re.findall(r'(?:24h|72h|14d) REFERENCIA',text)),18)
         self.assertTrue(text.startswith('📊 CRYPTO AI BOT — RANNÁ'))
         self.assertEqual(rv.contract(text,18)['format_version'],'brief-v2')
         self.assertNotIn('https://',text);self.assertNotIn('EMA',text);self.assertNotIn('$152',text)
@@ -107,7 +107,7 @@ class CompactTests(unittest.TestCase):
         self.assertNotIn('DO STRANY',text);self.assertIn('🌐 TRH: NEISTOTA',text)
     def test_compact_prediction_count_keeps_all_eighteen(self):
         snap,m=self.make();text=integrated_report.render(m,snap,NOW,'morning')
-        self.assertEqual(len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY)(?=\s|[.;]|$)',text)),18)
+        self.assertEqual(len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY|REFERENCIA|NEURČENÉ)(?=\s|[.;]|$)',text)),18)
 
 class DeliveryEventTests(unittest.TestCase):
     def exercise(self,fail=False):

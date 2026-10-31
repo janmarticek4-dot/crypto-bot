@@ -2,6 +2,7 @@
 from . import analyst,trend_reversal as tr,report_verdict as rv
 from .prediction_runtime import current_predictions
 from .telegram_text import without_links
+from .v113 import prediction_label
 
 LABELS=dict(tr.LABELS,UPTREND_CONFIRMED='POTVRDENÝ RAST')
 
@@ -26,10 +27,11 @@ def render(model,snapshot,now,kind,inventory=None):
     if r.get('groups',{}).get('directional_volume') is False:text+=' Nákupný záujem nie je presvedčivo potvrdený (sviečkový proxy).'
     lines.append(text)
     g=snapshot.get('global_data',{});btc_now=snapshot.get('coins',{}).get('BTC',{})
+    if type(g.get('change')) in (int,float) and abs(g['change'])>=5:lines.append('Príčina prudkého pohybu zatiaľ nie je potvrdená; súbeh správ nie je dôkaz príčiny.')
     if not btc_now.get('stale',True):lines.append('BTC '+analyst.price(btc_now.get('price'))+' | kap. '+analyst.compact(g.get('cap'))+' ('+analyst.pct(g.get('change'))+' za24h).')
     lines+=['','🎯 ODPORÚČANIE']
     held=[s+' '+rv.ACTIONS[a] for s,a,c in approved if c=='držba']
-    lines.append('; '.join(held)+'.' if held else 'Držba bez bezpečne načítanej evidencie neposúdená; nejde o pokyn predať.')
+    lines.append('; '.join(held)+'.' if held else 'Otvorené pozície: žiadne podľa súkromnej evidencie.' if inventory is not None and not inventory['positions'] else 'Držba bez bezpečne načítanej evidencie neposúdená; nejde o pokyn predať.')
     new=[s+' '+a for s,a,c in approved if c=='nový nákup' and a.startswith('BUY')]
     lines.append('Nové nákupy: '+(', '.join(new) if new else 'ČAKAŤ na potvrdenie vstupu a nákladov')+'.')
     lines+=['','🔮 VÝHĽAD']
@@ -42,7 +44,7 @@ def render(model,snapshot,now,kind,inventory=None):
         if h=='24–72 h':
             lo=view.get('support');hi=view.get('resistance')
             if analyst.number(lo) and analyst.number(hi):lines.append('Alternatíva rastu: uzavretie BTC nad '+analyst.price(hi)+' s objemom; riziko pod '+analyst.price(lo)+'.')
-    lines+=['','💰 KRYPTOMENY','V2 experimentálne, nízka istota; intervaly a vyhodnotenie sú v diagnostike.']
+    lines+=['','💰 KRYPTOMENY','V2 experimentálne: REFERENCIA = nezmenená cena; NEURČENÉ = bez smerovej prevahy. Nie potvrdenie bočného trhu.']
     forecasts=current_predictions(model,int(now.timestamp()*1000))
     rows=base.split('ODPORÚČANIA:',1)[1].splitlines()
     for symbol,action,context in approved:
@@ -66,7 +68,7 @@ def render(model,snapshot,now,kind,inventory=None):
             pieces=[]
             for horizon,label in [('24 h','24h'),('48–72 h','72h'),('7–14 dní','14d')]:
                 value=forecasts.get(symbol,{}).get(horizon)
-                pieces.append(label+' '+(value['direction'] if value else 'nedostupné'))
+                pieces.append(label+' '+prediction_label(value))
             lines.append('V2: '+' | '.join(pieces)+'.')
     if sum(map(len,forecasts.values()))<18:lines.append('Chýbajúce V2: náhradný technický scenár je výhľad vyššie, iba pri aktuálnych technických dátach; nejde o výstup V2.')
     events=model.get('event_notices',{}).get('selected',[])

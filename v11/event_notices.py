@@ -17,6 +17,11 @@ def digest(value):return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_a
 def url_key(url):
     p=urlsplit(url);return urlunsplit((p.scheme,p.netloc.lower(),p.path.rstrip('/'),'',''))
 def same_notice(a,b):
+    from .v113 import incident_fact
+    fa,fb=incident_fact(a.get('title','')),incident_fact(b.get('title',''))
+    if fa and fb:
+        aa,bb=timestamp(a.get('published_at')),timestamp(b.get('published_at'))
+        return bool(aa and bb and abs((aa-bb).total_seconds())<=72*3600 and fa[:2]==fb[:2] and (fa[2]==fb[2] or not fa[2] or not fb[2]))
     for actor in ('SEC','CFTC','Binance','Coinbase','Bybit','Kraken','OKX','Tether','Circle'):
         pattern=r'\b'+actor+r'\b'
         if bool(re.search(pattern,a.get('title',''),re.I))!=bool(re.search(pattern,b.get('title',''),re.I)):return False
@@ -105,6 +110,16 @@ def candidates(fund,now):
             'Geopolitická udalosť môže zvýšiť rizikovú averziu; vplyv na krypto nie je preukázanou príčinou pohybu.' if 'geopolitics' in cats else
             'Hlásená zmena tokenovej ponuky; odomknutie nie je automatický predaj.' if 'unlock' in cats else
             'Projektová alebo ekonomická správa; ekonomický dopad zatiaľ nepotvrdený.')
+        from .v113 import incident_fact
+        incident=incident_fact(title)
+        if incident:
+            summary={'breach':'Hlásený bezpečnostný incident; rozsah strát a expozícia trhu vyžadujú potvrdenie.',
+                     'withdrawals_resumed':'Hlásené obnovenie výberov zmierňuje prevádzkové riziko; neznamená automatický rast.',
+                     'losses_repaid':'Hlásená náhrada strát zmierňuje riziko; skutočný rozsah plnenia treba overiť.',
+                     'breach_expanded':'Hlásený širší prienik zvyšuje riziko; preveriť zasiahnuté systémy a aktíva.',
+                     'withdrawals_paused':'Hlásené obmedzenie výberov zvyšuje prevádzkové a likviditné riziko.',
+                     'asset_freeze':'Hlásené zmrazenie aktív môže pomôcť obnove; zmrazenie nie je už vykonaná náhrada strát.',
+                     'coverage_plan':'Oznámené krytie alebo rezervy sú plán, nie dôkaz úplnej náhrady strát.'}[incident[1]]
         if re.search(r'ETF',title,re.I):
             asset='BTC' if re.search(r'bitcoin|\bBTC\b',title,re.I) else 'ETH' if re.search(r'ethereum|ether|\bETH\b',title,re.I) else 'krypto'
             stage='hlásené schválenie' if re.search(r'\bapproves\b|(?<!-)\bapproved\b|\bpasses\b',title,re.I) else 'hlásené zamietnutie' if re.search(r'denies|denied|reject',title,re.I) else 'nová správa'

@@ -159,6 +159,7 @@ def _run(manual_key=None):
     records=state.setdefault('manual_slots',{}) if manual_key else state['slots']
     if key in records:return 0
     pending_notices=None
+    collect_started=datetime.now(timezone.utc).isoformat()
     if kind=='usa':
         from us_context import report as us
         started=datetime.now(timezone.utc)
@@ -232,6 +233,7 @@ def _run(manual_key=None):
         pending_notices=pending_observation.get('event_notices_pending')
     if pending_notices is not None:
         records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url')} for row in pending_notices.get('selected',[])]
+    records[key]['delivery_timing']=dict(collection_started_at=collect_started,generation_completed_at=datetime.now(timezone.utc).isoformat(),planned_at=scheduled.isoformat() if not manual_key else None)
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if (kind!='usa' or callable(usa_prepare)) and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
         private_stage='storage_or_inventory'
@@ -259,10 +261,12 @@ def _run(manual_key=None):
         meta=delivery_metadata(text)
         require_public_data(meta)
         records[key]['report_validation']=meta
+    records[key]['delivery_timing']['send_started_at']=datetime.now(timezone.utc).isoformat()
     try:send(text)
     except Exception:
         records[key]['status']='uncertain';journal.save(state);raise
     records[key]['status']='sent'
+    records[key]['delivery_timing']['telegram_acknowledged_at']=datetime.now(timezone.utc).isoformat()
     if pending_notices is not None:
         from v11.event_notices import commit as commit_notices
         commit_notices(state,pending_notices,datetime.now(timezone.utc))
