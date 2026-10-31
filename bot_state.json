@@ -4,7 +4,7 @@
   "safety_state": "CRITICAL",
   "last_check": "2026-10-07T14:40:37.280630+02:00",
   "main_analysis_slot": "MANUAL",
-  "last_run": "2026-10-31T02:58:02.466085+01:00",
+  "last_run": "2026-10-31T09:08:24.962008+01:00",
   "market_safety": {
     "state": "NORMAL",
     "score": 0,
@@ -2459,25 +2459,26 @@
     "risk_pts": 1
   },
   "crash_monitor": {
-    "last_checked_at": "2026-10-31T01:58:02.466066+00:00",
-    "last_result": "quiet_not_confirmed",
-    "last_alert_ts": "2026-10-30T05:54:42.749161+00:00",
-    "last_alert_event": "Binance, najväčšia kryptoburza na svete, potvrdila bezpečnostný incident, pri ktorom bolo odcudzených približne 6,3 mld. USD digitálnych aktív, pričom veľká časť prostriedkov bola okamžite zmrazená. Incident spôsobil pokles Bitcoinu o viac ako 4 % a výrazný výpadok ostatných hlavných kryptomien.",
+    "last_checked_at": "2026-10-31T08:08:24.961867+00:00",
+    "last_result": "alert_sent",
+    "last_alert_ts": "2026-10-31T08:08:24.961893+00:00",
+    "last_alert_event": "Binance potvrdila hack s odhadovaným finančným dopadom približne 6,3 mld. USD, pričom pozastavila výbery a zamrazať takmer 3 mld. USD na blockchainu. Veľkosť straty a dočasná nedostupnosť najväčšej kryptoburzy predstavuje systémovú hrozbu, ktorá môže spôsobiť ďalší pokles celého kryptotrhu o viac než 10 % od aktuálnej úrovne.",
     "last_alert_titles": [
-      "binance hack could accelerate shift to dexs standard chartered",
-      "binance points to engineer s hacked laptop in 6 3b breach",
-      "binance hack rattles markets as bnb falls 8 bitcoin nears 77k",
-      "live updates binance 6 3b hack linked to north korea s tradertraitor",
-      "binance hack bites india s largest crypto exchange as it curbs futures trading",
-      "binance hacker splits 1 4 billion of bitcoin into 19 wallets that no one can freeze",
-      "6 billion binance hack sends bitcoin ether tumbling standard chartered expects more pain",
-      "institutional crypto investors rush to pull funds from exchanges after binance hack",
-      "crypto s longtime foe north korea s lazarus group likely behind binance hack blockchain sleuths",
-      "binance hack drained wallets backing customer assets reserve data shows",
-      "binance loses over 6 billion in biggest crypto hack in history"
+      "binance hackers raced to move billions before it could be frozen",
+      "coinbase leads crypto stock selloff following 6 3b binance hack",
+      "recap how binance s record 6 3b hack unfolded",
+      "as it happened binance s record 6 3b crypto hack",
+      "fbi and secret service join response to binance s 6 3b hack",
+      "binance says it holds 5b in matching tokens to cover hack losses",
+      "bitcoin price metrics hint at rebound as 1 6b liquidations follow binance hack",
+      "eip 7702 didn t cause binance hack but may have amplified losses",
+      "binance hacker s bitcoin haul tops coinbase s corporate treasury",
+      "experts divided over binance hack asset freezes warn recovery is another matter",
+      "binance uncovers wider breach in 6 3 billion exploit targets sunday withdrawal restart",
+      "wall street analysts urge investors to buy crypto stocks after 6 3 billion binance hack"
     ],
-    "last_alert_expected_drawdown_pct": 12.0,
-    "last_alert_confidence_pct": 86.0
+    "last_alert_expected_drawdown_pct": 13.0,
+    "last_alert_confidence_pct": 88.0
   },
   "last_us_outlook": "2026-10-26T15:00:26.177842+01:00"
 }
