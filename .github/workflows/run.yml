@@ -129,7 +129,8 @@ jobs:
       - id: slot
         shell: python
         run: |
-          import os
+          import os,sys
+          sys.path.insert(0,os.getcwd())
           from datetime import datetime,timezone
           from v11.production_schedule import phase as select_phase
           phase = select_phase(datetime.now(timezone.utc)) or ''

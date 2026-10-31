@@ -28,8 +28,8 @@ jobs:
                     const logs=await github.rest.actions.downloadJobLogsForWorkflowRun({...context.repo,job_id:j.id});
                     const text=typeof logs.data==='string'?logs.data:Buffer.from(logs.data).toString('utf8');
                     item.checkout_sha=text.match(/git log -1 --format=%H[\s\S]{0,180}?\b([a-f0-9]{40})\b/)?.[1]||null;
-                    item.facts={native_alert_sent:text.includes('mimoriadny crash alert odoslaný'),main_sent:text.includes('Analytical report delivered'),collection_exceeded:text.includes('Collection exceeded pilot slot'),missing_health:text.includes('ANALYSIS_DELIVERY_HEALTH=MISSING'),telegram_error:text.includes('Telegram refused')||text.includes('Telegram request failed')};
-                    item.errors=[...new Set((text.match(/(?:RuntimeError|ValueError|TypeError|HTTPError|KeyError|TimeoutError|URLError|SyntaxError)(?=:)/g)||[]))];
+                    item.facts={no_module_v11:text.includes("No module named 'v11'"),native_alert_sent:text.includes('mimoriadny crash alert odoslaný'),main_sent:text.includes('Analytical report delivered'),collection_exceeded:text.includes('Collection exceeded pilot slot'),missing_health:text.includes('ANALYSIS_DELIVERY_HEALTH=MISSING'),telegram_error:text.includes('Telegram refused')||text.includes('Telegram request failed')};
+                    item.errors=[...new Set((text.match(/(?:RuntimeError|ValueError|TypeError|HTTPError|KeyError|TimeoutError|URLError|ModuleNotFoundError|SyntaxError)(?=:)/g)||[]))];
                   }catch(e){item.logs_unavailable=true;}
                 }
                 row.jobs.push(item);

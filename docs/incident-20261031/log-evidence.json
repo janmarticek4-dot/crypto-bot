@@ -1,0 +1,156 @@
+[
+  {
+    "id": 41157775801,
+    "event": "schedule",
+    "created_at": "2026-10-31T01:57:44Z",
+    "run_started_at": "2026-10-31T01:57:44Z",
+    "head_sha": "ce769828ef0259d8aade01a4490266a05b2598c7",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "analysis-delivery-health",
+        "conclusion": "success",
+        "started_at": "2026-10-31T01:57:46Z",
+        "checkout_sha": "929bd6389216be1b4eefcd1be61be89d944abf33",
+        "facts": {
+          "native_alert_sent": false,
+          "main_sent": false,
+          "collection_exceeded": false,
+          "missing_health": false,
+          "telegram_error": false
+        },
+        "errors": []
+      },
+      {
+        "name": "pilot-slot",
+        "conclusion": "success",
+        "started_at": "2026-10-31T01:57:46Z",
+        "checkout_sha": null,
+        "facts": {
+          "native_alert_sent": false,
+          "main_sent": false,
+          "collection_exceeded": false,
+          "missing_health": false,
+          "telegram_error": false
+        },
+        "errors": []
+      },
+      {
+        "name": "private-advisory-updates",
+        "conclusion": "success",
+        "started_at": "2026-10-31T01:57:47Z"
+      },
+      {
+        "name": "crypto-bot",
+        "conclusion": "success",
+        "started_at": "2026-10-31T01:57:46Z",
+        "checkout_sha": "ce769828ef0259d8aade01a4490266a05b2598c7",
+        "facts": {
+          "native_alert_sent": false,
+          "main_sent": false,
+          "collection_exceeded": false,
+          "missing_health": false,
+          "telegram_error": false
+        },
+        "errors": []
+      },
+      {
+        "name": "us-source-validation",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T01:57:44Z"
+      },
+      {
+        "name": "initialize-private-advisory",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T01:57:44Z"
+      },
+      {
+        "name": "validate-manual-v111",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T01:57:45Z"
+      },
+      {
+        "name": "v111-analytical-pilot",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T01:58:07Z"
+      }
+    ]
+  },
+  {
+    "id": 41183335169,
+    "event": "schedule",
+    "created_at": "2026-10-31T08:08:00Z",
+    "run_started_at": "2026-10-31T08:08:00Z",
+    "head_sha": "cc9e04355d620bf0d4f1ced8d6c8c37f790c0d29",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "name": "pilot-slot",
+        "conclusion": "success",
+        "started_at": "2026-10-31T08:08:02Z",
+        "checkout_sha": null,
+        "facts": {
+          "native_alert_sent": false,
+          "main_sent": false,
+          "collection_exceeded": false,
+          "missing_health": false,
+          "telegram_error": false
+        },
+        "errors": []
+      },
+      {
+        "name": "crypto-bot",
+        "conclusion": "success",
+        "started_at": "2026-10-31T08:08:03Z",
+        "checkout_sha": "cc9e04355d620bf0d4f1ced8d6c8c37f790c0d29",
+        "facts": {
+          "native_alert_sent": true,
+          "main_sent": false,
+          "collection_exceeded": false,
+          "missing_health": false,
+          "telegram_error": false
+        },
+        "errors": []
+      },
+      {
+        "name": "analysis-delivery-health",
+        "conclusion": "failure",
+        "started_at": "2026-10-31T08:08:02Z",
+        "checkout_sha": "929bd6389216be1b4eefcd1be61be89d944abf33",
+        "facts": {
+          "native_alert_sent": false,
+          "main_sent": false,
+          "collection_exceeded": false,
+          "missing_health": true,
+          "telegram_error": false
+        },
+        "errors": []
+      },
+      {
+        "name": "private-advisory-updates",
+        "conclusion": "success",
+        "started_at": "2026-10-31T08:08:10Z"
+      },
+      {
+        "name": "validate-manual-v111",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T08:08:01Z"
+      },
+      {
+        "name": "initialize-private-advisory",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T08:08:01Z"
+      },
+      {
+        "name": "us-source-validation",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T08:08:01Z"
+      },
+      {
+        "name": "v111-analytical-pilot",
+        "conclusion": "skipped",
+        "started_at": "2026-10-31T08:08:29Z"
+      }
+    ]
+  }
+]
