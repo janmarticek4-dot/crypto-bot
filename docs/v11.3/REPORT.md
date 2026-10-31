@@ -38,3 +38,14 @@ GitHub nemá časové SLA; žiadna bezplatná úprava cron negarantuje 07:00. Ve
 `v11/v113.py`, `v11/compact_main.py`, `v11/event_notices.py`, `v11/prediction_runtime.py`, `v11/verified_monitor.py`, `scripts/v111_trial.py`, `scripts/v111_integrated_delivery.py`, `scripts/v2_production_preview.py`, `scripts/confirm_empty_inventory.py`, príslušné testy; run.yml, release validácia a production audit source pins. main.py a v11/strategy.py bez zmien.
 
 Rollback je normálny pin-only commit, nikdy reset/force-push. Po novej evidencii nesmie obnoviť staré portfólio ani starý nekompatibilný čítač. Canonical sent/uncertain záznamy sa nemažú. Približný kapitál sa nenahrádza tajnou predvolenou sumou. Jednorazovú korekciu po potvrdení vypnúť; marker zostáva v súkromnom šifrovanom stave.
+
+
+## Potvrdená aktivácia
+
+Produkčný runtime: **05576b4888497ccbec7a0e26b1ca7eb6d3256f2c**. Nasadzovací commit: **d4faa2e**. GitHub workflow sa teraz volá **Crypto AI Bot V11.3**; existujúce environment flags ostali kompatibilné, Secrets sa nemenili.
+
+- [Overenie skutočného produkčného source](https://github.com/janmarticek4-dot/crypto-bot/actions/runs/41188181914): SUCCESS, runtime 05576b4, schválené flags aktívne, súkromný čítač overený, žiadny Telegram z testu.
+- [Finálna validácia a explicitná súkromná korekcia](https://github.com/janmarticek4-dot/crypto-bot/actions/runs/41188181923): SUCCESS, 416 testov, autorizovaná korekcia potvrdená opätovným čítaním bez zverejnenia detailov. Jednorazový job sa potom vypol. Žiadna skúšobná Telegram správa ani obchod sa nevykonali.
+- [Finálny živý shadow kandidát](https://github.com/janmarticek4-dot/crypto-bot/actions/runs/41187978448): SUCCESS, dostupných 18/18 výstupov, ranný aj večerný náhľad bez odoslania. Príklad náhľadu nie je dôkaz predikčnej výhody.
+
+Dnešná už doručená ranná správa o 09:47 bola ešte pred touto V11.3 aktiváciou a nesmie sa spätne označiť za V11.3. Historické správy sa nemenili ani neposlali duplicitne. Nasledujúce hlavné/USA analýzy a safety monitor sú nastavené na nový runtime; skutočné budúce Telegram doručenie o 15:00/20:00 ešte v čase tejto aktivácie nebolo pozorované. Bezpečný manuálny report možno spustiť existujúcou voľbou v Run workflow.

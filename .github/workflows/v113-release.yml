@@ -26,7 +26,7 @@ jobs:
       - run: python scripts/test_integration_offline.py
   apply-explicit-inventory-correction:
     needs: offline
-    if: github.event_name == 'push'
+    if: false
     environment: production-advisory
     runs-on: ubuntu-latest
     steps:
