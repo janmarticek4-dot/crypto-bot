@@ -40,3 +40,14 @@ class SafetyCorrectionTests(unittest.TestCase):
         before=copy.deepcopy(s['advisory_portfolio'])
         with self.assertRaises(RuntimeError):correct(s)
         self.assertEqual(s['advisory_portfolio'],before)
+
+class PredictionInputTests(unittest.TestCase):
+    def test_corrupt_direction_or_flat_point_never_reaches_telegram(self):
+        from v11.prediction_runtime import current_predictions
+        f=dict(model='flat',generated_at=1000,valid_until=2000,price=100,point=100,low=95,high=105,low_pct=-5,high_pct=5,direction='DO STRANY')
+        m={'experimental_predictions':{'SOL':{'24 h':f}}}
+        self.assertEqual(len(current_predictions(m,1500)['SOL']),1)
+        f['point']=120
+        self.assertEqual(current_predictions(m,1500)['SOL'],{})
+        f['point']=100;f['direction']='RAST'
+        self.assertEqual(current_predictions(m,1500)['SOL'],{})

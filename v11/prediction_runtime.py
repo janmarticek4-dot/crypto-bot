@@ -96,6 +96,11 @@ def current_predictions(model,now_ms):
             if not created<=now_ms<=until or until-created>900000:continue
             if not all(r.finite(item.get(k)) for k in ('low','high','low_pct','high_pct')):continue
             if item['low']<=0 or item['high']<item['low']:continue
+            if item.get('model') not in r.MODELS[:5] or item.get('direction') not in ('RAST','POKLES','DO STRANY'):continue
+            if not all(r.finite(item.get(k)) and item[k]>0 for k in ('price','point')):continue
+            if item['model']=='flat' and (item['direction']!='DO STRANY' or not math.isclose(item['price'],item['point'],rel_tol=1e-10)):continue
+            tol=item.get('tolerance_log')
+            if tol is not None and (not r.finite(tol) or tol<0 or r.direction(math.log(item['point']/item['price']),tol)!=item['direction']):continue
             usable[label]=item
         out[symbol]=usable
     return out
