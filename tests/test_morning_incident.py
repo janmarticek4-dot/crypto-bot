@@ -69,3 +69,18 @@ class IncidentTests(unittest.TestCase):
         response=MagicMock();response.__enter__.return_value.read.return_value=b'{"ok":true}'
         with patch.dict(p.os.environ,{'TELEGRAM_TOKEN':'synthetic','TELEGRAM_CHAT_ID':'synthetic'}),patch.object(p.urllib.request,'urlopen',return_value=response):
             with self.assertRaisesRegex(RuntimeError,'message ID'):p.send('synthetic')
+
+class WorkflowShellTests(unittest.TestCase):
+    def test_real_github_python_shell_imports_checkout_not_runner_temp(self):
+        import os,sys,tempfile,textwrap,subprocess
+        from pathlib import Path
+        root=Path(__file__).resolve().parents[1]
+        workflow=(root/'.github/workflows/run.yml').read_text()
+        section=workflow.split('      - id: slot\n',1)[1].split('  v111-analytical-pilot:',1)[0]
+        body=textwrap.dedent(section.split('        run: |\n',1)[1])
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'github-step.py';path.write_text(body)
+            output=Path(d)/'output';env=dict(os.environ,GITHUB_OUTPUT=str(output))
+            result=subprocess.run([sys.executable,str(path)],cwd=root,env=env,capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertIn('phase=',output.read_text())
