@@ -31,7 +31,7 @@ jobs:
       - run: python scripts/test_integration_offline.py
   recover-approved-morning:
     needs: offline
-    if: github.event_name == 'push'
+    if: false
     runs-on: ubuntu-latest
     permissions:
       actions: write

@@ -72,7 +72,7 @@ jobs:
       - name: Checkout approved monitor code separately from current production state
         uses: actions/checkout@v4
         with:
-          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
+          ref: 67e9909272601437c0b6e94337df0ee0c8534b75
           path: approved-native-runtime
           persist-credentials: false
       - name: Setup Python
@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
+          ref: 67e9909272601437c0b6e94337df0ee0c8534b75
           persist-credentials: false
       - id: slot
         shell: python
@@ -150,7 +150,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '5e78b4cf284775debb0d3b8fd4e3c6319ce9f634' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '67e9909272601437c0b6e94337df0ee0c8534b75' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -222,7 +222,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: verified-release
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '5e78b4cf284775debb0d3b8fd4e3c6319ce9f634' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '67e9909272601437c0b6e94337df0ee0c8534b75' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - name: Record effective production source (no Telegram)
         env:
@@ -235,7 +235,7 @@ jobs:
           value=dict(source=source,v112_active=os.getenv('V112_ACTIVE')=='true',experimental_display=True,telegram_sent=False)
           Path('us-source-diagnostics/deployment.json').write_text(json.dumps(value))
           print('::notice title=Verified production V2 source::'+json.dumps(value))
-          assert value['v112_active'] and source=='5e78b4cf284775debb0d3b8fd4e3c6319ce9f634','Existing V11.2 flags must be enabled; production source was not activated'
+          assert value['v112_active'] and source=='67e9909272601437c0b6e94337df0ee0c8534b75','Existing V11.2 flags must be enabled; production source was not activated'
           PY
       - name: Verify existing private advisory context read-only (no values or Telegram)
         working-directory: verified-release
@@ -279,14 +279,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
+          ref: 67e9909272601437c0b6e94337df0ee0c8534b75
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: python -m pip install 'cryptography>=43,<51'
       - name: Verify approved private-command source
-        run: test "$(git rev-parse HEAD)" = "5e78b4cf284775debb0d3b8fd4e3c6319ce9f634"
+        run: test "$(git rev-parse HEAD)" = "67e9909272601437c0b6e94337df0ee0c8534b75"
       - name: Owner enrollment gate (no Telegram or state access)
         id: owner
         env:
@@ -344,7 +344,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
+          ref: 67e9909272601437c0b6e94337df0ee0c8534b75
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:

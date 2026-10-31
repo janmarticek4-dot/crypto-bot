@@ -1,0 +1,15 @@
+{
+  "status": "sent",
+  "at": "2026-10-31T08:47:27.969543+00:00",
+  "report_validation": {
+    "format_version": "verdict-v1",
+    "verdict_first": false,
+    "urls_absent": true,
+    "v2_count": 18,
+    "technical_fallback_labeled": false,
+    "trend_reversal_state": "RECOVERY_ATTEMPT",
+    "reversal_consistency_checked": true,
+    "workflow_run": "41185920910",
+    "source": "5e78b4cf284775debb0d3b8fd4e3c6319ce9f634"
+  }
+}
