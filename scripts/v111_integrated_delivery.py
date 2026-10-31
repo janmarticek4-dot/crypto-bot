@@ -96,8 +96,9 @@ def run():
                 from v11 import trend_reversal
                 trend_reversal.attach(model,snap,fund,now,holder.get('journal',{}))
                 from v11 import event_notices
-                from v11.v113 import movement_review
+                from v11.v113 import movement_review,expanded_market_context
                 model['movement_review']=movement_review(snap,fund)
+                model['expanded_market_context']=expanded_market_context(snap,now)
                 model['event_notices']=event_notices.plan(fund,holder.get('journal',{}),now)
                 model['observation']['event_notices_pending']=model['event_notices']
                 holder['model']=model

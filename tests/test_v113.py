@@ -26,7 +26,6 @@ class V113Tests(unittest.TestCase):
         r=movement_review({'global_data':{'change':-7.2},'coins':{'BTC':{}}},{})
         self.assertTrue(r['required']);self.assertEqual(r['causal_attribution'],'UNCONFIRMED');self.assertFalse(r['checks']['liquidations'])
     def test_empty_inventory_not_unknown_or_hold(self):
-        from tests.test_smart_brief import CompactTests
         from v11 import compact_main
         # Reuse actual production fixture setup used by existing regressions.
         from tests.test_analyst_v112 import sample,model,NOW
@@ -34,3 +33,10 @@ class V113Tests(unittest.TestCase):
         snap=sample();m=model(snap);trend_reversal.attach(m,snap,{},NOW,{})
         text=compact_main.render(m,snap,NOW,'morning',{'positions':[],'cash':None})
         self.assertIn('Otvorené pozície: žiadne',text);self.assertNotIn('HOLD (držba)',text)
+
+class SafetyCorrectionTests(unittest.TestCase):
+    def test_newer_real_buy_blocks_old_empty_instruction(self):
+        s={'advisory_portfolio':{'positions':[dict(symbol='SOL',quantity=1,average_cost=98,currency='USD')],'cash':None},'telegram_inventory':{'transactions':[{'op':'buy','at':17672256000}]}}
+        before=copy.deepcopy(s['advisory_portfolio'])
+        with self.assertRaises(RuntimeError):correct(s)
+        self.assertEqual(s['advisory_portfolio'],before)

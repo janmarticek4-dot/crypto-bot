@@ -10,6 +10,8 @@ def correct(state):
     markers=state.setdefault('owner_corrections',{})
     if ID in markers:return False
     from datetime import datetime,timezone
+    if state['advisory_portfolio']['positions'] and any(t.get('op')=='buy' and t.get('at',0)>datetime(2026,10,31,9,tzinfo=timezone.utc).timestamp() for t in state.get('telegram_inventory',{}).get('transactions',[])):
+        raise RuntimeError('Recent user-declared buy requires review; refusing to erase a newer position')
     at=datetime.now(timezone.utc).isoformat()
     old=state['advisory_portfolio']
     state.setdefault('inventory_change_history',[]).append(dict(at=at,before=old,source=ID))

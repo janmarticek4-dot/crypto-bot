@@ -33,3 +33,14 @@ def movement_review(snapshot,fund):
                         'etf_flows':bool(extensions.get('etf_flows')),'liquidations':False,'equity_fx_yields':'SEE_SOURCE_DIAGNOSTICS',
                         'project_and_security_news':bool(fund.get('events'))},
                 missing='Liquidations, leverage and complete global capital flows are not verified; unavailable is not zero.')
+
+def expanded_market_context(snapshot,now):
+    if not movement_review(snapshot,{})['required']:return {'status':'NOT_REQUIRED'}
+    try:
+        from us_context.report import collect,PublicUSAPI
+        context=collect(PublicUSAPI(),now)
+        return dict(status='COLLECTED',collected_at=now.isoformat(),market_phase=context['market']['phase'],
+            quotes={s:{'status':q.get('status'),'price':q.get('price'),'kind':q.get('kind'),
+                'at':q['at'].isoformat() if q.get('at') else None} for s,q in context['quotes'].items()},
+            causal_attribution='UNCONFIRMED',liquidations=None,leverage=None)
+    except Exception as exc:return dict(status='UNAVAILABLE',error=type(exc).__name__,causal_attribution='UNCONFIRMED')

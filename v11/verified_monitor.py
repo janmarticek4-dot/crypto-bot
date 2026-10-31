@@ -68,7 +68,7 @@ def render(event):
     if flags.get('restart_planned') and not flags['resumed']:notes.append('Obnovenie výberov je zatiaľ plán, nie potvrdený výsledok.')
     if flags['resumed']:notes.append('Správy uvádzajú obnovenie výberov; pretrvávanie obmedzení treba preveriť.')
     if not notes:notes.append('Krytie strát, zmrazené aktíva a obnovenie výberov nie sú v dostupných aktuálnych podkladoch potvrdené.')
-    return '\n'.join(['🚨 CRYPTO AI BOT V11.2 — MIMORIADNE RIZIKO',
+    return '\n'.join(['🚨 CRYPTO AI BOT V11.3 — MIMORIADNE RIZIKO',
         event['entity'].upper()+': viaceré redakcie hlásia '+{'hack':'bezpečnostný incident','withdrawals':'obmedzenie výberov','insolvency':'platobné problémy','depeg':'stratu naviazania'}[event['kind']]+'.',
         f"BTC {event['btc_change_24h']:+.1f}% a kapitalizácia {event['cap_change_24h']:+.1f}% za24h: už uskutočnený pohyb, nie odhad ďalšieho poklesu.",
         *notes,'Možný ďalší dopad je neistý. Vážnosť incidentu neurčuje pravdepodobnosť ďalšieho výpredaja.',
