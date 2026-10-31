@@ -45,6 +45,9 @@ def run(reuse=False):
     model['event_notices']=event_notices.plan(fund,json.loads((ROOT/'trial-public/v111-delivery.json').read_text()),now)
     reports={kind:render(model,snap,now,kind) for kind in ('morning','evening')}
     from v11.integrated_report import render_detailed
+    from v11.v113 import movement_review,expanded_market_context
+    model['movement_review']=movement_review(snap,fund)
+    model['expanded_market_context']=expanded_market_context(snap,now)
     detailed=render_detailed(model,snap,now,'morning')
     (OUT/'morning-detailed.txt').write_text(detailed)
     from v11.report_verdict import contract

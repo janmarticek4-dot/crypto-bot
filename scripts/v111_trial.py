@@ -284,7 +284,7 @@ def _run(manual_key=None):
     return 0
 
 
-def run(manual_key=None):
+def _bounded_run(manual_key=None):
     """One bounded retry only if the durable journal proves NO send attempt."""
     for attempt in range(2):
         try:return _run(manual_key)
@@ -300,6 +300,19 @@ def run(manual_key=None):
                 raise
             print('DELIVERY_RETRY pre_attempt_only '+type(exc).__name__)
             time.sleep(2)
+
+
+def run(manual_key=None):
+    begin=datetime.now(timezone.utc);result='FAILED_OR_UNCERTAIN'
+    try:
+        value=_bounded_run(manual_key)
+        result='COMPLETED_OR_DEDUPLICATED_NOT_A_DELIVERY_RECEIPT'
+        return value
+    finally:
+        from v11.production_schedule import target
+        selected=phase(begin) if not manual_key else None
+        print('DELIVERY_RUN '+json.dumps(dict(started_at=begin.isoformat(),finished_at=datetime.now(timezone.utc).isoformat(),
+            planned_at=target(begin,selected).isoformat() if selected else None,result=result)))
 
 
 if __name__=='__main__':
