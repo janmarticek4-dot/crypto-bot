@@ -14,7 +14,9 @@ ENTITIES=('binance','coinbase','tether','usdt','usdc','aave','solana','bittensor
 EVENTS={'hack':r'\b(hack(?:ed)?|exploit|security breach)\b','withdrawals':r'withdrawals? (?:suspended|halted|paused|frozen)|halts? withdrawals',
         'insolvency':r'\b(bankruptcy|insolven\w*)\b','depeg':r'\b(depeg\w*|loses? (?:its )?peg)\b'}
 NEGATION=r'\b(rumou?r|unconfirmed|denies?|denied|not hacked|false report|could|might|may have|simulation|drill)\b'
-MITIGATIONS={'frozen':r'freez\w*|froze\w*|frozen assets|assets frozen','covered':r'fully cover\w*|losses (?:are |were )?covered|reimburse\w*|no (?:user )?losses',
+MITIGATIONS={'frozen':r'freez\w*|froze\w*|frozen assets|assets frozen','covered':r'losses (?:are |were |have been )?fully covered|all losses (?:are |were )?covered|fully reimbursed|no (?:user )?losses',
+             'coverage_pledged':r'to cover|will cover|plans? to cover|matching tokens|reimburse|insurance fund|safu',
+             'restart_planned':r'targets?.{0,45}withdrawal restart|plans?.{0,45}resume withdrawals',
              'resumed':r'withdrawals? (?:resumed|restored|reopened)|resumes? withdrawals|all services restored'}
 
 
@@ -54,7 +56,7 @@ def assess(news,ctx,now):
             stage='insolvency' if any('insolvency' in r['kinds'] for r in group) else 'withdrawals' if any('withdrawals' in r['kinds'] for r in group) else kind
             identity=entity+':systemic-incident'
             return dict(id=hashlib.sha256(identity.encode()).hexdigest(),entity=entity,kind=kind,stage=stage,flags=flags,
-                        reports=reports,btc_change_24h=btc,cap_change_24h=cap,at=now.isoformat()),'corroborated_event_and_market_stress'
+                        reports=reports,new_episode=all(re.search(r'\b(another|second|new) (?:hack|breach|exploit)\b',r['title'].lower()) for r in reports),btc_change_24h=btc,cap_change_24h=cap,at=now.isoformat()),'corroborated_event_and_market_stress'
     return None,'event_not_corroborated'
 
 
@@ -62,6 +64,8 @@ def render(event):
     flags=event['flags'];notes=[]
     if flags['frozen']:notes.append('Správy uvádzajú zmrazenie aktív; ide o možnú obnovu prostriedkov, nie ďalšiu stratu.')
     if flags['covered']:notes.append('Správy uvádzajú krytie/náhradu strát; rozsah a skutočné plnenie treba potvrdiť.')
+    if flags.get('coverage_pledged') and not flags['covered']:notes.append('Oznámené rezervy/plán krytia nie sú dôkaz úplnej náhrady strát; chýba overené vyčíslenie skutočne nahradených prostriedkov.')
+    if flags.get('restart_planned') and not flags['resumed']:notes.append('Obnovenie výberov je zatiaľ plán, nie potvrdený výsledok.')
     if flags['resumed']:notes.append('Správy uvádzajú obnovenie výberov; pretrvávanie obmedzení treba preveriť.')
     if not notes:notes.append('Krytie strát, zmrazené aktíva a obnovenie výberov nie sú v dostupných aktuálnych podkladoch potvrdené.')
     return '\n'.join(['🚨 CRYPTO AI BOT V11.2 — MIMORIADNE RIZIKO',
@@ -95,6 +99,13 @@ def run(api):
             book[event['id']]=dict(status='legacy_notified',at=native['last_alert_ts'],stage=event['stage'])
             journal.save(state)
     old=book.get(event['id'])
+    if old and old.get('status') in ('sent','legacy_notified') and event.get('new_episode'):
+        try:
+            boundary=datetime.fromisoformat(old['at'])
+            explicit_new=(now-boundary).total_seconds()>72*3600 and all(datetime.fromisoformat(r['at'])>boundary for r in event['reports'])
+            old_urls={r.get('url') for r in old.get('evidence',[])}
+            if explicit_new and not old_urls.intersection(r['url'] for r in event['reports']):old=None
+        except (KeyError,ValueError,TypeError):pass
     if old:
         # Ambiguous/attempting deliveries are never retried automatically.
         # Same incident stays deduplicated; a new confirmed escalation may be announced once.

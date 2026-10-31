@@ -33,7 +33,7 @@ class IncidentTests(unittest.TestCase):
         self.assertIsNone(m.assess(items,CTX,NOW)[0])
     def test_frozen_assets_not_additional_loss_and_mitigation(self):
         ev,_=m.assess(news('frozen assets'),CTX,NOW);self.assertIn('nie ďalšiu stratu',m.render(ev))
-        self.assertIsNone(m.assess(news('losses covered; withdrawals resumed'),CTX,NOW)[0])
+        self.assertIsNone(m.assess(news('losses fully covered; withdrawals resumed'),CTX,NOW)[0])
     def test_identical_republication_not_two_independent_sources(self):
         items=news();items[1]['title']=items[0]['title'];self.assertIsNone(m.assess(items,CTX,NOW)[0])
     def setup_monitor(self,state):
@@ -84,3 +84,18 @@ class WorkflowShellTests(unittest.TestCase):
             result=subprocess.run([sys.executable,str(path)],cwd=root,env=env,capture_output=True,text=True)
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertIn('phase=',output.read_text())
+
+class IncidentContextTests(unittest.TestCase):
+    def test_pledged_coverage_and_planned_restart_not_completed_mitigation(self):
+        ev,_=m.assess(news('holds 5B in matching tokens to cover losses; targets Sunday withdrawal restart'),CTX,NOW)
+        self.assertFalse(ev['flags']['covered']);self.assertFalse(ev['flags']['resumed'])
+        text=m.render(ev);self.assertIn('nie sú dôkaz úplnej náhrady',text);self.assertIn('zatiaľ plán',text)
+    def test_old_incident_is_not_reopened_by_passage_of_time(self):
+        ev,_=m.assess(news(),CTX,NOW)
+        self.assertFalse(ev['new_episode'])
+    def test_native_adapter_only_replaces_monitor_not_trade_rules(self):
+        from scripts import native_presentation as wrapper
+        original=wrapper.legacy.run_safety_monitor
+        with patch.object(m,'run') as monitor,patch.object(wrapper.legacy,'main',side_effect=lambda:wrapper.legacy.run_safety_monitor()):
+            wrapper.run();monitor.assert_called_once_with(wrapper.legacy)
+        self.assertIs(wrapper.legacy.run_safety_monitor,original)
