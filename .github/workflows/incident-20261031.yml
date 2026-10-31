@@ -1,0 +1,46 @@
+name: Read-only Morning Incident Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/incident-20261031.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            const all=await github.paginate(github.rest.actions.listWorkflowRunsForRepo,{...context.repo,created:'2026-10-30T23:00:00Z..2026-10-31T22:59:59Z',per_page:100});
+            const runs=all.filter(r=>r.path==='.github/workflows/run.yml');
+            const report=[];
+            for(const r of runs){
+              const jobs=await github.paginate(github.rest.actions.listJobsForWorkflowRun,{...context.repo,run_id:r.id,per_page:100});
+              const row={id:r.id,event:r.event,created_at:r.created_at,run_started_at:r.run_started_at,head_sha:r.head_sha,conclusion:r.conclusion,jobs:[]};
+              for(const j of jobs){
+                const item={name:j.name,started_at:j.started_at,completed_at:j.completed_at,conclusion:j.conclusion,steps:j.steps.map(s=>({name:s.name,conclusion:s.conclusion}))};
+                if(j.conclusion!=='skipped'&&['crypto-bot','v111-analytical-pilot','analysis-delivery-health','pilot-slot'].includes(j.name)){
+                  try{
+                    const logs=await github.rest.actions.downloadJobLogsForWorkflowRun({...context.repo,job_id:j.id});
+                    const text=typeof logs.data==='string'?logs.data:Buffer.from(logs.data).toString('utf8');
+                    item.checkout_sha=text.match(/git log -1 --format=%H[\s\S]{0,180}?\b([a-f0-9]{40})\b/)?.[1]||null;
+                    item.facts={native_alert_sent:text.includes('mimoriadny crash alert odoslaný'),main_sent:text.includes('Analytical report delivered'),collection_exceeded:text.includes('Collection exceeded pilot slot'),missing_health:text.includes('ANALYSIS_DELIVERY_HEALTH=MISSING'),telegram_error:text.includes('Telegram refused')||text.includes('Telegram request failed')};
+                    item.errors=[...new Set((text.match(/(?:RuntimeError|ValueError|TypeError|HTTPError|KeyError|TimeoutError|URLError|SyntaxError)(?=:)/g)||[]))];
+                  }catch(e){item.logs_unavailable=true;}
+                }
+                row.jobs.push(item);
+              }
+              report.push(row);
+            }
+            const result={read_only:true,telegram_sent:false,state_written:false,window_utc:['2026-10-30T23:00:00Z','2026-10-31T22:59:59Z'],runs:report};
+            fs.mkdirSync('incident-report');fs.writeFileSync('incident-report/results.json',JSON.stringify(result,null,2));
+            for(const r of report)core.notice(JSON.stringify(r));
+      - uses: actions/upload-artifact@v4
+        with:
+          name: morning-incident-readonly-${{ github.run_id }}
+          path: incident-report/results.json
+          retention-days: 14
