@@ -96,7 +96,7 @@ class ManualV111Tests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):delivery.run()
                 old.assert_not_called()
     def test_multipart_send_stops_on_first_uncertain_part_without_retry(self):
-        response=MagicMock();response.__enter__.return_value.read.return_value=b'{"ok":true}'
+        response=MagicMock();response.__enter__.return_value.read.return_value=b'{"ok":true,"result":{"message_id":1}}'
         with patch.dict(os.environ,{'TELEGRAM_TOKEN':'synthetic','TELEGRAM_CHAT_ID':'synthetic'}),patch.object(pilot.urllib.request,'urlopen',side_effect=[response,TimeoutError('synthetic'),response]) as post:
             with self.assertRaises(TimeoutError):pilot.send('x'*12000)
             self.assertEqual(post.call_count,2)

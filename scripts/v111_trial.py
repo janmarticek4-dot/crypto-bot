@@ -27,10 +27,8 @@ usa_prepare=None
 
 
 def phase(now):
-    local=now.astimezone(BL);minute=local.hour*60+local.minute
-    for name,start in [('morning',420),('usa',900),('evening',1200)]:
-        if start<=minute<=start+90:return name
-    return None
+    from v11.production_schedule import phase as scheduled_phase
+    return scheduled_phase(now)
 
 
 def price(value):
@@ -125,6 +123,10 @@ class PublicJournal:
         response=self.request('PUT',body);self.sha=response['content']['sha']
 
 
+class TelegramRejected(RuntimeError):
+    pass
+
+
 def send(text):
     from v11.telegram_text import without_links
     text=without_links(text)
@@ -135,10 +137,13 @@ def send(text):
         req=urllib.request.Request('https://api.telegram.org/bot'+token+'/sendMessage',
             data=json.dumps({'chat_id':chat,'text':part,'disable_web_page_preview':True}).encode(),headers={'Content-Type':'application/json'})
         with urllib.request.urlopen(req,timeout=25) as response:
-            if not json.load(response).get('ok'):raise RuntimeError('Telegram refused pilot report')
+            result=json.load(response)
+            if not result.get('ok'):raise TelegramRejected('Telegram refused pilot report')
+            receipt=result.get('result',{})
+            if type(receipt.get('message_id')) is not int:raise RuntimeError('Telegram acknowledgment missing message ID')
 
 
-def run(manual_key=None):
+def _run(manual_key=None):
     if manual_key is not None and not re.fullmatch(r'github-run-[0-9]+',manual_key):raise ValueError('Invalid manual delivery key')
     now=datetime.now(timezone.utc);kind='manual' if manual_key else phase(now)
     if not kind:return 0
@@ -201,6 +206,13 @@ def run(manual_key=None):
         if os.getenv('V111_INTEGRATION_ENABLED','false').lower()!='true':
             text+='\n'+'\n'.join(forecast_audit.lines(state))+'\n'+'\n'.join(macro_context.economic_lines(economic))
     if not manual_key and phase(now)!=kind:raise RuntimeError('Collection exceeded pilot slot')
+    if not manual_key:
+        from v11.production_schedule import target
+        scheduled=target(now,kind)
+        delay=max(0,int((now-scheduled).total_seconds()))
+        if delay>900:
+            text='⏱ Plánované '+scheduled.strftime('%H:%M')+' Bratislava; aktuálny zber '+now.astimezone(BL).strftime('%H:%M')+' (oneskorený beh).\n'+text
+        print('DELIVERY_TIMING '+json.dumps(dict(slot=key,target=scheduled.isoformat(),started_at=now.isoformat(),delay_seconds=delay)))
     require_public_data(quotes)
     pending_observation=quotes.pop('_v112_observation',None) if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true' else None
     if manual_key:
@@ -231,6 +243,8 @@ def run(manual_key=None):
                 print('V112 private context unavailable: '+private_stage+'/'+type(exc).__name__)
                 text+='\nPosúdenie držby sa nepodarilo bezpečne overiť; nejde o prázdne portfólio ani potvrdené HOLD.'
             else:text+='\nSúkromné portfólio N/A — úložisko alebo evidencia sa nedali bezpečne overiť; nie je to prázdne portfólio.'
+    if not manual_key and delay>900 and not text.startswith('⏱'):
+        text='⏱ Plánované '+scheduled.strftime('%H:%M')+' Bratislava; aktuálny zber '+now.astimezone(BL).strftime('%H:%M')+' (oneskorený beh).\n'+text
     if manual_key:
         if os.getenv('V112_ANALYTICS_ENABLED','false').lower()=='true':text=text.replace('— RUČNÁ','— RUČNÁ | '+manual_key,1)
         else:text='RUČNÁ ANALÝZA V11.1 | '+manual_key+'\n'+text
@@ -255,8 +269,26 @@ def run(manual_key=None):
         for forecast in state.get('analysis_forecasts_v11',[]):
             if forecast['id'].startswith(slot+'|'):forecast['delivery_confirmed']=True
     journal.save(state)
-    print('Analytical report delivered; no orders executed.')
+    print('Analytical report delivered; Telegram API acknowledged all parts; no orders executed.')
     return 0
+
+
+def run(manual_key=None):
+    """One bounded retry only if the durable journal proves NO send attempt."""
+    for attempt in range(2):
+        try:return _run(manual_key)
+        except (OSError,urllib.error.URLError) as exc:
+            now=datetime.now(timezone.utc);kind='manual' if manual_key else phase(now)
+            key=manual_key or (now.astimezone(BL).date().isoformat()+'-'+kind if kind else None)
+            if attempt or key is None:raise
+            # Failed/ambiguous journal access cannot authorize another send.
+            state=PublicJournal().read()
+            records=state.get('manual_slots',{}) if manual_key else state.get('slots',{})
+            if key in records:
+                print('DELIVERY_RETRY_BLOCKED existing_attempt; no automatic resend')
+                raise
+            print('DELIVERY_RETRY pre_attempt_only '+type(exc).__name__)
+            time.sleep(2)
 
 
 if __name__=='__main__':

@@ -38,7 +38,7 @@ jobs:
             }
             const result={read_only:true,telegram_sent:false,state_written:false,window_utc:['2026-10-30T23:00:00Z','2026-10-31T22:59:59Z'],runs:report};
             fs.mkdirSync('incident-report');fs.writeFileSync('incident-report/results.json',JSON.stringify(result,null,2));
-            for(const r of report)core.notice(JSON.stringify(r));
+            for(const r of report)core.notice(JSON.stringify({...r,jobs:r.jobs.map(j=>({name:j.name,conclusion:j.conclusion,started_at:j.started_at,checkout_sha:j.checkout_sha,facts:j.facts,errors:j.errors}))}));
       - uses: actions/upload-artifact@v4
         with:
           name: morning-incident-readonly-${{ github.run_id }}

@@ -1,0 +1,49 @@
+name: Morning and Safety Repair Validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/morning-repair-validation.yml
+      - v11/verified_monitor.py
+      - v11/production_schedule.py
+      - scripts/check_analysis_delivery.py
+      - tests/test_morning_incident.py
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    env:
+      BOT_DISABLE_TELEGRAM: '1'
+      TELEGRAM_TOKEN: ''
+      TELEGRAM_CHAT_ID: ''
+      GROQ_API_KEY: ''
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt -r requirements-research.txt
+      - run: python scripts/test_integration_offline.py
+  recover-approved-morning:
+    needs: offline
+    if: false
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const now=new Date();
+            if(now.toISOString().slice(0,10)!=='2026-10-31')return;
+            const r=(await github.rest.repos.getContent({...context.repo,path:'trial-public/v111-delivery.json',ref:'main'})).data;
+            const state=JSON.parse(Buffer.from(r.content,'base64').toString('utf8'));
+            if(state.slots?.['2026-10-31-morning']){core.notice('Existing attempt; automatic recovery blocked');return;}
+            await github.rest.actions.createWorkflowDispatch({...context.repo,workflow_id:'run.yml',ref:'main',inputs:{recover_due_analysis:true}});
+            core.notice('Dispatched actual overdue morning analysis; canonical slot and Telegram acknowledgment required. This is not a test message.');
