@@ -6,8 +6,13 @@ on:
     paths: ['.github/workflows/run.yml']
   schedule:
     - cron: "*/15 * * * *"
+    - cron: "2 5,6,13,14,18,19 * * *"
   workflow_dispatch:
     inputs:
+      recover_due_analysis:
+        description: "Bezpečne doplniť chýbajúcu plánovanú analýzu (rovnaký slot, nie nový ručný report)"
+        type: boolean
+        default: false
       portfolio_commands:
         description: "Spracovať príkazy portfólia (bez analýzy a bez obchodov)"
         type: boolean
@@ -48,6 +53,7 @@ jobs:
       - name: Require approved V11.1 and one explicit manual action
         env:
           ENABLED: ${{ vars.V111_INTEGRATION_ENABLED || 'false' }}
+          RECOVERY: ${{ inputs.recover_due_analysis || false }}
           PORTFOLIO: ${{ inputs.portfolio_commands || false }}
           IMPORT: ${{ inputs.advisory_import || false }}
           LEGACY: ${{ inputs.manual_analysis || false }}
@@ -55,20 +61,27 @@ jobs:
         run: |
           test "$GITHUB_REF" = 'refs/heads/main' || { echo 'Vyberte vetvu main.'; exit 1; }
           test "$ENABLED" = 'true' || { echo 'Schválená integrácia V11.1 nie je zapnutá.'; exit 1; }
-          test "$PORTFOLIO:$IMPORT:$LEGACY:$DEEP" = 'false:false:false:false' || { echo 'Pre ručnú V11.1 ponechajte ostatné ručné možnosti vypnuté.'; exit 1; }
+          test "$RECOVERY:$PORTFOLIO:$IMPORT:$LEGACY:$DEEP" = 'false:false:false:false:false' || { echo 'Pre ručnú V11.1 ponechajte ostatné ručné možnosti vypnuté.'; exit 1; }
   crypto-bot:
-    if: github.event_name != 'push' && inputs.advisory_import != true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true
+    if: github.event_name != 'push' && inputs.advisory_import != true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true && inputs.recover_due_analysis != true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Checkout approved monitor code separately from current production state
+        uses: actions/checkout@v4
+        with:
+          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
+          path: approved-native-runtime
+          persist-credentials: false
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Run Crypto AI Bot
         env:
+          GH_TOKEN: ${{ github.token }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
@@ -80,7 +93,8 @@ jobs:
           V111_TRIAL_ENABLED: ${{ vars.V111_TRIAL_ENABLED || 'true' }}
         run: |
           python scripts/state_public_guard.py --record-schema "$RUNNER_TEMP/v111-state-schema.json"
-          python scripts/native_presentation.py
+          echo "::notice title=Approved safety monitor source::$(git -C approved-native-runtime rev-parse HEAD)"
+          python approved-native-runtime/scripts/native_presentation.py
       - name: Save bot state
         if: always() && !cancelled()
         run: |
@@ -101,21 +115,25 @@ jobs:
           fi
 
   pilot-slot:
-    if: github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
+    if: (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.recover_due_analysis == true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true && inputs.advisory_import != true)) && vars.V111_TRIAL_ENABLED != 'false'
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      contents: read
     outputs:
       phase: ${{ steps.slot.outputs.phase }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
+          persist-credentials: false
       - id: slot
         shell: python
         run: |
           import os
-          from datetime import datetime
-          from zoneinfo import ZoneInfo
-          now = datetime.now(ZoneInfo('Europe/Bratislava'))
-          minute = now.hour * 60 + now.minute
-          phase = 'morning' if 420 <= minute <= 510 else 'usa' if 900 <= minute <= 990 and now.date().isoformat() >= '2026-10-27' else 'evening' if 1200 <= minute <= 1290 else ''
+          from datetime import datetime,timezone
+          from v11.production_schedule import phase as select_phase
+          phase = select_phase(datetime.now(timezone.utc)) or ''
+          print('SCHEDULE_PHASE='+(phase or 'none'))
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('phase=' + phase + '\n')
   v111-analytical-pilot:
@@ -131,7 +149,7 @@ jobs:
       - name: Checkout reviewed immutable analytical pilot source
         uses: actions/checkout@v4
         with:
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '297a88840cf0f2a0c9d7fc45fe6e8df476742aa6' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '5e78b4cf284775debb0d3b8fd4e3c6319ce9f634' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -203,7 +221,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: verified-release
-          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '297a88840cf0f2a0c9d7fc45fe6e8df476742aa6' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
+          ref: ${{ vars.V112_ANALYTICS_ENABLED == 'true' && vars.V111_INTEGRATION_ENABLED == 'true' && '5e78b4cf284775debb0d3b8fd4e3c6319ce9f634' || vars.V111_INTEGRATION_ENABLED == 'true' && 'c012eca0fe8967220025deb60d431d7621f40485' || '929bd6389216be1b4eefcd1be61be89d944abf33' }}
           persist-credentials: false
       - name: Record effective production source (no Telegram)
         env:
@@ -216,7 +234,7 @@ jobs:
           value=dict(source=source,v112_active=os.getenv('V112_ACTIVE')=='true',experimental_display=True,telegram_sent=False)
           Path('us-source-diagnostics/deployment.json').write_text(json.dumps(value))
           print('::notice title=Verified production V2 source::'+json.dumps(value))
-          assert value['v112_active'] and source=='297a88840cf0f2a0c9d7fc45fe6e8df476742aa6','Existing V11.2 flags must be enabled; production source was not activated'
+          assert value['v112_active'] and source=='5e78b4cf284775debb0d3b8fd4e3c6319ce9f634','Existing V11.2 flags must be enabled; production source was not activated'
           PY
       - name: Verify existing private advisory context read-only (no values or Telegram)
         working-directory: verified-release
@@ -260,14 +278,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 297a88840cf0f2a0c9d7fc45fe6e8df476742aa6
+          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: python -m pip install 'cryptography>=43,<51'
       - name: Verify approved private-command source
-        run: test "$(git rev-parse HEAD)" = "297a88840cf0f2a0c9d7fc45fe6e8df476742aa6"
+        run: test "$(git rev-parse HEAD)" = "5e78b4cf284775debb0d3b8fd4e3c6319ce9f634"
       - name: Owner enrollment gate (no Telegram or state access)
         id: owner
         env:
@@ -316,7 +334,8 @@ jobs:
         run: python scripts/initialize_private_advisory.py
 
   analysis-delivery-health:
-    if: github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
+    needs: [v111-analytical-pilot]
+    if: always() && github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -324,7 +343,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 929bd6389216be1b4eefcd1be61be89d944abf33
+          ref: 5e78b4cf284775debb0d3b8fd4e3c6319ce9f634
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
