@@ -61,7 +61,7 @@ def render(model,snapshot,now,kind,inventory=None):
         if action in ('REDUCE','SELL','HOLD') and analyst.number(support):boundary='Riziko pod '+analyst.price(support)+' po potvrdení prerazenia.'
         elif profile.get('status')=='AVAILABLE' and not analyst.number(support):boundary='Stará podpora '+analyst.price(profile['four']['support'])+' je pri/nad cenou; preveriť prerazenie.'
         elif context=='držba':boundary='Stará podpora je pri/nad cenou; ďalšia hranica neoverená.' if profile.get('status')=='AVAILABLE' else 'Riziková hranica nie je spoľahlivo overená.'
-        elif analyst.number(level):boundary='Vstup preveriť po 2×4h nad '+analyst.price(level)+' s objemom.'
+        elif analyst.number(level):boundary=('Pullback sledovať pri '+analyst.price(support)+' až po stabilizácii; ' if analyst.number(support) else '')+'vstup preveriť po 2×4h nad '+analyst.price(level)+' s objemom.'
         else:boundary='Platná hranica zatiaľ nepotvrdená.'
         lines.append(boundary)
         if symbol in tr.COINS:
