@@ -8,7 +8,7 @@ on:
         required: true
         type: string
   workflow_run:
-    workflows: [Crypto AI Bot V11.2]
+    workflows: [Crypto AI Bot V11.2, Crypto AI Bot V11.3]
     types: [completed]
     branches: [main]
   push:
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/github-script@v7
         env:
           PRODUCTION_RUN: ${{ needs.select.outputs.run_id }}
-          EXPECTED_SOURCE: '67e9909272601437c0b6e94337df0ee0c8534b75'
+          EXPECTED_SOURCE: '05576b4888497ccbec7a0e26b1ca7eb6d3256f2c'
         with:
           script: |
             const fs=require('fs');

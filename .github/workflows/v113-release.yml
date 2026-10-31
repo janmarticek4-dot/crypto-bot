@@ -26,7 +26,7 @@ jobs:
       - run: python scripts/test_integration_offline.py
   apply-explicit-inventory-correction:
     needs: offline
-    if: false
+    if: github.event_name == 'push'
     environment: production-advisory
     runs-on: ubuntu-latest
     steps:
@@ -43,4 +43,6 @@ jobs:
           PROD_STATE_REPOSITORY: ${{ vars.PROD_STATE_REPOSITORY }}
           PROD_STATE_TOKEN: ${{ secrets.PROD_STATE_TOKEN }}
           PROD_STATE_ENCRYPTION_KEY: ${{ secrets.PROD_STATE_ENCRYPTION_KEY }}
-        run: python scripts/confirm_empty_inventory.py
+        run: |
+          python scripts/confirm_empty_inventory.py > /dev/null
+          echo '::notice title=Private state correction::Authorized correction verified; no orders, no Telegram, no cash assumption; private details suppressed.'
