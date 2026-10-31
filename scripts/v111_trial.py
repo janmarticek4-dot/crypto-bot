@@ -261,6 +261,7 @@ def _run(manual_key=None):
         meta=delivery_metadata(text)
         require_public_data(meta)
         records[key]['report_validation']=meta
+    records[key]['delivery_timing']['generation_completed_at']=datetime.now(timezone.utc).isoformat()
     records[key]['delivery_timing']['send_started_at']=datetime.now(timezone.utc).isoformat()
     try:send(text)
     except Exception:
