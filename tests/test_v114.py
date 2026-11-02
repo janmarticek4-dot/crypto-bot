@@ -118,3 +118,11 @@ class IncompatibleAmountsTests(unittest.TestCase):
         self.assertTrue(grouped[0]['amounts_ambiguous'])
         self.assertTrue(grouped[0]['suppress_uninformative'])
         self.assertNotIn('106/6000',grouped[0].get('text',''))
+
+class ReservationSizeTests(unittest.TestCase):
+    def test_delivery_reservation_keeps_dedup_facts_without_copying_article_payloads(self):
+        from scripts.v111_trial import reserve_events
+        row=dict(id='i',state='NEWS',semantic='s',title='Binance hack',published_at=NOW.isoformat(),kind='news',incident_id='i',incident_facts=['breach'],reported_amounts=[],citations=[{'url':'https://example.org/'+('x'*10000)}],excerpt='x'*5000)
+        stored=reserve_events({'selected':[row]})[0]
+        self.assertEqual(stored['semantic'],'s');self.assertEqual(stored['incident_facts'],['breach'])
+        self.assertNotIn('citations',stored);self.assertNotIn('excerpt',stored)

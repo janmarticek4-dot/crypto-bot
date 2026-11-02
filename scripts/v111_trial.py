@@ -150,6 +150,12 @@ def send(text):
             if type(receipt.get('message_id')) is not int:raise RuntimeError('Telegram acknowledgment missing message ID')
 
 
+def reserve_events(plan):
+    fields={'id','state','semantic','title','published_at','event_at','categories','symbols','kind',
+            'incident_id','incident_entity','incident_date','incident_facts','reported_amounts','fact_parts'}
+    return [{k:v for k,v in row.items() if k in fields} for row in plan.get('selected',[])]
+
+
 def _run(manual_key=None):
     if manual_key is not None and not re.fullmatch(r'github-run-[0-9]+',manual_key):raise ValueError('Invalid manual delivery key')
     now=datetime.now(timezone.utc);kind='manual' if manual_key else phase(now)
@@ -232,7 +238,7 @@ def _run(manual_key=None):
     if pending_observation is not None:
         pending_notices=pending_observation.get('event_notices_pending')
     if pending_notices is not None:
-        records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url','excerpt')} for row in pending_notices.get('selected',[])]
+        records[key]['event_notifications']=reserve_events(pending_notices)
     records[key]['delivery_timing']=dict(collection_started_at=collect_started,generation_completed_at=datetime.now(timezone.utc).isoformat(),planned_at=scheduled.isoformat() if not manual_key else None)
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if (kind!='usa' or callable(usa_prepare)) and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
