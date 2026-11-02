@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - v11/news_incidents.py
+      - v11/support_scenarios.py
+      - tests/test_v114.py
       - v11/event_notices.py
       - v11/event_notice_seed.json
       - v11/compact_main.py
