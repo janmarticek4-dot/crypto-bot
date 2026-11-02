@@ -117,4 +117,4 @@ class IncompatibleAmountsTests(unittest.TestCase):
         grouped,_=group_news(rows,[],NOW)
         self.assertTrue(grouped[0]['amounts_ambiguous'])
         self.assertTrue(grouped[0]['suppress_uninformative'])
-        self.assertNotIn('106/6000',grouped[0]['text'])
+        self.assertNotIn('106/6000',grouped[0].get('text',''))

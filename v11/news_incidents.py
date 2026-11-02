@@ -24,7 +24,7 @@ def extract(row):
     if re.search(r'launder|transfer|freez|seiz|recover|cover|reserv|matching|market|stock|etf|volume|liquidat',monetary):monetary=''
     amounts=sorted({format((Decimal(n)*scale).normalize(),'f') for n,u in re.findall(r'\$\s*(\d+(?:\.\d+)?)\s*(billion|million|bn\b|[bm]\b)',monetary) for scale in [1000000000 if u.startswith('b') else 1000000]})
     facts={'breach'}
-    for fact,pattern in {'withdrawals_paused':r'halts? withdrawals|withdrawals? (?:halted|paused|suspended)',
+    for fact,pattern in {'breach_expanded':r'wider breach|additional breach|new vulnerability','loss_revision':r'revised loss|raises? (?:the )?loss estimate|loss toll (?:grew|rises)', 'withdrawals_paused':r'halts? withdrawals|withdrawals? (?:halted|paused|suspended)',
                          'withdrawals_resumed':r'resumes? withdrawals|withdrawals? (?:resumed|restored)',
                          'funds_moving':r'launder\w*|moving funds|move funds|hack loot',
                          'asset_freeze':r'freez\w*|frozen assets',
@@ -102,6 +102,8 @@ def group_news(rows,previous,now):
             parts.append('zdroje uvádzajú '+('/'.join(amounts))+' mil. USD; '+('odhady sa líšia' if len(amounts)>1 else 'nezávislé vyčíslenie nepotvrdené'))
         if 'withdrawals_resumed' in facts:parts.append('hlásené obnovenie výberov zmierňuje prevádzkové riziko')
         elif 'withdrawals_paused' in facts:parts.append('hlásené zastavenie výberov zvyšuje likviditné riziko')
+        if 'breach_expanded' in facts:parts.append('zdroje hlásia rozšírenie prieniku; dosah treba potvrdiť')
+        if 'loss_revision' in facts:parts.append('zdroj revidoval odhad strát; nejde o nový incident')
         if 'funds_moving' in facts:parts.append('hlásené presuny ukradnutých aktív; nejde o nový hack')
         if 'asset_freeze' in facts:parts.append('hlásené zmrazenie aktív nie je dokončená náhrada')
         if 'coverage_plan' in facts:parts.append('plán krytia strát ešte nie je náhradou')
