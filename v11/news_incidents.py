@@ -93,7 +93,11 @@ def group_news(rows,previous,now):
             legacy.append(old['id'])
         value['legacy_ids']=legacy
         facts=set(value['incident_facts']);parts=[]
-        if value['reported_amounts'] and not facts&{'asset_freeze','coverage_plan','repaid'}:
+        amounts_numeric=[Decimal(v) for v in value['reported_amounts'] if Decimal(v)>0]
+        value['amounts_ambiguous']=bool(amounts_numeric and max(amounts_numeric)/min(amounts_numeric)>Decimal('1.25'))
+        # Widely different headline figures may refer to historical incidents or other scopes.
+        # Preserve each citation in diagnostics; never label them competing estimates of one loss.
+        if value['reported_amounts'] and not value['amounts_ambiguous'] and not facts&{'asset_freeze','coverage_plan','repaid'}:
             amounts=[f'{Decimal(v)/1000000:g}' for v in value['reported_amounts']]
             parts.append('zdroje uvádzajú '+('/'.join(amounts))+' mil. USD; '+('odhady sa líšia' if len(amounts)>1 else 'nezávislé vyčíslenie nepotvrdené'))
         if 'withdrawals_resumed' in facts:parts.append('hlásené obnovenie výberov zmierňuje prevádzkové riziko')
