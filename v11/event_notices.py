@@ -215,18 +215,21 @@ def commit(journal,planned,now):
         old=rows.get(observed['id'])
         if old:
             citations=old.get('citations',[])+observed.get('citations',[])
-            old['citations']=list({c['id']:c for c in citations}.values())[-30:]
+            old['citations']=list({c['id']:c for c in citations}.values())[-6:]
             old['last_checked_at']=now.isoformat()
     for row in planned.get('selected',[]):
-        stored={k:copy.deepcopy(v) for k,v in row.items() if k not in ('text','url')}
+        stored={k:copy.deepcopy(v) for k,v in row.items() if k not in ('text','url','excerpt')}
         if row.get('incident_id'):
             old=rows.get(row['id'],{})
             stored['first_seen_at']=old.get('first_seen_at',row['published_at'])
             stored['last_updated_at']=now.isoformat()
             stored['announced_facts']=row['incident_facts']
             citations=old.get('citations',[])+row.get('citations',[])
-            stored['citations']=list({c['id']:c for c in citations}.values())[-30:]
+            stored['citations']=list({c['id']:c for c in citations}.values())[-6:]
         stored['last_announced_at']=now.isoformat();rows[row['id']]=stored
     rows={k:v for k,v in rows.items() if (at:=timestamp(v.get('last_announced_at'))) and timedelta(0)<=now-at<=timedelta(days=90)}
-    journal[KEY]=dict(sorted(rows.items(),key=lambda kv:kv[1]['last_announced_at'])[-256:])
+    ordered=sorted(rows.items(),key=lambda kv:kv[1]['last_announced_at'])
+    recent_incidents={k for k,v in ordered if v.get('incident_id')}
+    keep_incidents=[k for k,v in ordered if k in recent_incidents][-64:]
+    journal[KEY]=dict([(k,v) for k,v in ordered if not v.get('incident_id') or k in keep_incidents][-256:])
     require_public_data(journal[KEY])

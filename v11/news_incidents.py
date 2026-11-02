@@ -79,6 +79,8 @@ def group_news(rows,previous,now):
         groups.append(value)
     for value in groups:
         if not value.get('incident_id'):continue
+        value['citations_truncated']=len(value['citations'])>6
+        value['citations']=value['citations'][-6:]
         legacy=[]
         for old in previous:
             f=extract(old);at=timestamp(old.get('published_at'));current=timestamp(value['published_at'])

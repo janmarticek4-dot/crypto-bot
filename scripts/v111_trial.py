@@ -232,7 +232,7 @@ def _run(manual_key=None):
     if pending_observation is not None:
         pending_notices=pending_observation.get('event_notices_pending')
     if pending_notices is not None:
-        records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url')} for row in pending_notices.get('selected',[])]
+        records[key]['event_notifications']=[{k:v for k,v in row.items() if k not in ('text','url','excerpt')} for row in pending_notices.get('selected',[])]
     records[key]['delivery_timing']=dict(collection_started_at=collect_started,generation_completed_at=datetime.now(timezone.utc).isoformat(),planned_at=scheduled.isoformat() if not manual_key else None)
     journal.save(state)  # CAS before any Telegram side effect; conflict means no send.
     if (kind!='usa' or callable(usa_prepare)) and os.getenv('PRIVATE_ADVISORY_ENABLED','false')=='true':
