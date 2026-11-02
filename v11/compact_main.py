@@ -62,7 +62,7 @@ def render(model,snapshot,now,kind,inventory=None):
         elif profile.get('status')=='AVAILABLE' and not analyst.number(support):
             scenarios=profile.get('scenarios',{});zone=scenarios.get('pullback',{}).get('zone')
             level=scenarios.get('confirmed',{}).get('level')
-            boundary=('Ďalšia historická zóna '+analyst.price(zone)+'; kúpa až po stabilizácii.' if analyst.number(zone) else 'Nižšia podpora nepotvrdená; čakať na obnovu štruktúry.')
+            boundary=('Prerazenie potvrdené 2×4h. ' if scenarios.get('breakdown')=='CONFIRMED_2_CLOSED_BARS' else 'Prerazenie zatiaľ nepotvrdené. ')+('Ďalšia historická zóna '+analyst.price(zone)+'; kúpa až po stabilizácii.' if analyst.number(zone) else 'Nižšia podpora nepotvrdená; čakať na obnovu štruktúry.')
             if analyst.number(level):boundary+=' Potvrdenie nad '+analyst.price(level)+' + objem.'
         elif context=='držba':boundary='Stará podpora je pri/nad cenou; ďalšia hranica neoverená.' if profile.get('status')=='AVAILABLE' else 'Riziková hranica nie je spoľahlivo overená.'
         elif analyst.number(level):boundary=('Pullback sledovať pri '+analyst.price(support)+' až po stabilizácii; ' if analyst.number(support) else '')+'vstup preveriť po 2×4h nad '+analyst.price(level)+' s objemom.'

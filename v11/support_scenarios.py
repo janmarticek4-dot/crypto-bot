@@ -21,6 +21,18 @@ def assess(coin,now_ms):
         if len(touches)>=2 and max(t for v,t in touches)-min(t for v,t in touches)>=3*14400000:
             zones.append(dict(price=min(v for v,t in touches),touches=len(touches),confirmed_at=max(t for v,t in touches)+3*14400000))
     support=max((z for z in zones if z['price']<price),key=lambda z:z['price'],default=None)
+    if support is not None:support['timeframe']='4h'
+    if support is None:
+        try:
+            daily=closed(coin.get('raw',{}).get('1d'),'1d',now_ms)
+            pivots=[(daily[i]['low'],daily[i]['timestamp']) for i in range(2,len(daily)-2) if daily[i]['low']<price and daily[i]['low']<=min(r['low'] for r in daily[i-2:i+3])]
+            zones=[]
+            for value,stamp in pivots:
+                touches=[(v,t) for v,t in pivots if abs(v-value)<=tolerance]
+                if len(touches)>=2 and max(t for v,t in touches)-min(t for v,t in touches)>=3*86400000:
+                    zones.append(dict(price=min(v for v,t in touches),touches=len(touches),confirmed_at=max(t for v,t in touches)+3*86400000,timeframe='1d'))
+            support=max(zones,key=lambda z:z['price'],default=None)
+        except (ValueError,TypeError,KeyError):pass
     lost=finite(old) and old>=price
     recent=rows[-2:];below=lost and all(r['close']<old for r in recent)
     prior=rows[-22:-2];avg=sum(r['volume'] for r in prior)/len(prior)

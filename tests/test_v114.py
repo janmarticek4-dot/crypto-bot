@@ -84,3 +84,12 @@ class AmountContextTests(unittest.TestCase):
         group=group_news(rows,[],NOW)[0][0]
         self.assertNotIn('odhady sa líšia',group['text'])
         self.assertIn('plán krytia',group['text']);self.assertIn('nie je dokončená náhrada',group['text'])
+
+class DailyFallbackTests(unittest.TestCase):
+    def test_lower_daily_support_used_when_recent_intraday_has_no_zone(self):
+        c=SupportTests().coin()
+        for row in c['raw']['4h']:row['low']=min(row['open'],row['close'])-0.5
+        day=86400000;end=int(NOW.timestamp()*1000)//day*day
+        c['raw']['1d']=[dict(timestamp=end-(80-i)*day,open=100,close=100,high=105,low=70 if i in (10,30) else 95,volume=100) for i in range(80)]
+        r=assess(c,int(NOW.timestamp()*1000))
+        self.assertEqual(r['support']['price'],70);self.assertEqual(r['support']['timeframe'],'1d')
