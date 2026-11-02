@@ -1,113 +1,120 @@
-"""Bounded incident entities, source facts and persistent delivery history.
-No inference that all exchange incidents or same-day stories describe one event.
-"""
-import copy,hashlib,json,re
-from datetime import timedelta
-from decimal import Decimal
-from .fundamentals import timestamp
+import copy,unittest
+from datetime import datetime,timezone,timedelta
+from v11.news_incidents import group_news
+from v11.production_schedule import due_phase
+from v11.support_scenarios import assess
+NOW=datetime(2026,11,2,19,42,tzinfo=timezone.utc)
+def story(i,title,**kw):
+    return dict(id=str(i),title=title,published_at=NOW.isoformat(),url='https://example.org/'+str(i),source='synthetic',kind='news',state='NEWS',categories=['hack'],symbols=[],**kw)
 
-ENTITIES={'mercado-bitcoin':r'\bmercado bitcoin\b','binance':r'\bbinance\b','coinbase':r'\bcoinbase\b','bybit':r'\bbybit\b','kraken':r'\bkraken\b','okx':r'\bokx\b'}
-NAMES={'mercado-bitcoin':'Mercado Bitcoin','binance':'Binance','coinbase':'Coinbase','bybit':'Bybit','kraken':'Kraken','okx':'OKX'}
-KEY='incident_announcements_v114'
-def digest(x):return hashlib.sha256(json.dumps(x,sort_keys=True).encode()).hexdigest()
-def extract(row):
-    title=row.get('title','');body=row.get('excerpt','');text=(title+' '+body).lower()
-    if not re.search(r'\bhack\w*|\bexploit\w*|\bbreach\b|withdrawals? (?:halted|suspended|resumed)',text):return None
-    entities=[e for e,p in ENTITIES.items() if re.search(p,text)]
-    if not entities and row.get('incident_entity') in ENTITIES:entities=[row['incident_entity']]
-    if len(entities)>1:
-        primary=[e for e in entities if re.search(ENTITIES[e]+r' (?:exchange )?(?:hack|exploit|breach)',text)]
-        if len(primary)==1:entities=primary
-        else:return None # Cross-exchange comparisons are not a unique incident.
-    # Do not mix article-body market caps, token amounts or recovered assets into loss estimates.
-    monetary=title.lower()
-    if re.search(r'launder|transfer|freez|seiz|recover|cover|reserv|matching|market|stock|etf|volume|liquidat',monetary):monetary=''
-    amounts=sorted({format((Decimal(n)*scale).normalize(),'f') for n,u in re.findall(r'\$\s*(\d+(?:\.\d+)?)\s*(billion|million|bn\b|[bm]\b)',monetary) for scale in [1000000000 if u.startswith('b') else 1000000]})
-    facts={'breach'}
-    for fact,pattern in {'withdrawals_paused':r'halts? withdrawals|withdrawals? (?:halted|paused|suspended)',
-                         'withdrawals_resumed':r'resumes? withdrawals|withdrawals? (?:resumed|restored)',
-                         'funds_moving':r'launder\w*|moving funds|move funds|hack loot',
-                         'asset_freeze':r'freez\w*|frozen assets',
-                         'coverage_plan':r'to cover|will cover|matching tokens|safu',
-                         'repaid':r'fully reimbursed|losses fully covered'}.items():
-        if re.search(pattern,text):facts.add(fact)
-    # Only explicit occurrence dates; publication date is not the incident date.
-    date=row.get('incident_date') or next(iter(re.findall(r'(?:hack|breach|exploit) (?:on|dated) (20\d\d-\d\d-\d\d)',text)),None)
-    return dict(entity=entities[0] if entities else None,amounts=amounts,facts=sorted(facts),incident_date=date,
-                distinct=bool(re.search(r'\b(?:another|second|separate|new) (?:hack|breach|exploit)\b',text)),
-                content_scope='RSS_EXCERPT' if body else 'HEADLINE_ONLY')
+class IncidentTests(unittest.TestCase):
+    def test_actual_evening_is_two_incidents_not_three_or_one(self):
+        rows=[story(1,'Mercado Bitcoin wallets keep moving funds after $46M hack'),story(2,'North Korea Is Laundering Binance Hack Loot at One New Wallet Every 25 Seconds'),story(3,"Brazil's Largest Exchange Mercado Bitcoin Halts Withdrawals After $40 Million Hack")]
+        groups,_=group_news(rows,[],NOW)
+        self.assertEqual(len(groups),2)
+        mercado=next(g for g in groups if g['incident_entity']=='mercado-bitcoin')
+        self.assertEqual(len(mercado['citations']),2);self.assertIn('odhady sa líšia',mercado['text'])
+    def test_generic_article_matches_only_unique_evidence_anchor(self):
+        rows=[story(1,'Binance hack caused $6.3B loss'),story(2,'Exchange withdrawals halted after $6.30 billion hack')]
+        groups,_=group_news(rows,[],NOW);self.assertEqual(len(groups),1)
+        self.assertEqual(groups[0]['incident_entity'],'binance')
+    def test_two_incidents_same_exchange_separate_explicit_dates(self):
+        rows=[story(1,'Binance hack loss $2M',incident_date='2026-10-30'),story(2,'Binance hack loss $3M',incident_date='2026-11-02')]
+        self.assertEqual(len(group_news(rows,[],NOW)[0]),2)
+    def test_restart_stable_id_and_new_material_fact(self):
+        first=group_news([story(1,'Binance hack loss $6.3B')],[],NOW)[0][0]
+        second=group_news([story(2,'Binance withdrawals resumed after hack')],[first],NOW+timedelta(hours=2))[0][0]
+        self.assertEqual(first['id'],second['id']);self.assertIn('withdrawals_resumed',second['incident_facts'])
+    def test_unidentified_generic_headline_not_filled_with_fake_facts(self):
+        rows,diag=group_news([story(1,'Crypto exchange hack reported')],[],NOW)
+        self.assertEqual(rows,[]);self.assertEqual(diag[0]['reason'],'UNVERIFIED_INCIDENT_IDENTITY')
+    def test_42_minute_delay_due_once_and_uncertain_not_replayed(self):
+        self.assertEqual(due_phase(NOW,{'slots':{}}),'evening')
+        for status in ('sent','attempting','uncertain'):
+            self.assertEqual(due_phase(NOW,{'slots':{'2026-11-02-evening':{'status':status}}}),'')
 
-def group_news(rows,previous,now):
-    """Groups known incidents, retains material facts, suppresses unidentifiable hype."""
-    groups=[];diagnostics=[]
-    known=[]
-    for old in previous:
-        f=extract(old)
-        if f and f['entity']:known.append((old,f))
-    parsed=[(r,extract(r)) for r in rows]
-    for row,f in parsed:
-        if f and f['entity']:known.append((row,f))
-    for row,f in parsed:
-        if not f:
-            if 'hack' in row.get('categories',[]):diagnostics.append(dict(id=row['id'],reason='AMBIGUOUS_OR_UNVERIFIED_SECURITY_EVENT'))
-            else:groups.append(row)
-            continue
-        at=timestamp(row.get('published_at'))
-        if not at:continue
-        if not f['entity']:
-            matches={g['entity'] for old,g in known if f['amounts'] and set(f['amounts'])&set(g['amounts']) and timestamp(old.get('published_at')) and abs((at-timestamp(old['published_at'])).total_seconds())<=72*3600}
-            if len(matches)==1:f['entity']=matches.pop()
-            else:diagnostics.append(dict(id=row['id'],reason='UNVERIFIED_INCIDENT_IDENTITY'));continue
-        match=None;legacy=None
-        for old,g in known:
-            t=timestamp(old.get('published_at'))
-            if not t or g['entity']!=f['entity'] or abs((at-t).total_seconds())>7*86400:continue
-            if f['incident_date'] and g['incident_date'] and f['incident_date']!=g['incident_date']:continue
-            if (f['distinct'] or g['distinct']) and row['id']!=old['id'] and not (f['incident_date'] and f['incident_date']==g['incident_date']):continue
-            old_id=old.get('incident_id') or 'incident:'+digest([f['entity'],g['incident_date'] or old['id']])
-            match=old_id
-            if any(old is prior for prior in previous):legacy=old['id']
-            break
-        identity=match or 'incident:'+digest([f['entity'],f['incident_date'] or row['id']])
-        # The same entity can have separate explicitly dated/new incidents.
-        existing=next((x for x in groups if x.get('incident_id')==identity),None)
-        citation=dict(id=row['id'],url=row.get('url'),source=row.get('source'),published_at=row['published_at'],content_scope=f['content_scope'])
-        if existing:
-            existing['incident_facts']=sorted(set(existing['incident_facts'])|set(f['facts']))
-            existing['reported_amounts']=sorted(set(existing['reported_amounts'])|set(f['amounts']))
-            existing['citations'].append(citation)
-            continue
-        value=copy.deepcopy(row);value.update(id=identity,incident_id=identity,incident_entity=f['entity'],incident_date=f['incident_date'],
-            legacy_record_id=legacy,incident_facts=f['facts'],reported_amounts=f['amounts'],citations=[citation],content_scope=f['content_scope'])
-        groups.append(value)
-    for value in groups:
-        if not value.get('incident_id'):continue
-        value['citations_truncated']=len(value['citations'])>6
-        value['citations']=value['citations'][-6:]
-        legacy=[]
-        for old in previous:
-            f=extract(old);at=timestamp(old.get('published_at'));current=timestamp(value['published_at'])
-            if not f or f['entity']!=value['incident_entity'] or not at or abs((current-at).total_seconds())>7*86400:continue
-            if f['incident_date'] and value.get('incident_date') and f['incident_date']!=value['incident_date']:continue
-            if f['distinct'] and old['id']!=value.get('legacy_record_id'):continue
-            legacy.append(old['id'])
-        value['legacy_ids']=legacy
-        facts=set(value['incident_facts']);parts=[]
-        amounts_numeric=[Decimal(v) for v in value['reported_amounts'] if Decimal(v)>0]
-        value['amounts_ambiguous']=bool(amounts_numeric and max(amounts_numeric)/min(amounts_numeric)>Decimal('1.25'))
-        # Widely different headline figures may refer to historical incidents or other scopes.
-        # Preserve each citation in diagnostics; never label them competing estimates of one loss.
-        if value['reported_amounts'] and not value['amounts_ambiguous'] and not facts&{'asset_freeze','coverage_plan','repaid'}:
-            amounts=[f'{Decimal(v)/1000000:g}' for v in value['reported_amounts']]
-            parts.append('zdroje uvádzajú '+('/'.join(amounts))+' mil. USD; '+('odhady sa líšia' if len(amounts)>1 else 'nezávislé vyčíslenie nepotvrdené'))
-        if 'withdrawals_resumed' in facts:parts.append('hlásené obnovenie výberov zmierňuje prevádzkové riziko')
-        elif 'withdrawals_paused' in facts:parts.append('hlásené zastavenie výberov zvyšuje likviditné riziko')
-        if 'funds_moving' in facts:parts.append('hlásené presuny ukradnutých aktív; nejde o nový hack')
-        if 'asset_freeze' in facts:parts.append('hlásené zmrazenie aktív nie je dokončená náhrada')
-        if 'coverage_plan' in facts:parts.append('plán krytia strát ešte nie je náhradou')
-        if 'repaid' in facts:parts.append('hlásená náhrada strát zmierňuje riziko')
-        if not parts:
-            value['suppress_uninformative']=True;continue
-        value['text']=NAMES[value['incident_entity']]+': '+ '; '.join(parts)+'. Samotná správa nemení BUY/SELL.'
-        value['semantic']=digest([value['incident_facts'],value['reported_amounts']])
-    return groups,diagnostics
+class SupportTests(unittest.TestCase):
+    def coin(self):
+        step=14400000;end=int(NOW.timestamp()*1000)//step*step
+        rows=[]
+        for i in range(240):
+            # Repeatable historical pivot 80, while recent support 93 has broken.
+            low=80 if i in (40,80,120) else 95
+            rows.append(dict(timestamp=end-(240-i)*step,open=100,high=103,low=low,close=100,volume=100))
+        for row in rows[-2:]:row.update(open=94,high=95,low=89,close=90,volume=200)
+        return dict(price=91.12,stale=False,raw={'4h':rows},frames={'4h':{'support':93.18,'atr':2}})
+    def test_sol_and_tao_breakdown_new_closed_history_zone_no_buy(self):
+        for symbol in ('SOL','TAO'):
+            c=self.coin();r=assess(c,int(NOW.timestamp()*1000))
+            self.assertEqual(r['breakdown'],'CONFIRMED_2_CLOSED_BARS')
+            self.assertEqual(r['support']['price'],80);self.assertLess(r['support']['price'],c['price'])
+            self.assertFalse(r['approved_buy']);self.assertFalse(r['pullback']['ready']);self.assertIn('level',r['confirmed'])
+    def test_no_history_and_intrabar_not_confirmed_break(self):
+        c=self.coin();c['raw']['4h'][-1]['close']=94
+        self.assertEqual(assess(c,int(NOW.timestamp()*1000))['breakdown'],'INTRABAR_OR_UNCONFIRMED')
+        c['raw']['4h']=[];self.assertIsNone(assess(c,int(NOW.timestamp()*1000))['support'])
+
+class DeliveryHistoryTests(unittest.TestCase):
+    def test_fact_history_survives_restart_without_repeating_updates(self):
+        from v11 import event_notices as en
+        def fund(i,title):
+            e=story(i,title,retrieved_at=NOW.isoformat())
+            return {'events':[e]}
+        j={};plan=en.plan(fund(1,'Binance hack caused $6.3B loss'),j,NOW)
+        self.assertEqual(len(plan['selected']),1);en.commit(j,plan,NOW)
+        plan=en.plan(fund(2,'Binance withdrawals resumed after hack'),copy.deepcopy(j),NOW+timedelta(minutes=1))
+        self.assertEqual(len(plan['selected']),1);self.assertIn('obnovenie',plan['selected'][0]['text'])
+        en.commit(j,plan,NOW+timedelta(minutes=1))
+        plan=en.plan(fund(3,'Binance hack caused $6.3B loss'),copy.deepcopy(j),NOW+timedelta(minutes=2))
+        self.assertEqual(plan['selected'],[])
+        self.assertTrue(next(v for v in j[en.KEY].values() if v.get('incident_id'))['announced_facts'])
+
+class LegacyHistoryTests(unittest.TestCase):
+    def test_already_announced_aspects_are_merged_before_deciding_novelty(self):
+        from v11 import event_notices as en
+        older=[story(1,'Mercado Bitcoin moving funds after $46M hack'),story(2,'Mercado Bitcoin halts withdrawals after $40M hack')]
+        for row in older:row.update(last_announced_at=NOW.isoformat(),semantic='old-headline-hash')
+        j={en.KEY:{r['id']:r for r in older}}
+        fresh=story(3,'Mercado Bitcoin halts withdrawals after $40M hack',retrieved_at=NOW.isoformat())
+        self.assertEqual(en.plan({'events':[fresh]},j,NOW)['selected'],[])
+
+class AmountContextTests(unittest.TestCase):
+    def test_frozen_assets_and_reserves_are_not_presented_as_loss_estimates(self):
+        rows=[story(1,'Binance $6.3B hack; freezes $3B assets'),story(2,'Binance holds $5B matching tokens to cover hack losses')]
+        group=group_news(rows,[],NOW)[0][0]
+        self.assertNotIn('odhady sa líšia',group['text'])
+        self.assertIn('plán krytia',group['text']);self.assertIn('nie je dokončená náhrada',group['text'])
+
+class DailyFallbackTests(unittest.TestCase):
+    def test_lower_daily_support_used_when_recent_intraday_has_no_zone(self):
+        c=SupportTests().coin()
+        for row in c['raw']['4h']:row['low']=min(row['open'],row['close'])-0.5
+        day=86400000;end=int(NOW.timestamp()*1000)//day*day
+        c['raw']['1d']=[dict(timestamp=end-(80-i)*day,open=100,close=100,high=105,low=70 if i in (10,30) else 95,volume=100) for i in range(80)]
+        r=assess(c,int(NOW.timestamp()*1000))
+        self.assertEqual(r['support']['price'],70);self.assertEqual(r['support']['timeframe'],'1d')
+
+class AmbiguityTests(unittest.TestCase):
+    def test_cross_exchange_price_comparison_not_a_second_hack(self):
+        rows,diag=group_news([story(1,'Coinbase leads selloff after Binance hack loss $6.3B')],[],NOW)
+        self.assertEqual(rows[0]['incident_entity'],'binance')
+        rows,diag=group_news([story(2,'Binance and Coinbase security incidents reported')],[],NOW)
+        self.assertEqual(rows,[]);self.assertTrue(diag)
+
+class MonetaryScopeTests(unittest.TestCase):
+    def test_article_body_market_metrics_not_reported_as_hack_loss(self):
+        row=story(1,'Binance $6.3B hack',excerpt='Market capitalization $171B, volume $515M; a bitcoin treasury $643M. Protocol fees $106M.')
+        value=group_news([row],[],NOW)[0][0]
+        self.assertEqual(value['reported_amounts'],['6300000000'])
+        self.assertNotIn('171000',value['text'])
+    def test_recovered_amount_is_not_new_total_loss_estimate(self):
+        row=story(1,'Mercado Bitcoin recovers $4.5M after hack')
+        self.assertEqual(group_news([row],[],NOW)[0][0]['reported_amounts'],[])
+
+class IncompatibleAmountsTests(unittest.TestCase):
+    def test_widely_different_historical_scopes_not_presented_as_same_loss(self):
+        rows=[story(1,'Binance $106M hack'),story(2,'Binance $6B hack')]
+        grouped,_=group_news(rows,[],NOW)
+        self.assertTrue(grouped[0]['amounts_ambiguous'])
+        self.assertTrue(grouped[0]['suppress_uninformative'])
+        self.assertNotIn('106/6000',grouped[0]['text'])
