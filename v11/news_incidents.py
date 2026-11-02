@@ -19,7 +19,10 @@ def extract(row):
         primary=[e for e in entities if re.search(ENTITIES[e]+r' (?:exchange )?(?:hack|exploit|breach)',text)]
         if len(primary)==1:entities=primary
         else:return None # Cross-exchange comparisons are not a unique incident.
-    amounts=sorted({format((Decimal(n)*scale).normalize(),'f') for n,u in re.findall(r'\$?\s*(\d+(?:\.\d+)?)\s*(billion|million|bn\b|[bm]\b)',text) for scale in [1000000000 if u.startswith('b') else 1000000]})
+    # Do not mix article-body market caps, token amounts or recovered assets into loss estimates.
+    monetary=title.lower()
+    if re.search(r'launder|transfer|freez|seiz|recover|cover|reserv|matching|market|stock|etf|volume|liquidat',monetary):monetary=''
+    amounts=sorted({format((Decimal(n)*scale).normalize(),'f') for n,u in re.findall(r'\$\s*(\d+(?:\.\d+)?)\s*(billion|million|bn\b|[bm]\b)',monetary) for scale in [1000000000 if u.startswith('b') else 1000000]})
     facts={'breach'}
     for fact,pattern in {'withdrawals_paused':r'halts? withdrawals|withdrawals? (?:halted|paused|suspended)',
                          'withdrawals_resumed':r'resumes? withdrawals|withdrawals? (?:resumed|restored)',

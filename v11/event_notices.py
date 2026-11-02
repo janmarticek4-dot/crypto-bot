@@ -162,7 +162,7 @@ def _plan(fund,journal,now,limit=3):
     news,diag=group_news([v for v in candidates_all if v.get('kind')=='news'],history,now)
     suppressed.extend(diag)
     for row in [v for v in candidates_all if v.get('kind')!='news']+news:
-        if row.get('suppress_uninformative'):
+        if row.get('suppress_uninformative') or (row.get('kind')=='news' and 'Projektová alebo ekonomická správa; ekonomický dopad zatiaľ nepotvrdený.' in row.get('text','')):
             suppressed.append(dict(id=row['id'],reason='NO_CONCRETE_VERIFIABLE_FACT'));continue
         old=previous.get(row['id']) or previous.get(row.get('legacy_record_id'));matched_copy=False
         if row.get('incident_id') and not previous.get(row['id']) and row.get('legacy_ids'):

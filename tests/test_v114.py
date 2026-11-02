@@ -100,3 +100,13 @@ class AmbiguityTests(unittest.TestCase):
         self.assertEqual(rows[0]['incident_entity'],'binance')
         rows,diag=group_news([story(2,'Binance and Coinbase security incidents reported')],[],NOW)
         self.assertEqual(rows,[]);self.assertTrue(diag)
+
+class MonetaryScopeTests(unittest.TestCase):
+    def test_article_body_market_metrics_not_reported_as_hack_loss(self):
+        row=story(1,'Binance $6.3B hack',excerpt='Market capitalization $171B, volume $515M; a bitcoin treasury $643M. Protocol fees $106M.')
+        value=group_news([row],[],NOW)[0][0]
+        self.assertEqual(value['reported_amounts'],['6300000000'])
+        self.assertNotIn('171000',value['text'])
+    def test_recovered_amount_is_not_new_total_loss_estimate(self):
+        row=story(1,'Mercado Bitcoin recovers $4.5M after hack')
+        self.assertEqual(group_news([row],[],NOW)[0][0]['reported_amounts'],[])
