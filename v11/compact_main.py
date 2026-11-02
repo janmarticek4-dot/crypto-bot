@@ -55,7 +55,10 @@ def render(model,snapshot,now,kind,inventory=None):
         elif action in ('REDUCE','SELL'):reason='Existujúce ochranné pravidlo vyžaduje preveriť '+('zníženie pozície.' if action=='REDUCE' else 'predaj.')
         elif context=='držba':reason='Posúdenie držby neúplné; nejde o potvrdené HOLD.'
         elif profile.get('technical_candidate'):reason='Technický kandidát; realizácia a čisté R:R neoverené.'
-        else:reason='Vstup ešte nepotvrdený.'
+        elif profile.get('scenarios',{}).get('breakdown')=='CONFIRMED_2_CLOSED_BARS':reason='Podpora sa stratila na uzavretých sviečkach; obrat ešte nepotvrdený.'
+        elif profile.get('four',{}).get('sell_volume'):reason='Pokles sprevádza predajný sviečkový objem (proxy).'
+        elif profile.get('state')=='RECOVERY_ATTEMPT':reason='Odraz zatiaľ nepotvrdila širšia rastová štruktúra.'
+        else:reason='Chýba potvrdenie rastovej štruktúry a nákupného objemu.'
         lines.append(f'{symbol} {analyst.price(p)} — {action} ({context}): '+reason)
         level=profile.get('entry_level');support=profile.get('support')
         if action in ('REDUCE','SELL','HOLD') and analyst.number(support):boundary='Riziko pod '+analyst.price(support)+' po potvrdení prerazenia.'

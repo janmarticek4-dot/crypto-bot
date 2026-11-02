@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths: [.github/workflows/v114-release.yml, v11/news_incidents.py, v11/support_scenarios.py, tests/test_v114.py]
+concurrency:
+  group: v114-readonly-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
