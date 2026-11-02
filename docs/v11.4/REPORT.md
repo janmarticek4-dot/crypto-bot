@@ -89,3 +89,10 @@ Runtime kandidát: **52253f270c7ffdaa0f0438abeab634d115bdf90e**.
 Všetky produkčné analytické/safety/command-reader/slot/health source pins sa menia spoločne. Existujúce V111/V112 environment flags sa zachovávajú kvôli spätnej kompatibilite; nie je potrebný nový Secret. Nové meno workflow je Crypto AI Bot V11.4; audit naďalej sleduje aj historické názvy. História doručenia, skutočné portfólio a bot_state.json sa pri tejto aktivácii nemenia.
 
 Pri návrate sa použije normálny pin-only commit a záložná referencia pred V11.4; nesmie sa resetovať main ani obnovovať starý portfóliový/doručovací snapshot. Nové päťminútové triggery zostávajú lacné, lebo kontrolujú canonical slot pred zberom. Nasledujúce reálne doručenie sa musí overiť samostatne; zelený no-send source check nie je dôkaz, že už nastalo budúce plánované doručenie.
+
+
+## Potvrdené produkčné nasadenie
+
+Aktivačný commit **4823eaec57f67a868c5ceccc8d894e8ab793d172** pripol runtime **52253f270c7ffdaa0f0438abeab634d115bdf90e** do analytiky, slot gate, safety monitora, command readera a delivery health. [Skutočný produkčný source-check](https://github.com/janmarticek4-dot/crypto-bot/actions/runs/41529997978) skončil SUCCESS: tento presný SHA, aktívne schválené flags, súkromný čítač read_verified=true, žiadny Telegram ani zápis stavu z overenia.
+
+Záložný tag `backup/before-v114-20261102` ukazuje na východiskovú main 625d76f. main.py, v11/strategy.py, bot_state.json, verejný doručovací denník a skutočné portfólio sa implementáciou nezmenili. Neskoršie automatické dátové commity treba vždy zachovať fetch/merge postupom, nie resetom. Staré už doručené správy sa neprepisovali. Reálne nasledujúce plánované doručenie V11.4 zatiaľ nie je preukázané touto no-send kontrolou.
