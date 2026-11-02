@@ -6,6 +6,7 @@ on:
     paths: ['.github/workflows/run.yml']
   schedule:
     - cron: "*/15 * * * *"
+    - cron: "*/5 5-7,13-15,18-20 * * *"
     - cron: "2 5,6,13,14,18,19 * * *"
   workflow_dispatch:
     inputs:
@@ -63,7 +64,7 @@ jobs:
           test "$ENABLED" = 'true' || { echo 'Schválená integrácia V11.1 nie je zapnutá.'; exit 1; }
           test "$RECOVERY:$PORTFOLIO:$IMPORT:$LEGACY:$DEEP" = 'false:false:false:false:false' || { echo 'Pre ručnú V11.1 ponechajte ostatné ručné možnosti vypnuté.'; exit 1; }
   crypto-bot:
-    if: github.event_name != 'push' && inputs.advisory_import != true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true && inputs.recover_due_analysis != true
+    if: github.event_name != 'push' && github.event.schedule != '*/5 5-7,13-15,18-20 * * *' && inputs.advisory_import != true && inputs.manual_v111_analysis != true && inputs.portfolio_commands != true && inputs.recover_due_analysis != true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -127,13 +128,16 @@ jobs:
           ref: 05576b4888497ccbec7a0e26b1ca7eb6d3256f2c
           persist-credentials: false
       - id: slot
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: python
         run: |
           import os,sys
           sys.path.insert(0,os.getcwd())
           from datetime import datetime,timezone
-          from v11.production_schedule import phase as select_phase
-          phase = select_phase(datetime.now(timezone.utc)) or ''
+          from v11.production_schedule import due_phase
+          from scripts.v111_trial import PublicJournal
+          phase = due_phase(datetime.now(timezone.utc),PublicJournal().read())
           print('SCHEDULE_PHASE='+(phase or 'none'))
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('phase=' + phase + '\n')
@@ -270,7 +274,7 @@ jobs:
           if-no-files-found: warn
 
   private-advisory-updates:
-    if: github.ref == 'refs/heads/main' && vars.PRIVATE_INVENTORY_COMMANDS_ENABLED != 'false' && ((github.event_name == 'schedule' && vars.V111_TRIAL_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.portfolio_commands == true && inputs.manual_v111_analysis != true && inputs.manual_analysis != true && inputs.advisory_import != true))
+    if: github.ref == 'refs/heads/main' && vars.PRIVATE_INVENTORY_COMMANDS_ENABLED != 'false' && ((github.event_name == 'schedule' && github.event.schedule != '*/5 5-7,13-15,18-20 * * *' && vars.V111_TRIAL_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.portfolio_commands == true && inputs.manual_v111_analysis != true && inputs.manual_analysis != true && inputs.advisory_import != true))
     environment: production-advisory
     runs-on: ubuntu-latest
     timeout-minutes: 5

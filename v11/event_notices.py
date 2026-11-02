@@ -126,7 +126,7 @@ def candidates(fund,now):
             summary=stage+' '+asset+' ETF; primárne rozhodnutie a následné toky treba overiť.'
         elif re.search(r'tokeniz',title,re.I):summary='Správa o tokenizovaných aktívach; realizovaný objem a dopyt po tokene neoverené.'
         elif 'Fed' in cats:summary='Nové vyjadrenie Fedu; význam pre očakávania sadzieb a rizikové aktíva treba potvrdiť.'
-        out.append(dict(id='news:'+e['id'],state='NEWS',published_at=e['published_at'],event_at=None,semantic=digest(sorted(tokens(title))),title=title,categories=sorted(cats),symbols=symbols,url=e['url'],kind='news',
+        out.append(dict(excerpt=e.get('excerpt',''),id='news:'+e['id'],state='NEWS',published_at=e['published_at'],event_at=None,semantic=digest(sorted(tokens(title))),title=title,categories=sorted(cats),symbols=symbols,url=e['url'],kind='news',
             text=name+': '+summary+' ('+e['published_at'][:10]+', '+e['source']+').'))
     for symbol,item in fund.get('extensions',{}).get('etf_flows',{}).items():
         value=item.get('net_flow_usd');day=item.get('date');observed=timestamp(item.get('retrieved_at'))
@@ -156,9 +156,20 @@ def prior_records(journal,now):
 
 def _plan(fund,journal,now,limit=3):
     previous=prior_records(journal,now);selected=[];suppressed=[dict(id=e['id'],reason=news_relevance(e,now)[1]) for e in analyze(fund,now)['evidence'] if not news_relevance(e,now)[0]]
-    for row in candidates(fund,now):
-        old=previous.get(row['id']);matched_copy=False
-        if old is None and row['kind']=='news':
+    from .news_incidents import group_news
+    candidates_all=candidates(fund,now)
+    history=[v for v in previous.values() if v.get('kind')=='news']
+    news,diag=group_news([v for v in candidates_all if v.get('kind')=='news'],history,now)
+    suppressed.extend(diag)
+    for row in [v for v in candidates_all if v.get('kind')!='news']+news:
+        if row.get('suppress_uninformative'):
+            suppressed.append(dict(id=row['id'],reason='NO_CONCRETE_VERIFIABLE_FACT'));continue
+        old=previous.get(row['id']) or previous.get(row.get('legacy_record_id'));matched_copy=False
+        if row.get('incident_id') and old and not old.get('incident_id'):
+            from .news_incidents import extract
+            facts=extract(old)
+            if facts:old=dict(old,incident_facts=facts['facts'],reported_amounts=facts['amounts'],semantic=digest([facts['facts'],facts['amounts']]))
+        if old is None and row['kind']=='news' and not row.get('incident_id'):
             for item in previous.values():
                 if item.get('state')!='NEWS':continue
                 try:
@@ -166,6 +177,11 @@ def _plan(fund,journal,now,limit=3):
                     # Cross-provider copies within the existing semantic grouping.
                     if same_notice(a,b):old=item;matched_copy=True;break
                 except (KeyError,TypeError,ValueError):continue
+        if row.get('incident_id') and old:
+            previous_facts=set(old.get('announced_facts',old.get('incident_facts',[])))
+            row['incident_facts']=sorted(set(row['incident_facts'])|previous_facts)
+            row['reported_amounts']=sorted(set(row['reported_amounts'])|set(old.get('reported_amounts',[])))
+            row['semantic']=digest([row['incident_facts'],row['reported_amounts']])
         repeated=old and (old.get('semantic')==row['semantic'] or matched_copy)
         if repeated:suppressed.append(dict(id=row['id'],reason='DELIVERY_UNCERTAIN' if old.get('delivery_status') else 'ALREADY_ANNOUNCED_SAME_FACT'));continue
         at=timestamp(row['published_at'])
@@ -178,7 +194,7 @@ def _plan(fund,journal,now,limit=3):
         if row['kind']=='news' and any(x['kind']=='news' and same_notice(row,x) for x in selected):continue
         selected.append(row)
     selected.sort(key=lambda r:({'RESULT':0,'NEWS':1,'FLOW':1,'UPCOMING':2}[r['state']],-(timestamp(r.get('published_at') or r.get('observed_at')).timestamp() if timestamp(r.get('published_at') or r.get('observed_at')) else 0)))
-    return dict(selected=selected[:limit],suppressed=suppressed,seeded_records=len(previous),version='event-notices-v1')
+    return dict(selected=selected[:limit],suppressed=suppressed,observed_incidents=[{k:v for k,v in n.items() if k in ('id','incident_id','citations','published_at')} for n in news if n.get('incident_id')],seeded_records=len(previous),version='event-notices-v2')
 
 def plan(fund,journal,now,limit=3):
     try:return _plan(fund,journal,now,limit)
@@ -188,8 +204,21 @@ def plan(fund,journal,now,limit=3):
 def commit(journal,planned,now):
     if planned.get('error'):return
     rows=prior_records(journal,now)
+    for observed in planned.get('observed_incidents',[]):
+        old=rows.get(observed['id'])
+        if old:
+            citations=old.get('citations',[])+observed.get('citations',[])
+            old['citations']=list({c['id']:c for c in citations}.values())[-30:]
+            old['last_checked_at']=now.isoformat()
     for row in planned.get('selected',[]):
         stored={k:copy.deepcopy(v) for k,v in row.items() if k not in ('text','url')}
+        if row.get('incident_id'):
+            old=rows.get(row['id'],{})
+            stored['first_seen_at']=old.get('first_seen_at',row['published_at'])
+            stored['last_updated_at']=now.isoformat()
+            stored['announced_facts']=row['incident_facts']
+            citations=old.get('citations',[])+row.get('citations',[])
+            stored['citations']=list({c['id']:c for c in citations}.values())[-30:]
         stored['last_announced_at']=now.isoformat();rows[row['id']]=stored
     rows={k:v for k,v in rows.items() if (at:=timestamp(v.get('last_announced_at'))) and timedelta(0)<=now-at<=timedelta(days=90)}
     journal[KEY]=dict(sorted(rows.items(),key=lambda kv:kv[1]['last_announced_at'])[-256:])

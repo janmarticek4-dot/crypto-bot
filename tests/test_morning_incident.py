@@ -22,7 +22,7 @@ class IncidentTests(unittest.TestCase):
         self.assertEqual(phase(datetime(2026,10,31,19,tzinfo=timezone.utc)),'evening')
     def test_alert_no_probabilities_no_free_ai(self):
         ev,why=m.assess(news(),CTX,NOW);self.assertIsNotNone(ev)
-        text=m.render(ev);self.assertIn('V11.3',text);self.assertNotIn('88',text);self.assertNotIn('13 %',text)
+        text=m.render(ev);self.assertIn('V11.4',text);self.assertNotIn('88',text);self.assertNotIn('13 %',text)
         self.assertIn('už uskutočnený',text);self.assertNotIn('https://',text)
     def test_old_rumor_price_only_missing_data_quiet(self):
         self.assertIsNone(m.assess(news('rumor'),CTX,NOW)[0])
@@ -79,8 +79,10 @@ class WorkflowShellTests(unittest.TestCase):
         section=workflow.split('      - id: slot\n',1)[1].split('  v111-analytical-pilot:',1)[0]
         body=textwrap.dedent(section.split('        run: |\n',1)[1])
         with tempfile.TemporaryDirectory() as d:
-            path=Path(d)/'github-step.py';path.write_text(body)
-            output=Path(d)/'output';env=dict(os.environ,GITHUB_OUTPUT=str(output))
+            path=Path(d)/'github-step.py'
+            prefix="import sys;sys.path.insert(0,"+repr(str(root))+")\nfrom unittest.mock import patch\np=patch('scripts.v111_trial.PublicJournal.read',return_value={'schema':1,'slots':{}});p.start()\n"
+            path.write_text(prefix+body)
+            output=Path(d)/'output';env=dict(os.environ,GITHUB_OUTPUT=str(output),GITHUB_REPOSITORY='synthetic/repo',GH_TOKEN='synthetic')
             result=subprocess.run([sys.executable,str(path)],cwd=root,env=env,capture_output=True,text=True)
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertIn('phase=',output.read_text())

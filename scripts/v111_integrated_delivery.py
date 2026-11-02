@@ -169,6 +169,10 @@ def run():
                 # possibly expired in-memory model. No private text is persisted.
                 import re
                 result=contract(text,len(re.findall(r'(?:24h|72h|14d) (?:RAST|POKLES|DO STRANY|REFERENCIA|NEURČENÉ)(?=\s|[.;]|$)',text)))
+                from v11.prediction_runtime import current_predictions
+                if holder.get('model'):
+                    result['v2_displayed_directional_count']=result['v2_count']
+                    result['v2_count']=sum(map(len,current_predictions(holder['model'],int(pilot.datetime.now(pilot.timezone.utc).timestamp()*1000)).values()))
                 try:source=subprocess.check_output(['git','rev-parse','HEAD'],text=True,stderr=subprocess.DEVNULL).strip()
                 except (OSError,subprocess.SubprocessError):source=None
                 if 'trend_reversal' in holder.get('model',{}):

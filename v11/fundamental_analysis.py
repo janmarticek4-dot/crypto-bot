@@ -44,7 +44,7 @@ def analyze(result, now):
         else:
             significance='potenciálna zmena projektového alebo regulačného rizika'
             impact='smer nepotvrdený';verify='primárny dokument, účinnosť a ekonomický rozsah'
-        evidence.append(dict(id=event['id'],title=title,source=event['source'],url=url,
+        evidence.append(dict(excerpt=event.get('excerpt',''),id=event['id'],title=title,source=event['source'],url=url,
             published_at=at.isoformat(),retrieved_at=collected.isoformat(),
             fact_scope='zdroj publikoval uvedené oznámenie; samotný titulok nepotvrdzuje realizáciu',
             symbols=symbols or list(SYMBOLS),significance=significance,impact=impact,

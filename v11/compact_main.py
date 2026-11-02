@@ -44,7 +44,7 @@ def render(model,snapshot,now,kind,inventory=None):
         if h=='24–72 h':
             lo=view.get('support');hi=view.get('resistance')
             if analyst.number(lo) and analyst.number(hi):lines.append('Alternatíva rastu: uzavretie BTC nad '+analyst.price(hi)+' s objemom; riziko pod '+analyst.price(lo)+'.')
-    lines+=['','💰 KRYPTOMENY','V2 experimentálne: REFERENCIA = nezmenená cena; NEURČENÉ = bez smerovej prevahy. Nie potvrdenie bočného trhu.']
+    lines+=['','💰 KRYPTOMENY','V2 bez smerovej výhody sa neopakuje pri každej minci; všetkých 18 výstupov zostáva v diagnostike.']
     forecasts=current_predictions(model,int(now.timestamp()*1000))
     rows=base.split('ODPORÚČANIA:',1)[1].splitlines()
     for symbol,action,context in approved:
@@ -59,7 +59,11 @@ def render(model,snapshot,now,kind,inventory=None):
         lines.append(f'{symbol} {analyst.price(p)} — {action} ({context}): '+reason)
         level=profile.get('entry_level');support=profile.get('support')
         if action in ('REDUCE','SELL','HOLD') and analyst.number(support):boundary='Riziko pod '+analyst.price(support)+' po potvrdení prerazenia.'
-        elif profile.get('status')=='AVAILABLE' and not analyst.number(support):boundary='Stará podpora '+analyst.price(profile['four']['support'])+' je pri/nad cenou; preveriť prerazenie.'
+        elif profile.get('status')=='AVAILABLE' and not analyst.number(support):
+            scenarios=profile.get('scenarios',{});zone=scenarios.get('pullback',{}).get('zone')
+            level=scenarios.get('confirmed',{}).get('level')
+            boundary=('Ďalšia historická zóna '+analyst.price(zone)+'; kúpa až po stabilizácii.' if analyst.number(zone) else 'Nižšia podpora nepotvrdená; čakať na obnovu štruktúry.')
+            if analyst.number(level):boundary+=' Potvrdenie nad '+analyst.price(level)+' + objem.'
         elif context=='držba':boundary='Stará podpora je pri/nad cenou; ďalšia hranica neoverená.' if profile.get('status')=='AVAILABLE' else 'Riziková hranica nie je spoľahlivo overená.'
         elif analyst.number(level):boundary=('Pullback sledovať pri '+analyst.price(support)+' až po stabilizácii; ' if analyst.number(support) else '')+'vstup preveriť po 2×4h nad '+analyst.price(level)+' s objemom.'
         else:boundary='Platná hranica zatiaľ nepotvrdená.'
@@ -68,8 +72,8 @@ def render(model,snapshot,now,kind,inventory=None):
             pieces=[]
             for horizon,label in [('24 h','24h'),('48–72 h','72h'),('7–14 dní','14d')]:
                 value=forecasts.get(symbol,{}).get(horizon)
-                pieces.append(label+' '+prediction_label(value))
-            lines.append('V2: '+' | '.join(pieces)+'.')
+                if value and prediction_label(value) in ('RAST','POKLES'):pieces.append(label+' '+prediction_label(value))
+            if pieces:lines.append('V2 experiment: '+' | '.join(pieces)+'.')
     if sum(map(len,forecasts.values()))<18:lines.append('Chýbajúce V2: náhradný technický scenár je výhľad vyššie, iba pri aktuálnych technických dátach; nejde o výstup V2.')
     events=model.get('event_notices',{}).get('selected',[])
     if events:lines+=['','📰 NOVÉ DÔLEŽITÉ UDALOSTI',*['• '+e['text'] for e in events[:3]]]

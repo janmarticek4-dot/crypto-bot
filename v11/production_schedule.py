@@ -10,3 +10,9 @@ def phase(now):
 def target(now,kind):
     hour={'morning':7,'usa':15,'evening':20}[kind]
     return now.astimezone(BL).replace(hour=hour,minute=0,second=0,microsecond=0)
+
+def due_phase(now,journal):
+    kind=phase(now)
+    if not kind:return ''
+    key=now.astimezone(BL).date().isoformat()+'-'+kind
+    return '' if key in journal.get('slots',{}) else kind

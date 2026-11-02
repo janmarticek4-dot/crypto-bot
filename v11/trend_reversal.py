@@ -71,7 +71,9 @@ def profile(coin,now_ms):
     bull=four['bull'] and daily['bull']
     setup='BUY CONFIRMED' if four['breakout'] and daily['bull'] else 'BUY PULLBACK' if four['retest'] and daily['bull'] else None
     state='UPTREND_CONFIRMED' if bull and four['buy_volume'] else 'REVERSAL_CONFIRMING' if four['bull'] and four['buy_volume'] else 'RECOVERY_ATTEMPT' if four['rebound'] else 'CORRECTION'
-    return dict(status='AVAILABLE',state=state,four=four,daily=daily,technical_candidate=setup,
+    from .support_scenarios import assess as assess_support
+    scenarios=assess_support(coin,now_ms)
+    return dict(scenarios=scenarios,status='AVAILABLE',state=state,four=four,daily=daily,technical_candidate=setup,
         entry_level=four['resistance'],support=four['support'] if four['support']<coin['price'] else None,
         invalidation=four['support'] if four['support']<coin['price'] else None,
         confirmation='two closed 4h candles above fixed prior resistance plus directional volume and daily structure',

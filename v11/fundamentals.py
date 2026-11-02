@@ -144,6 +144,9 @@ def parse_feed(raw,source,now=None):
             if len(symbols)==1:attributed['symbol']=symbols[0]
         item=event(title,url,published,attributed)
         if item:
+            import html
+            excerpt=values.get('description') or values.get('summary') or values.get('encoded') or values.get('content') or ''
+            item['excerpt']=re.sub(r'\s+',' ',html.unescape(re.sub('<[^>]+>',' ',excerpt)))[:5000].strip()
             item['timestamp_kind']='published' if values.get('pubDate') or values.get('published') else 'updated'
             out.append(item)
     return out
