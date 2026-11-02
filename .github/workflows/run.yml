@@ -135,9 +135,12 @@ jobs:
           import os,sys
           sys.path.insert(0,os.getcwd())
           from datetime import datetime,timezone
-          from v11.production_schedule import due_phase
+          from v11.production_schedule import phase as select_phase,BL
           from scripts.v111_trial import PublicJournal
-          phase = due_phase(datetime.now(timezone.utc),PublicJournal().read())
+          now=datetime.now(timezone.utc)
+          phase=select_phase(now) or ''
+          journal=PublicJournal().read()
+          if phase and now.astimezone(BL).date().isoformat()+'-'+phase in journal.get('slots',{}):phase=''
           print('SCHEDULE_PHASE='+(phase or 'none'))
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('phase=' + phase + '\n')
