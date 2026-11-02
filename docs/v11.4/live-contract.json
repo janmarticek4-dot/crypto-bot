@@ -1,0 +1,76 @@
+{
+  "predictions": 18,
+  "per_coin": {
+    "SOL": 3,
+    "TAO": 3,
+    "FET": 3,
+    "AAVE": 3,
+    "ONDO": 3,
+    "RENDER": 3
+  },
+  "contracts": {
+    "morning": {
+      "format_version": "brief-v2",
+      "verdict_first": true,
+      "urls_absent": true,
+      "v2_count": 18,
+      "technical_fallback_labeled": false
+    },
+    "evening": {
+      "format_version": "brief-v2",
+      "verdict_first": true,
+      "urls_absent": true,
+      "v2_count": 18,
+      "technical_fallback_labeled": false
+    }
+  },
+  "generated_at": 1793655268076,
+  "package_created": 1793651276737,
+  "package_age_ms": 3991339,
+  "snapshot_age_ms": 20093,
+  "missing_predictions": {},
+  "parts": {
+    "morning": 1,
+    "evening": 1
+  },
+  "reversal_state": "CORRECTION",
+  "consistency_checks": {
+    "morning": {
+      "passed": true,
+      "corrected_comments": [],
+      "actions_unchanged": true,
+      "time_basis_checked": true,
+      "causal_claims_checked": true,
+      "return_probabilities_invented": false
+    },
+    "evening": {
+      "passed": true,
+      "corrected_comments": [],
+      "actions_unchanged": true,
+      "time_basis_checked": true,
+      "causal_claims_checked": true,
+      "return_probabilities_invented": false
+    }
+  },
+  "v2_mechanism": {
+    "model_counts": {
+      "flat": 10,
+      "regime_momentum": 5,
+      "legacy_v1": 2,
+      "ridge_technical": 1
+    },
+    "flat_outputs": 10,
+    "flat_is_same_as_no_price_change_baseline": true,
+    "quote_rebases_price_bands": true,
+    "nonflat_features": "closed OHLCV; no fitting during delivery",
+    "utility": "UNPROVEN_WITHOUT_MATURED_OUT_OF_SAMPLE_COMPARISON"
+  },
+  "paper_matured": 120,
+  "length_comparison": {
+    "detailed": 5007,
+    "compact": 2156,
+    "reduction_pct": 56.9
+  },
+  "new_buy_sell_activated": false,
+  "telegram_sent": false
+}
