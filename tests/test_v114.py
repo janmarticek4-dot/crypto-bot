@@ -77,3 +77,10 @@ class LegacyHistoryTests(unittest.TestCase):
         j={en.KEY:{r['id']:r for r in older}}
         fresh=story(3,'Mercado Bitcoin halts withdrawals after $40M hack',retrieved_at=NOW.isoformat())
         self.assertEqual(en.plan({'events':[fresh]},j,NOW)['selected'],[])
+
+class AmountContextTests(unittest.TestCase):
+    def test_frozen_assets_and_reserves_are_not_presented_as_loss_estimates(self):
+        rows=[story(1,'Binance $6.3B hack; freezes $3B assets'),story(2,'Binance holds $5B matching tokens to cover hack losses')]
+        group=group_news(rows,[],NOW)[0][0]
+        self.assertNotIn('odhady sa líšia',group['text'])
+        self.assertIn('plán krytia',group['text']);self.assertIn('nie je dokončená náhrada',group['text'])

@@ -82,7 +82,7 @@ def group_news(rows,previous,now):
             legacy.append(old['id'])
         value['legacy_ids']=legacy
         facts=set(value['incident_facts']);parts=[]
-        if value['reported_amounts']:
+        if value['reported_amounts'] and not facts&{'asset_freeze','coverage_plan','repaid'}:
             amounts=[f'{Decimal(v)/1000000:g}' for v in value['reported_amounts']]
             parts.append('zdroje uvádzajú '+('/'.join(amounts))+' mil. USD; '+('odhady sa líšia' if len(amounts)>1 else 'nezávislé vyčíslenie nepotvrdené'))
         if 'withdrawals_resumed' in facts:parts.append('hlásené obnovenie výberov zmierňuje prevádzkové riziko')
