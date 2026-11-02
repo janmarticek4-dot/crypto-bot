@@ -15,7 +15,10 @@ def extract(row):
     if not re.search(r'\bhack\w*|\bexploit\w*|\bbreach\b|withdrawals? (?:halted|suspended|resumed)',text):return None
     entities=[e for e,p in ENTITIES.items() if re.search(p,text)]
     if not entities and row.get('incident_entity') in ENTITIES:entities=[row['incident_entity']]
-    if len(entities)>1:return None # Cross-exchange comparisons are not a unique incident.
+    if len(entities)>1:
+        primary=[e for e in entities if re.search(ENTITIES[e]+r' (?:exchange )?(?:hack|exploit|breach)',text)]
+        if len(primary)==1:entities=primary
+        else:return None # Cross-exchange comparisons are not a unique incident.
     amounts=sorted({format((Decimal(n)*scale).normalize(),'f') for n,u in re.findall(r'\$?\s*(\d+(?:\.\d+)?)\s*(billion|million|bn\b|[bm]\b)',text) for scale in [1000000000 if u.startswith('b') else 1000000]})
     facts={'breach'}
     for fact,pattern in {'withdrawals_paused':r'halts? withdrawals|withdrawals? (?:halted|paused|suspended)',
@@ -42,7 +45,10 @@ def group_news(rows,previous,now):
     for row,f in parsed:
         if f and f['entity']:known.append((row,f))
     for row,f in parsed:
-        if not f:groups.append(row);continue
+        if not f:
+            if 'hack' in row.get('categories',[]):diagnostics.append(dict(id=row['id'],reason='AMBIGUOUS_OR_UNVERIFIED_SECURITY_EVENT'))
+            else:groups.append(row)
+            continue
         at=timestamp(row.get('published_at'))
         if not at:continue
         if not f['entity']:

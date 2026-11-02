@@ -93,3 +93,10 @@ class DailyFallbackTests(unittest.TestCase):
         c['raw']['1d']=[dict(timestamp=end-(80-i)*day,open=100,close=100,high=105,low=70 if i in (10,30) else 95,volume=100) for i in range(80)]
         r=assess(c,int(NOW.timestamp()*1000))
         self.assertEqual(r['support']['price'],70);self.assertEqual(r['support']['timeframe'],'1d')
+
+class AmbiguityTests(unittest.TestCase):
+    def test_cross_exchange_price_comparison_not_a_second_hack(self):
+        rows,diag=group_news([story(1,'Coinbase leads selloff after Binance hack loss $6.3B')],[],NOW)
+        self.assertEqual(rows[0]['incident_entity'],'binance')
+        rows,diag=group_news([story(2,'Binance and Coinbase security incidents reported')],[],NOW)
+        self.assertEqual(rows,[]);self.assertTrue(diag)
