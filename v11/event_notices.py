@@ -165,7 +165,14 @@ def _plan(fund,journal,now,limit=3):
         if row.get('suppress_uninformative'):
             suppressed.append(dict(id=row['id'],reason='NO_CONCRETE_VERIFIABLE_FACT'));continue
         old=previous.get(row['id']) or previous.get(row.get('legacy_record_id'));matched_copy=False
-        if row.get('incident_id') and old and not old.get('incident_id'):
+        if row.get('incident_id') and not previous.get(row['id']) and row.get('legacy_ids'):
+            from .news_incidents import extract
+            prior=[previous[k] for k in row['legacy_ids'] if k in previous]
+            facts=[extract(v) for v in prior];facts=[f for f in facts if f]
+            if facts:
+                pf=sorted({x for f in facts for x in f['facts']});pa=sorted({x for f in facts for x in f['amounts']})
+                old=dict(prior[0],incident_facts=pf,reported_amounts=pa,semantic=digest([pf,pa]))
+        if row.get('incident_id') and old and not old.get('incident_facts'):
             from .news_incidents import extract
             facts=extract(old)
             if facts:old=dict(old,incident_facts=facts['facts'],reported_amounts=facts['amounts'],semantic=digest([facts['facts'],facts['amounts']]))

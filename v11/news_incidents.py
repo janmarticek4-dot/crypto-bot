@@ -73,6 +73,14 @@ def group_news(rows,previous,now):
         groups.append(value)
     for value in groups:
         if not value.get('incident_id'):continue
+        legacy=[]
+        for old in previous:
+            f=extract(old);at=timestamp(old.get('published_at'));current=timestamp(value['published_at'])
+            if not f or f['entity']!=value['incident_entity'] or not at or abs((current-at).total_seconds())>7*86400:continue
+            if f['incident_date'] and value.get('incident_date') and f['incident_date']!=value['incident_date']:continue
+            if f['distinct'] and old['id']!=value.get('legacy_record_id'):continue
+            legacy.append(old['id'])
+        value['legacy_ids']=legacy
         facts=set(value['incident_facts']);parts=[]
         if value['reported_amounts']:
             amounts=[f'{Decimal(v)/1000000:g}' for v in value['reported_amounts']]

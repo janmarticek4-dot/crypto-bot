@@ -68,3 +68,12 @@ class DeliveryHistoryTests(unittest.TestCase):
         plan=en.plan(fund(3,'Binance hack caused $6.3B loss'),copy.deepcopy(j),NOW+timedelta(minutes=2))
         self.assertEqual(plan['selected'],[])
         self.assertTrue(next(v for v in j[en.KEY].values() if v.get('incident_id'))['announced_facts'])
+
+class LegacyHistoryTests(unittest.TestCase):
+    def test_already_announced_aspects_are_merged_before_deciding_novelty(self):
+        from v11 import event_notices as en
+        older=[story(1,'Mercado Bitcoin moving funds after $46M hack'),story(2,'Mercado Bitcoin halts withdrawals after $40M hack')]
+        for row in older:row.update(last_announced_at=NOW.isoformat(),semantic='old-headline-hash')
+        j={en.KEY:{r['id']:r for r in older}}
+        fresh=story(3,'Mercado Bitcoin halts withdrawals after $40M hack',retrieved_at=NOW.isoformat())
+        self.assertEqual(en.plan({'events':[fresh]},j,NOW)['selected'],[])
